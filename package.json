@@ -2,7 +2,8 @@
   "name": "themezer_api",
   "version": "1.0.0",
   "description": "The Api for Themezer",
-  "main": "index.js",
+  "private": false,
+  "license": "GPL-3.0",
   "scripts": {
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-path .eslintignore .",
     "lint-fix": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-path .eslintignore . --fix",
@@ -12,7 +13,6 @@
   },
   "keywords": [],
   "author": "Migushthe2nd <Migushthe2nd@users.noreply.github.com>",
-  "license": "ISC",
   "dependencies": {
     "apollo-server-express": "^2.13.1",
     "consola": "^2.12.1",
@@ -46,6 +46,5 @@
     "exec": "tsc && npm start",
     "ext": "ts"
   },
-  "repository": "https://github.com/Migushthe2nd/ThemezerApi.git",
-  "private": false
+  "repository": "https://github.com/Migushthe2nd/ThemezerApi.git"
 }
