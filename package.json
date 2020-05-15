@@ -6,16 +6,17 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-path .eslintignore .",
     "lint-fix": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-path .eslintignore . --fix",
+    "deploy": "yarn && rimraf dist && tsc && cd dist && yarn --production",
     "start": "node ./dist/index.js",
-    "build": "tsc",
     "dev": "cross-env NODE_ENV=development nodemon"
   },
   "keywords": [],
-  "author": "",
+  "author": "Migushthe2nd <Migushthe2nd@users.noreply.github.com>",
   "license": "ISC",
   "dependencies": {
     "apollo-server-express": "^2.13.1",
     "consola": "^2.12.1",
+    "cross-env": "^7.0.2",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "graphql": "^15.0.0",
@@ -29,7 +30,8 @@
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-nuxt": ">=0.4.2",
     "eslint-plugin-prettier": "^3.1.2",
-    "prettier": "^1.19.1"
+    "prettier": "^1.19.1",
+    "rimraf": "^3.0.2"
   },
   "nodemonConfig": {
     "ignore": [
@@ -41,7 +43,9 @@
     "watch": [
       "src"
     ],
-    "exec": "npm run build && npm run start",
+    "exec": "tsc && npm start",
     "ext": "ts"
-  }
+  },
+  "repository": "https://github.com/Migushthe2nd/ThemezerApi.git",
+  "private": false
 }

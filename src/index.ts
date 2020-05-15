@@ -37,22 +37,27 @@ const server = new ApolloServer({
 			: false,
 	formatError: (err) => {
 		let error: error = null
+		console.log(err)
 
 		if (getErrorCode(err.message)) {
 			error = getErrorCode(err.message)
+			return {
+				message: error.message,
+				statusCode: error.statusCode
+			}
 		} else if (err.message.includes('Cannot query field')) {
 			const fieldREGEX = /".*?"/
 			error = getErrorCode('INVALID_FIELD')(
 				fieldREGEX.exec(err.message)[0].replace(/"/g, ''),
 				''
 			)
-		} else {
-			error = getErrorCode('UNKNOWN')
+			return {
+				message: error.message,
+				statusCode: error.statusCode
+			}
 		}
-		return {
-			message: error.message,
-			statusCode: error.statusCode
-		}
+
+		return err
 	}
 })
 

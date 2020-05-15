@@ -1,18 +1,30 @@
 const gql = require('graphql-tag')
 
 export default gql`
+	type Author {
+		name: String!
+		discordTag: String
+	}
+
+	type LayoutDetails {
+		name: String!
+		author: Author
+		description: String
+		menu: String!
+		color: String
+		tags: [String!]
+	}
+
 	type Layout {
 		uuid: String!
-		username: String!
-		email: String!
-		password_hash: String!
-		joined: String!
+		name: String!
+		details: LayoutDetails
+		baselayout: String
 	}
 
 	type Query {
-		# allUsers: [User!]
+		Layout(name: String!): Layout
 		Layouts: [Layout!]
-		emailAvailable(email: String!): Boolean!
 	}
 
 	schema {
