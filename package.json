@@ -4,30 +4,24 @@
   "description": "The Api for Themezer",
   "main": "index.js",
   "scripts": {
-    "start": "pm2 start index.js --watch",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore --ignore-path .eslintignore .",
-    "lint-fix": "eslint --ext .js,.vue --ignore-path .gitignore --ignore-path .eslintignore . --fix",
-    "dev": "nodemon index.js --ignore 'images/'"
+    "lint": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-path .eslintignore .",
+    "lint-fix": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-path .eslintignore . --fix",
+    "start": "node ./dist/index.js",
+    "build": "tsc",
+    "dev": "cross-env NODE_ENV=development nodemon"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "apollo-server-express": "^2.13.1",
-    "bcryptjs": "^2.4.3",
-    "connect-pg-simple": "^6.1.0",
     "consola": "^2.12.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "express-session": "^1.17.1",
     "graphql": "^15.0.0",
     "graphql-fields": "^2.0.3",
-    "graphql-passport": "^0.6.3",
     "graphql-tag": "^2.10.3",
     "graphql-tools": "^5.0.0",
-    "http": "0.0.1-security",
-    "join-monster-graphql-tools-adapter": "^0.1.0",
-    "passport": "^0.4.1",
     "pg-promise": "^10.5.5"
   },
   "devDependencies": {
@@ -36,5 +30,18 @@
     "eslint-plugin-nuxt": ">=0.4.2",
     "eslint-plugin-prettier": "^3.1.2",
     "prettier": "^1.19.1"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "**/*.test.ts",
+      "**/*.spec.ts",
+      ".git",
+      "node_modules"
+    ],
+    "watch": [
+      "src"
+    ],
+    "exec": "npm run build && npm run start",
+    "ext": "ts"
   }
 }

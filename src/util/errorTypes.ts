@@ -1,4 +1,4 @@
-exports.errorName = {
+export const errorName = {
 	UNKNOWN: 'UNKNOWN',
 	INVALID_FIELD: 'INVALID_FIELD',
 
@@ -12,7 +12,7 @@ exports.errorName = {
 	USER_PASSWORD_INCORRECT: 'USER_PASSWORD_INCORRECT'
 }
 
-exports.errorType = {
+export const errorType = {
 	UNKNOWN: {
 		message: 'Unknown error',
 		statusCode: 0
