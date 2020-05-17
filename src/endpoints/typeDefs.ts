@@ -8,23 +8,27 @@ export default gql`
 
 	type LayoutDetails {
 		name: String!
+		uuid: String!
 		author: Author
 		description: String
 		menu: String!
 		color: String
 		tags: [String!]
+		version: String!
 	}
 
 	type Layout {
-		uuid: String!
 		name: String!
+		uuid: String!
 		details: LayoutDetails
 		baselayout: String
+		menu: String!
+		last_updated: String!
 	}
 
 	type Query {
-		Layout(name: String!): Layout
-		Layouts: [Layout!]
+		layout(name: String!, menu: String!): Layout
+		layoutsList(menu: String!): [Layout]
 	}
 
 	schema {
