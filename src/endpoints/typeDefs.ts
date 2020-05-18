@@ -9,7 +9,7 @@ export default gql`
 	type LayoutDetails {
 		name: String!
 		uuid: String!
-		author: Author
+		author: Author!
 		description: String
 		menu: String!
 		color: String
