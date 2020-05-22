@@ -19,6 +19,11 @@ export default gql`
 
 	type Piece {
 		name: String!
+		values: [Value!]
+	}
+
+	type Value {
+		name: String!
 		image: Boolean!
 		json: String!
 	}
