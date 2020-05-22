@@ -17,6 +17,12 @@ export default gql`
 		version: String!
 	}
 
+	type Piece {
+		name: String!
+		image: Boolean!
+		json: String!
+	}
+
 	type Layout {
 		name: String!
 		uuid: String!
@@ -24,6 +30,7 @@ export default gql`
 		baselayout: String
 		menu: String!
 		last_updated: String!
+		pieces: [Piece!]
 	}
 
 	type Query {
