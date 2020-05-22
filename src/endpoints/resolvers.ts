@@ -17,7 +17,6 @@ export = {
 				`,
 					[name, targetName(menu)]
 				)
-				console.log(dbData)
 
 				return dbData
 			} catch (e) {
