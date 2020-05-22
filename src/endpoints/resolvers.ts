@@ -9,12 +9,15 @@ export = {
 			try {
 				const dbData = await db.oneOrNone(
 					`
-					SELECT * from layouts
+					SELECT *,
+					CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces
+					from layouts
 					WHERE name = $1
 						AND menu = $2
 				`,
 					[name, targetName(menu)]
 				)
+				console.log(dbData)
 
 				return dbData
 			} catch (e) {
@@ -25,7 +28,8 @@ export = {
 			try {
 				const dbData = await db.any(
 					`
-					SELECT *
+					SELECT *,
+					CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces
 					FROM layouts
 					WHERE menu = $1
 				`,

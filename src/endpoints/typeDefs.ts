@@ -35,6 +35,7 @@ export default gql`
 		baselayout: String
 		menu: String!
 		last_updated: String!
+		has_pieces: Boolean
 		pieces: [Piece!]
 	}
 
