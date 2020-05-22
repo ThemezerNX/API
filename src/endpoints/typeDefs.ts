@@ -17,15 +17,15 @@ export default gql`
 		version: String!
 	}
 
+	type Value {
+		value: String!
+		image: Boolean!
+		json: String!
+	}
+
 	type Piece {
 		name: String!
 		values: [Value!]
-	}
-
-	type Value {
-		name: String!
-		image: Boolean!
-		json: String!
 	}
 
 	type Layout {
