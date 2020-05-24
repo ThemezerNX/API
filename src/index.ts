@@ -26,6 +26,10 @@ interface error {
 }
 
 const server = new ApolloServer({
+	uploads: {
+		maxFileSize: 10000000, // 10 MB
+		maxFiles: 4
+	},
 	schema,
 	playground:
 		process.env.NODE_ENV === 'development'

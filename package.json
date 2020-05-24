@@ -14,17 +14,20 @@
   "keywords": [],
   "author": "Migushthe2nd <Migushthe2nd@users.noreply.github.com>",
   "dependencies": {
-    "dotenv": "^8.2.0",
     "apollo-server-express": "^2.13.1",
     "consola": "^2.12.1",
     "cross-env": "^7.0.2",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "graphql": "^15.0.0",
     "graphql-fields": "^2.0.3",
     "graphql-tag": "^2.10.3",
     "graphql-tools": "^5.0.0",
+    "graphql-type-json": "^0.3.1",
+    "imagemagick": "^0.1.3",
     "pg-promise": "^10.5.5",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "tmp": "^0.2.1"
   },
   "devDependencies": {
     "eslint": "^6.1.0",

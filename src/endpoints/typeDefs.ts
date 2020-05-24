@@ -1,6 +1,9 @@
 const gql = require('graphql-tag')
 
 export default gql`
+	scalar Upload
+	scalar JSON
+
 	type Author {
 		name: String!
 		discordTag: String
@@ -20,7 +23,7 @@ export default gql`
 	type Value {
 		value: String!
 		image: Boolean!
-		json: String!
+		json: JSON!
 	}
 
 	type Piece {
@@ -32,7 +35,7 @@ export default gql`
 		name: String!
 		uuid: String!
 		details: LayoutDetails
-		baselayout: String
+		baselayout: JSON
 		menu: String!
 		last_updated: String!
 		has_pieces: Boolean
@@ -44,7 +47,22 @@ export default gql`
 		layoutsList(menu: String!): [Layout]
 	}
 
+	type File {
+		filename: String
+		mimetype: String
+		encoding: String
+	}
+
+	type Mutation {
+		createOverlay(
+			themeName: String
+			blackImg: Upload!
+			whiteImg: Upload!
+		): File
+	}
+
 	schema {
 		query: Query
+		mutation: Mutation
 	}
 `
