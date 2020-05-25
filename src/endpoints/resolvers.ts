@@ -113,45 +113,45 @@ export = {
 
 						const imageData = await Promise.all(imageDataPromises)
 						console.log(imageData)
-						console.log(`${path}\\${imageData[0]}`)
+						console.log(`${path}/${imageData[0]}`)
 
 						im.readMetadata(`${path}/${imageData[0]}`, function(
 							err,
 							metadata
 						) {
 							if (err) throw err
-							console.log(
-								'Shot at ' + metadata.exif.dateTimeOriginal
-							)
+							console.log('Shot at ' + metadata)
 						})
 
-						// im.convert(
-						// 	[
-						// 		`'${path}/${imageData[0]}'`,
-						// 		`'${path}/${imageData[1]}'`,
-						// 		'-alpha',
-						// 		'off',
-						// 		'( -clone 0,1 -compose difference -composite -threshold 50%% -negate)',
-						// 		'( -clone 0,2 +swap -compose divide -composite )',
-						// 		'-delete',
-						// 		'0,1',
-						// 		'+swap',
-						// 		'-compose',
-						// 		'Copy_Opacity',
-						// 		'-composite',
-						// 		themeName
-						// 			? `${themeName}_overlay.jpg`
-						// 			: 'overlay.jpg'
-						// 	],
-						// 	function(err, stdout, stderr) {
-						// 		if (err) {
-						// 			console.error(err)
-						// 			reject(stderr)
-						// 		}
-						// 		console.log(stdout)
-						// 		resolve(stdout)
-						// 	}
-						// )
+						im.convert(
+							[
+								`'${path}/${imageData[0]}'`,
+								`'${path}/${imageData[1]}'`,
+								'-alpha',
+								'off',
+								'( -clone 0,1 -compose difference -composite -threshold 50%% -negate)',
+								'( -clone 0,2 +swap -compose divide -composite )',
+								'-delete',
+								'0,1',
+								'+swap',
+								'-compose',
+								'Copy_Opacity',
+								'-composite',
+								themeName
+									? `${themeName}_overlay.jpg`
+									: 'overlay.jpg'
+							],
+							function(err, stdout, stderr) {
+								if (err || stderr) {
+									console.error(err)
+									console.error(stderr)
+									reject(stderr)
+								} else {
+									console.log(stdout)
+									resolve(stdout)
+								}
+							}
+						)
 					})
 				})
 			} catch (e) {
