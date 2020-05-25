@@ -104,7 +104,7 @@ const createNXTheme = (themes) =>
 						args: [
 							'-little',
 							'-compress',
-							'0',
+							'1',
 							'-o',
 							`${path}/theme.nxtheme`,
 							path
