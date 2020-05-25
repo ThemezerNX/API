@@ -49,6 +49,7 @@ export default gql`
 
 	type File {
 		filename: String
+		data: String!
 		mimetype: String
 		encoding: String
 	}

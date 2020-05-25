@@ -2,7 +2,7 @@ const graphqlFields = require('graphql-fields')
 import { pgp, db } from '../db/db'
 import targetName from '../util/menu'
 import GraphQLJSON from 'graphql-type-json'
-const { createWriteStream, unlink } = require('fs')
+const { createWriteStream, unlink, readFileSync } = require('fs')
 var tmp = require('tmp')
 var im = require('imagemagick')
 // import { errorName } from '../util/errorTypes'
@@ -125,21 +125,35 @@ export = {
 
 						im.convert(
 							[
-								`'${path}/${imageData[0]}'`,
-								`'${path}/${imageData[1]}'`,
+								`${path}/${imageData[0]}`,
+								`${path}/${imageData[1]}`,
 								'-alpha',
 								'off',
-								'( -clone 0,1 -compose difference -composite -threshold 50%% -negate)',
-								'( -clone 0,2 +swap -compose divide -composite )',
+								'(',
+								'-clone',
+								'0,1',
+								'-compose',
+								'difference',
+								'-composite',
+								'-threshold',
+								'50%',
+								'-negate',
+								')',
+								'(',
+								'-clone',
+								'0,2',
+								'+swap',
+								'-compose',
+								'divide',
+								'-composite',
+								')',
 								'-delete',
 								'0,1',
 								'+swap',
 								'-compose',
 								'Copy_Opacity',
 								'-composite',
-								themeName
-									? `${themeName}_overlay.jpg`
-									: 'overlay.jpg'
+								`${path}/overlay.jpg`
 							],
 							function(err, stdout, stderr) {
 								if (err || stderr) {
@@ -148,7 +162,15 @@ export = {
 									reject(stderr)
 								} else {
 									console.log(stdout)
-									resolve(stdout)
+									resolve({
+										filename: themeName
+											? `${themeName}_overlay.jpg`
+											: `overlay.jpg`,
+										data: readFileSync(
+											`${path}/overlay.jpg`,
+											{ encoding: 'base64' }
+										)
+									})
 								}
 							}
 						)
