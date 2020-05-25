@@ -51,15 +51,22 @@ export default gql`
 		filename: String
 		data: String!
 		mimetype: String
-		encoding: String
 	}
 
 	type Mutation {
+		createOverlaysNXTheme(layout: Upload!): [File!]
 		createOverlay(
 			themeName: String
 			blackImg: Upload!
 			whiteImg: Upload!
-		): File
+		): File!
+
+		createNXTheme(
+			themeName: String
+			author: String
+			image: Upload
+			layout: Upload
+		): File!
 	}
 
 	schema {

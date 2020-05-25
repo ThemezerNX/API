@@ -1,11 +1,132 @@
 const graphqlFields = require('graphql-fields')
+const path = require('path')
+const util = require('util')
 import { pgp, db } from '../db/db'
-import targetName from '../util/menu'
+import {
+	webNameToFileNameNoExtension,
+	fileNameToThemeTarget
+} from '../util/convertName'
 import GraphQLJSON from 'graphql-type-json'
-const { createWriteStream, unlink, readFileSync } = require('fs')
+import { PythonShell } from 'python-shell'
+const link = require('fs-symlink')
+const { createWriteStream, unlink, readFile, writeFile } = require('fs')
+const writeFilePromisified = util.promisify(writeFile)
+const readFilePromisified = util.promisify(readFile)
 var tmp = require('tmp')
 var im = require('imagemagick')
 // import { errorName } from '../util/errorTypes'
+
+const saveFiles = (files, path) =>
+	files.map(
+		(file) =>
+			new Promise(async (resolve, reject) => {
+				const { createReadStream, filename, mimetype } = await file
+				const stream = createReadStream()
+
+				// Create a stream to which the upload will be written.
+				const writeStream = createWriteStream(`${path}/${filename}`)
+
+				// When the upload is fully written, resolve the promise.
+				writeStream.on('finish', () => {
+					resolve(filename)
+				})
+
+				// If there's an error writing the file, remove the partially written file
+				// and reject the promise.
+				writeStream.on('error', (error) => {
+					unlink(path, () => {
+						reject(error)
+					})
+				})
+
+				// In node <= 13, errors are not automatically propagated between piped
+				// streams. If there is an error receiving the upload, destroy the write
+				// stream with the corresponding error.
+				stream.on('error', (error) => writeStream.destroy(error))
+
+				// Pipe the upload into the write stream.
+				stream.pipe(writeStream)
+			})
+	)
+
+const createNXTheme = (themes) =>
+	themes.map(
+		(theme) =>
+			new Promise((resolve, reject) => {
+				tmp.dir(async function _tempDirCreated(
+					err,
+					path,
+					cleanupCallback
+				) {
+					if (err) throw err
+
+					if (
+						!(
+							theme.imagePath.endsWith('.dds') ||
+							theme.imagePath.endsWith('.DDS')
+						)
+					) {
+						// Implement jpg to dds conversion
+					}
+					if (theme.imagePath)
+						await link(theme.imagePath, `${path}/image.dds`)
+					if (theme.layoutPath)
+						await link(theme.layoutPath, `${path}/layout.json`)
+
+					console.log(`${theme.themeName}: ${path}`)
+
+					let layoutDetails = null
+					let LayoutInfo = null
+					if (theme.layoutPath) {
+						layoutDetails = require(`${path}/layout.json`)
+						LayoutInfo = `${layoutDetails.PatchName} by ${layoutDetails.AuthorName}`
+					}
+
+					const info = {
+						Version: 12,
+						ThemeName: theme.themeName,
+						Author: theme.author || 'Themezer',
+						Target:
+							fileNameToThemeTarget(theme.targetName) ||
+							fileNameToThemeTarget(layoutDetails.TargetName),
+						LayoutInfo
+					}
+
+					await writeFilePromisified(
+						`${path}/info.json`,
+						JSON.stringify(info),
+						'utf8'
+					)
+
+					const options = {
+						pythonPath: 'python3.8',
+						scriptPath: `${__dirname}/../../../SARC-Tool`,
+						args: [
+							'-little',
+							'-compress',
+							'3',
+							'-o',
+							`${path}/theme.nxtheme`,
+							path
+						]
+					}
+
+					PythonShell.run('main.py', options, async function(err) {
+						if (err) throw err
+						resolve({
+							filename: `${theme.themeName} - ${LayoutInfo}.nxtheme`,
+							data: await readFilePromisified(
+								`${path}/theme.nxtheme`,
+								'base64'
+							),
+							mimetype: 'application/nxtheme'
+						})
+					})
+
+					cleanupCallback()
+				})
+			})
+	)
 
 export = {
 	JSON: GraphQLJSON,
@@ -20,7 +141,7 @@ export = {
 					WHERE name = $1
 						AND menu = $2
 				`,
-					[name, targetName(menu)]
+					[name, webNameToFileNameNoExtension(menu)]
 				)
 
 				return dbData
@@ -37,7 +158,7 @@ export = {
 					FROM layouts
 					WHERE menu = $1
 				`,
-					[targetName(menu)]
+					[webNameToFileNameNoExtension(menu)]
 				)
 
 				return dbData
@@ -69,54 +190,17 @@ export = {
 					) {
 						if (err) throw err
 
-						const images = [blackImg, whiteImg]
-
-						const imageDataPromises = images.map(
-							(image) =>
-								new Promise(async (resolve2, reject2) => {
-									const {
-										createReadStream,
-										filename,
-										mimetype
-									} = await image
-									const stream = createReadStream()
-
-									// Create a stream to which the upload will be written.
-									const writeStream = createWriteStream(
-										`${path}/${filename}`
-									)
-
-									// When the upload is fully written, resolve the promise.
-									writeStream.on('finish', () => {
-										resolve2(filename)
-									})
-
-									// If there's an error writing the file, remove the partially written file
-									// and reject the promise.
-									writeStream.on('error', (error) => {
-										unlink(path, () => {
-											reject2(error)
-										})
-									})
-
-									// In node <= 13, errors are not automatically propagated between piped
-									// streams. If there is an error receiving the upload, destroy the write
-									// stream with the corresponding error.
-									stream.on('error', (error) =>
-										writeStream.destroy(error)
-									)
-
-									// Pipe the upload into the write stream.
-									stream.pipe(writeStream)
-								})
+						const filePromises = saveFiles(
+							[blackImg, whiteImg],
+							path
 						)
 
-						const imageData = await Promise.all(imageDataPromises)
+						const files = await Promise.all(filePromises)
 
 						im.convert(
 							[
-								`${path}/${imageData[0]}`,
-								`${path}/${imageData[1]}`,
+								`${path}/${files[0]}`,
+								`${path}/${files[1]}`,
 								'-alpha',
 								'off',
 								'(',
@@ -145,7 +229,7 @@ export = {
 								'-composite',
 								`${path}/overlay.png`
 							],
-							function(err, stdout, stderr) {
+							async function(err, stdout, stderr) {
 								if (err || stderr) {
 									console.error(err)
 									console.error(stderr)
@@ -156,16 +240,59 @@ export = {
 										filename: themeName
 											? `${themeName}_overlay.png`
 											: `overlay.png`,
-										data: readFileSync(
+										data: await readFilePromisified(
 											`${path}/overlay.png`,
-											{ encoding: 'base64' }
+											'base64'
 										),
 										mimetype: 'image/png'
 									})
 								}
 							}
 						)
+						cleanupCallback()
 					})
+				})
+			} catch (e) {
+				console.error(e)
+			}
+		},
+		createOverlaysNXTheme: async (parent, { layout }, context, info) => {
+			try {
+				return await new Promise((resolve, reject) => {
+					if (layout)
+						tmp.dir(async function _tempDirCreated(
+							err,
+							path,
+							cleanupCallback
+						) {
+							if (err) throw err
+
+							const filePromises = saveFiles([layout], path)
+
+							const files = await Promise.all(filePromises)
+
+							const themes = [
+								{
+									imagePath: `${__dirname}/../../images/BLACK.dds`,
+									layoutPath: `${path}/${files[0]}`,
+									themeName: 'Black background'
+								},
+								{
+									imagePath: `${__dirname}/../../images/WHITE.dds`,
+									layoutPath: `${path}/${files[0]}`,
+									themeName: 'White background'
+								}
+							]
+
+							const themePromises = createNXTheme(themes)
+
+							const themesB64 = await Promise.all(themePromises)
+
+							resolve(themesB64)
+
+							cleanupCallback()
+						})
+					else reject()
 				})
 			} catch (e) {
 				console.error(e)
