@@ -112,16 +112,6 @@ export = {
 						)
 
 						const imageData = await Promise.all(imageDataPromises)
-						console.log(imageData)
-						console.log(`${path}/${imageData[0]}`)
-
-						im.readMetadata(`${path}/${imageData[0]}`, function(
-							err,
-							metadata
-						) {
-							if (err) throw err
-							console.log('Shot at ' + metadata)
-						})
 
 						im.convert(
 							[
@@ -153,7 +143,7 @@ export = {
 								'-compose',
 								'Copy_Opacity',
 								'-composite',
-								`${path}/overlay.jpg`
+								`${path}/overlay.png`
 							],
 							function(err, stdout, stderr) {
 								if (err || stderr) {
@@ -164,12 +154,13 @@ export = {
 									console.log(stdout)
 									resolve({
 										filename: themeName
-											? `${themeName}_overlay.jpg`
-											: `overlay.jpg`,
+											? `${themeName}_overlay.png`
+											: `overlay.png`,
 										data: readFileSync(
-											`${path}/overlay.jpg`,
+											`${path}/overlay.png`,
 											{ encoding: 'base64' }
-										)
+										),
+										mimetype: 'image/png'
 									})
 								}
 							}
