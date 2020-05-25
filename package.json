@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-path .eslintignore .",
     "lint-fix": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-path .eslintignore . --fix",
-    "deploy": "yarn && rimraf dist && tsc && cd dist && yarn --production",
+    "deploy": "yarn --production && rimraf dist && tsc",
     "start": "node ./dist/index.js",
     "dev": "cross-env NODE_ENV=development nodemon"
   },
