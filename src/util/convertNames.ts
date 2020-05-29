@@ -99,3 +99,19 @@ export const themeTargetToFileName = (s) => {
 			return null
 	}
 }
+
+export const validFileName = (s) => {
+	switch (s) {
+		case 'ResidentMenu':
+		case 'Entrance':
+		case 'MyPage':
+		case 'Flaunch':
+		case 'Set':
+		case 'Notification':
+		case 'Psl':
+			return true
+
+		default:
+			return false
+	}
+}

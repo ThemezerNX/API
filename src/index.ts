@@ -36,7 +36,7 @@ const server = new ApolloServer({
 			: false,
 	formatError: (err) => {
 		let error = null
-		console.log(err)
+		console.error(err)
 
 		if (getErrorCode(err.message)) {
 			error = getErrorCode(err.message)

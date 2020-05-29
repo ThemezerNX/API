@@ -6,44 +6,95 @@ import {
 	webNameToFileNameNoExtension,
 	fileNameToThemeTarget,
 	themeTargetToFileName,
-	fileNameToWebName
+	fileNameToWebName,
+	validFileName
 } from '../util/convertNames'
+import { errorName } from '../util/errorTypes'
 
+import { uuid } from 'uuidv4'
 import { encrypt, decrypt } from '../util/crypt'
 import { parseThemeID, stringifyThemeID } from '@themezernx/layout-id-parser'
 import GraphQLJSON from 'graphql-type-json'
 import { PythonShell } from 'python-shell'
 import filterAsync from 'node-filter-async'
 const link = require('fs-symlink')
-const { createWriteStream, unlink, readFile, writeFile, readdir, rename } = require('fs')
+const { createWriteStream, unlink, readFile, writeFile, readdir, lstat } = require('fs')
 const writeFilePromisified = util.promisify(writeFile)
 const readFilePromisified = util.promisify(readFile)
 const readdirPromisified = util.promisify(readdir)
-const renamePromisified = util.promisify(rename)
-var tmp = require('tmp')
+const moveFile = require('move-file')
+const tmp = require('tmp')
 const rimraf = require('rimraf')
 
-var im = require('imagemagick')
+const im = require('imagemagick')
 
-var YAZ0_FILE = require('is-yaz0-file')
-var ZIP_FILE = require('is-zip-file')
+const YAZ0_FILE = require('is-yaz0-file')
+const JPEG_FILE = require('is-jpeg-file')
+const ZIP_FILE = require('is-zip-file')
 const isYaz0Promisified = util.promisify(YAZ0_FILE.isYaz0)
+const isJpegPromisified = util.promisify(JPEG_FILE.isJpeg)
 const isZipPromisified = util.promisify(ZIP_FILE.isZip)
 const extract = require('extract-zip')
 
-import { errorName } from '../util/errorTypes'
-
 const sarcToolPath = `${__dirname}/../../../SARC-Tool`
+const storagePath = `${__dirname}/../../../storage`
 
-const saveFiles = (files, path) =>
+const themesCS = new pgp.helpers.ColumnSet(
+	[
+		{ name: 'uuid', cast: 'uuid' },
+		{ name: 'layout_uuid', cast: 'uuid' },
+		{ name: 'piece_uuids', cast: 'uuid[]' },
+		'target',
+		{ name: 'last_updated', cast: 'timestamp without time zone' },
+		{ name: 'categories', cast: 'character varying[]' },
+		{ name: 'nsfw', cast: 'boolean' },
+		{ name: 'pack_uuid', cast: 'uuid' },
+		{ name: 'details', cast: 'json' }
+	],
+	{
+		table: 'themes'
+	}
+)
+
+const packsCS = new pgp.helpers.ColumnSet(
+	[
+		{ name: 'uuid', cast: 'uuid' },
+		{ name: 'last_updated', cast: 'timestamp without time zone' },
+		{ name: 'details', cast: 'json' }
+	],
+	{
+		table: 'packs'
+	}
+)
+
+const createInfo = (themeName, author, target, layoutDetails) => {
+	let LayoutInfo = null
+	if (layoutDetails) {
+		LayoutInfo = `${layoutDetails.PatchName} by ${layoutDetails.AuthorName || 'Themezer'}`
+	}
+	return {
+		Version: 12,
+		ThemeName: themeName,
+		Author: author || 'Themezer',
+		Target: target,
+		LayoutInfo
+	}
+}
+
+const saveFiles = (files) =>
 	files.map(
-		(file) =>
+		({ file, savename, path }) =>
 			new Promise<String>(async (resolve, reject) => {
 				let { createReadStream, filename, mimetype } = await file
 				const stream = createReadStream()
 
-				if (!/\.[^\/.]+$/.test(filename)) {
-					filename = `${filename}.file`
+				const FILE_EXTENSION_REGEX = /\.[^\/.]+$/
+				if (!FILE_EXTENSION_REGEX.test(filename)) {
+					filename = `${savename || filename}.file`
+				} else if (savename) {
+					filename = savename + FILE_EXTENSION_REGEX.exec(filename)
+				} else {
+					filename = filename
 				}
 
 				// Create a stream to which the upload will be written.
@@ -77,7 +128,7 @@ const createNXThemes = (themes) =>
 	themes.map(
 		(theme) =>
 			new Promise<Object>((resolve, reject) => {
-				tmp.dir({ unsafeCleanup: true }, async function _tempDirCreated(err, path, cleanupCallback) {
+				tmp.dir(async (err, path, cleanupCallback) => {
 					try {
 						if (err) {
 							reject(err)
@@ -90,8 +141,6 @@ const createNXThemes = (themes) =>
 						if (theme.imagePath) await link(theme.imagePath, `${path}/image.dds`)
 						if (theme.layoutPath) await link(theme.layoutPath, `${path}/layout.json`)
 
-						console.log(`${theme.themeName}: ${path}`)
-
 						let layoutDetails = null
 						let LayoutInfo = null
 						if (theme.layoutPath) {
@@ -99,15 +148,12 @@ const createNXThemes = (themes) =>
 							LayoutInfo = `${layoutDetails.PatchName} by ${layoutDetails.AuthorName}`
 						}
 
-						const info = {
-							Version: 12,
-							ThemeName: theme.themeName,
-							Author: theme.author || 'Themezer',
-							Target:
-								fileNameToThemeTarget(theme.targetName) ||
-								fileNameToThemeTarget(layoutDetails.TargetName),
-							LayoutInfo
-						}
+						const info = createInfo(
+							theme.themeName,
+							theme.author,
+							fileNameToThemeTarget(theme.targetName) || fileNameToThemeTarget(layoutDetails.TargetName),
+							layoutDetails
+						)
 
 						await writeFilePromisified(`${path}/info.json`, JSON.stringify(info), 'utf8')
 
@@ -121,6 +167,7 @@ const createNXThemes = (themes) =>
 							if (err) {
 								reject(errorName.NXTHEME_CREATE_FAILED)
 								rimraf(`${path}/*`, () => {})
+								cleanupCallback()
 								return
 							}
 
@@ -130,11 +177,10 @@ const createNXThemes = (themes) =>
 								mimetype: 'application/nxtheme'
 							})
 						})
-
-						cleanupCallback()
 					} catch (e) {
 						reject(e)
 						rimraf(`${path}/*`, () => {})
+						cleanupCallback()
 					}
 				})
 			})
@@ -176,7 +222,7 @@ export default {
 					SELECT *,
 					CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces
 					from layouts
-					WHERE name = $1
+					WHERE details ->> 'name' = $1
 						AND target = $2
 				`,
 					[name, webNameToFileNameNoExtension(target)]
@@ -209,15 +255,14 @@ export default {
 		createOverlaysNXTheme: async (parent, { layout }, context, info) => {
 			try {
 				return await new Promise((resolve, reject) => {
-					tmp.dir({ unsafeCleanup: true }, async function _tempDirCreated(err, path, cleanupCallback) {
+					tmp.dir({ unsafeCleanup: true }, async (err, path, cleanupCallback) => {
 						if (err) {
 							reject(err)
 							return
 						}
 
 						try {
-							const filePromises = saveFiles([layout], path)
-
+							const filePromises = saveFiles([{ file: layout, path }])
 							const files = await Promise.all(filePromises)
 
 							const themes = [
@@ -234,7 +279,6 @@ export default {
 							]
 
 							const themePromises = createNXThemes(themes)
-
 							const themesB64 = await Promise.all(themePromises)
 
 							resolve(themesB64)
@@ -253,14 +297,16 @@ export default {
 		createOverlay: async (parent, { themeName, blackImg, whiteImg }, context, info) => {
 			try {
 				return await new Promise((resolve, reject) => {
-					tmp.dir({ unsafeCleanup: true }, async function _tempDirCreated(err, path, cleanupCallback) {
+					tmp.dir({ unsafeCleanup: true }, async (err, path, cleanupCallback) => {
 						if (err) {
 							reject(err)
 							return
 						}
 
-						const filePromises = saveFiles([blackImg, whiteImg], path)
-
+						const filePromises = saveFiles([
+							{ file: blackImg, path },
+							{ file: whiteImg, path }
+						])
 						const files = await Promise.all(filePromises)
 
 						im.convert(
@@ -321,14 +367,13 @@ export default {
 		uploadSingleOrZip: async (parent, { file }, context, info) => {
 			try {
 				return await new Promise((resolve, reject) => {
-					tmp.dir({ prefix: 'theme' }, async function _tempDirCreated(err, path, cleanupCallback) {
+					tmp.dir({ prefix: 'theme' }, async (err, path, cleanupCallback) => {
 						if (err) {
 							reject(err)
 							return
 						}
 
-						const filePromises = saveFiles([file], path)
-
+						const filePromises = saveFiles([{ file, path }])
 						const files = await Promise.all(filePromises)
 
 						let NXThemePaths = []
@@ -350,17 +395,31 @@ export default {
 										}
 									})
 
-									filesInZip.forEach((file) => {
-										if (isYaz0Promisified(`${path}/${files[0]}_extracted/${file}`)) {
-											NXThemePaths.push(`${path}/${files[0]}_extracted/${file}`)
-										}
+									const promises = filesInZip.map((file) => {
+										return new Promise(async (resolve) => {
+											try {
+												if (await isYaz0Promisified(`${path}/${files[0]}_extracted/${file}`)) {
+													resolve(`${path}/${files[0]}_extracted/${file}`)
+												}
+											} catch (e) {
+												if (e.code === 'EISDIR') {
+													reject(errorName.FOLDER_IN_ZIP)
+												} else {
+													reject(errorName.FILE_READ_ERROR)
+												}
+												rimraf(path, () => {})
+											}
+										})
 									})
+
+									NXThemePaths = await Promise.all(promises)
 								} catch (e) {
-									reject(errorName.FILE_READ_ERROR)
+									reject(errorName.ZIP_READ_ERROR)
 									rimraf(path, () => {})
 								}
 							} catch (err) {
-								console.error(err)
+								reject(errorName.FILE_READ_ERROR)
+								rimraf(path, () => {})
 							}
 						} else {
 							reject(errorName.INVALID_FILE_TYPE)
@@ -458,9 +517,125 @@ export default {
 				throw new Error(e)
 			}
 		},
-		submitThemes: async (parent, { files, themes, details }, context, info) => {
+		submitThemes: async (parent, { files, themes, details, type }, context, info) => {
 			try {
-				return await new Promise((resolve, reject) => {})
+				return await new Promise(async (resolve, reject) => {
+					const toSave = files.map((f, i) => {
+						return new Promise((resolve, reject) => {
+							lstat(decrypt(themes[i].tmp), (err) => {
+								if (err) {
+									reject(errorName.INVALID_TMP)
+									return
+								}
+
+								resolve({
+									file: f,
+									savename: 'screenshot',
+									path: decrypt(themes[i].tmp)
+								})
+							})
+						})
+					})
+					const resolvedDecryptions = await Promise.all(toSave)
+
+					const filePromises = saveFiles(resolvedDecryptions)
+					const savedFiles = await Promise.all(filePromises)
+
+					if (savedFiles.length === themes.length) {
+						let themePaths = []
+
+						const promises = savedFiles.map((file, i) => {
+							const path = decrypt(themes[i].tmp)
+							return new Promise(async (resolve) => {
+								if (await isJpegPromisified(`${path}/${file}`)) {
+									resolve(`${path}`)
+								}
+							})
+						})
+
+						themePaths = await Promise.all(promises)
+						if (themePaths.length === savedFiles.length) {
+							// Insert packs into DB
+							let packUuid = null
+							if (type === 'pack' && savedFiles.length > 1) {
+								// User wants to and can submit as pack
+								packUuid = uuid()
+								const packData = {
+									uuid: packUuid,
+									last_updated: new Date(),
+									details: details
+								}
+								const query = () => pgp.helpers.insert([packData], packsCS)
+								try {
+									await db.none(query)
+								} catch (e) {
+									console.error(e)
+									reject(errorName.DB_SAVE_ERROR)
+									return
+								}
+							}
+
+							// Move files to storage
+							const themeDataPromises = themePaths.map((path, i) => {
+								const themeUuid = uuid()
+								return new Promise(async (resolve, reject) => {
+									let hasImage = false
+									try {
+										await moveFile(
+											`${path}/${savedFiles[i]}`,
+											`${storagePath}/themes/${themeUuid}/screenshot.jpg`
+										)
+										await moveFile(
+											`${path}/image.dds`,
+											`${storagePath}/themes/${themeUuid}/image.dds`
+										)
+										hasImage = true
+									} catch (e) {}
+									resolve({
+										uuid: themeUuid,
+										layout_uuid: themes[i].layout_uuid,
+										piece_uuids: themes[i].used_pieces.map((p) => p.value.uuid),
+										target: validFileName(themes[i].target)
+											? themes[i].target
+											: reject(errorName.INVALID_TARGET_NAME),
+										last_updated: new Date(),
+										categories: themes[i].categories,
+										nsfw: themes[i].nsfw,
+										pack_uuid: packUuid,
+										details: {
+											name: themes[i].info.ThemeName,
+											author: {
+												name: themes[i].info.Author
+													? themes[i].info.Author
+													: details.author.name,
+												discord_tag: details.author.discord_tag
+											},
+											description: themes[i].description,
+											color: themes[i].color,
+											version: details.version || themes[i].version || '1.0.0'
+										}
+									})
+								})
+							})
+							const themeDatas = await Promise.all(themeDataPromises)
+
+							// Insert themes into DB
+							const query = () => pgp.helpers.insert(themeDatas, themesCS)
+							try {
+								await db.none(query)
+
+								resolve(true)
+							} catch (e) {
+								console.error(e)
+								reject(errorName.DB_SAVE_ERROR)
+							}
+						} else {
+							reject(errorName.INVALID_FILE_TYPE)
+						}
+					} else {
+						reject(errorName.FILE_SAVE_ERROR)
+					}
+				})
 			} catch (e) {
 				throw new Error(e)
 			}

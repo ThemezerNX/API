@@ -9,31 +9,31 @@ export default gql`
 
 	type Author {
 		name: String!
-		discordTag: String
+		discord_tag: String
 	}
 
 	input AuthorInput {
-		name: String!
-		discordTag: String
+		name: String
+		discord_tag: String
 	}
 
 	type LayoutDetails {
 		name: String!
 		uuid: GUID!
 		author: Author!
-		description: String
+		description: String!
 		target: String!
 		color: HexColorCode
 		version: String!
 	}
 
 	input DetailsInput {
-		name: String!
+		name: String
 		author: AuthorInput!
 		description: String
 		color: HexColorCode
 		tags: [String!]
-		version: String!
+		version: String
 	}
 
 	type Value {
@@ -45,6 +45,7 @@ export default gql`
 
 	input ValueInput {
 		value: String!
+		uuid: GUID!
 	}
 
 	type Piece {
@@ -59,7 +60,7 @@ export default gql`
 
 	input UsedPieceInput {
 		name: String!
-		value: ValueInput
+		value: ValueInput!
 	}
 
 	type Layout {
@@ -102,10 +103,12 @@ export default gql`
 
 	input DetectedThemeInput {
 		info: ThemeInfoInput
-		tmp: String
+		tmp: String!
 		layout_uuid: GUID
-		used_pieces: [UsedPieceInput]
+		used_pieces: [UsedPieceInput!]
 		target: String!
+		color: String
+		version: String
 	}
 
 	type Query {
@@ -120,7 +123,7 @@ export default gql`
 		createNXTheme(themeName: String, author: String, image: Upload, layout: Upload): File!
 
 		uploadSingleOrZip(file: Upload!): [DetectedTheme!]
-		submitThemes(files: [Upload!], themes: [DetectedThemeInput!], details: DetailsInput!): String
+		submitThemes(files: [Upload!], themes: [DetectedThemeInput!], details: DetailsInput!, type: String!): Boolean
 	}
 
 	schema {

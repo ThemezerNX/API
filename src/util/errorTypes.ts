@@ -14,11 +14,17 @@ export const errorName = {
 	FILE_READ_ERROR: 'FILE_READ_ERROR',
 	FILE_SAVE_ERROR: 'FILE_SAVE_ERROR',
 	INVALID_FILE_TYPE: 'INVALID_FILE_TYPE',
+	INVALID_TMP: 'INVALID_TMP',
+	INVALID_TARGET_NAME: 'INVALID_TARGET_NAME',
 	INVALID_NXTHEME_CONTENTS: 'INVALID_NXTHEME_CONTENTS',
+	FOLDER_IN_ZIP: 'FOLDER_IN_ZIP',
+	ZIP_READ_ERROR: 'ZIP_READ_ERROR',
 	NO_NXTHEMES_IN_ZIP: 'NO_NXTHEMES_IN_ZIP',
 
 	NXTHEME_CREATE_FAILED: 'NXTHEME_CREATE_FAILED',
-	NXTHEME_UNPACK_FAILED: 'NXTHEME_UNPACK_FAILED'
+	NXTHEME_UNPACK_FAILED: 'NXTHEME_UNPACK_FAILED',
+
+	DB_SAVE_ERROR: 'DB_SAVE_ERROR'
 }
 
 export const errorType = {
@@ -75,13 +81,29 @@ export const errorType = {
 		message: 'Invalid file type',
 		statusCode: 4002
 	},
+	INVALID_TMP: {
+		message: 'Invalid tmp argument',
+		statusCode: 4003
+	},
+	INVALID_TARGET_NAME: {
+		message: 'Invalid target name',
+		statusCode: 4004
+	},
 	INVALID_NXTHEME_CONTENTS: {
 		message: 'Invalid NXTheme contents',
-		statusCode: 4002
+		statusCode: 4005
+	},
+	FOLDER_IN_ZIP: {
+		message: 'A Folder was found in the zip!',
+		statusCode: 4006
+	},
+	ZIP_READ_ERROR: {
+		message: 'The zip could not be extracted',
+		statusCode: 4007
 	},
 	NO_NXTHEMES_IN_ZIP: {
 		message: 'No NXThemes were found in the zip',
-		statusCode: 4003
+		statusCode: 4008
 	},
 
 	NXTHEME_CREATE_FAILED: {
@@ -91,5 +113,11 @@ export const errorType = {
 	NXTHEME_UNPACK_FAILED: {
 		message: 'Failed to unpack the NXTheme',
 		statusCode: 4101
+	},
+
+	// DB errors
+	DB_SAVE_ERROR: {
+		message: 'Failed saving data to DB',
+		statusCode: 4200
 	}
 }
