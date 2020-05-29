@@ -9,7 +9,16 @@ export const errorName = {
 
 	USER_NOT_EXIST: 'USER_NOT_EXIST',
 	USER_EXISTS: 'USER_EXISTS',
-	USER_PASSWORD_INCORRECT: 'USER_PASSWORD_INCORRECT'
+	USER_PASSWORD_INCORRECT: 'USER_PASSWORD_INCORRECT',
+
+	FILE_READ_ERROR: 'FILE_READ_ERROR',
+	FILE_SAVE_ERROR: 'FILE_SAVE_ERROR',
+	INVALID_FILE_TYPE: 'INVALID_FILE_TYPE',
+	INVALID_NXTHEME_CONTENTS: 'INVALID_NXTHEME_CONTENTS',
+	NO_NXTHEMES_IN_ZIP: 'NO_NXTHEMES_IN_ZIP',
+
+	NXTHEME_CREATE_FAILED: 'NXTHEME_CREATE_FAILED',
+	NXTHEME_UNPACK_FAILED: 'NXTHEME_UNPACK_FAILED'
 }
 
 export const errorType = {
@@ -19,9 +28,7 @@ export const errorType = {
 	},
 	INVALID_FIELD(field, type) {
 		return {
-			message:
-				`Field '${field}' cannot be queried on type` +
-				(type ? ` ${type}` : ''),
+			message: `Field '${field}' cannot be queried on type` + (type ? ` ${type}` : ''),
 			statusCode: 1
 		}
 	},
@@ -54,5 +61,35 @@ export const errorType = {
 	USER_PASSWORD_INCORRECT: {
 		message: 'Password incorrect',
 		statusCode: 1002
+	},
+	// Themes
+	FILE_READ_ERROR: {
+		message: "Couldn't read file",
+		statusCode: 4000
+	},
+	FILE_SAVE_ERROR: {
+		message: "Couldn't write file",
+		statusCode: 4001
+	},
+	INVALID_FILE_TYPE: {
+		message: 'Invalid file type',
+		statusCode: 4002
+	},
+	INVALID_NXTHEME_CONTENTS: {
+		message: 'Invalid NXTheme contents',
+		statusCode: 4002
+	},
+	NO_NXTHEMES_IN_ZIP: {
+		message: 'No NXThemes were found in the zip',
+		statusCode: 4003
+	},
+
+	NXTHEME_CREATE_FAILED: {
+		message: 'Failed to create the NXTheme',
+		statusCode: 4100
+	},
+	NXTHEME_UNPACK_FAILED: {
+		message: 'Failed to unpack the NXTheme',
+		statusCode: 4101
 	}
 }

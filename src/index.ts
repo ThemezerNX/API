@@ -5,7 +5,7 @@ const app = express()
 const bodyParser = require('body-parser')
 
 const { ApolloServer } = require('apollo-server-express')
-const resolvers = require('./endpoints/resolvers')
+import resolvers from './endpoints/resolvers'
 import typeDefs from './endpoints/typeDefs'
 const { makeExecutableSchema } = require('graphql-tools')
 
@@ -19,11 +19,6 @@ const schema = makeExecutableSchema({
 	typeDefs,
 	resolvers
 })
-
-interface error {
-	message: String
-	statusCode: Number
-}
 
 const server = new ApolloServer({
 	uploads: {
@@ -40,7 +35,7 @@ const server = new ApolloServer({
 			  }
 			: false,
 	formatError: (err) => {
-		let error: error = null
+		let error = null
 		console.log(err)
 
 		if (getErrorCode(err.message)) {
@@ -51,10 +46,7 @@ const server = new ApolloServer({
 			}
 		} else if (err.message.includes('Cannot query field')) {
 			const fieldREGEX = /".*?"/
-			error = getErrorCode('INVALID_FIELD')(
-				fieldREGEX.exec(err.message)[0].replace(/"/g, ''),
-				''
-			)
+			error = getErrorCode('INVALID_FIELD')(fieldREGEX.exec(err.message)[0].replace(/"/g, ''), '')
 			return {
 				message: error.message,
 				statusCode: error.statusCode
