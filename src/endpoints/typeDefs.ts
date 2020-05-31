@@ -144,6 +144,7 @@ export default gql`
 		description: String!
 		color: String
 		version: String!
+		nsfw: Boolean!
 	}
 
 	type Query {

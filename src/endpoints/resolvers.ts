@@ -297,6 +297,10 @@ export default {
 					[name, webNameToFileNameNoExtension(target)]
 				)
 
+				if (dbData && dbData.layout) {
+					dbData.layout.url = `${fileNameToWebName(dbData.layout.target)}/${dbData.layout.details.name}`
+				}
+
 				return dbData
 			} catch (e) {
 				console.error(e)
