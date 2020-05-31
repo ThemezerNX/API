@@ -179,7 +179,8 @@ const createNXThemes = (themes) =>
 						})
 					} catch (e) {
 						reject(e)
-						rimraf(`${path}/*`, () => {})
+					} finally {
+						rimraf(path, () => {})
 						cleanupCallback()
 					}
 				})
@@ -286,7 +287,8 @@ export default {
 							cleanupCallback()
 						} catch (e) {
 							reject(e)
-							rimraf(`${path}/*`, () => {})
+						} finally {
+							rimraf(path, () => {})
 						}
 					})
 				})
@@ -407,6 +409,7 @@ export default {
 												} else {
 													reject(errorName.FILE_READ_ERROR)
 												}
+											} finally {
 												rimraf(path, () => {})
 											}
 										})
@@ -415,10 +418,12 @@ export default {
 									NXThemePaths = await Promise.all(promises)
 								} catch (e) {
 									reject(errorName.ZIP_READ_ERROR)
+								} finally {
 									rimraf(path, () => {})
 								}
 							} catch (err) {
 								reject(errorName.FILE_READ_ERROR)
+							} finally {
 								rimraf(path, () => {})
 							}
 						} else {
@@ -494,6 +499,7 @@ export default {
 										}
 									} catch (e) {
 										reject(errorName.INVALID_NXTHEME_CONTENTS)
+									} finally {
 										rimraf(path, () => {})
 									}
 								})
@@ -572,6 +578,8 @@ export default {
 									console.error(e)
 									reject(errorName.DB_SAVE_ERROR)
 									return
+								} finally {
+									rimraf(path, () => {})
 								}
 							}
 
