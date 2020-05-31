@@ -19,7 +19,6 @@ export default gql`
 
 	type LayoutDetails {
 		name: String!
-		uuid: GUID!
 		author: Author!
 		description: String!
 		target: String!
@@ -32,8 +31,24 @@ export default gql`
 		author: AuthorInput!
 		description: String
 		color: HexColorCode
-		tags: [String!]
+		categories: [String!]
 		version: String
+	}
+
+	type ThemeDetails {
+		name: String!
+		author: Author!
+		description: String!
+		color: HexColorCode
+		version: String!
+	}
+
+	type PackDetails {
+		name: String!
+		author: Author!
+		description: String!
+		color: HexColorCode
+		version: String!
 	}
 
 	type Value {
@@ -64,7 +79,6 @@ export default gql`
 	}
 
 	type Layout {
-		name: String!
 		uuid: GUID!
 		details: LayoutDetails!
 		baselayout: JSON!
@@ -72,8 +86,27 @@ export default gql`
 		last_updated: DateTime!
 		has_pieces: Boolean!
 		pieces: [Piece!]
-		commonlayout: JSON!
+		has_commonlayout: Boolean!
+		commonlayout: JSON
 		url: String!
+	}
+
+	type Theme {
+		uuid: GUID!
+		details: ThemeDetails!
+		layout: Layout
+		pack: Pack
+		target: String!
+		last_updated: DateTime!
+		pieces: [Piece!]
+		categories: [String!]
+		nsfw: Boolean!
+	}
+
+	type Pack {
+		uuid: GUID!
+		details: PackDetails!
+		last_updated: DateTime!
 	}
 
 	type File {
@@ -108,13 +141,17 @@ export default gql`
 		layout_uuid: GUID
 		used_pieces: [UsedPieceInput!]
 		target: String!
+		description: String!
 		color: String
-		version: String
+		version: String!
 	}
 
 	type Query {
 		layout(name: String!, target: String!): Layout
 		layoutsList(target: String!): [Layout]
+
+		theme(name: String!, target: String!): Theme
+		themesList(target: String!): [Theme]
 	}
 
 	type Mutation {

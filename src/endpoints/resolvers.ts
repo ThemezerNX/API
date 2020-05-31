@@ -166,7 +166,7 @@ const createNXThemes = (themes) =>
 						PythonShell.run('main.py', options, async function(err) {
 							if (err) {
 								reject(errorName.NXTHEME_CREATE_FAILED)
-								rimraf(`${path}/*`, () => {})
+								rimraf(path, () => {})
 								cleanupCallback()
 								return
 							}
@@ -220,9 +220,9 @@ export default {
 				const dbData = await db.oneOrNone(
 					`
 					SELECT *,
-						CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces
-						-- CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
-					from layouts
+						CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces,
+						CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+					FROM layouts
 					WHERE details ->> 'name' = $1
 						AND target = $2
 				`,
@@ -231,6 +231,7 @@ export default {
 
 				return dbData
 			} catch (e) {
+				console.error(e)
 				throw new Error(e)
 			}
 		},
@@ -239,8 +240,8 @@ export default {
 				const dbData = await db.any(
 					`
 					SELECT *,
-						CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces
-						-- CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+						CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces,
+						CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
 					FROM layouts
 					WHERE target = $1
 				`,
@@ -249,6 +250,104 @@ export default {
 
 				return dbData
 			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
+		theme: async (parent, { name, target }, context, info) => {
+			try {
+				const dbData = await db.oneOrNone(
+					`
+					SELECT uuid, details, target, last_updated, categories, nsfw,
+						(
+							SELECT row_to_json(l) AS layout
+								FROM (
+									SELECT layouts.*,
+										CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+									FROM themes
+									INNER JOIN layouts
+									ON layouts.uuid = themes.layout_uuid
+									GROUP BY layouts.uuid
+								) as l
+						),
+						(
+							SELECT row_to_json(p) AS pack
+								FROM (
+									SELECT row_to_json(packs.*)
+									FROM themes
+									INNER JOIN packs
+									ON packs.uuid = themes.pack_uuid
+									GROUP BY packs.uuid
+								) as p
+						),
+						(
+							SELECT array_agg(row_to_json(pcs)) AS pieces
+								FROM (
+									SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
+									FROM layouts
+									WHERE uuid = themes.layout_uuid
+								) as pcs
+							WHERE value ->> 'uuid' = ANY(themes.piece_uuids::text[])
+						)
+
+					FROM themes
+					WHERE themes.details ->> 'name' = $1
+						AND target = $2
+				`,
+					[name, webNameToFileNameNoExtension(target)]
+				)
+
+				return dbData
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
+		themesList: async (parent, { target }, context, info) => {
+			try {
+				const dbData = await db.any(
+					`
+					SELECT uuid, details, target, last_updated, categories, nsfw,
+						(
+							SELECT row_to_json(l) AS layout
+								FROM (
+									SELECT layouts.*,
+										CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+									FROM themes
+									INNER JOIN layouts
+									ON layouts.uuid = themes.layout_uuid
+									GROUP BY layouts.uuid
+								) as l
+						),
+						(
+							SELECT row_to_json(p) AS pack
+								FROM (
+									SELECT row_to_json(packs.*)
+									FROM themes
+									INNER JOIN packs
+									ON packs.uuid = themes.pack_uuid
+									GROUP BY packs.uuid
+								) as p
+						),
+						(
+							SELECT array_agg(row_to_json(pcs)) AS pieces
+								FROM (
+									SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
+									FROM layouts
+									WHERE uuid = themes.layout_uuid
+								) as pcs
+							WHERE value ->> 'uuid' = ANY(themes.piece_uuids::text[])
+						)
+
+					FROM themes 
+					WHERE target = $1
+				`,
+					[webNameToFileNameNoExtension(target)]
+				)
+
+				return dbData
+			} catch (e) {
+				console.error(e)
 				throw new Error(e)
 			}
 		}
@@ -293,6 +392,7 @@ export default {
 					})
 				})
 			} catch (e) {
+				console.error(e)
 				throw new Error(e)
 			}
 		},
@@ -348,10 +448,10 @@ export default {
 									console.error(err)
 									console.error(stderr)
 									reject(errorName.FILE_READ_ERROR)
-									rimraf(`${path}/*`, () => {})
+									rimraf(path, () => {})
+									cleanupCallback()
 									return
 								} else {
-									console.log(stdout)
 									resolve({
 										filename: themeName ? `${themeName}_overlay.png` : `overlay.png`,
 										data: await readFilePromisified(`${path}/overlay.png`, 'base64'),
@@ -363,6 +463,7 @@ export default {
 					})
 				})
 			} catch (e) {
+				console.error(e)
 				throw new Error(e)
 			}
 		},
@@ -458,14 +559,15 @@ export default {
 												dbLayout = await db.oneOrNone(
 													`
 														SELECT *, (
-															SELECT array_agg(json_build_object('name', piece_name, 'value', value)) as used_pieces
-															FROM (
-																SELECT unnest(pieces) ->> 'name' as piece_name, json_array_elements(unnest(pieces)->'values') as value
-																FROM layouts
-																WHERE uuid = $1
-															) as p
-															WHERE value ->> 'uuid' = ANY($2::text[])
-														)
+																SELECT array_agg(row_to_json(p)) as used_pieces
+																FROM (
+																	SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
+																	FROM layouts
+																	WHERE uuid = $1
+																) as p
+																WHERE value ->> 'uuid' = ANY($2::text[])
+															),
+															CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
 														FROM layouts
 														WHERE uuid = $1
 													`,
@@ -516,6 +618,7 @@ export default {
 					})
 				})
 			} catch (e) {
+				console.error(e)
 				throw new Error(e)
 			}
 		},
@@ -580,6 +683,7 @@ export default {
 
 							// Move files to storage
 							const themeDataPromises = themePaths.map((path, i) => {
+								console.log(themes[i])
 								const themeUuid = uuid()
 								return new Promise(async (resolve, reject) => {
 									let hasImage = false
@@ -640,6 +744,7 @@ export default {
 					}
 				})
 			} catch (e) {
+				console.error(e)
 				throw new Error(e)
 			}
 		}
