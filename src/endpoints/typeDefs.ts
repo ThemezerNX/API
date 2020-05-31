@@ -98,7 +98,7 @@ export default gql`
 		pack: Pack
 		target: String!
 		last_updated: DateTime!
-		pieces: [Piece!]
+		pieces: [UsedPiece!]
 		categories: [String!]
 		nsfw: Boolean!
 	}
