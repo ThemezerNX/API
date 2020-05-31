@@ -70,8 +70,9 @@ export default gql`
 		baselayout: JSON!
 		target: String!
 		last_updated: DateTime!
-		has_pieces: Boolean
+		has_pieces: Boolean!
 		pieces: [Piece!]
+		commonlayout: JSON!
 		url: String!
 	}
 

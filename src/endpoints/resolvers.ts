@@ -179,7 +179,6 @@ const createNXThemes = (themes) =>
 						})
 					} catch (e) {
 						reject(e)
-					} finally {
 						rimraf(path, () => {})
 						cleanupCallback()
 					}
@@ -221,7 +220,8 @@ export default {
 				const dbData = await db.oneOrNone(
 					`
 					SELECT *,
-					CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces
+						CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces
+						-- CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
 					from layouts
 					WHERE details ->> 'name' = $1
 						AND target = $2
@@ -239,7 +239,8 @@ export default {
 				const dbData = await db.any(
 					`
 					SELECT *,
-					CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces
+						CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces
+						-- CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
 					FROM layouts
 					WHERE target = $1
 				`,
@@ -287,7 +288,6 @@ export default {
 							cleanupCallback()
 						} catch (e) {
 							reject(e)
-						} finally {
 							rimraf(path, () => {})
 						}
 					})
@@ -409,7 +409,6 @@ export default {
 												} else {
 													reject(errorName.FILE_READ_ERROR)
 												}
-											} finally {
 												rimraf(path, () => {})
 											}
 										})
@@ -418,12 +417,10 @@ export default {
 									NXThemePaths = await Promise.all(promises)
 								} catch (e) {
 									reject(errorName.ZIP_READ_ERROR)
-								} finally {
 									rimraf(path, () => {})
 								}
 							} catch (err) {
 								reject(errorName.FILE_READ_ERROR)
-							} finally {
 								rimraf(path, () => {})
 							}
 						} else {
@@ -499,7 +496,6 @@ export default {
 										}
 									} catch (e) {
 										reject(errorName.INVALID_NXTHEME_CONTENTS)
-									} finally {
 										rimraf(path, () => {})
 									}
 								})
@@ -577,9 +573,8 @@ export default {
 								} catch (e) {
 									console.error(e)
 									reject(errorName.DB_SAVE_ERROR)
-									return
-								} finally {
 									rimraf(path, () => {})
+									return
 								}
 							}
 
