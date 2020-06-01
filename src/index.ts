@@ -22,7 +22,7 @@ const schema = makeExecutableSchema({
 
 const server = new ApolloServer({
 	uploads: {
-		maxFileSize: 10000000, // 10 MB
+		maxFileSize: 25000000, // 25 MB
 		maxFiles: 4
 	},
 	schema,
@@ -34,23 +34,16 @@ const server = new ApolloServer({
 					}
 			  }
 			: false,
-	formatError: (err) => {
+	formatError: (err, params) => {
 		let error = null
 		console.error(err)
 
-		if (getErrorCode(err.message)) {
-			error = getErrorCode(err.message)
-			return {
-				message: error.message,
-				statusCode: error.statusCode
-			}
+		error = getErrorCode(err.message)
+		if (error) {
+			return error
 		} else if (err.message.includes('Cannot query field')) {
 			const fieldREGEX = /".*?"/
-			error = getErrorCode('INVALID_FIELD')(fieldREGEX.exec(err.message)[0].replace(/"/g, ''), '')
-			return {
-				message: error.message,
-				statusCode: error.statusCode
-			}
+			return getErrorCode('INVALID_FIELD')(fieldREGEX.exec(err.message)[0].replace(/"/g, ''), '')
 		}
 
 		return err

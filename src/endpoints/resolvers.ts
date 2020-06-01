@@ -84,7 +84,7 @@ const createInfo = (themeName, author, target, layoutDetails) => {
 const saveFiles = (files) =>
 	files.map(
 		({ file, savename, path }) =>
-			new Promise<String>(async (resolve, reject) => {
+			new Promise<any>(async (resolve, reject) => {
 				let { createReadStream, filename, mimetype } = await file
 				const stream = createReadStream()
 
@@ -97,29 +97,24 @@ const saveFiles = (files) =>
 					filename = filename
 				}
 
-				// Create a stream to which the upload will be written.
 				const writeStream = createWriteStream(`${path}/${filename}`)
 
-				// When the upload is fully written, resolve the promise.
 				writeStream.on('finish', () => {
 					resolve(`${filename}`)
 				})
 
-				// If there's an error writing the file, remove the partially written file
-				// and reject the promise.
 				writeStream.on('error', (error) => {
 					unlink(path, () => {
-						reject(errorName.FILE_SAVE_ERROR)
-						return
+						if (error.message.includes('exceeds') && error.message.includes('size limit')) {
+							reject(errorName.FILE_TOO_BIG)
+						} else {
+							reject(errorName.FILE_SAVE_ERROR)
+						}
 					})
 				})
 
-				// In node <= 13, errors are not automatically propagated between piped
-				// streams. If there is an error receiving the upload, destroy the write
-				// stream with the corresponding error.
 				stream.on('error', (error) => writeStream.destroy(error))
 
-				// Pipe the upload into the write stream.
 				stream.pipe(writeStream)
 			})
 	)
@@ -390,7 +385,7 @@ export default {
 
 							cleanupCallback()
 						} catch (e) {
-							reject(e)
+							// reject(e)
 							rimraf(path, () => {})
 						}
 					})
@@ -475,93 +470,79 @@ export default {
 			try {
 				return await new Promise((resolve, reject) => {
 					tmp.dir({ prefix: 'theme' }, async (err, path, cleanupCallback) => {
-						if (err) {
-							reject(err)
-							return
-						}
+						try {
+							if (err) {
+								reject(err)
+								return
+							}
 
-						const filePromises = saveFiles([{ file, path }])
-						const files = await Promise.all(filePromises)
+							const filePromises = saveFiles([{ file, path }])
+							const files = await Promise.all(filePromises)
 
-						let NXThemePaths = []
-						if (await isYaz0Promisified(`${path}/${files[0]}`)) {
-							NXThemePaths.push(`${path}/${files[0]}`)
-						} else if (await isZipPromisified(`${path}/${files[0]}`)) {
-							try {
-								await extract(`${path}/${files[0]}`, {
-									dir: `${path}/${files[0]}_extracted`
-								})
-
+							let NXThemePaths = []
+							if (await isYaz0Promisified(`${path}/${files[0]}`)) {
+								NXThemePaths.push(`${path}/${files[0]}`)
+							} else if (await isZipPromisified(`${path}/${files[0]}`)) {
 								try {
-									const filesInZip = await readdirPromisified(`${path}/${files[0]}_extracted`)
-									const NXThemesInZip = await filterAsync(filesInZip, async (file) => {
-										try {
-											return await isYaz0Promisified(`${path}/${files[0]}_extracted/${file}`)
-										} catch (e) {
-											console.error(e)
-										}
+									await extract(`${path}/${files[0]}`, {
+										dir: `${path}/${files[0]}_extracted`
 									})
 
-									const promises = filesInZip.map((file) => {
-										return new Promise(async (resolve) => {
+									try {
+										const filesInZip = await readdirPromisified(`${path}/${files[0]}_extracted`)
+										const NXThemesInZip = await filterAsync(filesInZip, async (file) => {
 											try {
-												if (await isYaz0Promisified(`${path}/${files[0]}_extracted/${file}`)) {
-													resolve(`${path}/${files[0]}_extracted/${file}`)
-												}
+												return await isYaz0Promisified(`${path}/${files[0]}_extracted/${file}`)
 											} catch (e) {
-												if (e.code === 'EISDIR') {
-													reject(errorName.FOLDER_IN_ZIP)
-												} else {
-													reject(errorName.FILE_READ_ERROR)
-												}
-												rimraf(path, () => {})
+												console.error(e)
 											}
 										})
-									})
 
-									NXThemePaths = await Promise.all(promises)
-								} catch (e) {
-									reject(errorName.ZIP_READ_ERROR)
+										NXThemePaths = NXThemesInZip.map((file) => {
+											return `${path}/${files[0]}_extracted/${file}`
+										})
+									} catch (e) {
+										reject(errorName.ZIP_READ_ERROR)
+										rimraf(path, () => {})
+									}
+								} catch (err) {
+									reject(errorName.FILE_READ_ERROR)
 									rimraf(path, () => {})
 								}
-							} catch (err) {
-								reject(errorName.FILE_READ_ERROR)
+							} else {
+								reject(errorName.INVALID_FILE_TYPE)
 								rimraf(path, () => {})
+								return
 							}
-						} else {
-							reject(errorName.INVALID_FILE_TYPE)
-							rimraf(path, () => {})
-							return
-						}
 
-						if (NXThemePaths.length > 0) {
-							const unpackPromises = unpackNXThemes(NXThemePaths)
-							const unpackedPaths = await Promise.all(unpackPromises)
+							if (NXThemePaths.length > 0) {
+								const unpackPromises = unpackNXThemes(NXThemePaths)
+								const unpackedPaths = await Promise.all(unpackPromises)
 
-							const readThemePromises = unpackedPaths.map((path) => {
-								return new Promise(async (resolve, reject) => {
-									try {
-										const info = JSON.parse(await readFilePromisified(`${path}/info.json`))
-
-										let layout = null
+								const readThemePromises = unpackedPaths.map((path) => {
+									return new Promise(async (resolve, reject) => {
 										try {
-											layout = JSON.parse(await readFilePromisified(`${path}/layout.json`))
-										} catch (e) {}
+											const info = JSON.parse(await readFilePromisified(`${path}/info.json`))
 
-										let ddsImage = null
-										try {
-											ddsImage = JSON.parse(
-												await readFilePromisified(`${path}/image.dds`, 'base64')
-											)
-										} catch (e) {}
+											let layout = null
+											try {
+												layout = JSON.parse(await readFilePromisified(`${path}/layout.json`))
+											} catch (e) {}
 
-										if (info && (layout || ddsImage)) {
-											let dbLayout = null
-											if (layout.ID) {
-												const { uuid, piece_uuids } = parseThemeID(layout.ID)
+											let ddsImage = null
+											try {
+												ddsImage = JSON.parse(
+													await readFilePromisified(`${path}/image.dds`, 'base64')
+												)
+											} catch (e) {}
 
-												dbLayout = await db.oneOrNone(
-													`
+											if (info && (layout || ddsImage)) {
+												let dbLayout = null
+												if (layout.ID) {
+													const { uuid, piece_uuids } = parseThemeID(layout.ID)
+
+													dbLayout = await db.oneOrNone(
+														`
 														SELECT *, (
 																SELECT array_agg(row_to_json(p)) as used_pieces
 																FROM (
@@ -575,49 +556,53 @@ export default {
 														FROM layouts
 														WHERE uuid = $1
 													`,
-													[uuid, piece_uuids]
-												)
+														[uuid, piece_uuids]
+													)
+												}
+
+												let used_pieces = []
+												if (dbLayout) {
+													used_pieces = dbLayout.used_pieces
+													delete dbLayout.used_pieces
+
+													dbLayout.url = `${fileNameToWebName(dbLayout.target)}/${
+														dbLayout.details.name
+													}`
+												}
+
+												resolve({
+													info: info,
+													tmp: encrypt(path),
+													layout: dbLayout,
+													used_pieces: used_pieces,
+													target: themeTargetToFileName(info.Target)
+												})
+											} else {
+												reject(errorName.INVALID_NXTHEME_CONTENTS)
+												rimraf(path, () => {})
 											}
-
-											let used_pieces = []
-											if (dbLayout) {
-												used_pieces = dbLayout.used_pieces
-												delete dbLayout.used_pieces
-
-												dbLayout.url = `${fileNameToWebName(dbLayout.target)}/${
-													dbLayout.details.name
-												}`
-											}
-
-											resolve({
-												info: info,
-												tmp: encrypt(path),
-												layout: dbLayout,
-												used_pieces: used_pieces,
-												target: themeTargetToFileName(info.Target)
-											})
-										} else {
+										} catch (e) {
 											reject(errorName.INVALID_NXTHEME_CONTENTS)
 											rimraf(path, () => {})
 										}
-									} catch (e) {
-										reject(errorName.INVALID_NXTHEME_CONTENTS)
-										rimraf(path, () => {})
-									}
+									})
 								})
-							})
 
-							const detectedThemes = await Promise.all(readThemePromises)
+								const detectedThemes = await Promise.all(readThemePromises)
 
-							if (detectedThemes.length > 0) {
-								resolve(detectedThemes)
+								if (detectedThemes.length > 0) {
+									resolve(detectedThemes)
+								} else {
+									reject(errorName.FILE_READ_ERROR)
+									rimraf(path, () => {})
+								}
 							} else {
-								reject(errorName.FILE_READ_ERROR)
+								reject(errorName.NO_NXTHEMES_IN_ZIP)
 								rimraf(path, () => {})
 							}
-						} else {
-							reject(errorName.NO_NXTHEMES_IN_ZIP)
-							rimraf(path, () => {})
+						} catch (e) {
+							reject(e)
+							return
 						}
 					})
 				})

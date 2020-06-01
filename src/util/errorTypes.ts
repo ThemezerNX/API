@@ -13,11 +13,11 @@ export const errorName = {
 
 	FILE_READ_ERROR: 'FILE_READ_ERROR',
 	FILE_SAVE_ERROR: 'FILE_SAVE_ERROR',
+	FILE_TOO_BIG: 'FILE_TOO_BIG',
 	INVALID_FILE_TYPE: 'INVALID_FILE_TYPE',
 	INVALID_TMP: 'INVALID_TMP',
 	INVALID_TARGET_NAME: 'INVALID_TARGET_NAME',
 	INVALID_NXTHEME_CONTENTS: 'INVALID_NXTHEME_CONTENTS',
-	FOLDER_IN_ZIP: 'FOLDER_IN_ZIP',
 	ZIP_READ_ERROR: 'ZIP_READ_ERROR',
 	NO_NXTHEMES_IN_ZIP: 'NO_NXTHEMES_IN_ZIP',
 
@@ -77,33 +77,33 @@ export const errorType = {
 		message: "Couldn't write file",
 		statusCode: 4001
 	},
-	INVALID_FILE_TYPE: {
-		message: 'Invalid file type',
+	FILE_TOO_BIG: {
+		message: 'The file is too big',
 		statusCode: 4002
+	},
+	INVALID_FILE_TYPE: {
+		message: 'Invalid file type detected',
+		statusCode: 4003
 	},
 	INVALID_TMP: {
 		message: 'Invalid tmp argument',
-		statusCode: 4003
+		statusCode: 4004
 	},
 	INVALID_TARGET_NAME: {
 		message: 'Invalid target name',
-		statusCode: 4004
+		statusCode: 4005
 	},
 	INVALID_NXTHEME_CONTENTS: {
 		message: 'Invalid NXTheme contents',
-		statusCode: 4005
-	},
-	FOLDER_IN_ZIP: {
-		message: 'A Folder was found in the zip!',
 		statusCode: 4006
 	},
 	ZIP_READ_ERROR: {
 		message: 'The zip could not be extracted',
-		statusCode: 4007
+		statusCode: 4008
 	},
 	NO_NXTHEMES_IN_ZIP: {
 		message: 'No NXThemes were found in the zip',
-		statusCode: 4008
+		statusCode: 4009
 	},
 
 	NXTHEME_CREATE_FAILED: {
