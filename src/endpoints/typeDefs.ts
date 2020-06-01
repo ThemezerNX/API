@@ -88,7 +88,7 @@ export default gql`
 		pieces: [Piece!]
 		has_commonlayout: Boolean!
 		commonlayout: JSON
-		url: String!
+		webtarget: String!
 	}
 
 	type Theme {
@@ -143,8 +143,8 @@ export default gql`
 		target: String!
 		description: String!
 		color: String
-		version: String!
-		nsfw: Boolean!
+		version: String
+		nsfw: Boolean
 	}
 
 	type Query {

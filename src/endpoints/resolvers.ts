@@ -268,7 +268,7 @@ export default {
 						(
 							SELECT row_to_json(p) AS pack
 								FROM (
-									SELECT row_to_json(packs.*)
+									SELECT packs.*
 									FROM themes
 									INNER JOIN packs
 									ON packs.uuid = themes.pack_uuid
@@ -293,7 +293,7 @@ export default {
 				)
 
 				if (dbData && dbData.layout) {
-					dbData.layout.url = `${fileNameToWebName(dbData.layout.target)}/${dbData.layout.details.name}`
+					dbData.layout.webtarget = fileNameToWebName(dbData.layout.target)
 				}
 
 				return dbData
@@ -321,7 +321,7 @@ export default {
 						(
 							SELECT row_to_json(p) AS pack
 								FROM (
-									SELECT row_to_json(packs.*)
+									SELECT packs.*
 									FROM themes
 									INNER JOIN packs
 									ON packs.uuid = themes.pack_uuid
@@ -343,6 +343,10 @@ export default {
 				`,
 					[webNameToFileNameNoExtension(target)]
 				)
+
+				if (dbData && dbData.layout) {
+					dbData.layout.webtarget = fileNameToWebName(dbData.layout.target)
+				}
 
 				return dbData
 			} catch (e) {
@@ -493,9 +497,7 @@ export default {
 										const NXThemesInZip = await filterAsync(filesInZip, async (file) => {
 											try {
 												return await isYaz0Promisified(`${path}/${files[0]}_extracted/${file}`)
-											} catch (e) {
-												console.error(e)
-											}
+											} catch (e) {}
 										})
 
 										NXThemePaths = NXThemesInZip.map((file) => {
@@ -565,9 +567,7 @@ export default {
 													used_pieces = dbLayout.used_pieces
 													delete dbLayout.used_pieces
 
-													dbLayout.url = `${fileNameToWebName(dbLayout.target)}/${
-														dbLayout.details.name
-													}`
+													dbLayout.webtarget = fileNameToWebName(dbLayout.target)
 												}
 
 												resolve({
