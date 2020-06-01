@@ -13,7 +13,7 @@ const { errorName, errorType } = require('./util/errorTypes')
 const getErrorCode = (errorName) => errorType[errorName]
 
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json())
+app.use(bodyParser.json({ limit: '50mb' }))
 
 const schema = makeExecutableSchema({
 	typeDefs,
@@ -23,7 +23,7 @@ const schema = makeExecutableSchema({
 const server = new ApolloServer({
 	uploads: {
 		maxFileSize: 25000000, // 25 MB
-		maxFiles: 4
+		maxFiles: 50
 	},
 	schema,
 	playground:
