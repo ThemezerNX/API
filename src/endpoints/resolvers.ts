@@ -210,6 +210,21 @@ const unpackNXThemes = (paths) =>
 export default {
 	JSON: GraphQLJSON,
 	Query: {
+		categories: async (parent, args, context, info) => {
+			try {
+				const categoriesDB = await db.one(`
+					SELECT ARRAY(
+						SELECT DISTINCT UNNEST(categories)
+						FROM themes
+					) as categories
+				`)
+
+				return categoriesDB.categories
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
 		layout: async (parent, { name, target }, context, info) => {
 			try {
 				const dbData = await db.oneOrNone(
@@ -253,7 +268,8 @@ export default {
 			try {
 				const dbData = await db.oneOrNone(
 					`
-					SELECT uuid, details, target, last_updated, categories, nsfw,
+					SELECT uuid, details, target, last_updated, categories,
+						CASE WHEN nsfw IS true THEN true ELSE false END AS nsfw,
 						(
 							SELECT row_to_json(l) AS layout
 								FROM (
@@ -262,6 +278,7 @@ export default {
 									FROM themes
 									INNER JOIN layouts
 									ON layouts.uuid = themes.layout_uuid
+									WHERE themes.uuid = mt.uuid
 									GROUP BY layouts.uuid
 								) as l
 						),
@@ -272,6 +289,7 @@ export default {
 									FROM themes
 									INNER JOIN packs
 									ON packs.uuid = themes.pack_uuid
+									WHERE themes.uuid = mt.uuid
 									GROUP BY packs.uuid
 								) as p
 						),
@@ -280,14 +298,14 @@ export default {
 								FROM (
 									SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
 									FROM layouts
-									WHERE uuid = themes.layout_uuid
+									WHERE uuid = mt.layout_uuid
 								) as pcs
-							WHERE value ->> 'uuid' = ANY(themes.piece_uuids::text[])
+							WHERE value ->> 'uuid' = ANY(mt.piece_uuids::text[])
 						)
 
-					FROM themes
-					WHERE themes.details ->> 'name' = $1
-						AND target = $2
+					FROM themes as mt
+					WHERE target = $2
+						AND mt.details ->> 'name' = $1
 				`,
 					[name, webNameToFileNameNoExtension(target)]
 				)
@@ -306,7 +324,8 @@ export default {
 			try {
 				const dbData = await db.any(
 					`
-					SELECT uuid, details, target, last_updated, categories, nsfw,
+					SELECT uuid, details, target, last_updated, categories,
+						CASE WHEN nsfw IS true THEN true ELSE false END AS nsfw,
 						(
 							SELECT row_to_json(l) AS layout
 								FROM (
@@ -315,6 +334,7 @@ export default {
 									FROM themes
 									INNER JOIN layouts
 									ON layouts.uuid = themes.layout_uuid
+									WHERE themes.uuid = mt.uuid
 									GROUP BY layouts.uuid
 								) as l
 						),
@@ -325,6 +345,7 @@ export default {
 									FROM themes
 									INNER JOIN packs
 									ON packs.uuid = themes.pack_uuid
+									WHERE themes.uuid = mt.uuid
 									GROUP BY packs.uuid
 								) as p
 						),
@@ -333,12 +354,12 @@ export default {
 								FROM (
 									SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
 									FROM layouts
-									WHERE uuid = themes.layout_uuid
+									WHERE uuid = mt.layout_uuid
 								) as pcs
-							WHERE value ->> 'uuid' = ANY(themes.piece_uuids::text[])
+							WHERE value ->> 'uuid' = ANY(mt.piece_uuids::text[])
 						)
 
-					FROM themes 
+					FROM themes mt
 					WHERE target = $1
 				`,
 					[webNameToFileNameNoExtension(target)]
@@ -563,6 +584,7 @@ export default {
 												}
 
 												let used_pieces = []
+												let categoriesDB = null
 												if (dbLayout) {
 													used_pieces = dbLayout.used_pieces
 													delete dbLayout.used_pieces
@@ -657,7 +679,16 @@ export default {
 								const packData = {
 									uuid: packUuid,
 									last_updated: new Date(),
-									details: details
+									details: {
+										name: details.name.trim(),
+										author: {
+											name: details.author.name.trim(),
+											discord_tag: details.author.discord_tag
+										},
+										description: details.description.trim(),
+										color: details.color,
+										version: details.version ? details.version.trim() : '1.0.0'
+									}
 								}
 								const query = () => pgp.helpers.insert([packData], packsCS)
 								try {
@@ -672,7 +703,6 @@ export default {
 
 							// Move files to storage
 							const themeDataPromises = themePaths.map((path, i) => {
-								console.log(themes[i])
 								const themeUuid = uuid()
 								return new Promise(async (resolve, reject) => {
 									let hasImage = false
@@ -695,20 +725,25 @@ export default {
 											? themes[i].target
 											: reject(errorName.INVALID_TARGET_NAME),
 										last_updated: new Date(),
-										categories: themes[i].categories,
+										categories: themes[i].categories.map((c) => c.trim()),
 										nsfw: themes[i].nsfw,
 										pack_uuid: packUuid,
 										details: {
-											name: themes[i].info.ThemeName,
+											name: themes[i].info.ThemeName.trim(),
 											author: {
-												name: themes[i].info.Author
-													? themes[i].info.Author
-													: details.author.name,
+												name:
+													themes[i].info.Author && themes[i].info.Author.length > 0
+														? themes[i].info.Author.trim()
+														: themes[i].authorname.trim(),
 												discord_tag: details.author.discord_tag
 											},
-											description: themes[i].description,
+											description: themes[i].description ? themes[i].description.trim() : null,
 											color: themes[i].color,
-											version: details.version || themes[i].version || '1.0.0'
+											version: details.version
+												? details.version.trim()
+												: themes[i].version
+												? themes[i].version.trim()
+												: '1.0.0'
 										}
 									})
 								})

@@ -38,7 +38,7 @@ export default gql`
 	type ThemeDetails {
 		name: String!
 		author: Author!
-		description: String!
+		description: String
 		color: HexColorCode
 		version: String!
 	}
@@ -141,13 +141,17 @@ export default gql`
 		layout_uuid: GUID
 		used_pieces: [UsedPieceInput!]
 		target: String!
-		description: String!
+		authorname: String
+		description: String
 		color: String
 		version: String
+		categories: [String!]
 		nsfw: Boolean
 	}
 
 	type Query {
+		categories: [String!]
+
 		layout(name: String!, target: String!): Layout
 		layoutsList(target: String!): [Layout]
 
