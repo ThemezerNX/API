@@ -15,7 +15,7 @@
   "author": "Migushthe2nd <Migushthe2nd@users.noreply.github.com>",
   "dependencies": {
     "@themezernx/layout-id-parser": "https://github.com/ThemezerNX/Layout-ID-Parser.git",
-    "apollo-server-express": "^2.13.1",
+    "apollo-server-express": "^2.14.2",
     "consola": "^2.12.1",
     "cross-env": "^7.0.2",
     "crypto": "^1.0.1",
