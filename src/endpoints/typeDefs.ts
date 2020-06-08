@@ -80,6 +80,7 @@ export default gql`
 
 	type Layout {
 		uuid: GUID!
+		id: Int!
 		details: LayoutDetails!
 		baselayout: JSON!
 		target: String!
@@ -93,6 +94,7 @@ export default gql`
 
 	type Theme {
 		uuid: GUID!
+		id: Int!
 		details: ThemeDetails!
 		layout: Layout
 		pack: Pack
@@ -105,6 +107,7 @@ export default gql`
 
 	type Pack {
 		uuid: GUID!
+		id: Int!
 		details: PackDetails!
 		last_updated: DateTime!
 	}
@@ -152,10 +155,10 @@ export default gql`
 	type Query {
 		categories: [String!]
 
-		layout(name: String!, target: String!): Layout
+		layout(id: Int!, target: String!): Layout
 		layoutsList(target: String!): [Layout]
 
-		theme(name: String!, target: String!): Theme
+		theme(id: Int!, target: String!): Theme
 		themesList(target: String!): [Theme]
 	}
 

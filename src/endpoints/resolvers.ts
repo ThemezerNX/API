@@ -225,7 +225,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		layout: async (parent, { name, target }, context, info) => {
+		layout: async (parent, { id, target }, context, info) => {
 			try {
 				const dbData = await db.oneOrNone(
 					`
@@ -233,10 +233,10 @@ export default {
 						CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces,
 						CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
 					FROM layouts
-					WHERE details ->> 'name' = $1
+					WHERE id = $1
 						AND target = $2
 				`,
-					[name, webNameToFileNameNoExtension(target)]
+					[id, webNameToFileNameNoExtension(target)]
 				)
 
 				return dbData
@@ -264,11 +264,11 @@ export default {
 				throw new Error(e)
 			}
 		},
-		theme: async (parent, { name, target }, context, info) => {
+		theme: async (parent, { id, target }, context, info) => {
 			try {
 				const dbData = await db.oneOrNone(
 					`
-					SELECT uuid, details, target, last_updated, categories,
+					SELECT uuid, details, target, last_updated, categories, id,
 						CASE WHEN nsfw IS true THEN true ELSE false END AS nsfw,
 						(
 							SELECT row_to_json(l) AS layout
@@ -305,9 +305,9 @@ export default {
 
 					FROM themes as mt
 					WHERE target = $2
-						AND mt.details ->> 'name' = $1
+						AND mt.id = $1
 				`,
-					[name, webNameToFileNameNoExtension(target)]
+					[id, webNameToFileNameNoExtension(target)]
 				)
 
 				if (dbData && dbData.layout) {
@@ -324,7 +324,7 @@ export default {
 			try {
 				const dbData = await db.any(
 					`
-					SELECT uuid, details, target, last_updated, categories,
+					SELECT uuid, details, target, last_updated, categories, id,
 						CASE WHEN nsfw IS true THEN true ELSE false END AS nsfw,
 						(
 							SELECT row_to_json(l) AS layout
