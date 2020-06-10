@@ -1011,14 +1011,13 @@ export default {
 									const themeUuid = uuid()
 									try {
 										const filesInFolder = await readdirPromisified(path)
-										const filteredFIlesInFolder = filesInFolder.filter((f) =>
-											allowdFilesInNXTheme.includes(f)
+										const filteredFIlesInFolder = filesInFolder.filter(
+											(f) => allowdFilesInNXTheme.includes(f) || f === 'screenshot.jpg'
 										)
 										const moveAllPromises = filteredFIlesInFolder.map((file) => {
 											console.log(!(themes[i].layout_uuid && file === 'layout.json'))
 											if (
 												file !== 'info.json' &&
-												file !== 'screenshot.jpg' &&
 												!(themes[i].layout_uuid && file === 'layout.json')
 											) {
 												console.log('move:', themeUuid)
