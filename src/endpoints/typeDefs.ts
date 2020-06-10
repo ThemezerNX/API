@@ -89,7 +89,7 @@ export default gql`
 		pieces: [Piece!]
 		has_commonlayout: Boolean!
 		commonlayout: JSON
-		webtarget: String!
+		dl_count: Int!
 	}
 
 	type Theme {
@@ -103,6 +103,7 @@ export default gql`
 		pieces: [UsedPiece!]
 		categories: [String!]
 		nsfw: Boolean!
+		dl_count: Int!
 	}
 
 	type Pack {
@@ -110,6 +111,8 @@ export default gql`
 		id: Int!
 		details: PackDetails!
 		last_updated: DateTime!
+		dl_count: Int!
+		themes: [Theme!]
 	}
 
 	type File {
@@ -160,6 +163,9 @@ export default gql`
 
 		theme(id: Int!, target: String!): Theme
 		themesList(target: String!): [Theme]
+
+		pack(id: Int!): Pack
+		packsList: [Pack]
 	}
 
 	type Mutation {
@@ -170,6 +176,11 @@ export default gql`
 
 		uploadSingleOrZip(file: Upload!): [DetectedTheme!]
 		submitThemes(files: [Upload!], themes: [DetectedThemeInput!], details: DetailsInput!, type: String!): Boolean
+
+		mergeJson(uuid: GUID!, piece_uuids: [GUID!], common: Boolean): JSON!
+
+		downloadTheme(uuid: GUID!, piece_uuids: [GUID!]): File!
+		downloadPack(uuid: GUID!): File!
 	}
 
 	schema {

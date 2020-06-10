@@ -107,7 +107,7 @@ export const errorType = {
 	},
 
 	NXTHEME_CREATE_FAILED: {
-		message: 'Failed to create the NXTheme',
+		message: 'Failed to create the NXTheme, please report this with details.',
 		statusCode: 4100
 	},
 	NXTHEME_UNPACK_FAILED: {
