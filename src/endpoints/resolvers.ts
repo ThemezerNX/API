@@ -1007,20 +1007,21 @@ export default {
 
 							// Move files to storage
 							const themeDataPromises = themePaths.map((path, i) => {
-								const themeUuid = uuid()
 								return new Promise(async (resolve, reject) => {
+									const themeUuid = uuid()
 									try {
 										const filesInFolder = await readdirPromisified(path)
 										const filteredFIlesInFolder = filesInFolder.filter((f) =>
 											allowdFilesInNXTheme.includes(f)
 										)
 										const moveAllPromises = filteredFIlesInFolder.map((file) => {
-											// TODO: compare all files to array of allowed files
+											console.log(!(themes[i].layout_uuid && file === 'layout.json'))
 											if (
 												file !== 'info.json' &&
 												file !== 'screenshot.jpg' &&
 												!(themes[i].layout_uuid && file === 'layout.json')
 											) {
+												console.log('move:', themeUuid)
 												return moveFile(
 													`${path}/${file}`,
 													`${storagePath}/themes/${themeUuid}/${file}`
@@ -1030,10 +1031,14 @@ export default {
 										await Promise.all(moveAllPromises)
 									} catch (e) {}
 
+									console.log('resolve:', themeUuid)
 									resolve({
 										uuid: themeUuid,
 										layout_uuid: themes[i].layout_uuid,
-										piece_uuids: themes[i].used_pieces.map((p) => p.value.uuid),
+										piece_uuids:
+											themes[i].used_pieces && themes[i].used_pieces.length > 0
+												? themes[i].used_pieces.map((p) => p.value.uuid)
+												: null,
 										target: validFileName(themes[i].target)
 											? themes[i].target
 											: reject(errorName.INVALID_TARGET_NAME),
