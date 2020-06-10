@@ -255,6 +255,7 @@ const createNXThemes = (themes) =>
 
 					PythonShell.run('main.py', options, async function(err) {
 						if (err) {
+							console.error(err)
 							reject(errorName.NXTHEME_CREATE_FAILED)
 							rimraf(theme.path, () => {})
 							return
