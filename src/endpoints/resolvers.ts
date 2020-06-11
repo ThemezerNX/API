@@ -1016,12 +1016,10 @@ export default {
 											(f) => allowdFilesInNXTheme.includes(f) || f === 'screenshot.jpg'
 										)
 										const moveAllPromises = filteredFIlesInFolder.map((file) => {
-											console.log(!(themes[i].layout_uuid && file === 'layout.json'))
 											if (
 												file !== 'info.json' &&
 												!(themes[i].layout_uuid && file === 'layout.json')
 											) {
-												console.log('move:', themeUuid)
 												return moveFile(
 													`${path}/${file}`,
 													`${storagePath}/themes/${themeUuid}/${file}`
@@ -1031,7 +1029,6 @@ export default {
 										await Promise.all(moveAllPromises)
 									} catch (e) {}
 
-									console.log('resolve:', themeUuid)
 									resolve({
 										uuid: themeUuid,
 										layout_uuid: themes[i].layout_uuid,
