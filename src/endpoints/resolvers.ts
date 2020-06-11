@@ -250,7 +250,7 @@ const createNXThemes = (themes) =>
 					const options = {
 						pythonPath: 'python3.8',
 						scriptPath: sarcToolPath,
-						args: ['-little', '-compress', '1', '-o', `${theme.path}/theme.nxtheme`, theme.path]
+						args: ['-little', '-compress', '0', '-o', `${theme.path}/theme.nxtheme`, theme.path]
 					}
 
 					PythonShell.run('main.py', options, async function(err) {
