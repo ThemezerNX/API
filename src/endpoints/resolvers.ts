@@ -1185,10 +1185,10 @@ export default {
 						for (const i in themesB64) {
 							try {
 								await zip.addFile(themesB64[i].filename, Buffer.from(themesB64[i].data, 'base64'))
-								resolve()
 							} catch (e) {
 								console.error(e)
-								reject()
+								reject(errorName.PACK_CREATE_FAILED)
+								return
 							}
 						}
 
