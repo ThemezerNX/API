@@ -39,6 +39,7 @@ const extract = require('extract-zip')
 const sarcToolPath = `${__dirname}/../../../SARC-Tool`
 const storagePath = `${__dirname}/../../../storage`
 
+// Allowed files according to https://github.com/exelix11/SwitchThemeInjector/blob/master/SwitchThemesCommon/PatchTemplate.cs#L10-L29
 const allowdFilesInNXTheme = [
 	'info.json',
 	'image.dds',
@@ -110,13 +111,12 @@ const saveFiles = (files) =>
 				let { createReadStream, filename, mimetype } = await file
 				const stream = createReadStream()
 
+				// Add file extension if none to prevent errors with matching file and directory names
 				const FILE_EXTENSION_REGEX = /\.[^\/.]+$/
 				if (!FILE_EXTENSION_REGEX.test(filename)) {
 					filename = `${savename || filename}.file`
 				} else if (savename) {
 					filename = savename + FILE_EXTENSION_REGEX.exec(filename)
-				} else {
-					filename = filename
 				}
 
 				const writeStream = createWriteStream(`${path}/${filename}`)
@@ -127,6 +127,7 @@ const saveFiles = (files) =>
 
 				writeStream.on('error', (error) => {
 					unlink(path, () => {
+						// If the uploaded file's size is too big return specific error
 						if (error.message.includes('exceeds') && error.message.includes('size limit')) {
 							reject(errorName.FILE_TOO_BIG)
 						} else {
@@ -143,6 +144,8 @@ const saveFiles = (files) =>
 
 const mergeJson = async (uuid, piece_uuids = [], common?) => {
 	let dbData = null
+
+	// If common layout, dont get the pieces
 	if (common) {
 		dbData = await db.oneOrNone(
 			`
@@ -174,39 +177,40 @@ const mergeJson = async (uuid, piece_uuids = [], common?) => {
 	}
 
 	if (dbData) {
-		const array = []
+		// Create an array with all used pieces
+		const usedPieces = []
 		for (const i in dbData.pieces) {
-			array.push({
+			usedPieces.push({
 				uuid: dbData.pieces[i].value.uuid,
 				json: dbData.pieces[i].value.json
 			})
 		}
 
-		const usedPieces = []
 		const baseJsonParsed = common ? JSON.parse(dbData.commonlayout) : JSON.parse(dbData.baselayout)
 		if (baseJsonParsed) {
-			for (const piece in array) usedPieces.push(array[piece].uuid)
+			while (usedPieces.length > 0) {
+				const shifted = usedPieces.shift()
 
-			const fArray = [].concat(array)
-			while (fArray.length > 0) {
-				const shifted = fArray.shift()
-				baseJsonParsed.Files = patch(baseJsonParsed.Files || [], JSON.parse(shifted.json).Files, [
-					'FileName',
-					'PaneName',
-					'PropName',
-					'GroupName',
-					'name',
-					'MaterialName',
-					'unknown'
-				])
+				// Merge files patches
+				if (Array.isArray(baseJsonParsed.Files)) {
+					baseJsonParsed.Files = patch(baseJsonParsed.Files, JSON.parse(shifted.json).Files, [
+						'FileName',
+						'PaneName',
+						'PropName',
+						'GroupName',
+						'name',
+						'MaterialName',
+						'unknown'
+					])
+				}
+
+				// Merge animation files patches
+				if (Array.isArray(baseJsonParsed.Anims)) {
+					baseJsonParsed.Anims = patch(baseJsonParsed.Anims, JSON.parse(shifted.json).Anims, ['FileName'])
+				}
 			}
 
-			const aArray = [].concat(array)
-			while (aArray.length > 0) {
-				const shifted = aArray.shift()
-				baseJsonParsed.Anims = patch(baseJsonParsed.Anims || [], JSON.parse(shifted.json).Anims, ['FileName'])
-			}
-
+			// Recreate the file layout
 			const ordered = {
 				PatchName: baseJsonParsed.PatchName,
 				AuthorName: baseJsonParsed.AuthorName,
@@ -214,13 +218,14 @@ const mergeJson = async (uuid, piece_uuids = [], common?) => {
 				ID: stringifyThemeID({
 					service: 'Themezer',
 					uuid: uuid + (baseJsonParsed.TargetName === 'common.szs' ? '-common' : ''),
-					piece_uuids: usedPieces
+					piece_uuids: usedPieces.map((p) => p.uuid)
 				}),
 				Ready8X: baseJsonParsed.Ready8X,
 				Files: baseJsonParsed.Files,
 				Anims: baseJsonParsed.Anims
 			}
 
+			// Return as prettified string
 			return JSON.stringify(ordered, null, 2)
 		} else return null
 	} else return null
@@ -231,28 +236,33 @@ const createNXThemes = (themes) =>
 		(theme) =>
 			new Promise<Object>(async (resolve, reject) => {
 				try {
+					// Read the dir contents that should be in the NXTheme
 					const filesInFolder = await readdirPromisified(theme.path)
 
+					// Check if there's a layout.json
 					let layoutDetails = null
 					if (filesInFolder.includes('layout.json')) {
 						layoutDetails = JSON.parse(await readFilePromisified(`${theme.path}/layout.json`, 'utf8'))
 					}
 
+					// Create info preferably with the one in the layout or the specified target
 					const info = createInfo(
 						theme.themeName,
 						theme.author,
-						fileNameToThemeTarget(theme.targetName || layoutDetails.TargetName),
+						fileNameToThemeTarget(layoutDetails ? layoutDetails.TargetName : theme.targetName),
 						layoutDetails
 					)
 
+					// Write the info.json to the dir
 					await writeFilePromisified(`${theme.path}/info.json`, JSON.stringify(info), 'utf8')
 
+					// Run SARC-Tool main.py on the specified folder
 					const options = {
 						pythonPath: 'python3.8',
 						scriptPath: sarcToolPath,
+						// Compression 0, to reduce stress on CPU
 						args: ['-little', '-compress', '0', '-o', `${theme.path}/theme.nxtheme`, theme.path]
 					}
-
 					PythonShell.run('main.py', options, async function(err) {
 						if (err) {
 							console.error(err)
@@ -261,6 +271,7 @@ const createNXThemes = (themes) =>
 							return
 						}
 
+						// Return NXTheme data as Base64 encoded string
 						resolve({
 							filename:
 								`${theme.themeName} by ${info.Author}` +
@@ -282,19 +293,20 @@ const unpackNXThemes = (paths) =>
 		(path) =>
 			new Promise<String>((resolve, reject) => {
 				try {
+					// Run SARC-Tool main.py on the specified file
 					const options = {
 						pythonPath: 'python3.8',
 						scriptPath: sarcToolPath,
 						args: [path]
 					}
-
 					PythonShell.run('main.py', options, async function(err) {
 						if (err) {
-							console.log(err)
+							console.error(err)
 							reject(errorName.NXTHEME_UNPACK_FAILED)
 							return
 						}
 
+						// Return extracted dir path
 						resolve(path.replace(/\.[^\/.]+$/, ''))
 					})
 				} catch (e) {
@@ -312,6 +324,7 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 			}
 
 			try {
+				// Get the theme details
 				const { layout_uuid, name, target, author } = await db.oneOrNone(
 					`
 						SELECT layout_uuid, details ->> 'name' as name, target, details -> 'author' ->> 'name' as author
@@ -321,12 +334,11 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 					[uuid]
 				)
 
-				// Get merged layout json if any, else link it in a bit
+				// Get merged layout json if any
 				let layoutJson = null
 				if (layout_uuid) {
 					const layoutJson = await mergeJson(layout_uuid, piece_uuids)
 					await writeFilePromisified(`${path}/layout.json`, layoutJson, 'utf8')
-				} else {
 				}
 
 				// Get optional common json
@@ -338,9 +350,7 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 					}
 				}
 
-				// Get all other optional files
-				// https://github.com/exelix11/SwitchThemeInjector/blob/master/SwitchThemesCommon/PatchTemplate.cs#L10-L29
-
+				// Symlink all other allowdFilesInNXTheme
 				const filesInFolder = await readdirPromisified(`${storagePath}/themes/${uuid}`)
 				const linkAllPromises = filesInFolder.map((file) => {
 					if (file !== 'screenshot.jpg') {
@@ -358,12 +368,12 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 						author: author
 					}
 				]
-
 				const themePromises = createNXThemes(themes)
 				const themesB64 = await Promise.all(themePromises)
 
 				resolve(themesB64[0])
 
+				// Increase download count by 1
 				db.none(
 					`
 						UPDATE themes
@@ -375,7 +385,7 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 
 				cleanupCallback()
 			} catch (e) {
-				console.log(e)
+				console.error(e)
 				reject(errorName.NXTHEME_CREATE_FAILED)
 				cleanupCallback()
 			}
@@ -661,6 +671,8 @@ export default {
 			return await new Promise(async (resolve, reject) => {
 				const json = await mergeJson(uuid, piece_uuids, common)
 				resolve(json)
+
+				// Increase download count by 1
 				db.none(
 					`
 					UPDATE layouts
@@ -684,6 +696,7 @@ export default {
 							const filePromises = saveFiles([{ file: layout, path }])
 							const files = await Promise.all(filePromises)
 
+							// Symlink the files to the two dirs
 							await Promise.all([
 								link(`${path}/${files[0]}`, `${path}/black/layout.json`),
 								link(`${__dirname}/../../images/BLACK.dds`, `${path}/black/image.dds`),
@@ -691,6 +704,7 @@ export default {
 								link(`${__dirname}/../../images/WHITE.dds`, `${path}/white/image.dds`)
 							])
 
+							// Make NXThemes
 							const themes = [
 								{
 									path: `${path}/black`,
@@ -701,7 +715,6 @@ export default {
 									themeName: 'White background'
 								}
 							]
-
 							const themePromises = createNXThemes(themes)
 							const themesB64 = await Promise.all(themePromises)
 
@@ -803,6 +816,7 @@ export default {
 							const filePromises = saveFiles([{ file, path }])
 							const files = await Promise.all(filePromises)
 
+							// Create array of valid NXThemes
 							let NXThemePaths = []
 							if (await isYaz0Promisified(`${path}/${files[0]}`)) {
 								NXThemePaths.push(`${path}/${files[0]}`)
@@ -826,7 +840,7 @@ export default {
 										reject(errorName.ZIP_READ_ERROR)
 										rimraf(path, () => {})
 									}
-								} catch (err) {
+								} catch (e) {
 									reject(errorName.FILE_READ_ERROR)
 									rimraf(path, () => {})
 								}
@@ -836,6 +850,7 @@ export default {
 								return
 							}
 
+							// Process all valid NXThemes
 							if (NXThemePaths.length > 0) {
 								const unpackPromises = unpackNXThemes(NXThemePaths)
 								const unpackedPaths = await Promise.all(unpackPromises)
@@ -843,8 +858,10 @@ export default {
 								const readThemePromises = unpackedPaths.map((path) => {
 									return new Promise(async (resolve, reject) => {
 										try {
+											// Read info.json
 											const info = JSON.parse(await readFilePromisified(`${path}/info.json`))
 
+											// Read layout.json
 											let layout = null
 											try {
 												layout = JSON.parse(await readFilePromisified(`${path}/layout.json`))
@@ -867,32 +884,36 @@ export default {
 												image = true
 											} catch (e) {}
 
+											// Only proceed if info and at least layout or image is detected
 											if (info && (layout || image)) {
+												// If the layout has an ID specified get the uuid
 												let dbLayout = null
 												if (layout && layout.ID) {
-													const { uuid, piece_uuids } = parseThemeID(layout.ID)
-
-													dbLayout = await db.oneOrNone(
-														`
-														SELECT *, (
-																SELECT array_agg(row_to_json(p)) as used_pieces
-																FROM (
-																	SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
-																	FROM layouts
-																	WHERE uuid = $1
-																) as p
-																WHERE value ->> 'uuid' = ANY($2::text[])
-															),
-															CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
-														FROM layouts
-														WHERE uuid = $1
-													`,
-														[uuid, piece_uuids]
-													)
+													const { service, uuid, piece_uuids } = parseThemeID(layout.ID)
+													// Only fetch the layout if it was created by Themezer
+													if (service === 'Themezer') {
+														dbLayout = await db.oneOrNone(
+															`
+															SELECT *, (
+																	SELECT array_agg(row_to_json(p)) as used_pieces
+																	FROM (
+																		SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
+																		FROM layouts
+																		WHERE uuid = $1
+																	) as p
+																	WHERE value ->> 'uuid' = ANY($2::text[])
+																),
+																CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+															FROM layouts
+															WHERE uuid = $1
+														`,
+															[uuid, piece_uuids]
+														)
+													}
 												}
 
+												// Return detected used_pieces separately
 												let used_pieces = []
-												let categoriesDB = null
 												if (dbLayout) {
 													used_pieces = dbLayout.used_pieces
 													delete dbLayout.used_pieces
@@ -917,10 +938,14 @@ export default {
 									})
 								})
 
+								// Execute all the NXTheme read promises
 								const detectedThemes = await Promise.all(readThemePromises)
 
-								if (detectedThemes.length > 0) {
+								if (detectedThemes && detectedThemes.length > 0) {
 									resolve(detectedThemes)
+								} else if (detectedThemes && detectedThemes.length === 0) {
+									reject(errorName.NO_VALID_NXTHEMES)
+									rimraf(path, () => {})
 								} else {
 									reject(errorName.FILE_READ_ERROR)
 									rimraf(path, () => {})
@@ -944,9 +969,11 @@ export default {
 			let themePaths = []
 			try {
 				return await new Promise(async (resolve, reject) => {
+					// Create array of screenshots to save
 					const toSave = files.map((f, i) => {
 						return new Promise((resolve, reject) => {
-							lstat(decrypt(themes[i].tmp), (err) => {
+							const path = decrypt(themes[i].tmp)
+							lstat(path, (err) => {
 								if (err) {
 									reject(errorName.INVALID_TMP)
 									return
@@ -955,33 +982,37 @@ export default {
 								resolve({
 									file: f,
 									savename: 'screenshot',
-									path: decrypt(themes[i].tmp)
+									path: path
 								})
 							})
 						})
 					})
 					const resolvedDecryptions = await Promise.all(toSave)
 
+					// Save the screenshots
 					const filePromises = saveFiles(resolvedDecryptions)
 					const savedFiles = await Promise.all(filePromises)
 
+					// If every theme has a screenshot
 					if (savedFiles.length === themes.length) {
 						const promises = savedFiles.map((file, i) => {
-							const path = decrypt(themes[i].tmp)
 							return new Promise(async (resolve) => {
+								const path = decrypt(themes[i].tmp)
+								// If a valid jpeg
 								if (await isJpegPromisified(`${path}/${file}`)) {
 									resolve(path)
 								}
 							})
 						})
-
 						themePaths = await Promise.all(promises)
+
+						// If all jpegs are valid
 						if (themePaths.length === savedFiles.length) {
-							// Insert packs into DB
+							// Insert pack into DB if user wants to and can submit as pack
 							let packUuid = null
 							if (type === 'pack' && savedFiles.length > 1) {
-								// User wants to and can submit as pack
 								packUuid = uuid()
+
 								const packData = {
 									uuid: packUuid,
 									last_updated: new Date(),
@@ -996,6 +1027,7 @@ export default {
 										version: details.version ? details.version.trim() : '1.0.0'
 									}
 								}
+
 								const query = () => pgp.helpers.insert([packData], packsCS)
 								try {
 									await db.none(query)
@@ -1006,28 +1038,33 @@ export default {
 								}
 							}
 
-							// Move files to storage
+							// Save NXTheme contents
 							const themeDataPromises = themePaths.map((path, i) => {
 								return new Promise(async (resolve, reject) => {
 									const themeUuid = uuid()
+
 									try {
+										// Read dir contents
 										const filesInFolder = await readdirPromisified(path)
-										const filteredFIlesInFolder = filesInFolder.filter(
-											(f) => allowdFilesInNXTheme.includes(f) || f === 'screenshot.jpg'
+										// Filter allowed files, 'screenshot.jpg', not 'info.json', and not 'layout.json' if the layout is in the DB
+										const filteredFilesInFolder = filesInFolder.filter(
+											(f) =>
+												(allowdFilesInNXTheme.includes(f) &&
+													f !== 'info.json' &&
+													!(f === 'layout.json' && themes[i].layout_uuid)) ||
+												f === 'screenshot.jpg'
 										)
-										const moveAllPromises = filteredFIlesInFolder.map((file) => {
-											if (
-												file !== 'info.json' &&
-												!(themes[i].layout_uuid && file === 'layout.json')
-											) {
-												return moveFile(
-													`${path}/${file}`,
-													`${storagePath}/themes/${themeUuid}/${file}`
-												)
-											} else return null
+
+										// Move NXTheme contents to storage
+										const moveAllPromises = filteredFilesInFolder.map((f) => {
+											return moveFile(`${path}/${f}`, `${storagePath}/themes/${themeUuid}/${f}`)
 										})
 										await Promise.all(moveAllPromises)
-									} catch (e) {}
+									} catch (e) {
+										console.error(e)
+										reject(errorName.FILE_SAVE_ERROR)
+										return
+									}
 
 									resolve({
 										uuid: themeUuid,
@@ -1071,6 +1108,7 @@ export default {
 								await db.none(query)
 
 								resolve(true)
+
 								for (const i in themePaths) {
 									rimraf(themePaths[i], () => {})
 								}
@@ -1101,7 +1139,7 @@ export default {
 
 						resolve(themePromise)
 					} catch (e) {
-						console.log(e)
+						console.error(e)
 						reject(errorName.NXTHEME_CREATE_FAILED)
 					}
 				})
@@ -1113,42 +1151,48 @@ export default {
 		downloadPack: async (parent, { uuid }, context, info) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
+					// Get the pack details and theme uuids
+					let pack = null
 					try {
-						const themes = await db.any(
+						pack = await db.one(
 							`
-							SELECT uuid
-							FROM themes
-							WHERE pack_uuid = $1
-						`,
+								SELECT details ->> 'name' as name,
+									details -> 'author' ->> 'name' as author,
+									(
+										SELECT array_agg(uuid)
+										FROM themes
+										WHERE pack_uuid = pck.uuid
+									) as themes
+								FROM packs pck
+								WHERE uuid = $1
+							`,
 							[uuid]
 						)
+					} catch (e) {
+						console.error(e)
+						reject(errorName.PACK_NOT_FOUND)
+						return
+					}
 
-						const pack = await db.one(
-							`
-							SELECT details ->> 'name' as name, details -> 'author' ->> 'name' as author
-							FROM packs
-							WHERE uuid = $1
-						`,
-							[uuid]
-						)
+					try {
+						// Create the NXThemes
+						const themePromises = pack.themes.map((uuid) => prepareNXTheme(uuid, null))
+						const themesB64: Array<any> = await Promise.all(themePromises)
 
-						const themePromises = themes.map(({ uuid }) => prepareNXTheme(uuid, null))
-						const themesB64 = await Promise.all(themePromises)
-
+						// Create zip from base64 buffers.
+						// Use basic for loop to prevent 'MaxListenersExceededWarning' (I guess):
 						const zip = new AdmZip()
-						const addPromises = themesB64.map(({ filename, data }) => {
-							return new Promise(async (resolve, reject) => {
-								try {
-									await zip.addFile(filename, Buffer.from(data, 'base64'))
-									resolve()
-								} catch (e) {
-									console.error(e)
-									reject()
-								}
-							})
-						})
-						await Promise.all(addPromises)
+						for (const i in themesB64) {
+							try {
+								await zip.addFile(themesB64[i].filename, Buffer.from(themesB64[i].data, 'base64'))
+								resolve()
+							} catch (e) {
+								console.error(e)
+								reject()
+							}
+						}
 
+						// Return zip data as Base64 encoded string
 						const buff = await zip.toBuffer()
 						resolve({
 							filename: `${pack.name} by ${pack.author}.zip`,
@@ -1156,6 +1200,7 @@ export default {
 							mimetype: 'application/nxtheme'
 						})
 
+						// Increase download count by 1
 						db.none(
 							`
 								UPDATE packs
@@ -1165,8 +1210,8 @@ export default {
 							[uuid]
 						)
 					} catch (e) {
-						console.log(e)
-						reject(errorName.NXTHEME_CREATE_FAILED)
+						console.error(e)
+						reject(errorName.PACK_CREATE_FAILED)
 					}
 				})
 			} catch (e) {

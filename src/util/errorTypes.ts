@@ -19,10 +19,16 @@ export const errorName = {
 	INVALID_TARGET_NAME: 'INVALID_TARGET_NAME',
 	INVALID_NXTHEME_CONTENTS: 'INVALID_NXTHEME_CONTENTS',
 	ZIP_READ_ERROR: 'ZIP_READ_ERROR',
+	NO_VALID_NXTHEMES: 'NO_VALID_NXTHEMES',
 	NO_NXTHEMES_IN_ZIP: 'NO_NXTHEMES_IN_ZIP',
 
 	NXTHEME_CREATE_FAILED: 'NXTHEME_CREATE_FAILED',
 	NXTHEME_UNPACK_FAILED: 'NXTHEME_UNPACK_FAILED',
+	PACK_CREATE_FAILED: 'PACK_CREATE_FAILED',
+
+	LAYOUT_NOT_FOUND: 'LAYOUT_NOT_FOUND',
+	THEME_NOT_FOUND: 'THEME_NOT_FOUND',
+	PACK_NOT_FOUND: 'PACK_NOT_FOUND',
 
 	DB_SAVE_ERROR: 'DB_SAVE_ERROR'
 }
@@ -101,8 +107,12 @@ export const errorType = {
 		message: 'The zip could not be extracted',
 		statusCode: 4008
 	},
+	NO_VALID_NXTHEMES: {
+		message: 'No valid NXThemes were detected',
+		statusCode: 4009
+	},
 	NO_NXTHEMES_IN_ZIP: {
-		message: 'No NXThemes were found in the zip',
+		message: 'No NXThemes were detected in the zip',
 		statusCode: 4009
 	},
 
@@ -113,6 +123,23 @@ export const errorType = {
 	NXTHEME_UNPACK_FAILED: {
 		message: 'Failed to unpack the NXTheme',
 		statusCode: 4101
+	},
+	PACK_CREATE_FAILED: {
+		message: 'Failed to create the pack, please report this with details.',
+		statusCode: 4102
+	},
+
+	LAYOUT_NOT_FOUND: {
+		message: 'The requested layout does not exist',
+		statusCode: 4200
+	},
+	THEME_NOT_FOUND: {
+		message: 'The requested theme does not exist',
+		statusCode: 4201
+	},
+	PACK_NOT_FOUND: {
+		message: 'The requested pack does not exist',
+		statusCode: 4202
 	},
 
 	// DB errors
