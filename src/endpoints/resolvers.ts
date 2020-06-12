@@ -40,7 +40,7 @@ const sarcToolPath = `${__dirname}/../../../SARC-Tool`
 const storagePath = `${__dirname}/../../../storage`
 
 // Allowed files according to https://github.com/exelix11/SwitchThemeInjector/blob/master/SwitchThemesCommon/PatchTemplate.cs#L10-L29
-const allowdFilesInNXTheme = [
+const allowedFilesInNXTheme = [
 	'info.json',
 	'image.dds',
 	'image.jpg',
@@ -350,7 +350,7 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 					}
 				}
 
-				// Symlink all other allowdFilesInNXTheme
+				// Symlink all other allowedFilesInNXTheme
 				const filesInFolder = await readdirPromisified(`${storagePath}/themes/${uuid}`)
 				const linkAllPromises = filesInFolder.map((file) => {
 					if (file !== 'screenshot.jpg') {
@@ -1049,7 +1049,7 @@ export default {
 										// Filter allowed files, 'screenshot.jpg', not 'info.json', and not 'layout.json' if the layout is in the DB
 										const filteredFilesInFolder = filesInFolder.filter(
 											(f) =>
-												(allowdFilesInNXTheme.includes(f) &&
+												(allowedFilesInNXTheme.includes(f) &&
 													f !== 'info.json' &&
 													!(f === 'layout.json' && themes[i].layout_uuid)) ||
 												f === 'screenshot.jpg'
