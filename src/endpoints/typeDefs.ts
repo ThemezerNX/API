@@ -110,6 +110,7 @@ export default gql`
 		id: Int!
 		details: PackDetails!
 		last_updated: DateTime!
+		categories: [String!]
 		dl_count: Int!
 		themes: [Theme!]
 	}
