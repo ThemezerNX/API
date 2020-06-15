@@ -102,7 +102,6 @@ export default gql`
 		last_updated: DateTime!
 		pieces: [UsedPiece!]
 		categories: [String!]
-		nsfw: Boolean!
 		dl_count: Int!
 	}
 
@@ -111,7 +110,6 @@ export default gql`
 		id: Int!
 		details: PackDetails!
 		last_updated: DateTime!
-		nsfw: Boolean!
 		dl_count: Int!
 		themes: [Theme!]
 	}

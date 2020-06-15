@@ -70,7 +70,6 @@ const themesCS = new pgp.helpers.ColumnSet(
 		'target',
 		{ name: 'last_updated', cast: 'timestamp without time zone' },
 		{ name: 'categories', cast: 'character varying[]' },
-		{ name: 'nsfw', cast: 'boolean' },
 		{ name: 'pack_uuid', cast: 'uuid' },
 		{ name: 'details', cast: 'json' }
 	],
@@ -557,14 +556,6 @@ export default {
 				return await db.oneOrNone(
 					`
 						SELECT *,
-							CASE WHEN EXISTS (
-								SELECT nsfw
-								FROM themes
-								WHERE pack_uuid = pck.uuid
-									AND nsfw = true
-								LIMIT 1
-							)
-							THEN true ELSE false END AS nsfw,
 							(
 								SELECT array_agg(row_to_json(theme))
 								FROM (
@@ -620,11 +611,11 @@ export default {
 			try {
 				return await db.any(
 					`
-					SELECT *, (
+					SELECT *, 
+						(
 							SELECT array_agg(row_to_json(theme))
 							FROM (
-								SELECT uuid, details, target, last_updated, categories, id, dl_count,
-									CASE WHEN nsfw IS true THEN true ELSE false END AS nsfw,
+								SELECT uuid, details, target, last_updated, categories, id, nswf, dl_count,
 									(
 										SELECT row_to_json(l) AS layout
 										FROM (
@@ -1070,6 +1061,10 @@ export default {
 										return
 									}
 
+									if (themes[i].nsfw) {
+										themes[i].categories.push('NSFW')
+									}
+
 									resolve({
 										uuid: themeUuid,
 										layout_uuid: themes[i].layout_uuid,
@@ -1082,7 +1077,6 @@ export default {
 											: reject(errorName.INVALID_TARGET_NAME),
 										last_updated: new Date(),
 										categories: themes[i].categories.map((c) => c.trim()),
-										nsfw: themes[i].nsfw || false,
 										pack_uuid: packUuid,
 										details: {
 											name: themes[i].info.ThemeName.trim(),
