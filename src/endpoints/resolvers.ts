@@ -557,6 +557,14 @@ export default {
 					`
 						SELECT *,
 							(
+								SELECT array_agg(c) as categories
+								FROM (
+									SELECT DISTINCT UNNEST(categories)
+									FROM themes
+									WHERE pack_uuid = pck.uuid
+								) as t(c)
+							),
+							(
 								SELECT array_agg(row_to_json(theme))
 								FROM (
 									SELECT uuid, details, target, last_updated, categories, id, dl_count,
@@ -613,9 +621,17 @@ export default {
 					`
 					SELECT *, 
 						(
+							SELECT array_agg(c) as categories
+							FROM (
+								SELECT DISTINCT UNNEST(categories)
+								FROM themes
+								WHERE pack_uuid = pck.uuid
+							) as t(c)
+						),
+						(
 							SELECT array_agg(row_to_json(theme))
 							FROM (
-								SELECT uuid, details, target, last_updated, categories, id, nswf, dl_count,
+								SELECT uuid, details, target, last_updated, categories, id, dl_count,
 									(
 										SELECT row_to_json(l) AS layout
 										FROM (
