@@ -152,6 +152,7 @@ const mergeJson = async (uuid, piece_uuids = [], common?) => {
 			SELECT uuid, details, target, commonlayout
 			FROM layouts
 			WHERE uuid = $1
+			LIMIT 1
 		`,
 			[uuid]
 		)
@@ -171,6 +172,7 @@ const mergeJson = async (uuid, piece_uuids = [], common?) => {
 	
 			FROM layouts as mt
 			WHERE mt.uuid = $1
+			LIMIT 1
 		`,
 			[uuid, piece_uuids]
 		)
@@ -330,6 +332,7 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 						SELECT layout_uuid, details ->> 'name' as name, target, details -> 'author' ->> 'name' as author
 						FROM themes
 						WHERE uuid = $1
+						LIMIT 1
 					`,
 					[uuid]
 				)
@@ -415,13 +418,14 @@ export default {
 			try {
 				const dbData = await db.oneOrNone(
 					`
-					SELECT *,
-						CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces,
-						CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
-					FROM layouts
-					WHERE id = $1
-						AND target = $2
-				`,
+						SELECT *,
+							CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces,
+							CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+						FROM layouts
+						WHERE id = $1
+							AND target = $2
+						LIMIT 1
+					`,
 					[id, webNameToFileNameNoExtension(target)]
 				)
 
@@ -435,12 +439,12 @@ export default {
 			try {
 				const dbData = await db.any(
 					`
-					SELECT *,
-						CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces,
-						CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
-					FROM layouts
-					WHERE target = $1
-				`,
+						SELECT *,
+							CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces,
+							CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+						FROM layouts
+						WHERE target = $1
+					`,
 					[webNameToFileNameNoExtension(target)]
 				)
 
@@ -452,50 +456,49 @@ export default {
 		},
 		theme: async (parent, { id, target }, context, info) => {
 			try {
-				const dbData = await db.oneOrNone(
+				return await db.oneOrNone(
 					`
-					SELECT uuid, details, target, last_updated, categories, id, dl_count,
-						(
-							SELECT row_to_json(l) AS layout
-							FROM (
-								SELECT layouts.*,
-									CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
-								FROM themes
-								INNER JOIN layouts
-								ON layouts.uuid = themes.layout_uuid
-								WHERE themes.uuid = mt.uuid
-								GROUP BY layouts.uuid
-							) as l
-						),
-						(
-							SELECT row_to_json(p) AS pack
-							FROM (
-								SELECT packs.*
-								FROM themes
-								INNER JOIN packs
-								ON packs.uuid = themes.pack_uuid
-								WHERE themes.uuid = mt.uuid
-								GROUP BY packs.uuid
-							) as p
-						),
-						(
-							SELECT array_agg(row_to_json(pcs)) AS pieces
-							FROM (
-								SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
-								FROM layouts
-								WHERE uuid = mt.layout_uuid
-							) as pcs
-							WHERE value ->> 'uuid' = ANY(mt.piece_uuids::text[])
-						)
+						SELECT uuid, details, target, last_updated, categories, id, dl_count,
+							(
+								SELECT row_to_json(l) AS layout
+								FROM (
+									SELECT layouts.*,
+										CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+									FROM themes
+									INNER JOIN layouts
+									ON layouts.uuid = themes.layout_uuid
+									WHERE themes.uuid = mt.uuid
+									GROUP BY layouts.uuid
+								) as l
+							),
+							(
+								SELECT row_to_json(p) AS pack
+								FROM (
+									SELECT packs.*
+									FROM themes
+									INNER JOIN packs
+									ON packs.uuid = themes.pack_uuid
+									WHERE themes.uuid = mt.uuid
+									GROUP BY packs.uuid
+								) as p
+							),
+							(
+								SELECT array_agg(row_to_json(pcs)) AS pieces
+								FROM (
+									SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
+									FROM layouts
+									WHERE uuid = mt.layout_uuid
+								) as pcs
+								WHERE value ->> 'uuid' = ANY(mt.piece_uuids::text[])
+							)
 
-					FROM themes as mt
-					WHERE target = $2
-						AND mt.id = $1
-				`,
+						FROM themes as mt
+						WHERE target = $2
+							AND mt.id = $1
+						LIMIT 1
+					`,
 					[id, webNameToFileNameNoExtension(target)]
 				)
-
-				return dbData
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -503,49 +506,47 @@ export default {
 		},
 		themesList: async (parent, { target }, context, info) => {
 			try {
-				const dbData = await db.any(
+				return await db.any(
 					`
-					SELECT uuid, details, target, last_updated, categories, id, dl_count,
-						(
-							SELECT row_to_json(l) AS layout
-							FROM (
-								SELECT layouts.*,
-									CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
-								FROM themes
-								INNER JOIN layouts
-								ON layouts.uuid = themes.layout_uuid
-								WHERE themes.uuid = mt.uuid
-								GROUP BY layouts.uuid
-							) as l
-						),
-						(
-							SELECT row_to_json(p) AS pack
-							FROM (
-								SELECT packs.*
-								FROM themes
-								INNER JOIN packs
-								ON packs.uuid = themes.pack_uuid
-								WHERE themes.uuid = mt.uuid
-								GROUP BY packs.uuid
-							) as p
-						),
-						(
-							SELECT array_agg(row_to_json(pcs)) AS pieces
-							FROM (
-								SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
-								FROM layouts
-								WHERE uuid = mt.layout_uuid
-							) as pcs
-							WHERE value ->> 'uuid' = ANY(mt.piece_uuids::text[])
-						)
+						SELECT uuid, details, target, last_updated, categories, id, dl_count,
+							(
+								SELECT row_to_json(l) AS layout
+								FROM (
+									SELECT layouts.*,
+										CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+									FROM themes
+									INNER JOIN layouts
+									ON layouts.uuid = themes.layout_uuid
+									WHERE themes.uuid = mt.uuid
+									GROUP BY layouts.uuid
+								) as l
+							),
+							(
+								SELECT row_to_json(p) AS pack
+								FROM (
+									SELECT packs.*
+									FROM themes
+									INNER JOIN packs
+									ON packs.uuid = themes.pack_uuid
+									WHERE themes.uuid = mt.uuid
+									GROUP BY packs.uuid
+								) as p
+							),
+							(
+								SELECT array_agg(row_to_json(pcs)) AS pieces
+								FROM (
+									SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
+									FROM layouts
+									WHERE uuid = mt.layout_uuid
+								) as pcs
+								WHERE value ->> 'uuid' = ANY(mt.piece_uuids::text[])
+							)
 
-					FROM themes mt
-					WHERE target = $1
-				`,
+						FROM themes mt
+						WHERE target = $1
+					`,
 					[webNameToFileNameNoExtension(target)]
 				)
-
-				return dbData
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -553,64 +554,63 @@ export default {
 		},
 		pack: async (parent, { id }, context, info) => {
 			try {
-				const dbData = await db.oneOrNone(
+				return await db.oneOrNone(
 					`
-					SELECT *,
-						CASE WHEN EXISTS (
-							SELECT nsfw
-							FROM themes
-							WHERE pack_uuid = pck.uuid
-								AND nsfw = true
-							LIMIT 1
-						)
-						THEN true ELSE false END AS nsfw,
-						(
-							SELECT array_agg(row_to_json(theme))
-							FROM (
-								SELECT uuid, details, target, last_updated, categories, id, dl_count,
-									(
-										SELECT row_to_json(l) AS layout
-										FROM (
-											SELECT layouts.*,
-												CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
-											FROM themes
-											INNER JOIN layouts
-											ON layouts.uuid = themes.layout_uuid
-											WHERE themes.uuid = mt.uuid
-											GROUP BY layouts.uuid
-										) as l
-									),
-									(
-										SELECT row_to_json(p) AS pack
-										FROM (
-											SELECT packs.*
-											FROM themes
-											INNER JOIN packs
-											ON packs.uuid = themes.pack_uuid
-											WHERE themes.uuid = mt.uuid
-											GROUP BY packs.uuid
-										) as p
-									),
-									(
-										SELECT array_agg(row_to_json(pcs)) AS pieces
-										FROM (
-											SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
-											FROM layouts
-											WHERE uuid = mt.layout_uuid
-										) as pcs
-										WHERE value ->> 'uuid' = ANY(mt.piece_uuids::text[])
-									)
-								FROM themes mt
-								WHERE mt.pack_uuid = pck.uuid
-							) as theme
-						) as themes
-					FROM packs pck
-					WHERE id = $1
-				`,
+						SELECT *,
+							CASE WHEN EXISTS (
+								SELECT nsfw
+								FROM themes
+								WHERE pack_uuid = pck.uuid
+									AND nsfw = true
+								LIMIT 1
+							)
+							THEN true ELSE false END AS nsfw,
+							(
+								SELECT array_agg(row_to_json(theme))
+								FROM (
+									SELECT uuid, details, target, last_updated, categories, id, dl_count,
+										(
+											SELECT row_to_json(l) AS layout
+											FROM (
+												SELECT layouts.*,
+													CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+												FROM themes
+												INNER JOIN layouts
+												ON layouts.uuid = themes.layout_uuid
+												WHERE themes.uuid = mt.uuid
+												GROUP BY layouts.uuid
+											) as l
+										),
+										(
+											SELECT row_to_json(p) AS pack
+											FROM (
+												SELECT packs.*
+												FROM themes
+												INNER JOIN packs
+												ON packs.uuid = themes.pack_uuid
+												WHERE themes.uuid = mt.uuid
+												GROUP BY packs.uuid
+											) as p
+										),
+										(
+											SELECT array_agg(row_to_json(pcs)) AS pieces
+											FROM (
+												SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
+												FROM layouts
+												WHERE uuid = mt.layout_uuid
+											) as pcs
+											WHERE value ->> 'uuid' = ANY(mt.piece_uuids::text[])
+										)
+									FROM themes mt
+									WHERE mt.pack_uuid = pck.uuid
+								) as theme
+							) as themes
+						FROM packs pck
+						WHERE id = $1
+						LIMIT 1
+					`,
 					[id]
 				)
-
-				return dbData
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -618,7 +618,7 @@ export default {
 		},
 		packsList: async (parent, params, context, info) => {
 			try {
-				const dbData = await db.any(
+				return await db.any(
 					`
 					SELECT *, (
 							SELECT array_agg(row_to_json(theme))
@@ -664,8 +664,6 @@ export default {
 					FROM packs pck
 				`
 				)
-
-				return dbData
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -1171,6 +1169,7 @@ export default {
 									) as themes
 								FROM packs pck
 								WHERE uuid = $1
+								LIMIT 1
 							`,
 							[uuid]
 						)
