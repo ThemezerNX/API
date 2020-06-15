@@ -111,6 +111,7 @@ export default gql`
 		id: Int!
 		details: PackDetails!
 		last_updated: DateTime!
+		nsfw: Boolean!
 		dl_count: Int!
 		themes: [Theme!]
 	}

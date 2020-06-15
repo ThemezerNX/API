@@ -455,7 +455,6 @@ export default {
 				const dbData = await db.oneOrNone(
 					`
 					SELECT uuid, details, target, last_updated, categories, id, dl_count,
-						CASE WHEN nsfw IS true THEN true ELSE false END AS nsfw,
 						(
 							SELECT row_to_json(l) AS layout
 							FROM (
@@ -507,7 +506,6 @@ export default {
 				const dbData = await db.any(
 					`
 					SELECT uuid, details, target, last_updated, categories, id, dl_count,
-						CASE WHEN nsfw IS true THEN true ELSE false END AS nsfw,
 						(
 							SELECT row_to_json(l) AS layout
 							FROM (
@@ -557,11 +555,19 @@ export default {
 			try {
 				const dbData = await db.oneOrNone(
 					`
-					SELECT *, (
+					SELECT *,
+						CASE WHEN EXISTS (
+							SELECT nsfw
+							FROM themes
+							WHERE pack_uuid = pck.uuid
+								AND nsfw = true
+							LIMIT 1
+						)
+						THEN true ELSE false END AS nsfw,
+						(
 							SELECT array_agg(row_to_json(theme))
 							FROM (
 								SELECT uuid, details, target, last_updated, categories, id, dl_count,
-									CASE WHEN nsfw IS true THEN true ELSE false END AS nsfw,
 									(
 										SELECT row_to_json(l) AS layout
 										FROM (
@@ -1078,7 +1084,7 @@ export default {
 											: reject(errorName.INVALID_TARGET_NAME),
 										last_updated: new Date(),
 										categories: themes[i].categories.map((c) => c.trim()),
-										nsfw: themes[i].nsfw,
+										nsfw: themes[i].nsfw || false,
 										pack_uuid: packUuid,
 										details: {
 											name: themes[i].info.ThemeName.trim(),
