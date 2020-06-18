@@ -7,20 +7,31 @@ export default gql`
 	scalar HexColorCode
 	scalar JSON
 
+	type DiscordUser {
+		username: String!
+		discriminator: String!
+		avatar: String
+		system: Boolean
+		locale: String
+	}
+
+	type UserInfo {
+		id: String!
+		discord_user: DiscordUser!
+		biography: String
+		joined: DateTime!
+		role: String
+	}
+
 	type Author {
 		name: String!
 		discord_tag: String
 	}
 
-	input AuthorInput {
-		name: String
-		discord_tag: String
-	}
-
 	type LayoutDetails {
 		name: String!
-		author: Author!
 		description: String!
+		author: Author!
 		target: String!
 		color: HexColorCode
 		version: String!
@@ -28,7 +39,6 @@ export default gql`
 
 	input DetailsInput {
 		name: String
-		author: AuthorInput!
 		description: String
 		color: HexColorCode
 		categories: [String!]
@@ -37,7 +47,6 @@ export default gql`
 
 	type ThemeDetails {
 		name: String!
-		author: Author!
 		description: String
 		color: HexColorCode
 		version: String!
@@ -45,7 +54,6 @@ export default gql`
 
 	type PackDetails {
 		name: String!
-		author: Author!
 		description: String!
 		color: HexColorCode
 		version: String!
@@ -95,6 +103,7 @@ export default gql`
 	type Theme {
 		uuid: GUID!
 		id: Int!
+		creator: UserInfo!
 		details: ThemeDetails!
 		layout: Layout
 		pack: Pack
@@ -103,11 +112,13 @@ export default gql`
 		pieces: [UsedPiece!]
 		categories: [String!]
 		dl_count: Int!
+		bg_type: String
 	}
 
 	type Pack {
 		uuid: GUID!
 		id: Int!
+		creator: UserInfo!
 		details: PackDetails!
 		last_updated: DateTime!
 		categories: [String!]
@@ -147,7 +158,6 @@ export default gql`
 		layout_uuid: GUID
 		used_pieces: [UsedPieceInput!]
 		target: String!
-		authorname: String
 		description: String
 		color: String
 		version: String
@@ -156,6 +166,9 @@ export default gql`
 	}
 
 	type Query {
+		me: UserInfo!
+		creator(id: String!): UserInfo!
+
 		categories: [String!]
 
 		layout(id: Int!, target: String!): Layout

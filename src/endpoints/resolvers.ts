@@ -71,7 +71,9 @@ const themesCS = new pgp.helpers.ColumnSet(
 		{ name: 'last_updated', cast: 'timestamp without time zone' },
 		{ name: 'categories', cast: 'character varying[]' },
 		{ name: 'pack_uuid', cast: 'uuid' },
-		{ name: 'details', cast: 'json' }
+		{ name: 'creator_id', cast: 'bigint' },
+		{ name: 'details', cast: 'json' },
+		{ name: 'bg_type', cast: 'character varying (3)' }
 	],
 	{
 		table: 'themes'
@@ -82,6 +84,7 @@ const packsCS = new pgp.helpers.ColumnSet(
 	[
 		{ name: 'uuid', cast: 'uuid' },
 		{ name: 'last_updated', cast: 'timestamp without time zone' },
+		{ name: 'creator_id', cast: 'bigint' },
 		{ name: 'details', cast: 'json' }
 	],
 	{
@@ -89,7 +92,7 @@ const packsCS = new pgp.helpers.ColumnSet(
 	}
 )
 
-const createInfo = (themeName, author, target, layoutDetails) => {
+const createInfo = (themeName, creatorName, target, layoutDetails) => {
 	let LayoutInfo = null
 	if (layoutDetails) {
 		LayoutInfo = `${layoutDetails.PatchName} by ${layoutDetails.AuthorName || 'Themezer'}`
@@ -97,7 +100,7 @@ const createInfo = (themeName, author, target, layoutDetails) => {
 	return {
 		Version: 12,
 		ThemeName: themeName,
-		Author: author || 'Themezer',
+		Author: creatorName || 'Themezer',
 		Target: target,
 		LayoutInfo
 	}
@@ -148,7 +151,7 @@ const mergeJson = async (uuid, piece_uuids = [], common?) => {
 	if (common) {
 		dbData = await db.oneOrNone(
 			`
-			SELECT uuid, details, target, commonlayout
+			SELECT commonlayout
 			FROM layouts
 			WHERE uuid = $1
 			LIMIT 1
@@ -158,7 +161,7 @@ const mergeJson = async (uuid, piece_uuids = [], common?) => {
 	} else {
 		dbData = await db.oneOrNone(
 			`
-			SELECT uuid, details, target, baselayout,
+			SELECT baselayout,
 				(
 					SELECT array_agg(row_to_json(pcs)) AS pieces
 					FROM (
@@ -249,7 +252,7 @@ const createNXThemes = (themes) =>
 					// Create info preferably with the one in the layout or the specified target
 					const info = createInfo(
 						theme.themeName,
-						theme.author,
+						theme.creatorName,
 						fileNameToThemeTarget(layoutDetails ? layoutDetails.TargetName : theme.targetName),
 						layoutDetails
 					)
@@ -326,9 +329,15 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 
 			try {
 				// Get the theme details
-				const { layout_uuid, name, target, author } = await db.oneOrNone(
+				const { layout_uuid, name, target, creator_name } = await db.oneOrNone(
 					`
-						SELECT layout_uuid, details ->> 'name' as name, target, details -> 'author' ->> 'name' as author
+						SELECT layout_uuid, details ->> 'name' as name, target, 
+							(
+								SELECT discord_user ->> 'username'
+								FROM creators
+								WHERE id = themes.creator_id
+								LIMIT 1
+							) as username
 						FROM themes
 						WHERE uuid = $1
 						LIMIT 1
@@ -367,7 +376,7 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 						path: path,
 						themeName: name,
 						targetName: target,
-						author: author
+						creatorName: creator_name
 					}
 				]
 				const themePromises = createNXThemes(themes)
@@ -398,6 +407,30 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 export default {
 	JSON: GraphQLJSON,
 	Query: {
+		me: async (parent, args, context, info) => {
+			if (await context.authenticate()) {
+				return context.req.user
+			} else {
+				throw new Error(errorName.UNAUTHORIZED)
+			}
+		},
+		creator: async (parent, { id }, context, info) => {
+			try {
+				const dbData = await db.one(
+					`
+					SELECT *
+					FROM creators
+					WHERE id = $1::bigint
+					LIMIT 1
+				`,
+					[id]
+				)
+
+				return dbData
+			} catch (e) {
+				throw new Error(errorName.CREATOR_NOT_EXIST)
+			}
+		},
 		categories: async (parent, args, context, info) => {
 			try {
 				const categoriesDB = await db.one(`
@@ -457,27 +490,45 @@ export default {
 			try {
 				return await db.oneOrNone(
 					`
-						SELECT uuid, details, target, last_updated, categories, id, dl_count,
+						SELECT uuid, target, last_updated, categories, details, id, dl_count, bg_type,
+							(
+								SELECT row_to_json(c) as creator
+								FROM (
+									SELECT *
+									FROM creators
+									WHERE id = mt.creator_id
+									LIMIT 1
+								) c
+							),
 							(
 								SELECT row_to_json(l) AS layout
 								FROM (
 									SELECT layouts.*,
 										CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
-									FROM themes
+									FROM themes as st
 									INNER JOIN layouts
-									ON layouts.uuid = themes.layout_uuid
-									WHERE themes.uuid = mt.uuid
+									ON layouts.uuid = st.layout_uuid
+									WHERE st.uuid = mt.uuid
 									GROUP BY layouts.uuid
 								) as l
 							),
 							(
 								SELECT row_to_json(p) AS pack
 								FROM (
-									SELECT packs.*
-									FROM themes
+									SELECT packs.uuid, packs.last_updated, packs.details, packs.id, packs.dl_count,
+										(
+											SELECT row_to_json(c) as creator
+											FROM (
+												SELECT *
+												FROM creators
+												WHERE id = packs.creator_id
+												LIMIT 1
+											) c
+										)
+									FROM themes as st
 									INNER JOIN packs
-									ON packs.uuid = themes.pack_uuid
-									WHERE themes.uuid = mt.uuid
+									ON packs.uuid = st.pack_uuid
+									WHERE st.uuid = mt.uuid
 									GROUP BY packs.uuid
 								) as p
 							),
@@ -507,27 +558,45 @@ export default {
 			try {
 				return await db.any(
 					`
-						SELECT uuid, details, target, last_updated, categories, id, dl_count,
+						SELECT uuid, target, last_updated, categories, details, id, dl_count, bg_type,
+							(
+								SELECT row_to_json(c) as creator
+								FROM (
+									SELECT *
+									FROM creators
+									WHERE id = mt.creator_id
+									LIMIT 1
+								) c
+							),
 							(
 								SELECT row_to_json(l) AS layout
 								FROM (
 									SELECT layouts.*,
 										CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
-									FROM themes
+									FROM themes as st
 									INNER JOIN layouts
-									ON layouts.uuid = themes.layout_uuid
-									WHERE themes.uuid = mt.uuid
+									ON layouts.uuid = st.layout_uuid
+									WHERE st.uuid = mt.uuid
 									GROUP BY layouts.uuid
 								) as l
 							),
 							(
 								SELECT row_to_json(p) AS pack
 								FROM (
-									SELECT packs.*
-									FROM themes
+									SELECT packs.uuid, packs.last_updated, packs.details, packs.id, packs.dl_count,
+										(
+											SELECT row_to_json(c) as creator
+											FROM (
+												SELECT *
+												FROM creators
+												WHERE id = packs.creator_id
+												LIMIT 1
+											) c
+										)
+									FROM themes as st
 									INNER JOIN packs
-									ON packs.uuid = themes.pack_uuid
-									WHERE themes.uuid = mt.uuid
+									ON packs.uuid = st.pack_uuid
+									WHERE st.uuid = mt.uuid
 									GROUP BY packs.uuid
 								) as p
 							),
@@ -555,7 +624,16 @@ export default {
 			try {
 				return await db.oneOrNone(
 					`
-						SELECT *,
+						SELECT uuid, last_updated, details, id, dl_count,
+							(
+								SELECT row_to_json(c) as creator
+								FROM (
+									SELECT *
+									FROM creators
+									WHERE id = pck.creator_id
+									LIMIT 1
+								) c
+							),
 							(
 								SELECT array_agg(c) as categories
 								FROM (
@@ -569,6 +647,15 @@ export default {
 								FROM (
 									SELECT uuid, details, target, last_updated, categories, id, dl_count,
 										(
+											SELECT row_to_json(c) as creator
+											FROM (
+												SELECT *
+												FROM creators
+												WHERE id = mt.creator_id
+												LIMIT 1
+											) c
+										),
+										(
 											SELECT row_to_json(l) AS layout
 											FROM (
 												SELECT layouts.*,
@@ -579,17 +666,6 @@ export default {
 												WHERE themes.uuid = mt.uuid
 												GROUP BY layouts.uuid
 											) as l
-										),
-										(
-											SELECT row_to_json(p) AS pack
-											FROM (
-												SELECT packs.*
-												FROM themes
-												INNER JOIN packs
-												ON packs.uuid = themes.pack_uuid
-												WHERE themes.uuid = mt.uuid
-												GROUP BY packs.uuid
-											) as p
 										),
 										(
 											SELECT array_agg(row_to_json(pcs)) AS pieces
@@ -619,7 +695,16 @@ export default {
 			try {
 				return await db.any(
 					`
-					SELECT *, 
+					SELECT uuid, last_updated, details, id, dl_count,
+						(
+							SELECT row_to_json(c) as creator
+							FROM (
+								SELECT *
+								FROM creators
+								WHERE id = pck.creator_id
+								LIMIT 1
+							) c
+						),
 						(
 							SELECT array_agg(c) as categories
 							FROM (
@@ -633,6 +718,15 @@ export default {
 							FROM (
 								SELECT uuid, details, target, last_updated, categories, id, dl_count,
 									(
+										SELECT row_to_json(c) as creator
+										FROM (
+											SELECT *
+											FROM creators
+											WHERE id = mt.creator_id
+											LIMIT 1
+										) c
+									),
+									(
 										SELECT row_to_json(l) AS layout
 										FROM (
 											SELECT layouts.*,
@@ -643,17 +737,6 @@ export default {
 											WHERE themes.uuid = mt.uuid
 											GROUP BY layouts.uuid
 										) as l
-									),
-									(
-										SELECT row_to_json(p) AS pack
-										FROM (
-											SELECT packs.*
-											FROM themes
-											INNER JOIN packs
-											ON packs.uuid = themes.pack_uuid
-											WHERE themes.uuid = mt.uuid
-											GROUP BY packs.uuid
-										) as p
 									),
 									(
 										SELECT array_agg(row_to_json(pcs)) AS pieces
@@ -816,161 +899,170 @@ export default {
 		},
 		uploadSingleOrZip: async (parent, { file }, context, info) => {
 			try {
-				return await new Promise((resolve, reject) => {
-					tmp.dir({ prefix: 'theme' }, async (err, path, cleanupCallback) => {
-						try {
-							if (err) {
-								reject(err)
-								return
-							}
+				if (await context.authenticate()) {
+					return await new Promise((resolve, reject) => {
+						tmp.dir({ prefix: 'theme' }, async (err, path, cleanupCallback) => {
+							try {
+								if (err) {
+									reject(err)
+									return
+								}
 
-							const filePromises = saveFiles([{ file, path }])
-							const files = await Promise.all(filePromises)
+								const filePromises = saveFiles([{ file, path }])
+								const files = await Promise.all(filePromises)
 
-							// Create array of valid NXThemes
-							let NXThemePaths = []
-							if (await isYaz0Promisified(`${path}/${files[0]}`)) {
-								NXThemePaths.push(`${path}/${files[0]}`)
-							} else if (await isZipPromisified(`${path}/${files[0]}`)) {
-								try {
-									const zip = new AdmZip(`${path}/${files[0]}`)
-									await zip.extractAllTo(`${path}/${files[0]}_extracted`)
-
+								// Create array of valid NXThemes
+								let NXThemePaths = []
+								if (await isYaz0Promisified(`${path}/${files[0]}`)) {
+									NXThemePaths.push(`${path}/${files[0]}`)
+								} else if (await isZipPromisified(`${path}/${files[0]}`)) {
 									try {
-										const filesInZip = await readdirPromisified(`${path}/${files[0]}_extracted`)
-										const NXThemesInZip = await filterAsync(filesInZip, async (file) => {
-											try {
-												return await isYaz0Promisified(`${path}/${files[0]}_extracted/${file}`)
-											} catch (e) {}
-										})
+										const zip = new AdmZip(`${path}/${files[0]}`)
+										await zip.extractAllTo(`${path}/${files[0]}_extracted`)
 
-										NXThemePaths = NXThemesInZip.map((file) => {
-											return `${path}/${files[0]}_extracted/${file}`
-										})
+										try {
+											const filesInZip = await readdirPromisified(`${path}/${files[0]}_extracted`)
+											const NXThemesInZip = await filterAsync(filesInZip, async (file) => {
+												try {
+													return await isYaz0Promisified(
+														`${path}/${files[0]}_extracted/${file}`
+													)
+												} catch (e) {}
+											})
+
+											NXThemePaths = NXThemesInZip.map((file) => {
+												return `${path}/${files[0]}_extracted/${file}`
+											})
+										} catch (e) {
+											reject(errorName.ZIP_READ_ERROR)
+											rimraf(path, () => {})
+										}
 									} catch (e) {
-										reject(errorName.ZIP_READ_ERROR)
+										reject(errorName.FILE_READ_ERROR)
 										rimraf(path, () => {})
 									}
-								} catch (e) {
-									reject(errorName.FILE_READ_ERROR)
+								} else {
+									reject(errorName.INVALID_FILE_TYPE)
 									rimraf(path, () => {})
+									return
 								}
-							} else {
-								reject(errorName.INVALID_FILE_TYPE)
-								rimraf(path, () => {})
-								return
-							}
 
-							// Process all valid NXThemes
-							if (NXThemePaths.length > 0) {
-								const unpackPromises = unpackNXThemes(NXThemePaths)
-								const unpackedPaths = await Promise.all(unpackPromises)
+								// Process all valid NXThemes
+								if (NXThemePaths.length > 0) {
+									const unpackPromises = unpackNXThemes(NXThemePaths)
+									const unpackedPaths = await Promise.all(unpackPromises)
 
-								const readThemePromises = unpackedPaths.map((path) => {
-									return new Promise(async (resolve, reject) => {
-										try {
-											// Read info.json
-											const info = JSON.parse(await readFilePromisified(`${path}/info.json`))
-
-											// Read layout.json
-											let layout = null
+									const readThemePromises = unpackedPaths.map((path) => {
+										return new Promise(async (resolve, reject) => {
 											try {
-												layout = JSON.parse(await readFilePromisified(`${path}/layout.json`))
-											} catch (e) {}
+												// Read info.json
+												const info = JSON.parse(await readFilePromisified(`${path}/info.json`))
 
-											// Check if image in dds or jpg format
-											let image = false
-											try {
-												image = await promises.access(
-													`${path}/image.dds`,
-													constants.R_OK | constants.W_OK
-												)
-												image = true
-											} catch (e) {}
-											try {
-												image = await promises.access(
-													`${path}/image.jpg`,
-													constants.R_OK | constants.W_OK
-												)
-												image = true
-											} catch (e) {}
+												// Read layout.json
+												let layout = null
+												try {
+													layout = JSON.parse(
+														await readFilePromisified(`${path}/layout.json`)
+													)
+												} catch (e) {}
 
-											// Only proceed if info and at least layout or image is detected
-											if (info && (layout || image)) {
-												// If the layout has an ID specified get the uuid
-												let dbLayout = null
-												if (layout && layout.ID) {
-													const { service, uuid, piece_uuids } = parseThemeID(layout.ID)
-													// Only fetch the layout if it was created by Themezer
-													if (service === 'Themezer') {
-														dbLayout = await db.oneOrNone(
-															`
-															SELECT *, (
-																	SELECT array_agg(row_to_json(p)) as used_pieces
-																	FROM (
-																		SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
-																		FROM layouts
-																		WHERE uuid = $1
-																	) as p
-																	WHERE value ->> 'uuid' = ANY($2::text[])
-																),
-																CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
-															FROM layouts
-															WHERE uuid = $1
-														`,
-															[uuid, piece_uuids]
-														)
+												// Check if image in dds or jpg format
+												let image = false
+												try {
+													image = await promises.access(
+														`${path}/image.dds`,
+														constants.R_OK | constants.W_OK
+													)
+													image = true
+												} catch (e) {}
+												try {
+													image = await promises.access(
+														`${path}/image.jpg`,
+														constants.R_OK | constants.W_OK
+													)
+													image = true
+												} catch (e) {}
+
+												// Only proceed if info and at least layout or image is detected
+												if (info && (layout || image)) {
+													// If the layout has an ID specified get the uuid
+													let dbLayout = null
+													if (layout && layout.ID) {
+														const { service, uuid, piece_uuids } = parseThemeID(layout.ID)
+														// Only fetch the layout if it was created by Themezer
+														if (service === 'Themezer') {
+															dbLayout = await db.oneOrNone(
+																`
+																	SELECT *, (
+																			SELECT array_agg(row_to_json(p)) as used_pieces
+																			FROM (
+																				SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
+																				FROM layouts
+																				WHERE uuid = $1
+																			) as p
+																			WHERE value ->> 'uuid' = ANY($2::text[])
+																		),
+																		CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+																	FROM layouts
+																	WHERE uuid = $1
+																`,
+																[uuid, piece_uuids]
+															)
+														}
 													}
-												}
 
-												// Return detected used_pieces separately
-												let used_pieces = []
-												if (dbLayout) {
-													used_pieces = dbLayout.used_pieces
-													delete dbLayout.used_pieces
-												}
+													// Return detected used_pieces separately
+													let used_pieces = []
+													if (dbLayout) {
+														used_pieces = dbLayout.used_pieces
+														delete dbLayout.used_pieces
+													}
 
-												resolve({
-													info: info,
-													tmp: encrypt(path),
-													layout: dbLayout,
-													used_pieces: used_pieces,
-													target: themeTargetToFileName(info.Target)
-												})
-											} else {
+													resolve({
+														info: info,
+														tmp: encrypt(path),
+														layout: dbLayout,
+														used_pieces: used_pieces,
+														target: themeTargetToFileName(info.Target)
+													})
+												} else {
+													reject(errorName.INVALID_NXTHEME_CONTENTS)
+													rimraf(path, () => {})
+												}
+											} catch (e) {
+												console.error(e)
 												reject(errorName.INVALID_NXTHEME_CONTENTS)
 												rimraf(path, () => {})
 											}
-										} catch (e) {
-											console.error(e)
-											reject(errorName.INVALID_NXTHEME_CONTENTS)
-											rimraf(path, () => {})
-										}
+										})
 									})
-								})
 
-								// Execute all the NXTheme read promises
-								const detectedThemes = await Promise.all(readThemePromises)
+									// Execute all the NXTheme read promises
+									const detectedThemes = await Promise.all(readThemePromises)
 
-								if (detectedThemes && detectedThemes.length > 0) {
-									resolve(detectedThemes)
-								} else if (detectedThemes && detectedThemes.length === 0) {
-									reject(errorName.NO_VALID_NXTHEMES)
-									rimraf(path, () => {})
+									if (detectedThemes && detectedThemes.length > 0) {
+										resolve(detectedThemes)
+									} else if (detectedThemes && detectedThemes.length === 0) {
+										reject(errorName.NO_VALID_NXTHEMES)
+										rimraf(path, () => {})
+									} else {
+										reject(errorName.FILE_READ_ERROR)
+										rimraf(path, () => {})
+									}
 								} else {
-									reject(errorName.FILE_READ_ERROR)
+									reject(errorName.NO_NXTHEMES_IN_ZIP)
 									rimraf(path, () => {})
 								}
-							} else {
-								reject(errorName.NO_NXTHEMES_IN_ZIP)
-								rimraf(path, () => {})
+							} catch (e) {
+								console.error(e)
+								reject(e)
+								return
 							}
-						} catch (e) {
-							reject(e)
-							return
-						}
+						})
 					})
-				})
+				} else {
+					throw new Error(errorName.UNAUTHORIZED)
+				}
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -979,164 +1071,186 @@ export default {
 		submitThemes: async (parent, { files, themes, details, type }, context, info) => {
 			let themePaths = []
 			try {
-				return await new Promise(async (resolve, reject) => {
-					// Create array of screenshots to save
-					const toSave = files.map((f, i) => {
-						return new Promise((resolve, reject) => {
-							const path = decrypt(themes[i].tmp)
-							lstat(path, (err) => {
-								if (err) {
-									reject(errorName.INVALID_TMP)
-									return
-								}
-
-								resolve({
-									file: f,
-									savename: 'screenshot',
-									path: path
-								})
-							})
-						})
-					})
-					const resolvedDecryptions = await Promise.all(toSave)
-
-					// Save the screenshots
-					const filePromises = saveFiles(resolvedDecryptions)
-					const savedFiles = await Promise.all(filePromises)
-
-					// If every theme has a screenshot
-					if (savedFiles.length === themes.length) {
-						const promises = savedFiles.map((file, i) => {
-							return new Promise(async (resolve) => {
+				if (await context.authenticate()) {
+					return await new Promise(async (resolve, reject) => {
+						// Create array of screenshots to save
+						const toSave = files.map((f, i) => {
+							return new Promise((resolve, reject) => {
 								const path = decrypt(themes[i].tmp)
-								// If a valid jpeg
-								if (await isJpegPromisified(`${path}/${file}`)) {
-									resolve(path)
-								}
-							})
-						})
-						themePaths = await Promise.all(promises)
-
-						// If all jpegs are valid
-						if (themePaths.length === savedFiles.length) {
-							// Insert pack into DB if user wants to and can submit as pack
-							let packUuid = null
-							if (type === 'pack' && savedFiles.length > 1) {
-								packUuid = uuid()
-
-								const packData = {
-									uuid: packUuid,
-									last_updated: new Date(),
-									details: {
-										name: details.name.trim(),
-										author: {
-											name: details.author.name.trim(),
-											discord_tag: details.author.discord_tag
-										},
-										description: details.description.trim(),
-										color: details.color,
-										version: details.version ? details.version.trim() : '1.0.0'
-									}
-								}
-
-								const query = () => pgp.helpers.insert([packData], packsCS)
-								try {
-									await db.none(query)
-								} catch (e) {
-									console.error(e)
-									reject(errorName.DB_SAVE_ERROR)
-									return
-								}
-							}
-
-							// Save NXTheme contents
-							const themeDataPromises = themePaths.map((path, i) => {
-								return new Promise(async (resolve, reject) => {
-									const themeUuid = uuid()
-
-									try {
-										// Read dir contents
-										const filesInFolder = await readdirPromisified(path)
-										// Filter allowed files, 'screenshot.jpg', not 'info.json', and not 'layout.json' if the layout is in the DB
-										const filteredFilesInFolder = filesInFolder.filter(
-											(f) =>
-												(allowedFilesInNXTheme.includes(f) &&
-													f !== 'info.json' &&
-													!(f === 'layout.json' && themes[i].layout_uuid)) ||
-												f === 'screenshot.jpg'
-										)
-
-										// Move NXTheme contents to storage
-										const moveAllPromises = filteredFilesInFolder.map((f) => {
-											return moveFile(`${path}/${f}`, `${storagePath}/themes/${themeUuid}/${f}`)
-										})
-										await Promise.all(moveAllPromises)
-									} catch (e) {
-										console.error(e)
-										reject(errorName.FILE_SAVE_ERROR)
+								lstat(path, (err) => {
+									if (err) {
+										reject(errorName.INVALID_TMP)
 										return
 									}
 
-									if (themes[i].nsfw) {
-										themes[i].categories.push('NSFW')
-									}
-
 									resolve({
-										uuid: themeUuid,
-										layout_uuid: themes[i].layout_uuid,
-										piece_uuids:
-											themes[i].used_pieces && themes[i].used_pieces.length > 0
-												? themes[i].used_pieces.map((p) => p.value.uuid)
-												: null,
-										target: validFileName(themes[i].target)
-											? themes[i].target
-											: reject(errorName.INVALID_TARGET_NAME),
-										last_updated: new Date(),
-										categories: themes[i].categories.map((c) => c.trim()),
-										pack_uuid: packUuid,
-										details: {
-											name: themes[i].info.ThemeName.trim(),
-											author: {
-												name:
-													themes[i].info.Author && themes[i].info.Author.length > 0
-														? themes[i].info.Author.trim()
-														: themes[i].authorname.trim(),
-												discord_tag: details.author.discord_tag
-											},
-											description: themes[i].description ? themes[i].description.trim() : null,
-											color: themes[i].color,
-											version: details.version
-												? details.version.trim()
-												: themes[i].version
-												? themes[i].version.trim()
-												: '1.0.0'
-										}
+										file: f,
+										savename: 'screenshot',
+										path: path
 									})
 								})
 							})
-							const themeDatas = await Promise.all(themeDataPromises)
+						})
+						const resolvedDecryptions = await Promise.all(toSave)
 
-							// Insert themes into DB
-							const query = () => pgp.helpers.insert(themeDatas, themesCS)
-							try {
-								await db.none(query)
+						// Save the screenshots
+						const filePromises = saveFiles(resolvedDecryptions)
+						const savedFiles = await Promise.all(filePromises)
 
-								resolve(true)
+						// If every theme has a screenshot
+						if (savedFiles.length === themes.length) {
+							const promises = savedFiles.map((file, i) => {
+								return new Promise(async (resolve) => {
+									const path = decrypt(themes[i].tmp)
+									// If a valid jpeg
+									if (await isJpegPromisified(`${path}/${file}`)) {
+										resolve(path)
+									}
+								})
+							})
+							themePaths = await Promise.all(promises)
 
-								for (const i in themePaths) {
-									rimraf(themePaths[i], () => {})
+							// If all jpegs are valid
+							if (themePaths.length === savedFiles.length) {
+								// Insert pack into DB if user wants to and can submit as pack
+								let packUuid = null
+								if (type === 'pack' && savedFiles.length > 1) {
+									packUuid = uuid()
+
+									const packData = {
+										uuid: packUuid,
+										last_updated: new Date(),
+										creator_id: context.req.user.id,
+										details: {
+											name: details.name.trim(),
+											description: details.description.trim(),
+											color: details.color,
+											version: details.version ? details.version.trim() : '1.0.0'
+										}
+									}
+
+									const query = () => pgp.helpers.insert([packData], packsCS)
+									try {
+										await db.none(query)
+									} catch (e) {
+										console.error(e)
+										reject(errorName.DB_SAVE_ERROR)
+										return
+									}
 								}
-							} catch (e) {
-								console.error(e)
-								reject(errorName.DB_SAVE_ERROR)
+
+								// Save NXTheme contents
+								const themeDataPromises = themePaths.map((path, i) => {
+									return new Promise(async (resolve, reject) => {
+										const themeUuid = uuid()
+										let bgType = null
+
+										try {
+											// Read dir contents
+											const filesInFolder = await readdirPromisified(path)
+											// Filter allowed files, 'screenshot.jpg', not 'info.json', and not 'layout.json' if the layout is in the DB
+											const filteredFilesInFolder = filesInFolder.filter(
+												(f) =>
+													(allowedFilesInNXTheme.includes(f) &&
+														f !== 'info.json' &&
+														!(f === 'layout.json' && themes[i].layout_uuid)) ||
+													f === 'screenshot.jpg'
+											)
+
+											if (filteredFilesInFolder.includes('image.jpg')) {
+												bgType = 'jpg'
+											} else if (filteredFilesInFolder.includes('image.dds')) {
+												bgType = 'dds'
+											}
+
+											// Move NXTheme contents to storage
+											const moveAllPromises = filteredFilesInFolder.map((f) => {
+												return moveFile(
+													`${path}/${f}`,
+													`${storagePath}/themes/${themeUuid}/${f}`
+												)
+											})
+											await Promise.all(moveAllPromises)
+										} catch (e) {
+											console.error(e)
+											reject(errorName.FILE_SAVE_ERROR)
+											return
+										}
+
+										// TODO: Reject if any of the values is too long, match client limits
+
+										// Reject if more than 10 categories
+										if (themes[i].categories.length > 10) {
+											reject(errorName.INVALID_CATEGORY_AMOUNT)
+											return
+										}
+
+										// Process each category
+										const categories = themes[i].categories.map((c) =>
+											c.trim().replace(/(^\w{1})|(\s{1}\w{1})/g, (match) => match.toUpperCase())
+										)
+
+										// Add NSFW as category
+										if (themes[i].nsfw) {
+											categories.push('NSFW')
+										}
+
+										resolve({
+											uuid: themeUuid,
+											layout_uuid: themes[i].layout_uuid,
+											piece_uuids:
+												themes[i].used_pieces && themes[i].used_pieces.length > 0
+													? themes[i].used_pieces.map((p) => p.value.uuid)
+													: null,
+											target: validFileName(themes[i].target)
+												? themes[i].target
+												: reject(errorName.INVALID_TARGET_NAME),
+											last_updated: new Date(),
+											categories: categories.sort(),
+											pack_uuid: packUuid,
+											creator_id: context.req.user.id,
+											details: {
+												name: themes[i].info.ThemeName.trim(),
+												description: themes[i].description
+													? themes[i].description.trim()
+													: null,
+												color: themes[i].color,
+												version: details.version
+													? details.version.trim()
+													: themes[i].version
+													? themes[i].version.trim()
+													: '1.0.0'
+											},
+											bg_type: bgType
+										})
+									})
+								})
+								const themeDatas = await Promise.all(themeDataPromises)
+
+								// Insert themes into DB
+								const query = () => pgp.helpers.insert(themeDatas, themesCS)
+								try {
+									await db.none(query)
+
+									resolve(true)
+
+									for (const i in themePaths) {
+										rimraf(themePaths[i], () => {})
+									}
+								} catch (e) {
+									console.error(e)
+									reject(errorName.DB_SAVE_ERROR)
+								}
+							} else {
+								reject(errorName.INVALID_FILE_TYPE)
 							}
 						} else {
-							reject(errorName.INVALID_FILE_TYPE)
+							reject(errorName.FILE_SAVE_ERROR)
 						}
-					} else {
-						reject(errorName.FILE_SAVE_ERROR)
-					}
-				})
+					})
+				} else {
+					throw new Error(errorName.UNAUTHORIZED)
+				}
 			} catch (e) {
 				console.error(e)
 				for (const i in themePaths) {
@@ -1171,11 +1285,17 @@ export default {
 						pack = await db.one(
 							`
 								SELECT details ->> 'name' as name,
-									details -> 'author' ->> 'name' as author,
+									(
+										SELECT discord_user ->> 'username'
+										FROM creators
+										WHERE id = pck.creator_id
+										LIMIT 1
+									) as creator_name
 									(
 										SELECT array_agg(uuid)
 										FROM themes
 										WHERE pack_uuid = pck.uuid
+										LIMIT 1
 									) as themes
 								FROM packs pck
 								WHERE uuid = $1
@@ -1210,7 +1330,7 @@ export default {
 						// Return zip data as Base64 encoded string
 						const buff = await zip.toBuffer()
 						resolve({
-							filename: `${pack.name} by ${pack.author}.zip`,
+							filename: `${pack.name} by ${pack.creator_name}.zip`,
 							data: buff.toString('base64'),
 							mimetype: 'application/nxtheme'
 						})

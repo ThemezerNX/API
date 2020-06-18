@@ -7,9 +7,7 @@ export const errorName = {
 	AUTHORIZATION_ERROR: 'AUTHORIZATION_ERROR',
 	NO_CONTENT: 'NO_CONTENT',
 
-	USER_NOT_EXIST: 'USER_NOT_EXIST',
-	USER_EXISTS: 'USER_EXISTS',
-	USER_PASSWORD_INCORRECT: 'USER_PASSWORD_INCORRECT',
+	CREATOR_NOT_EXIST: 'CREATOR_NOT_EXIST',
 
 	FILE_READ_ERROR: 'FILE_READ_ERROR',
 	FILE_SAVE_ERROR: 'FILE_SAVE_ERROR',
@@ -17,6 +15,7 @@ export const errorName = {
 	INVALID_FILE_TYPE: 'INVALID_FILE_TYPE',
 	INVALID_TMP: 'INVALID_TMP',
 	INVALID_TARGET_NAME: 'INVALID_TARGET_NAME',
+	INVALID_CATEGORY_AMOUNT: 'INVALID_CATEGORY_AMOUNT',
 	INVALID_NXTHEME_CONTENTS: 'INVALID_NXTHEME_CONTENTS',
 	ZIP_READ_ERROR: 'ZIP_READ_ERROR',
 	NO_VALID_NXTHEMES: 'NO_VALID_NXTHEMES',
@@ -62,17 +61,9 @@ export const errorType = {
 		statusCode: 204
 	},
 	// User messages
-	USER_NOT_EXIST: {
-		message: 'Email not registered',
+	CREATOR_NOT_EXIST: {
+		message: 'Creator not found',
 		statusCode: 1000
-	},
-	USER_EXISTS: {
-		message: 'Email already registered',
-		statusCode: 1001
-	},
-	USER_PASSWORD_INCORRECT: {
-		message: 'Password incorrect',
-		statusCode: 1002
 	},
 	// Themes
 	FILE_READ_ERROR: {
@@ -99,21 +90,25 @@ export const errorType = {
 		message: 'Invalid target name',
 		statusCode: 4005
 	},
+	INVALID_CATEGORY_AMOUNT: {
+		message: 'Max 10 categories allowed',
+		statusCode: 4005
+	},
 	INVALID_NXTHEME_CONTENTS: {
 		message: 'Invalid NXTheme contents',
-		statusCode: 4006
+		statusCode: 4010
 	},
 	ZIP_READ_ERROR: {
 		message: 'The zip could not be extracted',
-		statusCode: 4008
+		statusCode: 4011
 	},
 	NO_VALID_NXTHEMES: {
 		message: 'No valid NXThemes were detected',
-		statusCode: 4009
+		statusCode: 4012
 	},
 	NO_NXTHEMES_IN_ZIP: {
 		message: 'No NXThemes were detected in the zip',
-		statusCode: 4009
+		statusCode: 4013
 	},
 
 	NXTHEME_CREATE_FAILED: {

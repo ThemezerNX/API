@@ -1,17 +1,22 @@
 require('dotenv').config()
 const consola = require('consola')
 const express = require('express')
+const cors = require('cors')
 const app = express()
 const bodyParser = require('body-parser')
+import cookieParser from 'cookie-parser'
 
 const { ApolloServer } = require('apollo-server-express')
 import resolvers from './endpoints/resolvers'
 import typeDefs from './endpoints/typeDefs'
 const { makeExecutableSchema } = require('graphql-tools')
 
-const { errorName, errorType } = require('./util/errorTypes')
+const { errorType } = require('./util/errorTypes')
 const getErrorCode = (errorName) => errorType[errorName]
 
+import buildContext from './util/buildContext'
+
+app.use(cookieParser())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json({ limit: '50mb' }))
 
@@ -26,6 +31,7 @@ const server = new ApolloServer({
 		maxFiles: 50
 	},
 	schema,
+	context: async ({ req }) => buildContext({ req }),
 	playground:
 		process.env.NODE_ENV === 'development'
 			? {
@@ -50,11 +56,21 @@ const server = new ApolloServer({
 	}
 })
 
+app.get('/logout', function(req, res) {
+	req.logout()
+	req.session.destroy()
+	res.redirect('/')
+})
+
 app.get(/\/.+/, function(req, res) {
 	res.send('No frii gaems here')
 })
 
 server.applyMiddleware({
+	cors: {
+		credentials: true,
+		origin: process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : 'https://themezer.ga'
+	},
 	app,
 	path: '/'
 })
