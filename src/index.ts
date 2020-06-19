@@ -1,7 +1,6 @@
 require('dotenv').config()
 const consola = require('consola')
 const express = require('express')
-const cors = require('cors')
 const app = express()
 const bodyParser = require('body-parser')
 import cookieParser from 'cookie-parser'
@@ -54,12 +53,6 @@ const server = new ApolloServer({
 
 		return err
 	}
-})
-
-app.get('/logout', function(req, res) {
-	req.logout()
-	req.session.destroy()
-	res.redirect('/')
 })
 
 app.get(/\/.+/, function(req, res) {
