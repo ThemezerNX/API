@@ -17,7 +17,16 @@ import GraphQLJSON from 'graphql-type-json'
 import { PythonShell } from 'python-shell'
 import filterAsync from 'node-filter-async'
 const link = require('fs-symlink')
-const { createWriteStream, unlink, readFile, writeFile, readdir, lstat, promises, constants } = require('fs')
+const {
+	createWriteStream,
+	unlink,
+	readFile,
+	writeFile,
+	readdir,
+	lstat,
+	promises: { mkdir, access },
+	constants
+} = require('fs')
 const writeFilePromisified = util.promisify(writeFile)
 const readFilePromisified = util.promisify(readFile)
 const readdirPromisified = util.promisify(readdir)
@@ -62,6 +71,22 @@ const allowedFilesInNXTheme = [
 	'lock.png'
 ]
 
+// https://stackoverflow.com/questions/40697330/skip-update-columns-with-pg-promise
+function str(column) {
+	return {
+		name: column,
+		skip: (c) => !c.exists
+	}
+}
+
+function int(column) {
+	return {
+		name: column,
+		skip: (c) => !c.exists,
+		init: (c) => +c.value
+	}
+}
+
 const themesCS = new pgp.helpers.ColumnSet(
 	[
 		{ name: 'uuid', cast: 'uuid' },
@@ -71,7 +96,7 @@ const themesCS = new pgp.helpers.ColumnSet(
 		{ name: 'last_updated', cast: 'timestamp without time zone' },
 		{ name: 'categories', cast: 'character varying[]' },
 		{ name: 'pack_uuid', cast: 'uuid' },
-		{ name: 'creator_id', cast: 'bigint' },
+		{ name: 'creator_id', cast: 'character varying' },
 		{ name: 'details', cast: 'json' },
 		{ name: 'bg_type', cast: 'character varying (3)' }
 	],
@@ -84,11 +109,34 @@ const packsCS = new pgp.helpers.ColumnSet(
 	[
 		{ name: 'uuid', cast: 'uuid' },
 		{ name: 'last_updated', cast: 'timestamp without time zone' },
-		{ name: 'creator_id', cast: 'bigint' },
+		{ name: 'creator_id', cast: 'character varying' },
 		{ name: 'details', cast: 'json' }
 	],
 	{
 		table: 'packs'
+	}
+)
+
+const creatorsCS = new pgp.helpers.ColumnSet(
+	[
+		{ name: 'role', cast: 'character varying' },
+		{ name: 'bio', cast: 'character varying' },
+		{ name: 'joined', cast: 'timestamp without time zone' },
+		{ name: 'discord_user', cast: 'json' },
+		{ name: 'id', cast: 'character varying' },
+		{ name: 'banner_image', cast: 'character varying' },
+		{ name: 'logo_image', cast: 'character varying' },
+		{ name: 'profile_color', cast: 'character varying' }
+	],
+	{
+		table: 'creators'
+	}
+)
+
+const updateCreatorCS = new pgp.helpers.ColumnSet(
+	[str('role'), str('bio'), str('banner_image'), str('logo_image'), str('profile_color')],
+	{
+		table: 'creators'
 	}
 )
 
@@ -133,6 +181,7 @@ const saveFiles = (files) =>
 						if (error.message.includes('exceeds') && error.message.includes('size limit')) {
 							reject(errorName.FILE_TOO_BIG)
 						} else {
+							console.error(error)
 							reject(errorName.FILE_SAVE_ERROR)
 						}
 					})
@@ -420,7 +469,7 @@ export default {
 					`
 					SELECT *
 					FROM creators
-					WHERE id = $1::bigint
+					WHERE id = $1
 					LIMIT 1
 				`,
 					[id]
@@ -458,7 +507,7 @@ export default {
 							AND target = $2
 						LIMIT 1
 					`,
-					[id, webNameToFileNameNoExtension(target)]
+					[id, target]
 				)
 
 				return dbData
@@ -477,7 +526,7 @@ export default {
 						FROM layouts
 						WHERE target = $1
 					`,
-					[webNameToFileNameNoExtension(target)]
+					[target]
 				)
 
 				return dbData
@@ -488,7 +537,7 @@ export default {
 		},
 		theme: async (parent, { id, target }, context, info) => {
 			try {
-				return await db.oneOrNone(
+				const dbData = await db.oneOrNone(
 					`
 						SELECT uuid, target, last_updated, categories, details, id, dl_count, bg_type,
 							(
@@ -547,8 +596,9 @@ export default {
 							AND mt.id = $1
 						LIMIT 1
 					`,
-					[id, webNameToFileNameNoExtension(target)]
+					[id, target]
 				)
+				return dbData
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -556,7 +606,7 @@ export default {
 		},
 		themesList: async (parent, { target }, context, info) => {
 			try {
-				return await db.any(
+				const dbData = await db.any(
 					`
 						SELECT uuid, target, last_updated, categories, details, id, dl_count, bg_type,
 							(
@@ -613,8 +663,38 @@ export default {
 						FROM themes mt
 						WHERE target = $1
 					`,
-					[webNameToFileNameNoExtension(target)]
+					[target]
 				)
+				return dbData
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
+		latestThemesList: async (parent, { target, creator_id, limit }, context, info) => {
+			try {
+				const dbData = await db.any(
+					`
+						SELECT uuid, target, last_updated, categories, details, id, dl_count, bg_type,
+							(
+								SELECT row_to_json(c) as creator
+								FROM (
+									SELECT *
+									FROM creators
+									WHERE id = mt.creator_id
+									LIMIT 1
+								) c
+							)
+
+						FROM themes mt
+						WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END
+							AND CASE WHEN $2 IS NOT NULL THEN creator_id = $2 ELSE true END
+						ORDER BY last_updated DESC
+						LIMIT CASE WHEN $3 IS NOT NULL THEN $3 END
+					`,
+					[target, creator_id, limit]
+				)
+				return dbData
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -622,7 +702,7 @@ export default {
 		},
 		pack: async (parent, { id }, context, info) => {
 			try {
-				return await db.oneOrNone(
+				const dbData = await db.oneOrNone(
 					`
 						SELECT uuid, last_updated, details, id, dl_count,
 							(
@@ -686,6 +766,7 @@ export default {
 					`,
 					[id]
 				)
+				return dbData
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -693,7 +774,7 @@ export default {
 		},
 		packsList: async (parent, params, context, info) => {
 			try {
-				return await db.any(
+				const dbData = await db.any(
 					`
 					SELECT uuid, last_updated, details, id, dl_count,
 						(
@@ -754,6 +835,7 @@ export default {
 					FROM packs pck
 				`
 				)
+				return dbData
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -762,20 +844,25 @@ export default {
 	},
 	Mutation: {
 		mergeJson: async (parent, { uuid, piece_uuids, common }, context, info) => {
-			return await new Promise(async (resolve, reject) => {
-				const json = await mergeJson(uuid, piece_uuids, common)
-				resolve(json)
+			try {
+				return await new Promise(async (resolve, reject) => {
+					const json = await mergeJson(uuid, piece_uuids, common)
+					resolve(json)
 
-				// Increase download count by 1
-				db.none(
-					`
+					// Increase download count by 1
+					db.none(
+						`
 					UPDATE layouts
 						SET dl_count = dl_count + 1
 					WHERE uuid = $1
 				`,
-					[uuid]
-				)
-			})
+						[uuid]
+					)
+				})
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
 		},
 		createOverlaysNXTheme: async (parent, { layout }, context, info) => {
 			try {
@@ -969,14 +1056,14 @@ export default {
 												// Check if image in dds or jpg format
 												let image = false
 												try {
-													image = await promises.access(
+													image = await access(
 														`${path}/image.dds`,
 														constants.R_OK | constants.W_OK
 													)
 													image = true
 												} catch (e) {}
 												try {
-													image = await promises.access(
+													image = await access(
 														`${path}/image.jpg`,
 														constants.R_OK | constants.W_OK
 													)
@@ -1061,7 +1148,7 @@ export default {
 						})
 					})
 				} else {
-					throw new Error(errorName.UNAUTHORIZED)
+					throw errorName.UNAUTHORIZED
 				}
 			} catch (e) {
 				console.error(e)
@@ -1249,7 +1336,7 @@ export default {
 						}
 					})
 				} else {
-					throw new Error(errorName.UNAUTHORIZED)
+					throw errorName.UNAUTHORIZED
 				}
 			} catch (e) {
 				console.error(e)
@@ -1349,6 +1436,119 @@ export default {
 						reject(errorName.PACK_CREATE_FAILED)
 					}
 				})
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
+		profile: async (
+			parent,
+			{ bio, profile_color, banner_image, logo_image, clear_banner_image, clear_logo_image },
+			context,
+			info
+		) => {
+			try {
+				if (await context.authenticate()) {
+					return await new Promise(async (resolve, reject) => {
+						try {
+							let object: any = {}
+
+							if (bio) object.bio = bio
+							if (profile_color) object.profile_color = profile_color
+
+							const toSavePromises = []
+							const bannerPath = `${storagePath}/creators/${context.req.user.id}/banner`
+							if (!clear_banner_image && !!banner_image) {
+								toSavePromises.push(
+									new Promise(async (resolve, reject) => {
+										try {
+											await mkdir(bannerPath, { recursive: true })
+											rimraf(bannerPath + '/*', async () => {
+												try {
+													const files = await Promise.all(
+														saveFiles([
+															{
+																file: banner_image,
+																savename: 'banner',
+																path: bannerPath
+															}
+														])
+													)
+													object.banner_image = files[0]
+													resolve()
+												} catch (e) {
+													reject(e)
+												}
+											})
+										} catch (e) {
+											console.error(e)
+											reject(e)
+										}
+									})
+								)
+							} else if (clear_banner_image) {
+								object.banner_image = null
+								rimraf(bannerPath, () => {})
+							}
+
+							const logoPath = `${storagePath}/creators/${context.req.user.id}/logo`
+							if (!clear_logo_image && !!logo_image) {
+								toSavePromises.push(
+									new Promise(async (resolve, reject) => {
+										try {
+											await mkdir(logoPath, { recursive: true })
+											rimraf(logoPath + '/*', async () => {
+												try {
+													const files = await Promise.all(
+														saveFiles([
+															{
+																file: logo_image,
+																savename: 'logo',
+																path: logoPath
+															}
+														])
+													)
+													object.logo_image = files[0]
+													resolve()
+												} catch (e) {
+													reject(e)
+												}
+											})
+										} catch (e) {
+											console.error(e)
+											reject(e)
+										}
+									})
+								)
+							} else if (clear_logo_image) {
+								object.logo_image = null
+								rimraf(logoPath, () => {})
+							}
+
+							await Promise.all(toSavePromises)
+
+							const query = () => pgp.helpers.update(object, updateCreatorCS)
+							try {
+								const dbData = await db.none(
+									query() +
+										` WHERE id = $1
+										`,
+									[context.req.user.id]
+								)
+								resolve(true)
+							} catch (e) {
+								console.error(e)
+								reject(errorName.DB_SAVE_ERROR)
+								return
+							}
+						} catch (e) {
+							console.error(e)
+							reject(errorName.FILE_SAVE_ERROR)
+						}
+					})
+				} else {
+					throw errorName.UNAUTHORIZED
+				}
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)

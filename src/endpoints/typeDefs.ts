@@ -18,9 +18,12 @@ export default gql`
 	type UserInfo {
 		id: String!
 		discord_user: DiscordUser!
-		biography: String
+		bio: String
 		joined: DateTime!
 		role: String
+		banner_image: String
+		logo_image: String
+		profile_color: String
 	}
 
 	type Author {
@@ -172,13 +175,14 @@ export default gql`
 		categories: [String!]
 
 		layout(id: Int!, target: String!): Layout
-		layoutsList(target: String!): [Layout]
+		layoutsList(target: String!): [Layout!]
 
 		theme(id: Int!, target: String!): Theme
-		themesList(target: String!): [Theme]
+		themesList(target: String!): [Theme!]
+		latestThemesList(target: String, creator_id: String, limit: Int!): [Theme!]
 
 		pack(id: Int!): Pack
-		packsList: [Pack]
+		packsList: [Pack!]
 	}
 
 	type Mutation {
@@ -194,6 +198,16 @@ export default gql`
 
 		downloadTheme(uuid: GUID!, piece_uuids: [GUID!]): File!
 		downloadPack(uuid: GUID!): File!
+
+		# Creator
+		profile(
+			bio: String
+			profile_color: String
+			banner_image: Upload
+			logo_image: Upload
+			clear_banner_image: Boolean
+			clear_logo_image: Boolean
+		): Boolean
 	}
 
 	schema {
