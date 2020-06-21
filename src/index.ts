@@ -3,7 +3,6 @@ const consola = require('consola')
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
-import cookieParser from 'cookie-parser'
 
 const { ApolloServer } = require('apollo-server-express')
 import resolvers from './endpoints/resolvers'
@@ -15,7 +14,6 @@ const getErrorCode = (errorName) => errorType[errorName]
 
 import buildContext from './util/buildContext'
 
-app.use(cookieParser())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json({ limit: '50mb' }))
 

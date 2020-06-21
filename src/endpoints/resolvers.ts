@@ -158,38 +158,42 @@ const saveFiles = (files) =>
 	files.map(
 		({ file, savename, path }) =>
 			new Promise<any>(async (resolve, reject) => {
-				let { createReadStream, filename, mimetype } = await file
-				const stream = createReadStream()
+				try {
+					let { createReadStream, filename, mimetype } = await file
+					const stream = createReadStream()
 
-				// Add file extension if none to prevent errors with matching file and directory names
-				const FILE_EXTENSION_REGEX = /\.[^\/.]+$/
-				if (!FILE_EXTENSION_REGEX.test(filename)) {
-					filename = `${savename || filename}.file`
-				} else if (savename) {
-					filename = savename + FILE_EXTENSION_REGEX.exec(filename)
-				}
+					// Add file extension if none to prevent errors with matching file and directory names
+					const FILE_EXTENSION_REGEX = /\.[^\/.]+$/
+					if (!FILE_EXTENSION_REGEX.test(filename)) {
+						filename = `${savename || filename}.file`
+					} else if (savename) {
+						filename = savename + FILE_EXTENSION_REGEX.exec(filename)
+					}
 
-				const writeStream = createWriteStream(`${path}/${filename}`)
+					const writeStream = createWriteStream(`${path}/${filename}`)
 
-				writeStream.on('finish', () => {
-					resolve(`${filename}`)
-				})
-
-				writeStream.on('error', (error) => {
-					unlink(path, () => {
-						// If the uploaded file's size is too big return specific error
-						if (error.message.includes('exceeds') && error.message.includes('size limit')) {
-							reject(errorName.FILE_TOO_BIG)
-						} else {
-							console.error(error)
-							reject(errorName.FILE_SAVE_ERROR)
-						}
+					writeStream.on('finish', () => {
+						resolve(`${filename}`)
 					})
-				})
 
-				stream.on('error', (error) => writeStream.destroy(error))
+					writeStream.on('error', (error) => {
+						unlink(path, () => {
+							// If the uploaded file's size is too big return specific error
+							if (error.message.includes('exceeds') && error.message.includes('size limit')) {
+								reject(errorName.FILE_TOO_BIG)
+							} else {
+								console.error(error)
+								reject(errorName.FILE_SAVE_ERROR)
+							}
+						})
+					})
 
-				stream.pipe(writeStream)
+					stream.on('error', (error) => writeStream.destroy(error))
+
+					stream.pipe(writeStream)
+				} catch (e) {
+					reject(e)
+				}
 			})
 	)
 
