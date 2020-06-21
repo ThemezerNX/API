@@ -26,16 +26,16 @@ export default gql`
 		profile_color: String
 	}
 
-	type Author {
-		name: String!
-		discord_tag: String
-	}
-
 	type LayoutDetails {
 		name: String!
 		description: String!
-		author: Author!
-		target: String!
+		color: HexColorCode
+		version: String!
+	}
+
+	type ItemDetails {
+		name: String!
+		description: String
 		color: HexColorCode
 		version: String!
 	}
@@ -46,20 +46,6 @@ export default gql`
 		color: HexColorCode
 		categories: [String!]
 		version: String
-	}
-
-	type ThemeDetails {
-		name: String!
-		description: String
-		color: HexColorCode
-		version: String!
-	}
-
-	type PackDetails {
-		name: String!
-		description: String!
-		color: HexColorCode
-		version: String!
 	}
 
 	type Value {
@@ -92,6 +78,7 @@ export default gql`
 	type Layout {
 		uuid: GUID!
 		id: Int!
+		creator: UserInfo!
 		details: LayoutDetails!
 		baselayout: JSON!
 		target: String!
@@ -107,7 +94,7 @@ export default gql`
 		uuid: GUID!
 		id: Int!
 		creator: UserInfo!
-		details: ThemeDetails!
+		details: ItemDetails!
 		layout: Layout
 		pack: Pack
 		target: String!
@@ -122,7 +109,7 @@ export default gql`
 		uuid: GUID!
 		id: Int!
 		creator: UserInfo!
-		details: PackDetails!
+		details: ItemDetails!
 		last_updated: DateTime!
 		categories: [String!]
 		dl_count: Int!
@@ -175,7 +162,7 @@ export default gql`
 		categories: [String!]
 
 		layout(id: Int!, target: String!): Layout
-		layoutsList(target: String!): [Layout!]
+		layoutsList(target: String, creator_id: String): [Layout!]
 
 		theme(id: Int!, target: String!): Theme
 		themesList(target: String!): [Theme!]

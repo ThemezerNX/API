@@ -503,9 +503,18 @@ export default {
 			try {
 				const dbData = await db.oneOrNone(
 					`
-						SELECT *,
+						SELECT uuid, details, baselayout, target, last_updated, pieces, commonlayout, id, dl_count,
 							CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces,
-							CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+							CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout,
+							(
+								SELECT row_to_json(c) as creator
+								FROM (
+									SELECT *
+									FROM creators
+									WHERE id = layouts.creator_id
+									LIMIT 1
+								) c
+							)
 						FROM layouts
 						WHERE id = $1
 							AND target = $2
@@ -520,17 +529,28 @@ export default {
 				throw new Error(e)
 			}
 		},
-		layoutsList: async (parent, { target }, context, info) => {
+		layoutsList: async (parent, { target, creator_id }, context, info) => {
 			try {
 				const dbData = await db.any(
 					`
-						SELECT *,
+						SELECT uuid, details, baselayout, target, last_updated, pieces, commonlayout, id, dl_count,
 							CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces,
-							CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+							CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout,
+							(
+								SELECT row_to_json(c) as creator
+								FROM (
+									SELECT *
+									FROM creators
+									WHERE id = layouts.creator_id
+									LIMIT 1
+								) c
+							)
 						FROM layouts
-						WHERE target = $1
+						WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END
+							AND CASE WHEN $2 IS NOT NULL THEN creator_id = $2 ELSE true END
+						ORDER BY last_updated DESC
 					`,
-					[target]
+					[target, creator_id]
 				)
 
 				return dbData
@@ -556,8 +576,17 @@ export default {
 							(
 								SELECT row_to_json(l) AS layout
 								FROM (
-									SELECT layouts.*,
-										CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+									SELECT layouts.uuid, layouts.details, layouts.baselayout, layouts.target, layouts.last_updated, layouts.pieces, layouts.commonlayout, layouts.id, layouts.dl_count,
+										CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout,
+										(
+											SELECT row_to_json(c) as creator
+											FROM (
+												SELECT *
+												FROM creators
+												WHERE id = layouts.creator_id
+												LIMIT 1
+											) c
+										)
 									FROM themes as st
 									INNER JOIN layouts
 									ON layouts.uuid = st.layout_uuid
@@ -625,8 +654,17 @@ export default {
 							(
 								SELECT row_to_json(l) AS layout
 								FROM (
-									SELECT layouts.*,
-										CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+									SELECT layouts.uuid, layouts.details, layouts.baselayout, layouts.target, layouts.last_updated, layouts.pieces, layouts.commonlayout, layouts.id, layouts.dl_count,
+										CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout,
+										(
+											SELECT row_to_json(c) as creator
+											FROM (
+												SELECT *
+												FROM creators
+												WHERE id = layouts.creator_id
+												LIMIT 1
+											) c
+										)
 									FROM themes as st
 									INNER JOIN layouts
 									ON layouts.uuid = st.layout_uuid
@@ -666,6 +704,7 @@ export default {
 
 						FROM themes mt
 						WHERE target = $1
+						ORDER BY mt.last_updated DESC
 					`,
 					[target]
 				)
@@ -742,8 +781,17 @@ export default {
 										(
 											SELECT row_to_json(l) AS layout
 											FROM (
-												SELECT layouts.*,
-													CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+												SELECT layouts.uuid, layouts.details, layouts.baselayout, layouts.target, layouts.last_updated, layouts.pieces, layouts.commonlayout, layouts.id, layouts.dl_count,
+													CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout,
+													(
+														SELECT row_to_json(c) as creator
+														FROM (
+															SELECT *
+															FROM creators
+															WHERE id = layouts.creator_id
+															LIMIT 1
+														) c
+													)
 												FROM themes
 												INNER JOIN layouts
 												ON layouts.uuid = themes.layout_uuid
@@ -814,8 +862,17 @@ export default {
 									(
 										SELECT row_to_json(l) AS layout
 										FROM (
-											SELECT layouts.*,
-												CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+											SELECT layouts.uuid, layouts.details, layouts.baselayout, layouts.target, layouts.last_updated, layouts.pieces, layouts.commonlayout, layouts.id, layouts.dl_count,
+												CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout,
+												(
+													SELECT row_to_json(c) as creator
+													FROM (
+														SELECT *
+														FROM creators
+														WHERE id = layouts.creator_id
+														LIMIT 1
+													) c
+												)
 											FROM themes
 											INNER JOIN layouts
 											ON layouts.uuid = themes.layout_uuid
@@ -837,7 +894,8 @@ export default {
 							) as theme
 						) as themes
 					FROM packs pck
-				`
+					ORDER BY pck.last_updated DESC
+					`
 				)
 				return dbData
 			} catch (e) {
@@ -856,10 +914,10 @@ export default {
 					// Increase download count by 1
 					db.none(
 						`
-					UPDATE layouts
-						SET dl_count = dl_count + 1
-					WHERE uuid = $1
-				`,
+							UPDATE layouts
+								SET dl_count = dl_count + 1
+							WHERE uuid = $1
+						`,
 						[uuid]
 					)
 				})
