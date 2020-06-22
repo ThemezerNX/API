@@ -60,7 +60,7 @@ export const errorType = {
 		message: 'No data to return',
 		statusCode: 204
 	},
-	// User messages
+	// Creator messages
 	CREATOR_NOT_EXIST: {
 		message: 'Creator not found',
 		statusCode: 1000

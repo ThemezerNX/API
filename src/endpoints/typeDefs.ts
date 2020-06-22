@@ -156,23 +156,36 @@ export default gql`
 	}
 
 	type Query {
+		# Creator
 		me: UserInfo!
 		creator(id: String!): UserInfo!
 
+		# General
 		categories: [String!]
 
 		layout(id: Int!, target: String!): Layout
-		layoutsList(target: String, creator_id: String): [Layout!]
+		layoutsList(target: String, creator_id: String, limit: Int): [Layout!]
 
 		theme(id: Int!, target: String!): Theme
-		themesList(target: String!): [Theme!]
-		latestThemesList(target: String, creator_id: String, limit: Int!): [Theme!]
+		themesList(target: String, creator_id: String, limit: Int): [Theme!]
 
 		pack(id: Int!): Pack
 		packsList: [Pack!]
 	}
 
 	type Mutation {
+		# Creator
+		updateAuth: Boolean
+		profile(
+			bio: String
+			profile_color: String
+			banner_image: Upload
+			logo_image: Upload
+			clear_banner_image: Boolean
+			clear_logo_image: Boolean
+		): Boolean
+
+		# General
 		createOverlaysNXTheme(layout: Upload!): [File!]
 		createOverlay(themeName: String, blackImg: Upload!, whiteImg: Upload!): File!
 
@@ -185,16 +198,6 @@ export default gql`
 
 		downloadTheme(uuid: GUID!, piece_uuids: [GUID!]): File!
 		downloadPack(uuid: GUID!): File!
-
-		# Creator
-		profile(
-			bio: String
-			profile_color: String
-			banner_image: Upload
-			logo_image: Upload
-			clear_banner_image: Boolean
-			clear_logo_image: Boolean
-		): Boolean
 	}
 
 	schema {

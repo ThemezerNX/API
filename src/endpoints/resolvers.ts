@@ -637,7 +637,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		themesList: async (parent, { target }, context, info) => {
+		themesList: async (parent, { target, creator_id, limit }, context, info) => {
 			try {
 				const dbData = await db.any(
 					`
@@ -703,36 +703,9 @@ export default {
 							)
 
 						FROM themes mt
-						WHERE target = $1
-						ORDER BY mt.last_updated DESC
-					`,
-					[target]
-				)
-				return dbData
-			} catch (e) {
-				console.error(e)
-				throw new Error(e)
-			}
-		},
-		latestThemesList: async (parent, { target, creator_id, limit }, context, info) => {
-			try {
-				const dbData = await db.any(
-					`
-						SELECT uuid, target, last_updated, categories, details, id, dl_count, bg_type,
-							(
-								SELECT row_to_json(c) as creator
-								FROM (
-									SELECT *
-									FROM creators
-									WHERE id = mt.creator_id
-									LIMIT 1
-								) c
-							)
-
-						FROM themes mt
 						WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END
 							AND CASE WHEN $2 IS NOT NULL THEN creator_id = $2 ELSE true END
-						ORDER BY last_updated DESC
+						ORDER BY mt.last_updated DESC
 						LIMIT CASE WHEN $3 IS NOT NULL THEN $3 END
 					`,
 					[target, creator_id, limit]
@@ -905,6 +878,131 @@ export default {
 		}
 	},
 	Mutation: {
+		updateAuth: async (parent, params, context, info) => {
+			try {
+				if (await context.authenticate()) {
+					return true
+				} else {
+					throw errorName.UNAUTHORIZED
+				}
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
+		profile: async (
+			parent,
+			{ bio, profile_color, banner_image, logo_image, clear_banner_image, clear_logo_image },
+			context,
+			info
+		) => {
+			try {
+				if (await context.authenticate()) {
+					return await new Promise(async (resolve, reject) => {
+						try {
+							let object: any = {}
+
+							if (bio) object.bio = bio
+							if (profile_color) object.profile_color = profile_color
+
+							const toSavePromises = []
+							const bannerPath = `${storagePath}/creators/${context.req.user.id}/banner`
+							if (!clear_banner_image && !!banner_image) {
+								toSavePromises.push(
+									new Promise(async (resolve, reject) => {
+										try {
+											await mkdir(bannerPath, { recursive: true })
+											rimraf(bannerPath + '/*', async () => {
+												try {
+													const files = await Promise.all(
+														saveFiles([
+															{
+																file: banner_image,
+																savename: 'banner',
+																path: bannerPath
+															}
+														])
+													)
+													object.banner_image = files[0]
+													resolve()
+												} catch (e) {
+													reject(e)
+												}
+											})
+										} catch (e) {
+											console.error(e)
+											reject(e)
+										}
+									})
+								)
+							} else if (clear_banner_image) {
+								object.banner_image = null
+								rimraf(bannerPath, () => {})
+							}
+
+							const logoPath = `${storagePath}/creators/${context.req.user.id}/logo`
+							if (!clear_logo_image && !!logo_image) {
+								toSavePromises.push(
+									new Promise(async (resolve, reject) => {
+										try {
+											await mkdir(logoPath, { recursive: true })
+											rimraf(logoPath + '/*', async () => {
+												try {
+													const files = await Promise.all(
+														saveFiles([
+															{
+																file: logo_image,
+																savename: 'logo',
+																path: logoPath
+															}
+														])
+													)
+													object.logo_image = files[0]
+													resolve()
+												} catch (e) {
+													reject(e)
+												}
+											})
+										} catch (e) {
+											console.error(e)
+											reject(e)
+										}
+									})
+								)
+							} else if (clear_logo_image) {
+								object.logo_image = null
+								rimraf(logoPath, () => {})
+							}
+
+							await Promise.all(toSavePromises)
+
+							const query = () => pgp.helpers.update(object, updateCreatorCS)
+							try {
+								const dbData = await db.none(
+									query() +
+										` WHERE id = $1
+										`,
+									[context.req.user.id]
+								)
+								resolve(true)
+							} catch (e) {
+								console.error(e)
+								reject(errorName.DB_SAVE_ERROR)
+								return
+							}
+						} catch (e) {
+							console.error(e)
+							reject(errorName.FILE_SAVE_ERROR)
+						}
+					})
+				} else {
+					throw errorName.UNAUTHORIZED
+				}
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
 		mergeJson: async (parent, { uuid, piece_uuids, common }, context, info) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
@@ -975,6 +1073,7 @@ export default {
 				throw new Error(e)
 			}
 		},
+
 		createOverlay: async (parent, { themeName, blackImg, whiteImg }, context, info) => {
 			try {
 				return await new Promise((resolve, reject) => {
@@ -1498,119 +1597,6 @@ export default {
 						reject(errorName.PACK_CREATE_FAILED)
 					}
 				})
-			} catch (e) {
-				console.error(e)
-				throw new Error(e)
-			}
-		},
-		profile: async (
-			parent,
-			{ bio, profile_color, banner_image, logo_image, clear_banner_image, clear_logo_image },
-			context,
-			info
-		) => {
-			try {
-				if (await context.authenticate()) {
-					return await new Promise(async (resolve, reject) => {
-						try {
-							let object: any = {}
-
-							if (bio) object.bio = bio
-							if (profile_color) object.profile_color = profile_color
-
-							const toSavePromises = []
-							const bannerPath = `${storagePath}/creators/${context.req.user.id}/banner`
-							if (!clear_banner_image && !!banner_image) {
-								toSavePromises.push(
-									new Promise(async (resolve, reject) => {
-										try {
-											await mkdir(bannerPath, { recursive: true })
-											rimraf(bannerPath + '/*', async () => {
-												try {
-													const files = await Promise.all(
-														saveFiles([
-															{
-																file: banner_image,
-																savename: 'banner',
-																path: bannerPath
-															}
-														])
-													)
-													object.banner_image = files[0]
-													resolve()
-												} catch (e) {
-													reject(e)
-												}
-											})
-										} catch (e) {
-											console.error(e)
-											reject(e)
-										}
-									})
-								)
-							} else if (clear_banner_image) {
-								object.banner_image = null
-								rimraf(bannerPath, () => {})
-							}
-
-							const logoPath = `${storagePath}/creators/${context.req.user.id}/logo`
-							if (!clear_logo_image && !!logo_image) {
-								toSavePromises.push(
-									new Promise(async (resolve, reject) => {
-										try {
-											await mkdir(logoPath, { recursive: true })
-											rimraf(logoPath + '/*', async () => {
-												try {
-													const files = await Promise.all(
-														saveFiles([
-															{
-																file: logo_image,
-																savename: 'logo',
-																path: logoPath
-															}
-														])
-													)
-													object.logo_image = files[0]
-													resolve()
-												} catch (e) {
-													reject(e)
-												}
-											})
-										} catch (e) {
-											console.error(e)
-											reject(e)
-										}
-									})
-								)
-							} else if (clear_logo_image) {
-								object.logo_image = null
-								rimraf(logoPath, () => {})
-							}
-
-							await Promise.all(toSavePromises)
-
-							const query = () => pgp.helpers.update(object, updateCreatorCS)
-							try {
-								const dbData = await db.none(
-									query() +
-										` WHERE id = $1
-										`,
-									[context.req.user.id]
-								)
-								resolve(true)
-							} catch (e) {
-								console.error(e)
-								reject(errorName.DB_SAVE_ERROR)
-								return
-							}
-						} catch (e) {
-							console.error(e)
-							reject(errorName.FILE_SAVE_ERROR)
-						}
-					})
-				} else {
-					throw errorName.UNAUTHORIZED
-				}
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
