@@ -935,7 +935,7 @@ export default {
 														saveFiles([
 															{
 																file: banner_image,
-																savename: 'banner',
+																savename: uuid(),
 																path: bannerPath
 															}
 														])
@@ -969,7 +969,7 @@ export default {
 														saveFiles([
 															{
 																file: logo_image,
-																savename: 'logo',
+																savename: uuid(),
 																path: logoPath
 															}
 														])
