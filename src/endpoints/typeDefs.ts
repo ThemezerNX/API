@@ -170,7 +170,7 @@ export default gql`
 		themesList(target: String, creator_id: String, limit: Int): [Theme!]
 
 		pack(id: Int!): Pack
-		packsList: [Pack!]
+		packsList(creator_id: String, limit: Int): [Pack!]
 	}
 
 	type Mutation {

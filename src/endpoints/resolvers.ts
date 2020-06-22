@@ -705,7 +705,7 @@ export default {
 						FROM themes mt
 						WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END
 							AND CASE WHEN $2 IS NOT NULL THEN creator_id = $2 ELSE true END
-						ORDER BY mt.last_updated DESC
+						ORDER BY last_updated DESC
 						LIMIT CASE WHEN $3 IS NOT NULL THEN $3 END
 					`,
 					[target, creator_id, limit]
@@ -797,7 +797,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		packsList: async (parent, params, context, info) => {
+		packsList: async (parent, { creator_id, limit }, context, info) => {
 			try {
 				const dbData = await db.any(
 					`
@@ -867,8 +867,12 @@ export default {
 							) as theme
 						) as themes
 					FROM packs pck
-					ORDER BY pck.last_updated DESC
-					`
+
+					WHERE CASE WHEN $1 IS NOT NULL THEN creator_id = $1 ELSE true END
+					ORDER BY last_updated DESC
+					LIMIT CASE WHEN $2 IS NOT NULL THEN $2 END
+					`,
+					[creator_id, limit]
 				)
 				return dbData
 			} catch (e) {
