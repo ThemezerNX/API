@@ -12,6 +12,7 @@ export const errorName = {
 	FILE_READ_ERROR: 'FILE_READ_ERROR',
 	FILE_SAVE_ERROR: 'FILE_SAVE_ERROR',
 	FILE_TOO_BIG: 'FILE_TOO_BIG',
+	MAX_50_NXTHEMES: 'MAX_50_NXTHEMES',
 	INVALID_FILE_TYPE: 'INVALID_FILE_TYPE',
 	INVALID_TMP: 'INVALID_TMP',
 	INVALID_TARGET_NAME: 'INVALID_TARGET_NAME',
@@ -78,22 +79,27 @@ export const errorType = {
 		message: 'The file is too big',
 		statusCode: 4002
 	},
+	MAX_50_NXTHEMES: {
+		message: 'A maximum of 50 nxthemes is allowed',
+		statusCode: 4003
+	},
 	INVALID_FILE_TYPE: {
 		message: 'Invalid file type detected',
-		statusCode: 4003
+		statusCode: 4004
 	},
 	INVALID_TMP: {
 		message: 'Invalid tmp argument',
-		statusCode: 4004
+		statusCode: 4005
 	},
 	INVALID_TARGET_NAME: {
 		message: 'Invalid target name',
-		statusCode: 4005
+		statusCode: 4006
 	},
 	INVALID_CATEGORY_AMOUNT: {
 		message: 'Max 10 categories allowed',
-		statusCode: 4005
+		statusCode: 4007
 	},
+
 	INVALID_NXTHEME_CONTENTS: {
 		message: 'Invalid NXTheme contents',
 		statusCode: 4010
@@ -140,6 +146,6 @@ export const errorType = {
 	// DB errors
 	DB_SAVE_ERROR: {
 		message: 'Failed saving data to DB',
-		statusCode: 4200
+		statusCode: 5000
 	}
 }

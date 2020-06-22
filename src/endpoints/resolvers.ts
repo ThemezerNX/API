@@ -9,6 +9,10 @@ import {
 } from '../util/targetParser'
 import { errorName } from '../util/errorTypes'
 
+import webhook from 'webhook-discord'
+import { packMessage, themeMessage } from '../util/webhookMessages'
+const Hook = new webhook.Webhook(process.env.WEBHOOK_URL)
+
 import { uuid } from 'uuidv4'
 import { encrypt, decrypt } from '../util/crypt'
 import { parseThemeID, stringifyThemeID } from '@themezernx/layout-id-parser'
@@ -47,6 +51,7 @@ const extract = require('extract-zip')
 
 const sarcToolPath = `${__dirname}/../../../SARC-Tool`
 const storagePath = `${__dirname}/../../../storage`
+const urlNameREGEX = /[^a-zA-Z0-9_.]+/gm
 
 // Allowed files according to https://github.com/exelix11/SwitchThemeInjector/blob/master/SwitchThemesCommon/PatchTemplate.cs#L10-L29
 const allowedFilesInNXTheme = [
@@ -70,6 +75,14 @@ const allowedFilesInNXTheme = [
 	'lock.dds',
 	'lock.png'
 ]
+
+const avatar = (id, user): string => {
+	if (user.avatar) {
+		return `https://cdn.discordapp.com/avatars/${id}/${user.avatar}`
+	} else {
+		return `https://cdn.discordapp.com/embed/avatars/${parseInt(user.discriminator) % 5}.png`
+	}
+}
 
 // https://stackoverflow.com/questions/40697330/skip-update-columns-with-pg-promise
 function str(column) {
@@ -626,7 +639,7 @@ export default {
 
 						FROM themes as mt
 						WHERE target = $2
-							AND mt.id = $1
+							AND id = $1
 						LIMIT 1
 					`,
 					[id, target]
@@ -706,7 +719,7 @@ export default {
 						WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END
 							AND CASE WHEN $2 IS NOT NULL THEN creator_id = $2 ELSE true END
 						ORDER BY last_updated DESC
-						LIMIT CASE WHEN $3 IS NOT NULL THEN $3 END
+						LIMIT $3
 					`,
 					[target, creator_id, limit]
 				)
@@ -870,7 +883,7 @@ export default {
 
 					WHERE CASE WHEN $1 IS NOT NULL THEN creator_id = $1 ELSE true END
 					ORDER BY last_updated DESC
-					LIMIT CASE WHEN $2 IS NOT NULL THEN $2 END
+					LIMIT $2
 					`,
 					[creator_id, limit]
 				)
@@ -1077,7 +1090,6 @@ export default {
 				throw new Error(e)
 			}
 		},
-
 		createOverlay: async (parent, { themeName, blackImg, whiteImg }, context, info) => {
 			try {
 				return await new Promise((resolve, reject) => {
@@ -1196,6 +1208,11 @@ export default {
 								} else {
 									reject(errorName.INVALID_FILE_TYPE)
 									rimraf(path, () => {})
+									return
+								}
+
+								if (NXThemePaths.length > 50) {
+									reject(errorName.MAX_50_NXTHEMES)
 									return
 								}
 
@@ -1325,6 +1342,8 @@ export default {
 			try {
 				if (await context.authenticate()) {
 					return await new Promise(async (resolve, reject) => {
+						let insertedPack = null
+
 						// Create array of screenshots to save
 						const toSave = files.map((f, i) => {
 							return new Promise((resolve, reject) => {
@@ -1383,7 +1402,9 @@ export default {
 
 									const query = () => pgp.helpers.insert([packData], packsCS)
 									try {
-										await db.none(query)
+										insertedPack = await db.one(
+											query() + ` RETURNING id, details, last_updated, creator_id`
+										)
 									} catch (e) {
 										console.error(e)
 										reject(errorName.DB_SAVE_ERROR)
@@ -1482,9 +1503,74 @@ export default {
 								// Insert themes into DB
 								const query = () => pgp.helpers.insert(themeDatas, themesCS)
 								try {
-									await db.none(query)
+									const insertedThemes = await db.any(
+										query() + ` RETURNING uuid, id, details, last_updated, creator_id, target`
+									)
 
 									resolve(true)
+
+									if (type === 'pack') {
+										const newPackMessage = packMessage
+
+										newPackMessage
+											.setTitle(insertedPack.details.name)
+											.setAuthor(
+												context.req.user.discord_user.username,
+												avatar(context.req.user.id, context.req.user.discord_user) + '?size=64',
+												`https://themezer.ga/creators/${context.req.user.id}`
+											)
+											.addField(
+												'Themes in this pack:',
+												themeDatas.map((t: any) => t.details.name).join('\n')
+											)
+											.setThumbnail(
+												`https://api.themezer.ga/storage/themes/${
+													(themeDatas[0] as any).uuid
+												}/screenshot.jpg`
+											)
+											.setURL(
+												`https://themezer.ga/packs/${insertedPack.details.name.replace(
+													urlNameREGEX,
+													'-'
+												)}-${insertedPack.id}`
+											)
+
+										if (insertedPack.details.description) {
+											newPackMessage.setDescription(insertedPack.details.description)
+										}
+
+										console.log(JSON.stringify(newPackMessage, null, 4))
+
+										Hook.send(newPackMessage)
+									} else {
+										insertedThemes.forEach((t: any) => {
+											const newThemeMessage = themeMessage
+											newThemeMessage
+												.setTitle(t.details.name)
+												.setAuthor(
+													context.req.user.discord_user.username,
+													avatar(context.req.user.id, context.req.user.discord_user) +
+														'?size=64',
+													`https://themezer.ga/creators/${context.req.user.id}`
+												)
+												.setThumbnail(
+													`https://api.themezer.ga/storage/themes/${t.uuid}/screenshot.jpg`
+												)
+												.setURL(
+													`https://themezer.ga/themes/${fileNameToWebName(
+														t.target
+													)}/${t.details.name.replace(urlNameREGEX, '-')}-${t.id}`
+												)
+
+											if (t.details.description) {
+												newThemeMessage.setDescription(t.details.description)
+											}
+
+											console.log(JSON.stringify(newThemeMessage, null, 4))
+
+											Hook.send(newThemeMessage)
+										})
+									}
 
 									for (const i in themePaths) {
 										rimraf(themePaths[i], () => {})
