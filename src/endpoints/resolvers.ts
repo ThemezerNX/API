@@ -1628,7 +1628,7 @@ export default {
 										FROM creators
 										WHERE id = pck.creator_id
 										LIMIT 1
-									) as creator_name
+									) as creator_name,
 									(
 										SELECT array_agg(uuid)
 										FROM themes
