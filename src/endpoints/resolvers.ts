@@ -253,17 +253,19 @@ const mergeJson = async (uuid, piece_uuids = [], common?) => {
 	if (dbData) {
 		// Create an array with all used pieces
 		const usedPieces = []
-		for (const i in dbData.pieces) {
+
+		dbData.pieces.forEach((p) => {
 			usedPieces.push({
-				uuid: dbData.pieces[i].value.uuid,
-				json: dbData.pieces[i].value.json
+				uuid: p.value.uuid,
+				json: p.value.json
 			})
-		}
+		})
 
 		const baseJsonParsed = common ? JSON.parse(dbData.commonlayout) : JSON.parse(dbData.baselayout)
 		if (baseJsonParsed) {
-			while (usedPieces.length > 0) {
-				const shifted = usedPieces.shift()
+			const list = usedPieces.slice(0)
+			while (list.length > 0) {
+				const shifted = list.shift()
 
 				// Merge files patches
 				if (Array.isArray(baseJsonParsed.Files)) {
