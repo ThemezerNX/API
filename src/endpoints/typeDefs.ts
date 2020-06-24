@@ -7,14 +7,6 @@ export default gql`
 	scalar HexColorCode
 	scalar JSON
 
-	type DiscordUser {
-		username: String!
-		discriminator: String!
-		avatar: String
-		system: Boolean
-		locale: String
-	}
-
 	type UserInfo {
 		id: String!
 		discord_user: DiscordUser!
@@ -26,17 +18,35 @@ export default gql`
 		profile_color: String
 	}
 
-	type LayoutDetails {
+	type DiscordUser {
+		username: String!
+		discriminator: String!
+		avatar: String
+		system: Boolean
+		locale: String
+	}
+
+	interface Details {
+		name: String!
+		version: String!
+	}
+
+	type LayoutDetails implements Details {
 		name: String!
 		description: String!
 		color: HexColorCode
 		version: String!
 	}
 
-	type ItemDetails {
+	type ThemeDetails implements Details {
 		name: String!
 		description: String
-		color: HexColorCode
+		version: String!
+	}
+
+	type PackDetails implements Details {
+		name: String!
+		description: String!
 		version: String!
 	}
 
@@ -46,6 +56,21 @@ export default gql`
 		color: HexColorCode
 		categories: [String!]
 		version: String
+	}
+
+	type Layout {
+		uuid: GUID!
+		id: Int!
+		creator: UserInfo!
+		details: LayoutDetails!
+		baselayout: JSON!
+		target: String!
+		last_updated: DateTime!
+		has_pieces: Boolean!
+		pieces: [Piece!]
+		has_commonlayout: Boolean!
+		commonlayout: JSON
+		dl_count: Int!
 	}
 
 	type Value {
@@ -75,26 +100,11 @@ export default gql`
 		value: ValueInput!
 	}
 
-	type Layout {
-		uuid: GUID!
-		id: Int!
-		creator: UserInfo!
-		details: LayoutDetails!
-		baselayout: JSON!
-		target: String!
-		last_updated: DateTime!
-		has_pieces: Boolean!
-		pieces: [Piece!]
-		has_commonlayout: Boolean!
-		commonlayout: JSON
-		dl_count: Int!
-	}
-
 	type Theme {
 		uuid: GUID!
 		id: Int!
 		creator: UserInfo!
-		details: ItemDetails!
+		details: ThemeDetails!
 		layout: Layout
 		pack: Pack
 		target: String!
@@ -109,7 +119,7 @@ export default gql`
 		uuid: GUID!
 		id: Int!
 		creator: UserInfo!
-		details: ItemDetails!
+		details: PackDetails!
 		last_updated: DateTime!
 		categories: [String!]
 		dl_count: Int!

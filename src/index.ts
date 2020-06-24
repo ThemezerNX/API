@@ -9,6 +9,9 @@ import resolvers from './endpoints/resolvers'
 import typeDefs from './endpoints/typeDefs'
 const { makeExecutableSchema } = require('graphql-tools')
 
+import joinMonsterAdapt from 'join-monster-graphql-tools-adapter'
+import joinMonsterMetaData from './endpoints/joinMonsterMetaData'
+
 const { errorType } = require('./util/errorTypes')
 const getErrorCode = (errorName) => errorType[errorName]
 
@@ -21,6 +24,8 @@ const schema = makeExecutableSchema({
 	typeDefs,
 	resolvers
 })
+
+joinMonsterAdapt(schema, joinMonsterMetaData)
 
 const server = new ApolloServer({
 	uploads: {

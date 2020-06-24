@@ -115,3 +115,19 @@ export const validFileName = (s) => {
 			return false
 	}
 }
+
+export const validThemeTarget = (s) => {
+	switch (s) {
+		case 'home':
+		case 'lock':
+		case 'user':
+		case 'apps':
+		case 'set':
+		case 'news':
+		case 'psl':
+			return true
+
+		default:
+			return false
+	}
+}

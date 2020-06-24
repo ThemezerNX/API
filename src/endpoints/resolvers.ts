@@ -5,13 +5,17 @@ import {
 	fileNameToThemeTarget,
 	themeTargetToFileName,
 	fileNameToWebName,
-	validFileName
+	validFileName,
+	validThemeTarget
 } from '../util/targetParser'
 import { errorName } from '../util/errorTypes'
 
 import webhook from 'webhook-discord'
 import { packMessage, themeMessage } from '../util/webhookMessages'
 const Hook = new webhook.Webhook(process.env.WEBHOOK_URL)
+
+import joinMonster from 'join-monster'
+const joinMonsterOptions: any = { dialect: 'pg' }
 
 import { uuid } from 'uuidv4'
 import { encrypt, decrypt } from '../util/crypt'
@@ -52,16 +56,6 @@ const extract = require('extract-zip')
 const sarcToolPath = `${__dirname}/../../../SARC-Tool`
 const storagePath = `${__dirname}/../../../storage`
 const urlNameREGEX = /[^a-zA-Z0-9_.]+/gm
-
-const allowedTargets = [
-	'ResidentMenu.szs',
-	'Entrance.szs',
-	'MyPage.szs',
-	'Flaunch.szs',
-	'Set.szs',
-	'Notification.szs',
-	'Psl.szs'
-]
 
 // Allowed files according to https://github.com/exelix11/SwitchThemeInjector/blob/master/SwitchThemesCommon/PatchTemplate.cs#L10-L29
 const allowedFilesInNXTheme = [
@@ -492,17 +486,14 @@ export default {
 		},
 		creator: async (parent, { id }, context, info) => {
 			try {
-				const dbData = await db.one(
-					`
-					SELECT *
-					FROM creators
-					WHERE id = $1
-					LIMIT 1
-				`,
-					[id]
+				return joinMonster(
+					info,
+					context,
+					(sql) => {
+						return db.any(sql)
+					},
+					joinMonsterOptions
 				)
-
-				return dbData
 			} catch (e) {
 				throw new Error(errorName.CREATOR_NOT_EXIST)
 			}
@@ -522,218 +513,61 @@ export default {
 				throw new Error(e)
 			}
 		},
-		layout: async (parent, { id, target }, context, info) => {
+		layout: async (parent, args, context, info) => {
 			try {
-				const dbData = await db.oneOrNone(
-					`
-						SELECT uuid, details, baselayout, target, last_updated, pieces, commonlayout, id, dl_count,
-							CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces,
-							CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout,
-							(
-								SELECT row_to_json(c) as creator
-								FROM (
-									SELECT *
-									FROM creators
-									WHERE id = layouts.creator_id
-									LIMIT 1
-								) c
-							)
-						FROM layouts
-						WHERE id = $1
-							AND target = $2
-						LIMIT 1
-					`,
-					[id, target]
+				return joinMonster(
+					info,
+					context,
+					(sql) => {
+						return db.any(sql)
+					},
+					joinMonsterOptions
 				)
-
-				return dbData
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
 			}
 		},
-		layoutsList: async (parent, { target, creator_id }, context, info) => {
+		layoutsList: async (parent, args, context, info) => {
 			try {
-				const dbData = await db.any(
-					`
-						SELECT uuid, details, baselayout, target, last_updated, pieces, commonlayout, id, dl_count,
-							CASE WHEN (cardinality(pieces) > 0) THEN true ELSE false END AS has_pieces,
-							CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout,
-							(
-								SELECT row_to_json(c) as creator
-								FROM (
-									SELECT *
-									FROM creators
-									WHERE id = layouts.creator_id
-									LIMIT 1
-								) c
-							)
-						FROM layouts
-						WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END
-							AND CASE WHEN $2 IS NOT NULL THEN creator_id = $2 ELSE true END
-						ORDER BY last_updated DESC
-					`,
-					[target, creator_id]
+				return joinMonster(
+					info,
+					context,
+					(sql) => {
+						return db.any(sql)
+					},
+					joinMonsterOptions
 				)
-
-				return dbData
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
 			}
 		},
-		theme: async (parent, { id, target }, context, info) => {
+		theme: async (parent, args, context, info) => {
 			try {
-				const dbData = await db.oneOrNone(
-					`
-						SELECT uuid, target, last_updated, categories, details, id, dl_count, bg_type,
-							(
-								SELECT row_to_json(c) as creator
-								FROM (
-									SELECT *
-									FROM creators
-									WHERE id = mt.creator_id
-									LIMIT 1
-								) c
-							),
-							(
-								SELECT row_to_json(l) AS layout
-								FROM (
-									SELECT layouts.uuid, layouts.details, layouts.baselayout, layouts.target, layouts.last_updated, layouts.pieces, layouts.commonlayout, layouts.id, layouts.dl_count,
-										CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout,
-										(
-											SELECT row_to_json(c) as creator
-											FROM (
-												SELECT *
-												FROM creators
-												WHERE id = layouts.creator_id
-												LIMIT 1
-											) c
-										)
-									FROM themes as st
-									INNER JOIN layouts
-									ON layouts.uuid = st.layout_uuid
-									WHERE st.uuid = mt.uuid
-									GROUP BY layouts.uuid
-								) as l
-							),
-							(
-								SELECT row_to_json(p) AS pack
-								FROM (
-									SELECT packs.uuid, packs.last_updated, packs.details, packs.id, packs.dl_count,
-										(
-											SELECT row_to_json(c) as creator
-											FROM (
-												SELECT *
-												FROM creators
-												WHERE id = packs.creator_id
-												LIMIT 1
-											) c
-										)
-									FROM themes as st
-									INNER JOIN packs
-									ON packs.uuid = st.pack_uuid
-									WHERE st.uuid = mt.uuid
-									GROUP BY packs.uuid
-								) as p
-							),
-							(
-								SELECT array_agg(row_to_json(pcs)) AS pieces
-								FROM (
-									SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
-									FROM layouts
-									WHERE uuid = mt.layout_uuid
-								) as pcs
-								WHERE value ->> 'uuid' = ANY(mt.piece_uuids::text[])
-							)
-
-						FROM themes as mt
-						WHERE target = $2
-							AND id = $1
-						LIMIT 1
-					`,
-					[id, target]
+				return joinMonster(
+					info,
+					context,
+					(sql) => {
+						return db.any(sql)
+					},
+					joinMonsterOptions
 				)
-				return dbData
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
 			}
 		},
-		themesList: async (parent, { target, creator_id, limit }, context, info) => {
+		themesList: async (parent, args, context, info) => {
 			try {
-				const dbData = await db.any(
-					`
-						SELECT uuid, target, last_updated, categories, details, id, dl_count, bg_type,
-							(
-								SELECT row_to_json(c) as creator
-								FROM (
-									SELECT *
-									FROM creators
-									WHERE id = mt.creator_id
-									LIMIT 1
-								) c
-							),
-							(
-								SELECT row_to_json(l) AS layout
-								FROM (
-									SELECT layouts.uuid, layouts.details, layouts.baselayout, layouts.target, layouts.last_updated, layouts.pieces, layouts.commonlayout, layouts.id, layouts.dl_count,
-										CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout,
-										(
-											SELECT row_to_json(c) as creator
-											FROM (
-												SELECT *
-												FROM creators
-												WHERE id = layouts.creator_id
-												LIMIT 1
-											) c
-										)
-									FROM themes as st
-									INNER JOIN layouts
-									ON layouts.uuid = st.layout_uuid
-									WHERE st.uuid = mt.uuid
-									GROUP BY layouts.uuid
-								) as l
-							),
-							(
-								SELECT row_to_json(p) AS pack
-								FROM (
-									SELECT packs.uuid, packs.last_updated, packs.details, packs.id, packs.dl_count,
-										(
-											SELECT row_to_json(c) as creator
-											FROM (
-												SELECT *
-												FROM creators
-												WHERE id = packs.creator_id
-												LIMIT 1
-											) c
-										)
-									FROM themes as st
-									INNER JOIN packs
-									ON packs.uuid = st.pack_uuid
-									WHERE st.uuid = mt.uuid
-									GROUP BY packs.uuid
-								) as p
-							),
-							(
-								SELECT array_agg(row_to_json(pcs)) AS pieces
-								FROM (
-									SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
-									FROM layouts
-									WHERE uuid = mt.layout_uuid
-								) as pcs
-								WHERE value ->> 'uuid' = ANY(mt.piece_uuids::text[])
-							)
-
-						FROM themes mt
-						WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END
-							AND CASE WHEN $2 IS NOT NULL THEN creator_id = $2 ELSE true END
-						ORDER BY last_updated DESC
-						LIMIT $3
-					`,
-					[target, creator_id, limit]
+				return joinMonster(
+					info,
+					context,
+					(sql) => {
+						return db.any(sql)
+					},
+					joinMonsterOptions
 				)
-				return dbData
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -741,80 +575,14 @@ export default {
 		},
 		pack: async (parent, { id }, context, info) => {
 			try {
-				const dbData = await db.oneOrNone(
-					`
-						SELECT uuid, last_updated, details, id, dl_count,
-							(
-								SELECT row_to_json(c) as creator
-								FROM (
-									SELECT *
-									FROM creators
-									WHERE id = pck.creator_id
-									LIMIT 1
-								) c
-							),
-							(
-								SELECT array_agg(c) as categories
-								FROM (
-									SELECT DISTINCT UNNEST(categories)
-									FROM themes
-									WHERE pack_uuid = pck.uuid
-								) as t(c)
-							),
-							(
-								SELECT array_agg(row_to_json(theme))
-								FROM (
-									SELECT uuid, details, target, last_updated, categories, id, dl_count,
-										(
-											SELECT row_to_json(c) as creator
-											FROM (
-												SELECT *
-												FROM creators
-												WHERE id = mt.creator_id
-												LIMIT 1
-											) c
-										),
-										(
-											SELECT row_to_json(l) AS layout
-											FROM (
-												SELECT layouts.uuid, layouts.details, layouts.baselayout, layouts.target, layouts.last_updated, layouts.pieces, layouts.commonlayout, layouts.id, layouts.dl_count,
-													CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout,
-													(
-														SELECT row_to_json(c) as creator
-														FROM (
-															SELECT *
-															FROM creators
-															WHERE id = layouts.creator_id
-															LIMIT 1
-														) c
-													)
-												FROM themes
-												INNER JOIN layouts
-												ON layouts.uuid = themes.layout_uuid
-												WHERE themes.uuid = mt.uuid
-												GROUP BY layouts.uuid
-											) as l
-										),
-										(
-											SELECT array_agg(row_to_json(pcs)) AS pieces
-											FROM (
-												SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
-												FROM layouts
-												WHERE uuid = mt.layout_uuid
-											) as pcs
-											WHERE value ->> 'uuid' = ANY(mt.piece_uuids::text[])
-										)
-									FROM themes mt
-									WHERE mt.pack_uuid = pck.uuid
-								) as theme
-							) as themes
-						FROM packs pck
-						WHERE id = $1
-						LIMIT 1
-					`,
-					[id]
+				return joinMonster(
+					info,
+					context,
+					(sql) => {
+						return db.any(sql)
+					},
+					joinMonsterOptions
 				)
-				return dbData
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -822,82 +590,14 @@ export default {
 		},
 		packsList: async (parent, { creator_id, limit }, context, info) => {
 			try {
-				const dbData = await db.any(
-					`
-					SELECT uuid, last_updated, details, id, dl_count,
-						(
-							SELECT row_to_json(c) as creator
-							FROM (
-								SELECT *
-								FROM creators
-								WHERE id = pck.creator_id
-								LIMIT 1
-							) c
-						),
-						(
-							SELECT array_agg(c) as categories
-							FROM (
-								SELECT DISTINCT UNNEST(categories)
-								FROM themes
-								WHERE pack_uuid = pck.uuid
-							) as t(c)
-						),
-						(
-							SELECT array_agg(row_to_json(theme))
-							FROM (
-								SELECT uuid, details, target, last_updated, categories, id, dl_count,
-									(
-										SELECT row_to_json(c) as creator
-										FROM (
-											SELECT *
-											FROM creators
-											WHERE id = mt.creator_id
-											LIMIT 1
-										) c
-									),
-									(
-										SELECT row_to_json(l) AS layout
-										FROM (
-											SELECT layouts.uuid, layouts.details, layouts.baselayout, layouts.target, layouts.last_updated, layouts.pieces, layouts.commonlayout, layouts.id, layouts.dl_count,
-												CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout,
-												(
-													SELECT row_to_json(c) as creator
-													FROM (
-														SELECT *
-														FROM creators
-														WHERE id = layouts.creator_id
-														LIMIT 1
-													) c
-												)
-											FROM themes
-											INNER JOIN layouts
-											ON layouts.uuid = themes.layout_uuid
-											WHERE themes.uuid = mt.uuid
-											GROUP BY layouts.uuid
-										) as l
-									),
-									(
-										SELECT array_agg(row_to_json(pcs)) AS pieces
-										FROM (
-											SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
-											FROM layouts
-											WHERE uuid = mt.layout_uuid
-										) as pcs
-										WHERE value ->> 'uuid' = ANY(mt.piece_uuids::text[])
-									)
-								FROM themes mt
-								WHERE mt.pack_uuid = pck.uuid
-							) as theme
-						) as themes
-					FROM packs pck
-
-					WHERE CASE WHEN $1 IS NOT NULL THEN creator_id = $1 ELSE true END
-					ORDER BY last_updated DESC
-					LIMIT $2
-					`,
-					[creator_id, limit]
+				return joinMonster(
+					info,
+					context,
+					(sql) => {
+						return db.any(sql)
+					},
+					joinMonsterOptions
 				)
-				return dbData
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -1302,9 +1002,7 @@ export default {
 														tmp: encrypt(path),
 														layout: dbLayout,
 														used_pieces: used_pieces,
-														target: allowedTargets.includes(
-															themeTargetToFileName(info.Target)
-														)
+														target: validThemeTarget(info.Target)
 															? themeTargetToFileName(info.Target)
 															: reject(errorName.INVALID_TARGET_NAME)
 													})
