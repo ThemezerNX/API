@@ -16,6 +16,7 @@ export const errorName = {
 	INVALID_FILE_TYPE: 'INVALID_FILE_TYPE',
 	INVALID_TMP: 'INVALID_TMP',
 	INVALID_TARGET_NAME: 'INVALID_TARGET_NAME',
+	TARGETS_DONT_MATCH: 'TARGETS_DONT_MATCH',
 	INVALID_CATEGORY_AMOUNT: 'INVALID_CATEGORY_AMOUNT',
 	INVALID_NXTHEME_CONTENTS: 'INVALID_NXTHEME_CONTENTS',
 	ZIP_READ_ERROR: 'ZIP_READ_ERROR',
@@ -95,9 +96,13 @@ export const errorType = {
 		message: 'Invalid target name',
 		statusCode: 4006
 	},
+	TARGETS_DONT_MATCH: {
+		message: "The target of the theme and the detected layout don't match",
+		statusCode: 4007
+	},
 	INVALID_CATEGORY_AMOUNT: {
 		message: 'Max 10 categories allowed',
-		statusCode: 4007
+		statusCode: 4008
 	},
 
 	INVALID_NXTHEME_CONTENTS: {

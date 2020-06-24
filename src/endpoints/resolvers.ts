@@ -999,14 +999,25 @@ export default {
 														delete dbLayout.used_pieces
 													}
 
+													let target = null
+													if (validThemeTarget(info.Target)) {
+														target = themeTargetToFileName(info.Target)
+													} else {
+														reject(errorName.INVALID_TARGET_NAME)
+														return
+													}
+
+													if (target !== dbLayout.target) {
+														reject(errorName.TARGETS_DONT_MATCH)
+														return
+													}
+
 													resolve({
 														info: info,
 														tmp: encrypt(path),
 														layout: dbLayout,
 														used_pieces: used_pieces,
-														target: validThemeTarget(info.Target)
-															? themeTargetToFileName(info.Target)
-															: reject(errorName.INVALID_TARGET_NAME)
+														target: target
 													})
 												} else {
 													reject(errorName.INVALID_NXTHEME_CONTENTS)
@@ -1253,8 +1264,6 @@ export default {
 											newPackMessage.setDescription(insertedPack.details.description)
 										}
 
-										console.log(JSON.stringify(newPackMessage, null, 4))
-
 										Hook.send(newPackMessage)
 									} else {
 										insertedThemes.forEach((t: any) => {
@@ -1279,8 +1288,6 @@ export default {
 											if (t.details.description) {
 												newThemeMessage.setDescription(t.details.description)
 											}
-
-											console.log(JSON.stringify(newThemeMessage, null, 4))
 
 											Hook.send(newThemeMessage)
 										})
