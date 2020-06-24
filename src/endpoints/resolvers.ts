@@ -53,6 +53,16 @@ const sarcToolPath = `${__dirname}/../../../SARC-Tool`
 const storagePath = `${__dirname}/../../../storage`
 const urlNameREGEX = /[^a-zA-Z0-9_.]+/gm
 
+const allowedTargets = [
+	'ResidentMenu.szs',
+	'Entrance.szs',
+	'MyPage.szs',
+	'Flaunch.szs',
+	'Set.szs',
+	'Notification.szs',
+	'Psl.szs'
+]
+
 // Allowed files according to https://github.com/exelix11/SwitchThemeInjector/blob/master/SwitchThemesCommon/PatchTemplate.cs#L10-L29
 const allowedFilesInNXTheme = [
 	'info.json',
@@ -1292,7 +1302,11 @@ export default {
 														tmp: encrypt(path),
 														layout: dbLayout,
 														used_pieces: used_pieces,
-														target: themeTargetToFileName(info.Target)
+														target: allowedTargets.includes(
+															themeTargetToFileName(info.Target)
+														)
+															? themeTargetToFileName(info.Target)
+															: reject(errorName.INVALID_TARGET_NAME)
 													})
 												} else {
 													reject(errorName.INVALID_NXTHEME_CONTENTS)
