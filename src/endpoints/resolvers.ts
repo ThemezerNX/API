@@ -111,11 +111,11 @@ const themesCS = new pgp.helpers.ColumnSet(
 		{ name: 'piece_uuids', cast: 'uuid[]' },
 		'target',
 		{ name: 'last_updated', cast: 'timestamp without time zone' },
-		{ name: 'categories', cast: 'character varying[]' },
+		{ name: 'categories', cast: 'varchar[]' },
 		{ name: 'pack_uuid', cast: 'uuid' },
-		{ name: 'creator_id', cast: 'character varying' },
+		{ name: 'creator_id', cast: 'varchar' },
 		{ name: 'details', cast: 'json' },
-		{ name: 'bg_type', cast: 'character varying (3)' }
+		{ name: 'bg_type', cast: 'varchar (3)' }
 	],
 	{
 		table: 'themes'
@@ -126,7 +126,7 @@ const packsCS = new pgp.helpers.ColumnSet(
 	[
 		{ name: 'uuid', cast: 'uuid' },
 		{ name: 'last_updated', cast: 'timestamp without time zone' },
-		{ name: 'creator_id', cast: 'character varying' },
+		{ name: 'creator_id', cast: 'varchar' },
 		{ name: 'details', cast: 'json' }
 	],
 	{
@@ -136,14 +136,14 @@ const packsCS = new pgp.helpers.ColumnSet(
 
 const creatorsCS = new pgp.helpers.ColumnSet(
 	[
-		{ name: 'role', cast: 'character varying' },
-		{ name: 'bio', cast: 'character varying' },
+		{ name: 'role', cast: 'varchar' },
+		{ name: 'bio', cast: 'varchar' },
 		{ name: 'joined', cast: 'timestamp without time zone' },
 		{ name: 'discord_user', cast: 'json' },
-		{ name: 'id', cast: 'character varying' },
-		{ name: 'banner_image', cast: 'character varying' },
-		{ name: 'logo_image', cast: 'character varying' },
-		{ name: 'profile_color', cast: 'character varying' }
+		{ name: 'id', cast: 'varchar' },
+		{ name: 'banner_image', cast: 'varchar' },
+		{ name: 'logo_image', cast: 'varchar' },
+		{ name: 'profile_color', cast: 'varchar' }
 	],
 	{
 		table: 'creators'
@@ -607,10 +607,76 @@ export default {
 		}
 	},
 	Mutation: {
-		updateAuth: async (parent, params, context, info) => {
+		updateAuth: async (parent, { accepts }, context, info) => {
 			try {
 				if (await context.authenticate()) {
-					return true
+					let dbData
+					if (accepts) {
+						dbData = await db.one(
+							`
+								UPDATE creators
+									SET has_accepted = true
+								WHERE id = $1
+								RETURNING has_accepted
+							`,
+							[context.req.user.id]
+						)
+					}
+					return context.req.user.has_accepted
+						? {
+								has_accepted: true
+						  }
+						: dbData && dbData.has_accepted
+						? {
+								has_accepted: true
+						  }
+						: {
+								has_accepted: false,
+								backup_code: context.req.user.backup_code
+						  }
+				} else {
+					throw errorName.UNAUTHORIZED
+				}
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
+		restoreAccount: async (parent, { creator_id, backup_code }, context, info) => {
+			try {
+				if (await context.authenticate()) {
+					const dbData = await db.oneOrNone(
+						`
+							WITH valid AS (
+								SELECT case when count(*) > 0 then true else false end
+									FROM creators
+									WHERE id = $3
+										AND backup_code = $4
+							),
+							new_creator AS (
+								DELETE FROM creators
+								WHERE id = $1
+									AND (SELECT * FROM valid)
+								RETURNING id
+							),
+							restored AS (
+								UPDATE creators
+									SET id = (select id from new_creator),
+										has_accepted = false,
+										discord_user = $2,
+										backup_code = md5(random()::varchar)::varchar,
+										old_ids = array_append(old_ids, $3)
+								WHERE id = $3
+									AND (SELECT * FROM valid)
+								RETURNING id
+							)
+							
+							SELECT *
+							FROM restored
+							`,
+						[context.req.user.id, context.req.user.discord_user, creator_id, backup_code]
+					)
+					return dbData ? true : false
 				} else {
 					throw errorName.UNAUTHORIZED
 				}
@@ -629,10 +695,10 @@ export default {
 				if (await context.authenticate()) {
 					return await new Promise(async (resolve, reject) => {
 						try {
-							let object: any = {}
-
-							if (bio) object.bio = bio
-							if (profile_color) object.profile_color = profile_color
+							let object: any = {
+								bio: bio,
+								profile_color: profile_color
+							}
 
 							const toSavePromises = []
 							const bannerPath = `${storagePath}/creators/${context.req.user.id}/banner`

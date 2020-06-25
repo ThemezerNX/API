@@ -26,6 +26,11 @@ export default gql`
 		locale: String
 	}
 
+	type authPayload {
+		has_accepted: Boolean!
+		backup_code: String
+	}
+
 	interface Details {
 		name: String!
 		version: String!
@@ -185,7 +190,10 @@ export default gql`
 
 	type Mutation {
 		# Creator
-		updateAuth: Boolean
+		updateAuth(accepts: Boolean): authPayload
+
+		restoreAccount(creator_id: String!, backup_code: String!): Boolean!
+
 		profile(
 			bio: String
 			profile_color: String

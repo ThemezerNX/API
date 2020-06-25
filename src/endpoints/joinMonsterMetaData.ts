@@ -163,7 +163,8 @@ export default {
 		fields: {
 			id: { sqlColumn: 'id' },
 			creator: {
-				sqlJoin: (table, creatorTable) => `${table}.creator_id = ${creatorTable}.id`
+				sqlJoin: (table, creatorTable) =>
+					`(${table}.creator_id = ${creatorTable}.id) OR (${table}.creator_id = ANY(${creatorTable}.old_ids))`
 			},
 			details: {
 				sqlJoin: (table, detailsTable) => `${table}.uuid = ${detailsTable}.uuid`
