@@ -7,7 +7,7 @@ export default {
 	Query: {
 		fields: {
 			creator: {
-				where: (table, { id }) => format(`(${table}.id = $1) OR (${table}.id = ANY(${table}.old_ids))`, [id])
+				where: (table, { id }) => format(`(${table}.id = $1) OR ($1 = ANY(${table}.old_ids))`, [id])
 			},
 			layout: {
 				where: (table, { id, target }) => format(`${table}.id = $1 AND ${table}.target = $2`, [id, target])
