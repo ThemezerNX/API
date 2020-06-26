@@ -24,6 +24,7 @@ const { patch } = require('@tromkom/aurora-strategic-json-merge-patch')
 import GraphQLJSON from 'graphql-type-json'
 import { PythonShell } from 'python-shell'
 import filterAsync from 'node-filter-async'
+import { resolveFieldValueOrError } from 'graphql/execution/execute'
 const link = require('fs-symlink')
 const {
 	createWriteStream,
@@ -479,28 +480,36 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 export default {
 	JSON: GraphQLJSON,
 	Query: {
-		me: async (parent, args, context, info) => {
+		me: async (_parent, _args, context, _info) => {
 			if (await context.authenticate()) {
 				return context.req.user
 			} else {
 				throw new Error(errorName.UNAUTHORIZED)
 			}
 		},
-		creator: async (parent, { id }, context, info) => {
+		creator: async (_parent, _args, context, info) => {
 			try {
-				return joinMonster(
-					info,
-					context,
-					(sql) => {
-						return db.any(sql)
-					},
-					joinMonsterOptions
-				)
+				return await new Promise(async (resolve, reject) => {
+					const dbData = await joinMonster(
+						info,
+						context,
+						(sql) => {
+							return db.any(sql)
+						},
+						joinMonsterOptions
+					)
+
+					if (dbData) {
+						resolve(dbData)
+					} else {
+						reject(errorName.CREATOR_NOT_EXIST)
+					}
+				})
 			} catch (e) {
-				throw new Error(errorName.CREATOR_NOT_EXIST)
+				throw new Error(e)
 			}
 		},
-		categories: async (parent, args, context, info) => {
+		categories: async (_parent, _args, _context, _info) => {
 			try {
 				const categoriesDB = await db.one(`
 					SELECT ARRAY(
@@ -515,7 +524,29 @@ export default {
 				throw new Error(e)
 			}
 		},
-		layout: async (parent, args, context, info) => {
+		layout: async (_parent, _args, context, info) => {
+			try {
+				return await new Promise(async (resolve, reject) => {
+					const dbData = await joinMonster(
+						info,
+						context,
+						(sql) => {
+							return db.any(sql)
+						},
+						joinMonsterOptions
+					)
+
+					if (dbData) {
+						resolve(dbData)
+					} else {
+						reject(errorName.LAYOUT_NOT_FOUND)
+					}
+				})
+			} catch (e) {
+				throw new Error(e)
+			}
+		},
+		layoutsList: async (_parent, _args, context, info) => {
 			try {
 				return joinMonster(
 					info,
@@ -530,7 +561,29 @@ export default {
 				throw new Error(e)
 			}
 		},
-		layoutsList: async (parent, args, context, info) => {
+		theme: async (_parent, _args, context, info) => {
+			try {
+				return await new Promise(async (resolve, reject) => {
+					const dbData = await joinMonster(
+						info,
+						context,
+						(sql) => {
+							return db.any(sql)
+						},
+						joinMonsterOptions
+					)
+
+					if (dbData) {
+						resolve(dbData)
+					} else {
+						reject(errorName.THEME_NOT_FOUND)
+					}
+				})
+			} catch (e) {
+				throw new Error(e)
+			}
+		},
+		themesList: async (_parent, _args, context, info) => {
 			try {
 				return joinMonster(
 					info,
@@ -545,52 +598,30 @@ export default {
 				throw new Error(e)
 			}
 		},
-		theme: async (parent, args, context, info) => {
+		pack: async (_parent, _args, context, info) => {
 			try {
-				return joinMonster(
-					info,
-					context,
-					(sql) => {
-						return db.any(sql)
-					},
-					joinMonsterOptions
-				)
+				return await new Promise(async (resolve, reject) => {
+					const dbData = await joinMonster(
+						info,
+						context,
+						(sql) => {
+							return db.any(sql)
+						},
+						joinMonsterOptions
+					)
+
+					if (dbData) {
+						resolve(dbData)
+					} else {
+						console.log(dbData)
+						reject(errorName.PACK_NOT_FOUND)
+					}
+				})
 			} catch (e) {
-				console.error(e)
 				throw new Error(e)
 			}
 		},
-		themesList: async (parent, args, context, info) => {
-			try {
-				return joinMonster(
-					info,
-					context,
-					(sql) => {
-						return db.any(sql)
-					},
-					joinMonsterOptions
-				)
-			} catch (e) {
-				console.error(e)
-				throw new Error(e)
-			}
-		},
-		pack: async (parent, { id }, context, info) => {
-			try {
-				return joinMonster(
-					info,
-					context,
-					(sql) => {
-						return db.any(sql)
-					},
-					joinMonsterOptions
-				)
-			} catch (e) {
-				console.error(e)
-				throw new Error(e)
-			}
-		},
-		packsList: async (parent, { creator_id, limit }, context, info) => {
+		packsList: async (_parent, _args, context, info) => {
 			try {
 				return joinMonster(
 					info,
@@ -607,7 +638,7 @@ export default {
 		}
 	},
 	Mutation: {
-		updateAuth: async (parent, { accepts }, context, info) => {
+		updateAuth: async (_parent, { accepts }, context, _info) => {
 			try {
 				if (await context.authenticate()) {
 					let dbData
@@ -642,7 +673,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		restoreAccount: async (parent, { creator_id, backup_code }, context, info) => {
+		restoreAccount: async (_parent, { creator_id, backup_code }, context, _info) => {
 			try {
 				if (await context.authenticate()) {
 					const dbData = await db.oneOrNone(
@@ -686,10 +717,10 @@ export default {
 			}
 		},
 		profile: async (
-			parent,
+			_parent,
 			{ bio, profile_color, banner_image, logo_image, clear_banner_image, clear_logo_image },
 			context,
-			info
+			_info
 		) => {
 			try {
 				if (await context.authenticate()) {
@@ -798,9 +829,9 @@ export default {
 				throw new Error(e)
 			}
 		},
-		mergeJson: async (parent, { uuid, piece_uuids, common }, context, info) => {
+		mergeJson: async (_parent, { uuid, piece_uuids, common }, _context, _info) => {
 			try {
-				return await new Promise(async (resolve, reject) => {
+				return await new Promise(async (resolve, _reject) => {
 					const json = await mergeJson(uuid, piece_uuids, common)
 					resolve(json)
 
@@ -819,7 +850,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		createOverlaysNXTheme: async (parent, { layout }, context, info) => {
+		createOverlaysNXTheme: async (_parent, { layout }, _context, _info) => {
 			try {
 				return await new Promise((resolve, reject) => {
 					tmp.dir({ unsafeCleanup: true }, async (err, path, cleanupCallback) => {
@@ -868,7 +899,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		createOverlay: async (parent, { themeName, blackImg, whiteImg }, context, info) => {
+		createOverlay: async (_parent, { themeName, blackImg, whiteImg }, _context, _info) => {
 			try {
 				return await new Promise((resolve, reject) => {
 					tmp.dir({ unsafeCleanup: true }, async (err, path, cleanupCallback) => {
@@ -915,7 +946,7 @@ export default {
 								'-composite',
 								`${path}/overlay.png`
 							],
-							async function(err, stdout, stderr) {
+							async function(err, _stdout, stderr) {
 								if (err || stderr) {
 									console.error(err)
 									console.error(stderr)
@@ -939,11 +970,11 @@ export default {
 				throw new Error(e)
 			}
 		},
-		uploadSingleOrZip: async (parent, { file }, context, info) => {
+		uploadSingleOrZip: async (_parent, { file }, context, _info) => {
 			try {
 				if (await context.authenticate()) {
 					return await new Promise((resolve, reject) => {
-						tmp.dir({ prefix: 'theme' }, async (err, path, cleanupCallback) => {
+						tmp.dir({ prefix: 'theme' }, async (err, path, _cleanupCallback) => {
 							try {
 								if (err) {
 									reject(err)
@@ -1128,7 +1159,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		submitThemes: async (parent, { files, themes, details, type }, context, info) => {
+		submitThemes: async (_parent, { files, themes, details, type }, context, _info) => {
 			let themePaths = []
 			try {
 				if (await context.authenticate()) {
@@ -1384,7 +1415,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		downloadTheme: async (parent, { uuid, piece_uuids }, context, info) => {
+		downloadTheme: async (_parent, { uuid, piece_uuids }, _context, _info) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					try {
@@ -1401,7 +1432,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		downloadPack: async (parent, { uuid }, context, info) => {
+		downloadPack: async (_parent, { uuid }, _context, _info) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					// Get the pack details and theme uuids
