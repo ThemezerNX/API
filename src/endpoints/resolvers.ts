@@ -1089,13 +1089,6 @@ export default {
 														}
 													}
 
-													// Return detected used_pieces separately
-													let used_pieces = []
-													if (dbLayout) {
-														used_pieces = dbLayout.used_pieces
-														delete dbLayout.used_pieces
-													}
-
 													let target = null
 													if (validThemeTarget(info.Target)) {
 														target = themeTargetToFileName(info.Target)
@@ -1104,9 +1097,16 @@ export default {
 														return
 													}
 
-													if (target !== dbLayout.target) {
-														reject(errorName.TARGETS_DONT_MATCH)
-														return
+													// Return detected used_pieces separately
+													let used_pieces = []
+													if (dbLayout) {
+														used_pieces = dbLayout.used_pieces
+														delete dbLayout.used_pieces
+
+														if (target !== dbLayout.target) {
+															reject(errorName.TARGETS_DONT_MATCH)
+															return
+														}
 													}
 
 													resolve({
