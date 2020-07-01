@@ -255,12 +255,14 @@ const mergeJson = async (uuid, piece_uuids = [], common?) => {
 		// Create an array with all used pieces
 		const usedPieces = []
 
-		dbData.pieces.forEach((p) => {
-			usedPieces.push({
-				uuid: p.value.uuid,
-				json: p.value.json
+		if (dbData.pieces) {
+			dbData.pieces.forEach((p) => {
+				usedPieces.push({
+					uuid: p.value.uuid,
+					json: p.value.json
+				})
 			})
-		})
+		}
 
 		const baseJsonParsed = common ? JSON.parse(dbData.commonlayout) : JSON.parse(dbData.baselayout)
 		if (baseJsonParsed) {
