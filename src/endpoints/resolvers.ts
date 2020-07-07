@@ -135,21 +135,21 @@ const packsCS = new pgp.helpers.ColumnSet(
 	}
 )
 
-const creatorsCS = new pgp.helpers.ColumnSet(
-	[
-		{ name: 'role', cast: 'varchar' },
-		{ name: 'bio', cast: 'varchar' },
-		{ name: 'joined', cast: 'timestamp without time zone' },
-		{ name: 'discord_user', cast: 'json' },
-		{ name: 'id', cast: 'varchar' },
-		{ name: 'banner_image', cast: 'varchar' },
-		{ name: 'logo_image', cast: 'varchar' },
-		{ name: 'profile_color', cast: 'varchar' }
-	],
-	{
-		table: 'creators'
-	}
-)
+// const creatorsCS = new pgp.helpers.ColumnSet(
+// 	[
+// 		{ name: 'role', cast: 'varchar' },
+// 		{ name: 'bio', cast: 'varchar' },
+// 		{ name: 'joined', cast: 'timestamp without time zone' },
+// 		{ name: 'discord_user', cast: 'json' },
+// 		{ name: 'id', cast: 'varchar' },
+// 		{ name: 'banner_image', cast: 'varchar' },
+// 		{ name: 'logo_image', cast: 'varchar' },
+// 		{ name: 'profile_color', cast: 'varchar' },
+// 	],
+// 	{
+// 		table: 'creators'
+// 	}
+// )
 
 const updateCreatorCS = new pgp.helpers.ColumnSet(
 	[str('role'), str('bio'), str('banner_image'), str('logo_image'), str('profile_color')],
@@ -482,11 +482,30 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 export default {
 	JSON: GraphQLJSON,
 	Query: {
-		me: async (_parent, _args, context, _info) => {
-			if (await context.authenticate()) {
-				return context.req.user
-			} else {
-				throw new Error(errorName.UNAUTHORIZED)
+		me: async (_parent, _args, context, info) => {
+			try {
+				if (await context.authenticate()) {
+					return await new Promise(async (resolve, reject) => {
+						const dbData = await joinMonster(
+							info,
+							context,
+							(sql) => {
+								return db.any(sql)
+							},
+							joinMonsterOptions
+						)
+
+						if (dbData) {
+							resolve(dbData)
+						} else {
+							reject(errorName.UNKNOWN)
+						}
+					})
+				} else {
+					throw new Error(errorName.UNAUTHORIZED)
+				}
+			} catch (e) {
+				throw new Error(e)
 			}
 		},
 		creator: async (_parent, _args, context, info) => {
@@ -1507,6 +1526,51 @@ export default {
 						reject(errorName.PACK_CREATE_FAILED)
 					}
 				})
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
+		setLike: async (_parent, { type, id, value }, context, _info) => {
+			try {
+				const typeLowercase = type.toLowerCase()
+				if (!['creators', 'layouts', 'themes', 'packs'].includes(typeLowercase))
+					throw new Error(errorName.INVALID_FIELD)
+
+				if (await context.authenticate()) {
+					return await new Promise(async (resolve, reject) => {
+						let dbData = null
+
+						if (value === true) {
+							// Add like
+							dbData = await db.none(
+								`
+									UPDATE creators
+										SET liked_${typeLowercase} = array_append(liked_${typeLowercase}, $2)
+									WHERE id = $1
+										AND (liked_${typeLowercase} IS NULL OR NOT $2 = ANY(liked_${typeLowercase}))
+								`,
+								[context.req.user.id, id]
+							)
+						} else {
+							// Remove like
+							dbData = await db.none(
+								`
+									UPDATE creators
+										SET liked_${typeLowercase} = array_remove(liked_${typeLowercase}, $2)
+									WHERE id = $1
+										AND liked_${typeLowercase} IS NOT NULL
+										AND $2 = ANY(liked_${typeLowercase})
+								`,
+								[context.req.user.id, id]
+							)
+						}
+
+						resolve(true)
+					})
+				} else {
+					throw errorName.UNAUTHORIZED
+				}
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)

@@ -16,6 +16,8 @@ export default gql`
 		banner_image: String
 		logo_image: String
 		profile_color: String
+		liked: MyLikes
+		like_count: Int
 	}
 
 	type DiscordUser {
@@ -24,6 +26,13 @@ export default gql`
 		avatar: String
 		system: Boolean
 		locale: String
+	}
+
+	type MyLikes {
+		creators: [UserInfo!]
+		layouts: [Layout!]
+		themes: [Theme!]
+		packs: [Pack!]
 	}
 
 	type authPayload {
@@ -76,6 +85,7 @@ export default gql`
 		has_commonlayout: Boolean!
 		commonlayout: JSON
 		dl_count: Int!
+		like_count: Int
 	}
 
 	type Value {
@@ -116,8 +126,9 @@ export default gql`
 		last_updated: DateTime!
 		pieces: [UsedPiece!]
 		categories: [String!]
-		dl_count: Int!
 		bg_type: String
+		dl_count: Int!
+		like_count: Int
 	}
 
 	type Pack {
@@ -128,6 +139,7 @@ export default gql`
 		last_updated: DateTime!
 		categories: [String!]
 		dl_count: Int!
+		like_count: Int
 		themes: [Theme!]
 	}
 
@@ -171,11 +183,13 @@ export default gql`
 	}
 
 	type Query {
-		# Creator
+		# Authed
 		me: UserInfo!
+
+		# Unuthed
+		## General
 		creator(id: String!): UserInfo!
 
-		# General
 		categories: [String!]
 
 		layout(id: Int!, target: String!): Layout
@@ -189,7 +203,7 @@ export default gql`
 	}
 
 	type Mutation {
-		# Creator
+		# Authed
 		updateAuth(accepts: Boolean): authPayload
 
 		restoreAccount(creator_id: String!, backup_code: String!): Boolean!
@@ -203,7 +217,8 @@ export default gql`
 			clear_logo_image: Boolean
 		): Boolean
 
-		# General
+		# Unauthed
+		## Submitting
 		createOverlaysNXTheme(layout: Upload!): [File!]
 		createOverlay(themeName: String, blackImg: Upload!, whiteImg: Upload!): File!
 
@@ -212,10 +227,15 @@ export default gql`
 		uploadSingleOrZip(file: Upload!): [DetectedTheme!]
 		submitThemes(files: [Upload!], themes: [DetectedThemeInput!], details: DetailsInput!, type: String!): Boolean
 
+		## Downloading
 		mergeJson(uuid: GUID!, piece_uuids: [GUID!], common: Boolean): JSON!
 
 		downloadTheme(uuid: GUID!, piece_uuids: [GUID!]): File!
+
 		downloadPack(uuid: GUID!): File!
+
+		## Upvoting
+		setLike(type: String!, id: String!, value: Boolean!): Boolean
 	}
 
 	schema {

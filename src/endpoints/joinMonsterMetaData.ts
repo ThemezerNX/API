@@ -6,6 +6,9 @@ const {
 export default {
 	Query: {
 		fields: {
+			me: {
+				where: (table, _args, context) => format(`${table}.id = $1`, [context.req.user.id])
+			},
 			creator: {
 				where: (table, { id }) => format(`(${table}.id = $1) OR ($1 = ANY(${table}.old_ids))`, [id])
 			},
@@ -85,7 +88,17 @@ export default {
 			role: { sqlColumn: 'role' },
 			banner_image: { sqlColumn: 'banner_image' },
 			logo_image: { sqlColumn: 'logo_image' },
-			profile_color: { sqlColumn: 'profile_color' }
+			profile_color: { sqlColumn: 'profile_color' },
+			liked: {
+				sqlJoin: (table, creatorsTable) => `${table}.id = ${creatorsTable}.id`
+			},
+			like_count: {
+				sqlExpr: (table) => `(
+                    SELECT COUNT(*)
+					FROM creators
+					WHERE ${table}.id = ANY(liked_creators)
+                )`
+			}
 		}
 	},
 	DiscordUser: {
@@ -106,6 +119,24 @@ export default {
 			},
 			locale: {
 				sqlExpr: (table) => `${table}.discord_user ->> 'locale'`
+			}
+		}
+	},
+	MyLikes: {
+		sqlTable: 'creators',
+		uniqueKey: 'id',
+		fields: {
+			creators: {
+				sqlJoin: (table, creatorsTable) => `${creatorsTable}.id = ANY(${table}.liked_creators)`
+			},
+			layouts: {
+				sqlJoin: (table, creatorsTable) => `${creatorsTable}.uuid = ANY(${table}.liked_layouts)`
+			},
+			themes: {
+				sqlJoin: (table, creatorsTable) => `${creatorsTable}.uuid = ANY(${table}.liked_themes)`
+			},
+			packs: {
+				sqlJoin: (table, creatorsTable) => `${creatorsTable}.uuid = ANY(${table}.liked_packs)`
 			}
 		}
 	},
@@ -163,8 +194,8 @@ export default {
 		fields: {
 			id: { sqlColumn: 'id' },
 			creator: {
-				sqlJoin: (table, creatorTable) =>
-					`(${table}.creator_id = ${creatorTable}.id) OR (${table}.creator_id = ANY(${creatorTable}.old_ids))`
+				sqlJoin: (table, creatorsTable) =>
+					`(${table}.creator_id = ${creatorsTable}.id) OR (${table}.creator_id = ANY(${creatorsTable}.old_ids))`
 			},
 			details: {
 				sqlJoin: (table, detailsTable) => `${table}.uuid = ${detailsTable}.uuid`
@@ -183,7 +214,14 @@ export default {
 				sqlExpr: (table) => `CASE WHEN ${table}.commonlayout IS NULL THEN false ELSE true END`
 			},
 			commonlayout: { sqlColumn: 'commonlayout' },
-			dl_count: { sqlColumn: 'dl_count' }
+			dl_count: { sqlColumn: 'dl_count' },
+			like_count: {
+				sqlExpr: (table) => `(
+                    SELECT COUNT(*)
+					FROM creators
+					WHERE ${table}.uuid = ANY(liked_layouts)
+                )`
+			}
 		}
 	},
 	Theme: {
@@ -192,7 +230,7 @@ export default {
 		fields: {
 			id: { sqlColumn: 'id' },
 			creator: {
-				sqlJoin: (table, creatorTable) => `${table}.creator_id = ${creatorTable}.id`
+				sqlJoin: (table, creatorsTable) => `${table}.creator_id = ${creatorsTable}.id`
 			},
 			details: {
 				sqlJoin: (table, detailsTable) => `${table}.uuid = ${detailsTable}.uuid`
@@ -219,6 +257,13 @@ export default {
 			},
 			categories: { sqlColumn: 'categories' },
 			dl_count: { sqlColumn: 'dl_count' },
+			like_count: {
+				sqlExpr: (table) => `(
+                    SELECT COUNT(*)
+					FROM creators
+					WHERE ${table}.uuid = ANY(liked_themes)
+                )`
+			},
 			bg_type: { sqlColumn: 'bg_type' }
 		}
 	},
@@ -228,7 +273,7 @@ export default {
 		fields: {
 			id: { sqlColumn: 'id' },
 			creator: {
-				sqlJoin: (table, creatorTable) => `${table}.creator_id = ${creatorTable}.id`
+				sqlJoin: (table, creatorsTable) => `${table}.creator_id = ${creatorsTable}.id`
 			},
 			details: {
 				sqlJoin: (table, detailsTable) => `${table}.uuid = ${detailsTable}.uuid`
@@ -246,6 +291,13 @@ export default {
                 `
 			},
 			dl_count: { sqlColumn: 'dl_count' },
+			like_count: {
+				sqlExpr: (table) => `(
+                    SELECT COUNT(*)
+					FROM creators
+					WHERE ${table}.uuid = ANY(liked_packs)
+                )`
+			},
 			themes: {
 				sqlJoin: (table, themesTable) => `${table}.uuid = ${themesTable}.pack_uuid`
 			}
