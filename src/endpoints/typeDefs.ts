@@ -7,6 +7,13 @@ export default gql`
 	scalar HexColorCode
 	scalar JSON
 
+	enum CacheControlScope {
+		PUBLIC
+		PRIVATE
+	}
+
+	directive @cacheControl(maxAge: Int, scope: CacheControlScope) on FIELD_DEFINITION | OBJECT | INTERFACE
+
 	type UserInfo {
 		id: String!
 		discord_user: DiscordUser!
@@ -184,9 +191,9 @@ export default gql`
 
 	type Query {
 		# Authed
-		me: UserInfo!
+		me: UserInfo! @cacheControl(scope: PRIVATE)
 
-		# Unuthed
+		# Unauthed
 		## General
 		creator(id: String!): UserInfo!
 
@@ -200,6 +207,17 @@ export default gql`
 
 		pack(id: Int!): Pack
 		packsList(creator_id: String, limit: Int): [Pack!]
+
+		## Downloading
+		mergeJson(uuid: GUID!, piece_uuids: [GUID!], common: Boolean): JSON! @cacheControl(maxAge: 300)
+
+		downloadTheme(uuid: GUID!, piece_uuids: [GUID!]): File! @cacheControl(maxAge: 300)
+
+		downloadPack(uuid: GUID!): File! @cacheControl(maxAge: 300)
+
+		## Overlay creation tool
+		createOverlaysNXTheme(layout: Upload!): [File!]
+		createOverlay(themeName: String, blackImg: Upload!, whiteImg: Upload!): File!
 	}
 
 	type Mutation {
@@ -219,20 +237,9 @@ export default gql`
 
 		# Unauthed
 		## Submitting
-		createOverlaysNXTheme(layout: Upload!): [File!]
-		createOverlay(themeName: String, blackImg: Upload!, whiteImg: Upload!): File!
-
-		createNXTheme(themeName: String, author: String, image: Upload, layout: Upload): File!
 
 		uploadSingleOrZip(file: Upload!): [DetectedTheme!]
 		submitThemes(files: [Upload!], themes: [DetectedThemeInput!], details: DetailsInput!, type: String!): Boolean
-
-		## Downloading
-		mergeJson(uuid: GUID!, piece_uuids: [GUID!], common: Boolean): JSON!
-
-		downloadTheme(uuid: GUID!, piece_uuids: [GUID!]): File!
-
-		downloadPack(uuid: GUID!): File!
 
 		## Upvoting
 		setLike(type: String!, id: String!, value: Boolean!): Boolean

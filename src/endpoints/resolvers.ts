@@ -640,6 +640,242 @@ export default {
 				console.error(e)
 				throw new Error(e)
 			}
+		},
+		downloadTheme: async (_parent, { uuid, piece_uuids }, _context, _info) => {
+			try {
+				return await new Promise(async (resolve, reject) => {
+					try {
+						const themePromise = await prepareNXTheme(uuid, piece_uuids)
+
+						resolve(themePromise)
+					} catch (e) {
+						console.error(e)
+						reject(errorName.NXTHEME_CREATE_FAILED)
+					}
+				})
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
+		downloadPack: async (_parent, { uuid }, _context, _info) => {
+			try {
+				return await new Promise(async (resolve, reject) => {
+					// Get the pack details and theme uuids
+					let pack = null
+					try {
+						pack = await db.one(
+							`
+								SELECT details ->> 'name' as name,
+									(
+										SELECT discord_user ->> 'username'
+										FROM creators
+										WHERE id = pck.creator_id
+										LIMIT 1
+									) as creator_name,
+									(
+										SELECT array_agg(uuid)
+										FROM themes
+										WHERE pack_uuid = pck.uuid
+										LIMIT 1
+									) as themes
+								FROM packs pck
+								WHERE uuid = $1
+								LIMIT 1
+							`,
+							[uuid]
+						)
+					} catch (e) {
+						console.error(e)
+						reject(errorName.PACK_NOT_FOUND)
+						return
+					}
+
+					try {
+						// Create the NXThemes
+						const themePromises = pack.themes.map((uuid) => prepareNXTheme(uuid, null))
+						const themesB64: Array<any> = await Promise.all(themePromises)
+
+						// Create zip from base64 buffers.
+						// Use basic for loop to prevent 'MaxListenersExceededWarning' (I guess):
+						const zip = new AdmZip()
+						for (const i in themesB64) {
+							try {
+								await zip.addFile(themesB64[i].filename, Buffer.from(themesB64[i].data, 'base64'))
+							} catch (e) {
+								console.error(e)
+								reject(errorName.PACK_CREATE_FAILED)
+								return
+							}
+						}
+
+						// Return zip data as Base64 encoded string
+						const buff = await zip.toBuffer()
+						resolve({
+							filename: `${pack.name} by ${pack.creator_name}.zip`,
+							data: buff.toString('base64'),
+							mimetype: 'application/nxtheme'
+						})
+
+						// Increase download count by 1
+						db.none(
+							`
+								UPDATE packs
+									SET dl_count = dl_count + 1
+								WHERE uuid = $1
+							`,
+							[uuid]
+						)
+					} catch (e) {
+						console.error(e)
+						reject(errorName.PACK_CREATE_FAILED)
+					}
+				})
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
+		mergeJson: async (_parent, { uuid, piece_uuids, common }, _context, _info) => {
+			try {
+				return await new Promise(async (resolve, _reject) => {
+					const json = await mergeJson(uuid, piece_uuids, common)
+					resolve(json)
+
+					// Increase download count by 1
+					db.none(
+						`
+							UPDATE layouts
+								SET dl_count = dl_count + 1
+							WHERE uuid = $1
+						`,
+						[uuid]
+					)
+				})
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
+		createOverlaysNXTheme: async (_parent, { layout }, _context, _info) => {
+			try {
+				return await new Promise((resolve, reject) => {
+					tmp.dir({ unsafeCleanup: true }, async (err, path, cleanupCallback) => {
+						if (err) {
+							reject(err)
+							return
+						}
+
+						try {
+							const filePromises = saveFiles([{ file: layout, path }])
+							const files = await Promise.all(filePromises)
+
+							// Symlink the files to the two dirs
+							await Promise.all([
+								link(`${path}/${files[0]}`, `${path}/black/layout.json`),
+								link(`${__dirname}/../../images/BLACK.dds`, `${path}/black/image.dds`),
+								link(`${path}/${files[0]}`, `${path}/white/layout.json`),
+								link(`${__dirname}/../../images/WHITE.dds`, `${path}/white/image.dds`)
+							])
+
+							// Make NXThemes
+							const themes = [
+								{
+									path: `${path}/black`,
+									themeName: 'Black background'
+								},
+								{
+									path: `${path}/white`,
+									themeName: 'White background'
+								}
+							]
+							const themePromises = createNXThemes(themes)
+							const themesB64 = await Promise.all(themePromises)
+
+							resolve(themesB64)
+
+							cleanupCallback()
+						} catch (e) {
+							reject(e)
+							rimraf(path, () => {})
+						}
+					})
+				})
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
+		createOverlay: async (_parent, { themeName, blackImg, whiteImg }, _context, _info) => {
+			try {
+				return await new Promise((resolve, reject) => {
+					tmp.dir({ unsafeCleanup: true }, async (err, path, cleanupCallback) => {
+						if (err) {
+							reject(err)
+							return
+						}
+
+						const filePromises = saveFiles([
+							{ file: blackImg, path },
+							{ file: whiteImg, path }
+						])
+						const files = await Promise.all(filePromises)
+
+						im.convert(
+							[
+								`${path}/${files[0]}`,
+								`${path}/${files[1]}`,
+								'-alpha',
+								'off',
+								'(',
+								'-clone',
+								'0,1',
+								'-compose',
+								'difference',
+								'-composite',
+								'-threshold',
+								'50%',
+								'-negate',
+								')',
+								'(',
+								'-clone',
+								'0,2',
+								'+swap',
+								'-compose',
+								'divide',
+								'-composite',
+								')',
+								'-delete',
+								'0,1',
+								'+swap',
+								'-compose',
+								'Copy_Opacity',
+								'-composite',
+								`${path}/overlay.png`
+							],
+							async function(err, _stdout, stderr) {
+								if (err || stderr) {
+									console.error(err)
+									console.error(stderr)
+									reject(errorName.FILE_READ_ERROR)
+									rimraf(path, () => {})
+									cleanupCallback()
+									return
+								} else {
+									resolve({
+										filename: themeName ? `${themeName}_overlay.png` : `overlay.png`,
+										data: await readFilePromisified(`${path}/overlay.png`, 'base64'),
+										mimetype: 'image/png'
+									})
+								}
+							}
+						)
+					})
+				})
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
 		}
 	},
 	Mutation: {
@@ -829,147 +1065,6 @@ export default {
 				} else {
 					throw errorName.UNAUTHORIZED
 				}
-			} catch (e) {
-				console.error(e)
-				throw new Error(e)
-			}
-		},
-		mergeJson: async (_parent, { uuid, piece_uuids, common }, _context, _info) => {
-			try {
-				return await new Promise(async (resolve, _reject) => {
-					const json = await mergeJson(uuid, piece_uuids, common)
-					resolve(json)
-
-					// Increase download count by 1
-					db.none(
-						`
-							UPDATE layouts
-								SET dl_count = dl_count + 1
-							WHERE uuid = $1
-						`,
-						[uuid]
-					)
-				})
-			} catch (e) {
-				console.error(e)
-				throw new Error(e)
-			}
-		},
-		createOverlaysNXTheme: async (_parent, { layout }, _context, _info) => {
-			try {
-				return await new Promise((resolve, reject) => {
-					tmp.dir({ unsafeCleanup: true }, async (err, path, cleanupCallback) => {
-						if (err) {
-							reject(err)
-							return
-						}
-
-						try {
-							const filePromises = saveFiles([{ file: layout, path }])
-							const files = await Promise.all(filePromises)
-
-							// Symlink the files to the two dirs
-							await Promise.all([
-								link(`${path}/${files[0]}`, `${path}/black/layout.json`),
-								link(`${__dirname}/../../images/BLACK.dds`, `${path}/black/image.dds`),
-								link(`${path}/${files[0]}`, `${path}/white/layout.json`),
-								link(`${__dirname}/../../images/WHITE.dds`, `${path}/white/image.dds`)
-							])
-
-							// Make NXThemes
-							const themes = [
-								{
-									path: `${path}/black`,
-									themeName: 'Black background'
-								},
-								{
-									path: `${path}/white`,
-									themeName: 'White background'
-								}
-							]
-							const themePromises = createNXThemes(themes)
-							const themesB64 = await Promise.all(themePromises)
-
-							resolve(themesB64)
-
-							cleanupCallback()
-						} catch (e) {
-							reject(e)
-							rimraf(path, () => {})
-						}
-					})
-				})
-			} catch (e) {
-				console.error(e)
-				throw new Error(e)
-			}
-		},
-		createOverlay: async (_parent, { themeName, blackImg, whiteImg }, _context, _info) => {
-			try {
-				return await new Promise((resolve, reject) => {
-					tmp.dir({ unsafeCleanup: true }, async (err, path, cleanupCallback) => {
-						if (err) {
-							reject(err)
-							return
-						}
-
-						const filePromises = saveFiles([
-							{ file: blackImg, path },
-							{ file: whiteImg, path }
-						])
-						const files = await Promise.all(filePromises)
-
-						im.convert(
-							[
-								`${path}/${files[0]}`,
-								`${path}/${files[1]}`,
-								'-alpha',
-								'off',
-								'(',
-								'-clone',
-								'0,1',
-								'-compose',
-								'difference',
-								'-composite',
-								'-threshold',
-								'50%',
-								'-negate',
-								')',
-								'(',
-								'-clone',
-								'0,2',
-								'+swap',
-								'-compose',
-								'divide',
-								'-composite',
-								')',
-								'-delete',
-								'0,1',
-								'+swap',
-								'-compose',
-								'Copy_Opacity',
-								'-composite',
-								`${path}/overlay.png`
-							],
-							async function(err, _stdout, stderr) {
-								if (err || stderr) {
-									console.error(err)
-									console.error(stderr)
-									reject(errorName.FILE_READ_ERROR)
-									rimraf(path, () => {})
-									cleanupCallback()
-									return
-								} else {
-									resolve({
-										filename: themeName ? `${themeName}_overlay.png` : `overlay.png`,
-										data: await readFilePromisified(`${path}/overlay.png`, 'base64'),
-										mimetype: 'image/png'
-									})
-								}
-							}
-						)
-					})
-				})
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -1417,101 +1512,6 @@ export default {
 				for (const i in themePaths) {
 					rimraf(themePaths[i], () => {})
 				}
-				throw new Error(e)
-			}
-		},
-		downloadTheme: async (_parent, { uuid, piece_uuids }, _context, _info) => {
-			try {
-				return await new Promise(async (resolve, reject) => {
-					try {
-						const themePromise = await prepareNXTheme(uuid, piece_uuids)
-
-						resolve(themePromise)
-					} catch (e) {
-						console.error(e)
-						reject(errorName.NXTHEME_CREATE_FAILED)
-					}
-				})
-			} catch (e) {
-				console.error(e)
-				throw new Error(e)
-			}
-		},
-		downloadPack: async (_parent, { uuid }, _context, _info) => {
-			try {
-				return await new Promise(async (resolve, reject) => {
-					// Get the pack details and theme uuids
-					let pack = null
-					try {
-						pack = await db.one(
-							`
-								SELECT details ->> 'name' as name,
-									(
-										SELECT discord_user ->> 'username'
-										FROM creators
-										WHERE id = pck.creator_id
-										LIMIT 1
-									) as creator_name,
-									(
-										SELECT array_agg(uuid)
-										FROM themes
-										WHERE pack_uuid = pck.uuid
-										LIMIT 1
-									) as themes
-								FROM packs pck
-								WHERE uuid = $1
-								LIMIT 1
-							`,
-							[uuid]
-						)
-					} catch (e) {
-						console.error(e)
-						reject(errorName.PACK_NOT_FOUND)
-						return
-					}
-
-					try {
-						// Create the NXThemes
-						const themePromises = pack.themes.map((uuid) => prepareNXTheme(uuid, null))
-						const themesB64: Array<any> = await Promise.all(themePromises)
-
-						// Create zip from base64 buffers.
-						// Use basic for loop to prevent 'MaxListenersExceededWarning' (I guess):
-						const zip = new AdmZip()
-						for (const i in themesB64) {
-							try {
-								await zip.addFile(themesB64[i].filename, Buffer.from(themesB64[i].data, 'base64'))
-							} catch (e) {
-								console.error(e)
-								reject(errorName.PACK_CREATE_FAILED)
-								return
-							}
-						}
-
-						// Return zip data as Base64 encoded string
-						const buff = await zip.toBuffer()
-						resolve({
-							filename: `${pack.name} by ${pack.creator_name}.zip`,
-							data: buff.toString('base64'),
-							mimetype: 'application/nxtheme'
-						})
-
-						// Increase download count by 1
-						db.none(
-							`
-								UPDATE packs
-									SET dl_count = dl_count + 1
-								WHERE uuid = $1
-							`,
-							[uuid]
-						)
-					} catch (e) {
-						console.error(e)
-						reject(errorName.PACK_CREATE_FAILED)
-					}
-				})
-			} catch (e) {
-				console.error(e)
 				throw new Error(e)
 			}
 		},

@@ -5,6 +5,7 @@ const app = express()
 const bodyParser = require('body-parser')
 
 const { ApolloServer } = require('apollo-server-express')
+import responseCachePlugin from 'apollo-server-plugin-response-cache'
 import resolvers from './endpoints/resolvers'
 import typeDefs from './endpoints/typeDefs'
 const { makeExecutableSchema } = require('graphql-tools')
@@ -35,6 +36,11 @@ const server = new ApolloServer({
 	cacheControl: {
 		defaultMaxAge: 20
 	},
+	plugins: [
+		responseCachePlugin({
+			sessionId: (context) => context.request.http.headers.get('token') || null
+		})
+	],
 	schema,
 	context: async ({ req }) => buildContext({ req }),
 	playground:
