@@ -32,6 +32,9 @@ const server = new ApolloServer({
 		maxFileSize: 25000000, // 25 MB
 		maxFiles: 50
 	},
+	cacheControl: {
+		defaultMaxAge: 20
+	},
 	schema,
 	context: async ({ req }) => buildContext({ req }),
 	playground:

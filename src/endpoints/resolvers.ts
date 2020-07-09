@@ -135,22 +135,6 @@ const packsCS = new pgp.helpers.ColumnSet(
 	}
 )
 
-// const creatorsCS = new pgp.helpers.ColumnSet(
-// 	[
-// 		{ name: 'role', cast: 'varchar' },
-// 		{ name: 'bio', cast: 'varchar' },
-// 		{ name: 'joined', cast: 'timestamp without time zone' },
-// 		{ name: 'discord_user', cast: 'json' },
-// 		{ name: 'id', cast: 'varchar' },
-// 		{ name: 'banner_image', cast: 'varchar' },
-// 		{ name: 'logo_image', cast: 'varchar' },
-// 		{ name: 'profile_color', cast: 'varchar' },
-// 	],
-// 	{
-// 		table: 'creators'
-// 	}
-// )
-
 const updateCreatorCS = new pgp.helpers.ColumnSet(
 	[str('role'), str('bio'), str('banner_image'), str('logo_image'), str('profile_color')],
 	{
