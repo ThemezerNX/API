@@ -968,7 +968,7 @@ export default {
 					return await new Promise(async (resolve, reject) => {
 						try {
 							let object: any = {
-								bio: bio,
+								bio: bio.replace(/<script>.*?<\/script>/gm, ''), // Remove script tags for cross-site scripting
 								profile_color: profile_color
 							}
 
