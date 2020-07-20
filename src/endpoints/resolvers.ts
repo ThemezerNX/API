@@ -1,7 +1,6 @@
 const util = require('util')
 import { pgp, db } from '../db/db'
 import {
-	webNameToFileNameNoExtension,
 	fileNameToThemeTarget,
 	themeTargetToFileName,
 	fileNameToWebName,
@@ -24,7 +23,6 @@ const { patch } = require('@tromkom/aurora-strategic-json-merge-patch')
 import GraphQLJSON from 'graphql-type-json'
 import { PythonShell } from 'python-shell'
 import filterAsync from 'node-filter-async'
-import { resolveFieldValueOrError } from 'graphql/execution/execute'
 const link = require('fs-symlink')
 const {
 	createWriteStream,
@@ -150,7 +148,7 @@ const createInfo = (themeName, creatorName, target, layoutDetails) => {
 	return {
 		Version: 12,
 		ThemeName: themeName,
-		Author: creatorName || 'Themezer',
+		Author: creatorName,
 		Target: target,
 		LayoutInfo
 	}
@@ -396,7 +394,7 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 								FROM creators
 								WHERE id = themes.creator_id
 								LIMIT 1
-							) as username
+							) as creator_name
 						FROM themes
 						WHERE uuid = $1
 						LIMIT 1
@@ -438,6 +436,7 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 						creatorName: creator_name
 					}
 				]
+
 				const themePromises = createNXThemes(themes)
 				const themesB64 = await Promise.all(themePromises)
 
@@ -712,7 +711,7 @@ export default {
 						// Return zip data as Base64 encoded string
 						const buff = await zip.toBuffer()
 						resolve({
-							filename: `${pack.name} by ${pack.creator_name}.zip`,
+							filename: `${pack.name} by ${pack.creator_name} via Themezer.zip`,
 							data: buff.toString('base64'),
 							mimetype: 'application/nxtheme'
 						})

@@ -33,9 +33,12 @@ const server = new ApolloServer({
 		maxFileSize: 25000000, // 25 MB
 		maxFiles: 50
 	},
-	cacheControl: {
-		defaultMaxAge: 20
-	},
+	cacheControl:
+		process.env.NODE_ENV === 'development'
+			? false
+			: {
+					defaultMaxAge: 20
+			  },
 	plugins: [
 		responseCachePlugin({
 			sessionId: (context) => context.request.http.headers.get('token') || null

@@ -199,10 +199,10 @@ export default gql`
 
 		categories: [String!]
 
-		layout(id: Int!, target: String!): Layout
+		layout(id: Int!): Layout
 		layoutsList(target: String, creator_id: String, limit: Int): [Layout!]
 
-		theme(id: Int!, target: String!): Theme
+		theme(id: Int!): Theme
 		themesList(target: String, creator_id: String, limit: Int): [Theme!]
 
 		pack(id: Int!): Pack
