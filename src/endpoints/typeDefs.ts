@@ -209,7 +209,7 @@ export default gql`
 		packsList(creator_id: String, limit: Int): [Pack!]
 
 		## Downloading
-		mergeJson(uuid: GUID!, piece_uuids: [GUID!], common: Boolean): JSON! @cacheControl(maxAge: 300)
+		mergeJsonByUUID(uuid: GUID!, piece_uuids: [GUID!], common: Boolean): JSON! @cacheControl(maxAge: 300)
 
 		downloadTheme(uuid: GUID!, piece_uuids: [GUID!]): File! @cacheControl(maxAge: 300)
 

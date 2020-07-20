@@ -197,7 +197,33 @@ const saveFiles = (files) =>
 			})
 	)
 
-const mergeJson = async (uuid, piece_uuids = [], common?) => {
+const mergeJson = (base, jsonArray) => {
+	while (jsonArray.length > 0) {
+		const shifted = jsonArray.shift()
+
+		// Merge files patches
+		if (Array.isArray(base.Files)) {
+			base.Files = patch(base.Files, JSON.parse(shifted).Files, [
+				'FileName',
+				'PaneName',
+				'PropName',
+				'GroupName',
+				'name',
+				'MaterialName',
+				'unknown'
+			])
+		}
+
+		// Merge animation files patches
+		if (Array.isArray(base.Anims)) {
+			base.Anims = patch(base.Anims, JSON.parse(shifted).Anims, ['FileName'])
+		}
+	}
+
+	return base
+}
+
+const mergeJsonByUUID = async (uuid, piece_uuids = [], common?) => {
 	let dbData = null
 
 	// If common layout, dont get the pieces
@@ -248,42 +274,23 @@ const mergeJson = async (uuid, piece_uuids = [], common?) => {
 
 		const baseJsonParsed = common ? JSON.parse(dbData.commonlayout) : JSON.parse(dbData.baselayout)
 		if (baseJsonParsed) {
-			const list = usedPieces.slice(0)
-			while (list.length > 0) {
-				const shifted = list.shift()
+			const jsonArray = usedPieces.map((p) => p.json)
 
-				// Merge files patches
-				if (Array.isArray(baseJsonParsed.Files)) {
-					baseJsonParsed.Files = patch(baseJsonParsed.Files, JSON.parse(shifted.json).Files, [
-						'FileName',
-						'PaneName',
-						'PropName',
-						'GroupName',
-						'name',
-						'MaterialName',
-						'unknown'
-					])
-				}
-
-				// Merge animation files patches
-				if (Array.isArray(baseJsonParsed.Anims)) {
-					baseJsonParsed.Anims = patch(baseJsonParsed.Anims, JSON.parse(shifted.json).Anims, ['FileName'])
-				}
-			}
+			const mergedJson = mergeJson(baseJsonParsed, jsonArray)
 
 			// Recreate the file layout
 			const ordered = {
-				PatchName: baseJsonParsed.PatchName,
-				AuthorName: baseJsonParsed.AuthorName,
-				TargetName: baseJsonParsed.TargetName,
+				PatchName: mergedJson.PatchName,
+				AuthorName: mergedJson.AuthorName,
+				TargetName: mergedJson.TargetName,
 				ID: stringifyThemeID({
 					service: 'Themezer',
-					uuid: uuid + (baseJsonParsed.TargetName === 'common.szs' ? '-common' : ''),
+					uuid: uuid + (mergedJson.TargetName === 'common.szs' ? '-common' : ''),
 					piece_uuids: usedPieces.map((p) => p.uuid)
 				}),
-				Ready8X: baseJsonParsed.Ready8X,
-				Files: baseJsonParsed.Files,
-				Anims: baseJsonParsed.Anims
+				Ready8X: mergedJson.Ready8X,
+				Files: mergedJson.Files,
+				Anims: mergedJson.Anims
 			}
 
 			// Return as prettified string
@@ -405,14 +412,14 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 				// Get merged layout json if any
 				let layoutJson = null
 				if (layout_uuid) {
-					const layoutJson = await mergeJson(layout_uuid, piece_uuids)
+					const layoutJson = await mergeJsonByUUID(layout_uuid, piece_uuids)
 					await writeFilePromisified(`${path}/layout.json`, layoutJson, 'utf8')
 				}
 
 				// Get optional common json
 				let commonJson = null
 				if (layout_uuid) {
-					commonJson = await mergeJson(layout_uuid, null, true)
+					commonJson = await mergeJsonByUUID(layout_uuid, null, true)
 					if (commonJson) {
 						await writeFilePromisified(`${path}/common.json`, commonJson, 'utf8')
 					}
@@ -735,10 +742,10 @@ export default {
 				throw new Error(e)
 			}
 		},
-		mergeJson: async (_parent, { uuid, piece_uuids, common }, _context, _info) => {
+		mergeJsonByUUID: async (_parent, { uuid, piece_uuids, common }, _context, _info) => {
 			try {
 				return await new Promise(async (resolve, _reject) => {
-					const json = await mergeJson(uuid, piece_uuids, common)
+					const json = await mergeJsonByUUID(uuid, piece_uuids, common)
 					resolve(json)
 
 					// Increase download count by 1
@@ -756,7 +763,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		createOverlaysNXTheme: async (_parent, { layout }, _context, _info) => {
+		createOverlaysNXTheme: async (_parent, { layout, piece }, _context, _info) => {
 			try {
 				return await new Promise((resolve, reject) => {
 					tmp.dir({ unsafeCleanup: true }, async (err, path, cleanupCallback) => {
@@ -766,7 +773,9 @@ export default {
 						}
 
 						try {
-							const filePromises = saveFiles([{ file: layout, path }])
+							const json = mergeJson(layout, [piece])
+
+							const filePromises = saveFiles([{ file: json, path }])
 							const files = await Promise.all(filePromises)
 
 							// Symlink the files to the two dirs
