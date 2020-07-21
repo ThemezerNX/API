@@ -217,8 +217,8 @@ export default gql`
 		downloadPack(uuid: GUID!): File! @cacheControl(maxAge: 300)
 
 		## Overlay creation tool
-		createOverlaysNXTheme(layout: Upload!, piece: Upload): [File!]
-		createOverlay(themeName: String, blackImg: Upload!, whiteImg: Upload!): File!
+		createOverlaysNXTheme(layout: Upload!, piece: Upload): [File!] @cacheControl(maxAge: 0)
+		createOverlay(themeName: String, blackImg: Upload!, whiteImg: Upload!): File! @cacheControl(maxAge: 0)
 	}
 
 	type Mutation {

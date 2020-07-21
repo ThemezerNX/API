@@ -1080,7 +1080,7 @@ export default {
 							}
 						} catch (e) {
 							console.error(e)
-							reject(errorName.FILE_SAVE_ERROR)
+							reject(errorName.UNKNOWN)
 						}
 					})
 				} else {
