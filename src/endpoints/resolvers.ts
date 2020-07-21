@@ -989,7 +989,7 @@ export default {
 						try {
 							let object: any = {
 								custom_username: custom_username,
-								bio: bio.replace(/<script>.*?<\/script>/gm, ''), // Remove script tags for cross-site scripting
+								bio: bio?.replace(/<script>.*?<\/script>/gm, ''), // Remove script tags for cross-site scripting
 								profile_color: profile_color
 							}
 
