@@ -27,15 +27,11 @@ const link = require('fs-symlink')
 const {
 	createWriteStream,
 	unlink,
-	readFile,
-	writeFile,
 	readdir,
 	lstat,
-	promises: { mkdir, access },
+	promises: { mkdir, access, readFile, writeFile },
 	constants
 } = require('fs')
-const writeFilePromisified = util.promisify(writeFile)
-const readFilePromisified = util.promisify(readFile)
 const readdirPromisified = util.promisify(readdir)
 const moveFile = require('move-file')
 const tmp = require('tmp')
@@ -134,7 +130,7 @@ const packsCS = new pgp.helpers.ColumnSet(
 )
 
 const updateCreatorCS = new pgp.helpers.ColumnSet(
-	[str('role'), str('bio'), str('banner_image'), str('logo_image'), str('profile_color')],
+	[str('role'), str('custom_username'), str('bio'), str('banner_image'), str('logo_image'), str('profile_color')],
 	{
 		table: 'creators'
 	}
@@ -148,7 +144,7 @@ const createInfo = (themeName, creatorName, target, layoutDetails) => {
 	return {
 		Version: 12,
 		ThemeName: themeName,
-		Author: creatorName,
+		Author: creatorName || 'Themezer',
 		Target: target,
 		LayoutInfo
 	}
@@ -197,13 +193,13 @@ const saveFiles = (files) =>
 			})
 	)
 
-const mergeJson = (base, jsonArray) => {
+const mergeJson = (baseParsed, jsonArray) => {
 	while (jsonArray.length > 0) {
 		const shifted = jsonArray.shift()
 
 		// Merge files patches
-		if (Array.isArray(base.Files)) {
-			base.Files = patch(base.Files, JSON.parse(shifted).Files, [
+		if (Array.isArray(baseParsed.Files)) {
+			baseParsed.Files = patch(baseParsed.Files, JSON.parse(shifted).Files, [
 				'FileName',
 				'PaneName',
 				'PropName',
@@ -215,12 +211,12 @@ const mergeJson = (base, jsonArray) => {
 		}
 
 		// Merge animation files patches
-		if (Array.isArray(base.Anims)) {
-			base.Anims = patch(base.Anims, JSON.parse(shifted).Anims, ['FileName'])
+		if (Array.isArray(baseParsed.Anims)) {
+			baseParsed.Anims = patch(baseParsed.Anims, JSON.parse(shifted).Anims, ['FileName'])
 		}
 	}
 
-	return base
+	return baseParsed
 }
 
 const mergeJsonByUUID = async (uuid, piece_uuids = [], common?) => {
@@ -310,7 +306,7 @@ const createNXThemes = (themes) =>
 					// Check if there's a layout.json
 					let layoutDetails = null
 					if (filesInFolder.includes('layout.json')) {
-						layoutDetails = JSON.parse(await readFilePromisified(`${theme.path}/layout.json`, 'utf8'))
+						layoutDetails = JSON.parse(await readFile(`${theme.path}/layout.json`, 'utf8'))
 					}
 
 					// Create info preferably with the one in the layout or the specified target
@@ -322,7 +318,7 @@ const createNXThemes = (themes) =>
 					)
 
 					// Write the info.json to the dir
-					await writeFilePromisified(`${theme.path}/info.json`, JSON.stringify(info), 'utf8')
+					await writeFile(`${theme.path}/info.json`, JSON.stringify(info), 'utf8')
 
 					// Run SARC-Tool main.py on the specified folder
 					const options = {
@@ -345,7 +341,7 @@ const createNXThemes = (themes) =>
 								`${theme.themeName} by ${info.Author}` +
 								(info.LayoutInfo ? ` using ${info.LayoutInfo}` : '') +
 								'.nxtheme',
-							data: await readFilePromisified(`${theme.path}/theme.nxtheme`, 'base64'),
+							data: await readFile(`${theme.path}/theme.nxtheme`, 'base64'),
 							mimetype: 'application/nxtheme'
 						})
 					})
@@ -413,7 +409,7 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 				let layoutJson = null
 				if (layout_uuid) {
 					const layoutJson = await mergeJsonByUUID(layout_uuid, piece_uuids)
-					await writeFilePromisified(`${path}/layout.json`, layoutJson, 'utf8')
+					await writeFile(`${path}/layout.json`, layoutJson, 'utf8')
 				}
 
 				// Get optional common json
@@ -421,7 +417,7 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 				if (layout_uuid) {
 					commonJson = await mergeJsonByUUID(layout_uuid, null, true)
 					if (commonJson) {
-						await writeFilePromisified(`${path}/common.json`, commonJson, 'utf8')
+						await writeFile(`${path}/common.json`, commonJson, 'utf8')
 					}
 				}
 
@@ -773,16 +769,32 @@ export default {
 						}
 
 						try {
-							const json = mergeJson(layout, [piece])
+							const filesToSave = [{ file: layout, path }]
 
-							const filePromises = saveFiles([{ file: json, path }])
+							if (!!piece) {
+								filesToSave.push({ file: piece, path })
+							}
+
+							const filePromises = saveFiles(filesToSave)
+
 							const files = await Promise.all(filePromises)
+
+							const layoutJson = await readFile(`${path}/${files[0]}`, 'utf8')
+
+							const piecesJson = []
+							if (!!piece) {
+								piecesJson.push(await readFile(`${path}/${files[1]}`, 'utf8'))
+							}
+
+							const json = mergeJson(JSON.parse(layoutJson), piecesJson)
+
+							await writeFile(`${path}/layout_merged.json`, JSON.stringify(json, null, 4))
 
 							// Symlink the files to the two dirs
 							await Promise.all([
-								link(`${path}/${files[0]}`, `${path}/black/layout.json`),
+								link(`${path}/layout_merged.json`, `${path}/black/layout.json`),
 								link(`${__dirname}/../../images/BLACK.dds`, `${path}/black/image.dds`),
-								link(`${path}/${files[0]}`, `${path}/white/layout.json`),
+								link(`${path}/layout_merged.json`, `${path}/white/layout.json`),
 								link(`${__dirname}/../../images/WHITE.dds`, `${path}/white/image.dds`)
 							])
 
@@ -872,7 +884,7 @@ export default {
 								} else {
 									resolve({
 										filename: themeName ? `${themeName}_overlay.png` : `overlay.png`,
-										data: await readFilePromisified(`${path}/overlay.png`, 'base64'),
+										data: await readFile(`${path}/overlay.png`, 'base64'),
 										mimetype: 'image/png'
 									})
 								}
@@ -967,7 +979,7 @@ export default {
 		},
 		profile: async (
 			_parent,
-			{ bio, profile_color, banner_image, logo_image, clear_banner_image, clear_logo_image },
+			{ custom_username, bio, profile_color, banner_image, logo_image, clear_banner_image, clear_logo_image },
 			context,
 			_info
 		) => {
@@ -976,6 +988,7 @@ export default {
 					return await new Promise(async (resolve, reject) => {
 						try {
 							let object: any = {
+								custom_username: custom_username,
 								bio: bio.replace(/<script>.*?<\/script>/gm, ''), // Remove script tags for cross-site scripting
 								profile_color: profile_color
 							}
@@ -1142,14 +1155,12 @@ export default {
 										return new Promise(async (resolve, reject) => {
 											try {
 												// Read info.json
-												const info = JSON.parse(await readFilePromisified(`${path}/info.json`))
+												const info = JSON.parse(await readFile(`${path}/info.json`))
 
 												// Read layout.json
 												let layout = null
 												try {
-													layout = JSON.parse(
-														await readFilePromisified(`${path}/layout.json`)
-													)
+													layout = JSON.parse(await readFile(`${path}/layout.json`))
 												} catch (e) {}
 
 												// Check if image in dds or jpg format

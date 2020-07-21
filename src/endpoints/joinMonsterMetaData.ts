@@ -83,6 +83,7 @@ export default {
 			discord_user: {
 				sqlJoin: (table, detailsTable) => `${table}.id = ${detailsTable}.id`
 			},
+			custom_username: { sqlColumn: 'custom_username' },
 			bio: { sqlColumn: 'bio' },
 			joined: { sqlColumn: 'joined' },
 			role: { sqlColumn: 'role' },
@@ -106,7 +107,8 @@ export default {
 		uniqueKey: 'id',
 		fields: {
 			username: {
-				sqlExpr: (table) => `${table}.discord_user ->> 'username'`
+				sqlExpr: (table) =>
+					`CASE WHEN ${table}.custom_username IS NOT NULL THEN ${table}.custom_username ELSE ${table}.discord_user ->> 'username' END`
 			},
 			discriminator: {
 				sqlExpr: (table) => `${table}.discord_user ->> 'discriminator'`

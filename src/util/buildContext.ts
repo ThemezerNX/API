@@ -32,6 +32,10 @@ const buildCommonContext = (req, additionalContext: {}) => ({
 								[id, res.data]
 							)
 
+							if (!!user.custom_username) {
+								user.discord_user.username = user.custom_username
+							}
+
 							// Then add the user object to the original req object
 							req.user = user
 							resolve(true)

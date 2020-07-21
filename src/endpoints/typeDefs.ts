@@ -17,6 +17,7 @@ export default gql`
 	type UserInfo {
 		id: String!
 		discord_user: DiscordUser!
+		custom_username: String
 		bio: String
 		joined: DateTime!
 		role: String
@@ -216,7 +217,7 @@ export default gql`
 		downloadPack(uuid: GUID!): File! @cacheControl(maxAge: 300)
 
 		## Overlay creation tool
-		createOverlaysNXTheme(layout: Upload!): [File!]
+		createOverlaysNXTheme(layout: Upload!, piece: Upload): [File!]
 		createOverlay(themeName: String, blackImg: Upload!, whiteImg: Upload!): File!
 	}
 
@@ -227,6 +228,7 @@ export default gql`
 		restoreAccount(creator_id: String!, backup_code: String!): Boolean!
 
 		profile(
+			custom_username: String
 			bio: String
 			profile_color: String
 			banner_image: Upload
