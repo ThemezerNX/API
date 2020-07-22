@@ -50,7 +50,8 @@ const server = new ApolloServer({
 		process.env.NODE_ENV === 'development'
 			? {
 					settings: {
-						'request.credentials': 'same-origin'
+						'request.credentials': 'same-origin',
+						'schema.polling.enable': false
 					}
 			  }
 			: true,
