@@ -46,6 +46,7 @@ const server = new ApolloServer({
 	],
 	schema,
 	context: async ({ req }) => buildContext({ req }),
+	introspection: true,
 	playground:
 		process.env.NODE_ENV === 'development'
 			? {
@@ -53,11 +54,7 @@ const server = new ApolloServer({
 						'request.credentials': 'same-origin'
 					}
 			  }
-			: {
-					settings: {
-						'schema.polling.enable': false
-					}
-			  },
+			: true,
 	formatError: (err, params) => {
 		let error = null
 		console.error(err)
