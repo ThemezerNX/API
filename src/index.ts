@@ -53,7 +53,7 @@ const server = new ApolloServer({
 						'request.credentials': 'same-origin'
 					}
 			  }
-			: false,
+			: true,
 	formatError: (err, params) => {
 		let error = null
 		console.error(err)
