@@ -219,7 +219,7 @@ export default gql`
 
 		## Overlay creation tool
 		createOverlaysNXTheme(layout: Upload!, piece: Upload): [File!] @cacheControl(maxAge: 0)
-		createOverlay(themeName: String, blackImg: Upload!, whiteImg: Upload!): File! @cacheControl(maxAge: 0)
+		createOverlay(blackImg: Upload!, whiteImg: Upload!): File! @cacheControl(maxAge: 0)
 	}
 
 	type Mutation {
