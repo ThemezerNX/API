@@ -770,7 +770,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		createOverlaysNXTheme: async (_parent, { layout, piece }, _context, _info) => {
+		createOverlayNXThemes: async (_parent, { layout, piece, common }, _context, _info) => {
 			try {
 				return await new Promise((resolve, reject) => {
 					tmp.dir({ unsafeCleanup: true }, async (err, path, cleanupCallback) => {
@@ -783,31 +783,40 @@ export default {
 							const filesToSave = [{ file: layout, path }]
 
 							if (!!piece) {
-								filesToSave.push({ file: piece, path })
+								filesToSave[1] = { file: piece, path }
+							}
+
+							if (!!common) {
+								filesToSave[2] = { file: common, path }
 							}
 
 							const filePromises = saveFiles(filesToSave)
-
 							const files = await Promise.all(filePromises)
-
 							const layoutJson = await readFile(`${path}/${files[0]}`, 'utf8')
 
 							const piecesJson = []
+
 							if (!!piece) {
 								piecesJson.push(await readFile(`${path}/${files[1]}`, 'utf8'))
 							}
 
 							const json = mergeJson(JSON.parse(layoutJson), piecesJson)
-
 							await writeFile(`${path}/layout_merged.json`, JSON.stringify(json, null, 4))
 
-							// Symlink the files to the two dirs
-							await Promise.all([
+							const linkPromises = [
 								link(`${path}/layout_merged.json`, `${path}/black/layout.json`),
 								link(`${__dirname}/../../images/BLACK.dds`, `${path}/black/image.dds`),
 								link(`${path}/layout_merged.json`, `${path}/white/layout.json`),
 								link(`${__dirname}/../../images/WHITE.dds`, `${path}/white/image.dds`)
-							])
+							]
+
+							if (!!common) {
+								linkPromises.push(link(`${path}/${files[2]}`, `${path}/black/common.json`))
+								linkPromises.push(link(`${path}/${files[2]}`, `${path}/white/common.json`))
+							}
+
+							// Symlink the files to the two dirs
+							await Promise.all(linkPromises)
 
 							// Make NXThemes
 							const themes = [

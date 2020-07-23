@@ -218,7 +218,7 @@ export default gql`
 		downloadPack(uuid: GUID!): File! @cacheControl(maxAge: 300)
 
 		## Overlay creation tool
-		createOverlaysNXTheme(layout: Upload!, piece: Upload): [File!] @cacheControl(maxAge: 0)
+		createOverlayNXThemes(layout: Upload!, piece: Upload, common: Upload): [File!] @cacheControl(maxAge: 0)
 		createOverlay(blackImg: Upload!, whiteImg: Upload!): File! @cacheControl(maxAge: 0)
 	}
 
