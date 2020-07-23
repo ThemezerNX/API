@@ -123,6 +123,10 @@
   dependencies:
     lodash "4.13.1"
 
+"@themezernx/layout-id-parser@https://github.com/ThemezerNX/Layout-ID-Parser.git":
+  version "1.0.1"
+  resolved "https://github.com/ThemezerNX/Layout-ID-Parser.git#9b979bf7d88c4c9cd1ec389a23352a50e247082a"
+
 "@tromkom/aurora-strategic-json-merge-patch@https://github.com/Migushthe2nd/aurora-strategic-json-merge-patch.git":
   version "1.0.2"
   resolved "https://github.com/Migushthe2nd/aurora-strategic-json-merge-patch.git#261601e7b65e852c6b69e209bc616b1c37d47d5f"
