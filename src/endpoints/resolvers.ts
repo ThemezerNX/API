@@ -219,12 +219,13 @@ const mergeJson = (baseParsed, jsonArray) => {
 	return baseParsed
 }
 
-const mergeJsonByUUID = async (uuid, piece_uuids = [], common?) => {
-	let dbData = null
+const createJson = async (uuid, piece_uuids = [], common?) => {
+	let finalJsonObject = null
+	const usedPieces = []
 
 	// If common layout, dont get the pieces
 	if (common) {
-		dbData = await db.oneOrNone(
+		const dbData = await db.oneOrNone(
 			`
 			SELECT commonlayout
 			FROM layouts
@@ -233,8 +234,10 @@ const mergeJsonByUUID = async (uuid, piece_uuids = [], common?) => {
 		`,
 			[uuid]
 		)
+
+		finalJsonObject = JSON.parse(dbData.commonlayout)
 	} else {
-		dbData = await db.oneOrNone(
+		const dbData = await db.oneOrNone(
 			`
 			SELECT baselayout,
 				(
@@ -253,11 +256,8 @@ const mergeJsonByUUID = async (uuid, piece_uuids = [], common?) => {
 		`,
 			[uuid, piece_uuids]
 		)
-	}
 
-	if (dbData) {
 		// Create an array with all used pieces
-		const usedPieces = []
 
 		if (dbData.pieces) {
 			dbData.pieces.forEach((p) => {
@@ -268,30 +268,30 @@ const mergeJsonByUUID = async (uuid, piece_uuids = [], common?) => {
 			})
 		}
 
-		const baseJsonParsed = common ? JSON.parse(dbData.commonlayout) : JSON.parse(dbData.baselayout)
-		if (baseJsonParsed) {
-			const jsonArray = usedPieces.map((p) => p.json)
+		const baseJsonObject = JSON.parse(dbData.baselayout)
 
-			const mergedJson = mergeJson(baseJsonParsed, jsonArray)
+		const jsonArray = usedPieces.map((p) => p.json)
 
-			// Recreate the file layout
-			const ordered = {
-				PatchName: mergedJson.PatchName,
-				AuthorName: mergedJson.AuthorName,
-				TargetName: mergedJson.TargetName,
-				ID: stringifyThemeID({
-					service: 'Themezer',
-					uuid: uuid + (mergedJson.TargetName === 'common.szs' ? '-common' : ''),
-					piece_uuids: usedPieces.map((p) => p.uuid)
-				}),
-				Ready8X: mergedJson.Ready8X,
-				Files: mergedJson.Files,
-				Anims: mergedJson.Anims
-			}
+		finalJsonObject = mergeJson(baseJsonObject, jsonArray)
+	}
 
-			// Return as prettified string
-			return JSON.stringify(ordered, null, 2)
-		} else return null
+	if (finalJsonObject) {
+		// Recreate the file layout
+		const ordered = {
+			PatchName: finalJsonObject.PatchName,
+			AuthorName: finalJsonObject.AuthorName,
+			TargetName: finalJsonObject.TargetName,
+			ID: stringifyThemeID({
+				service: 'Themezer',
+				uuid: uuid + (finalJsonObject.TargetName === 'common.szs' ? '-common' : ''),
+				piece_uuids: usedPieces.map((p) => p.uuid)
+			}),
+			Files: finalJsonObject.Files,
+			Anims: finalJsonObject.Anims
+		}
+
+		// Return as prettified string
+		return JSON.stringify(ordered, null, 2)
 	} else return null
 }
 
@@ -408,14 +408,14 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 				// Get merged layout json if any
 				let layoutJson = null
 				if (layout_uuid) {
-					const layoutJson = await mergeJsonByUUID(layout_uuid, piece_uuids)
+					const layoutJson = await createJson(layout_uuid, piece_uuids)
 					await writeFile(`${path}/layout.json`, layoutJson, 'utf8')
 				}
 
 				// Get optional common json
 				let commonJson = null
 				if (layout_uuid) {
-					commonJson = await mergeJsonByUUID(layout_uuid, null, true)
+					commonJson = await createJson(layout_uuid, null, true)
 					if (commonJson) {
 						await writeFile(`${path}/common.json`, commonJson, 'utf8')
 					}
@@ -738,10 +738,10 @@ export default {
 				throw new Error(e)
 			}
 		},
-		mergeJsonByUUID: async (_parent, { uuid, piece_uuids, common }, _context, _info) => {
+		mergeJsonByUUID: async (_parent, { uuid, piece_uuids }, _context, _info) => {
 			try {
 				return await new Promise(async (resolve, _reject) => {
-					const json = await mergeJsonByUUID(uuid, piece_uuids, common)
+					const json = await createJson(uuid, piece_uuids)
 					resolve(json)
 
 					// Increase download count by 1
@@ -753,6 +753,17 @@ export default {
 						`,
 						[uuid]
 					)
+				})
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
+		getCommonJson: async (_parent, { uuid }, _context, _info) => {
+			try {
+				return await new Promise(async (resolve, _reject) => {
+					const json = await createJson(uuid, null, true)
+					resolve(json)
 				})
 			} catch (e) {
 				console.error(e)
