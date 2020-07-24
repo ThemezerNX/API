@@ -13,7 +13,7 @@ export default {
 				where: (table, { id }) => format(`(${table}.id = $1) OR ($1 = ANY(${table}.old_ids))`, [id])
 			},
 			layout: {
-				where: (table, { id }) => format(`${table}.id = hex_to_int('$1#')`, [id])
+				where: (table, { id }) => format(`${table}.id = hex_to_int('$1^')`, [id])
 			},
 			layoutsList: {
 				orderBy: {
@@ -35,7 +35,7 @@ export default {
 				}
 			},
 			theme: {
-				where: (table, { id }) => format(`${table}.id = hex_to_int('$1#')`, [id])
+				where: (table, { id }) => format(`${table}.id = hex_to_int('$1^')`, [id])
 			},
 			themesList: {
 				orderBy: {
@@ -57,7 +57,7 @@ export default {
 				}
 			},
 			pack: {
-				where: (table, { id }) => format(`${table}.id = hex_to_int('$1#')`, [id])
+				where: (table, { id }) => format(`${table}.id = hex_to_int('$1^')`, [id])
 			},
 			packsList: {
 				orderBy: {
