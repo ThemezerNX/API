@@ -118,7 +118,6 @@ const themesCS = new pgp.helpers.ColumnSet(
 
 const packsCS = new pgp.helpers.ColumnSet(
 	[
-		{ name: 'id', cast: 'int' },
 		{ name: 'last_updated', cast: 'timestamp without time zone' },
 		{ name: 'creator_id', cast: 'varchar' },
 		{ name: 'details', cast: 'json' }
@@ -390,7 +389,7 @@ const prepareNXTheme = (id, piece_uuids) => {
 				// Get the theme details
 				const { layout_id, name, target, creator_name } = await db.one(
 					`
-						SELECT layout_id, details ->> 'name' as name, target,
+						SELECT int_to_padded_hex(layout_id) as layout_id, details ->> 'name' as name, target,
 							(	
 								SELECT discord_user ->> 'username'	
 								FROM creators	
@@ -674,7 +673,7 @@ export default {
 										LIMIT 1
 									) as creator_name,
 									(
-										SELECT id
+										SELECT array_agg(int_to_padded_hex(id))
 										FROM themes
 										WHERE pack_id = pck.id
 										LIMIT 1
@@ -1367,7 +1366,7 @@ export default {
 									try {
 										insertedPack = await db.one(
 											query() +
-												` RETURNING int_to_padded_hex(id) as id, details, last_updated, creator_id`
+												` RETURNING id, int_to_padded_hex(id) as hex_id, details, last_updated, creator_id`
 										)
 									} catch (e) {
 										console.error(e)
@@ -1450,7 +1449,7 @@ export default {
 								try {
 									const insertedThemes = await db.any(
 										query() +
-											` RETURNING int_to_padded_hex(id) as id, details, last_updated, creator_id, target`
+											` RETURNING id, int_to_padded_hex(id) as hex_id, details, last_updated, creator_id, target`
 									)
 
 									const themeMovePromises = themePaths.map((path, i) => {
@@ -1471,7 +1470,7 @@ export default {
 												const moveAllPromises = filteredFilesInFolder.map((f) => {
 													return moveFile(
 														`${path}/${f}`,
-														`${storagePath}/themes/${insertedThemes[i].id}/${f}`
+														`${storagePath}/themes/${insertedThemes[i].hex_id}/${f}`
 													)
 												})
 												await Promise.all(moveAllPromises)
@@ -1505,14 +1504,14 @@ export default {
 											)
 											.setThumbnail(
 												`https://api.themezer.ga/cdn/themes/${
-													(themeDatas[0] as any).id
+													(themeDatas[0] as any).hex_id
 												}/screenshot.jpg`
 											)
 											.setURL(
 												`https://themezer.ga/packs/${insertedPack.details.name.replace(
 													urlNameREGEX,
 													'-'
-												)}-${insertedPack.id}`
+												)}-${insertedPack.hex_id}`
 											)
 
 										if (insertedPack.details.description) {
@@ -1532,12 +1531,12 @@ export default {
 													`https://themezer.ga/creators/${context.req.user.id}`
 												)
 												.setThumbnail(
-													`https://api.themezer.ga/cdn/themes/${t.id}/screenshot.jpg`
+													`https://api.themezer.ga/cdn/themes/${t.hex_id}/screenshot.jpg`
 												)
 												.setURL(
 													`https://themezer.ga/themes/${fileNameToWebName(
 														t.target
-													)}/${t.details.name.replace(urlNameREGEX, '-')}-${t.id}`
+													)}/${t.details.name.replace(urlNameREGEX, '-')}-${t.hex_id}`
 												)
 
 											if (t.details.description) {
