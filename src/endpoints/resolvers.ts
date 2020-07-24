@@ -101,7 +101,6 @@ function int(column) {
 
 const themesCS = new pgp.helpers.ColumnSet(
 	[
-		{ name: 'id', cast: 'int' },
 		{ name: 'layout_id', cast: 'int' },
 		{ name: 'piece_uuids', cast: 'uuid[]' },
 		'target',
@@ -391,9 +390,16 @@ const prepareNXTheme = (id, piece_uuids) => {
 				// Get the theme details
 				const { layout_id, name, target, creator_name } = await db.one(
 					`
-						SELECT id
+						SELECT layout_id, details ->> 'name' as name, target,
+							(	
+								SELECT discord_user ->> 'username'	
+								FROM creators	
+								WHERE id = themes.creator_id	
+								LIMIT 1	
+							) as creator_name
 						FROM themes
 						WHERE id = hex_to_int('$1^')
+						LIMIT 1
 					`,
 					[id]
 				)
@@ -1419,7 +1425,7 @@ export default {
 												: reject(errorName.INVALID_TARGET_NAME),
 											last_updated: new Date(),
 											categories: categories.sort(),
-											pack_id: insertedPack.id,
+											pack_id: insertedPack?.id,
 											creator_id: context.req.user.id,
 											details: {
 												name: themes[i].info.ThemeName.trim(),
@@ -1469,6 +1475,8 @@ export default {
 													)
 												})
 												await Promise.all(moveAllPromises)
+
+												resolve(true)
 											} catch (e) {
 												console.error(e)
 												reject(errorName.FILE_SAVE_ERROR)
