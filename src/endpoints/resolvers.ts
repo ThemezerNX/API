@@ -225,11 +225,11 @@ const createJson = async (id, piece_uuids = [], common?) => {
 
 	// If common layout, dont get the pieces
 	if (common) {
-		const dbData = await db.oneOrNone(
+		const dbData = await db.one(
 			`
 			SELECT commonlayout, uuid
 			FROM layouts
-			WHERE to_themezer_hex(id) = $1
+			WHERE id = hex_to_int('$1#')
 			LIMIT 1
 		`,
 			[id]
@@ -237,7 +237,7 @@ const createJson = async (id, piece_uuids = [], common?) => {
 
 		finalJsonObject = JSON.parse(dbData.commonlayout)
 	} else {
-		const dbData = await db.oneOrNone(
+		const dbData = await db.one(
 			`
 			SELECT baselayout, uuid,
 				(
@@ -251,7 +251,7 @@ const createJson = async (id, piece_uuids = [], common?) => {
 				)
 	
 			FROM layouts as mt
-			WHERE to_themezer_hex(mt.id) = $1
+			WHERE mt.id = hex_to_int('$1#')
 			LIMIT 1
 		`,
 			[id, piece_uuids]
@@ -389,18 +389,11 @@ const prepareNXTheme = (id, piece_uuids) => {
 
 			try {
 				// Get the theme details
-				const { layout_id, name, target, creator_name } = await db.oneOrNone(
+				const { layout_id, name, target, creator_name } = await db.one(
 					`
-						SELECT layout_id, details ->> 'name' as name, target, 
-							(
-								SELECT discord_user ->> 'username'
-								FROM creators
-								WHERE id = themes.creator_id
-								LIMIT 1
-							) as creator_name
+						SELECT id
 						FROM themes
-						WHERE to_themezer_hex(id) = $1
-						LIMIT 1
+						WHERE id = hex_to_int('$1#')
 					`,
 					[id]
 				)
@@ -450,7 +443,7 @@ const prepareNXTheme = (id, piece_uuids) => {
 					`
 						UPDATE themes
 							SET dl_count = dl_count + 1
-						WHERE to_themezer_hex(id) = $1
+						WHERE id = hex_to_int('$1#')
 					`,
 					[id]
 				)
@@ -682,7 +675,7 @@ export default {
 										LIMIT 1
 									) as themes
 								FROM packs pck
-								WHERE to_themezer_hex(id) = $1
+								WHERE id = hex_to_int('$1#')
 								LIMIT 1
 							`,
 							[id]
@@ -724,7 +717,7 @@ export default {
 							`
 								UPDATE packs
 									SET dl_count = dl_count + 1
-								WHERE to_themezer_hex(id) = $1
+								WHERE  id = hex_to_int('$1#')
 							`,
 							[id]
 						)
@@ -749,7 +742,7 @@ export default {
 						`
 							UPDATE layouts
 								SET dl_count = dl_count + 1
-							WHERE to_themezer_hex(id) = $1
+							WHERE  id = hex_to_int('$1#')
 						`,
 						[id]
 					)
@@ -1210,23 +1203,29 @@ export default {
 														const { service, id, piece_uuids } = parseThemeID(layout.ID)
 														// Only fetch the layout if it was created by Themezer
 														if (service === 'Themezer') {
-															dbLayout = await db.oneOrNone(
-																`
-																	SELECT *, (
-																			SELECT array_agg(row_to_json(p)) as used_pieces
-																			FROM (
-																				SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
-																				FROM layouts
-																				WHERE to_themezer_hex(id) = $1
-																			) as p
-																			WHERE value ->> 'uuid' = ANY($2::text[])
-																		),
-																		CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
-																	FROM layouts
-																	WHERE to_themezer_hex(id) = $1
-																`,
-																[id, piece_uuids]
-															)
+															try {
+																dbLayout = await db.one(
+																	`
+																		SELECT *, (
+																				SELECT array_agg(row_to_json(p)) as used_pieces
+																				FROM (
+																					SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
+																					FROM layouts
+																					WHERE id = hex_to_int('$1#')
+																				) as p
+																				WHERE value ->> 'uuid' = ANY($2::text[])
+																			),
+																			CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+																		FROM layouts
+																		WHERE id = hex_to_int('$1#')
+																	`,
+																	[id, piece_uuids]
+																)
+															} catch (e) {
+																console.error
+																reject(errorName.INVALID_ID)
+																return
+															}
 														}
 													}
 
@@ -1363,7 +1362,7 @@ export default {
 									try {
 										insertedPack = await db.one(
 											query() +
-												` RETURNING to_themezer_hex(id) as id, details, last_updated, creator_id`
+												` RETURNING int_to_padded_hex(id) as id, details, last_updated, creator_id`
 										)
 									} catch (e) {
 										console.error(e)
@@ -1446,7 +1445,7 @@ export default {
 								try {
 									const insertedThemes = await db.any(
 										query() +
-											` RETURNING to_themezer_hex(id) as id, details, last_updated, creator_id, target`
+											` RETURNING int_to_padded_hex(id) as id, details, last_updated, creator_id, target`
 									)
 
 									const themeMovePromises = themePaths.map((path, i) => {

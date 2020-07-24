@@ -15,6 +15,7 @@ export const errorName = {
 	MAX_50_NXTHEMES: 'MAX_50_NXTHEMES',
 	INVALID_FILE_TYPE: 'INVALID_FILE_TYPE',
 	INVALID_TMP: 'INVALID_TMP',
+	INVALID_ID: 'INVALID_ID',
 	INVALID_TARGET_NAME: 'INVALID_TARGET_NAME',
 	TARGETS_DONT_MATCH: 'TARGETS_DONT_MATCH',
 	NO_COMMON_ALLOWED: 'NO_COMMON_ALLOWED',
@@ -93,64 +94,68 @@ export const errorType = {
 		message: 'Invalid tmp argument',
 		statusCode: 4005
 	},
+	INVALID_ID: {
+		message: 'Invalid Themezer ID',
+		statusCode: 4006
+	},
 	INVALID_TARGET_NAME: {
 		message: 'Invalid target name',
-		statusCode: 4006
+		statusCode: 4007
 	},
 	TARGETS_DONT_MATCH: {
 		message: "The target of the theme and the detected layout don't match",
-		statusCode: 4007
+		statusCode: 4008
 	},
 	NO_COMMON_ALLOWED: {
 		message: 'A common layout is not allowed in this nxtheme file',
-		statusCode: 4008
+		statusCode: 4009
 	},
 	INVALID_CATEGORY_AMOUNT: {
 		message: 'Max 10 categories allowed',
-		statusCode: 4009
+		statusCode: 4010
 	},
 
 	INVALID_NXTHEME_CONTENTS: {
 		message: 'Invalid NXTheme contents',
-		statusCode: 4010
+		statusCode: 4100
 	},
 	ZIP_READ_ERROR: {
 		message: 'The zip could not be extracted',
-		statusCode: 4011
+		statusCode: 4101
 	},
 	NO_VALID_NXTHEMES: {
 		message: 'No valid NXThemes were detected',
-		statusCode: 4012
+		statusCode: 4102
 	},
 	NO_NXTHEMES_IN_ZIP: {
 		message: 'No NXThemes were detected in the zip',
-		statusCode: 4013
+		statusCode: 4103
 	},
 
 	NXTHEME_CREATE_FAILED: {
 		message: 'Failed to create the NXTheme, please report this with details.',
-		statusCode: 4100
+		statusCode: 4200
 	},
 	NXTHEME_UNPACK_FAILED: {
 		message: 'Failed to unpack the NXTheme',
-		statusCode: 4101
+		statusCode: 4201
 	},
 	PACK_CREATE_FAILED: {
 		message: 'Failed to create the pack, please report this with details.',
-		statusCode: 4102
+		statusCode: 4202
 	},
 
 	LAYOUT_NOT_FOUND: {
 		message: 'The requested layout does not exist',
-		statusCode: 4200
+		statusCode: 4500
 	},
 	THEME_NOT_FOUND: {
 		message: 'The requested theme does not exist',
-		statusCode: 4200
+		statusCode: 4500
 	},
 	PACK_NOT_FOUND: {
 		message: 'The requested pack does not exist',
-		statusCode: 4200
+		statusCode: 4500
 	},
 
 	// DB errors

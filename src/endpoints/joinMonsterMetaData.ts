@@ -13,7 +13,7 @@ export default {
 				where: (table, { id }) => format(`(${table}.id = $1) OR ($1 = ANY(${table}.old_ids))`, [id])
 			},
 			layout: {
-				where: (table, { id }) => format(`to_themezer_hex(${table}.id) = $1`, [id])
+				where: (table, { id }) => format(`${table}.id = hex_to_int('$1#')`, [id])
 			},
 			layoutsList: {
 				orderBy: {
@@ -35,7 +35,7 @@ export default {
 				}
 			},
 			theme: {
-				where: (table, { id }) => format(`to_themezer_hex(${table}.id) = $1`, [id])
+				where: (table, { id }) => format(`${table}.id = hex_to_int('$1#')`, [id])
 			},
 			themesList: {
 				orderBy: {
@@ -57,7 +57,7 @@ export default {
 				}
 			},
 			pack: {
-				where: (table, { id }) => format(`to_themezer_hex(${table}.id) = $1`, [id])
+				where: (table, { id }) => format(`${table}.id = hex_to_int('$1#')`, [id])
 			},
 			packsList: {
 				orderBy: {
@@ -167,7 +167,7 @@ export default {
 	},
 	LayoutDetails: {
 		sqlTable: 'layouts',
-		uniqueKey: 'uuid',
+		uniqueKey: 'id',
 		fields: {
 			name: {
 				sqlExpr: (table) => `${table}.details ->> 'name'`
@@ -215,10 +215,11 @@ export default {
 	},
 	Layout: {
 		sqlTable: 'layouts',
-		uniqueKey: 'uuid',
+		uniqueKey: 'id',
 		fields: {
+			uuid: { sqlColumn: 'uuid' },
 			id: {
-				sqlExpr: (table) => `to_themezer_hex(${table}.id)`
+				sqlExpr: (table) => `int_to_padded_hex(${table}.id)`
 			},
 			creator: {
 				sqlJoin: (table, creatorsTable) =>
@@ -256,7 +257,7 @@ export default {
 		uniqueKey: 'id',
 		fields: {
 			id: {
-				sqlExpr: (table) => `to_themezer_hex(${table}.id)`
+				sqlExpr: (table) => `int_to_padded_hex(${table}.id)`
 			},
 			creator: {
 				sqlJoin: (table, creatorsTable) => `${table}.creator_id = ${creatorsTable}.id`
@@ -301,7 +302,7 @@ export default {
 		uniqueKey: 'id',
 		fields: {
 			id: {
-				sqlExpr: (table) => `to_themezer_hex(${table}.id)`
+				sqlExpr: (table) => `int_to_padded_hex(${table}.id)`
 			},
 			creator: {
 				sqlJoin: (table, creatorsTable) => `${table}.creator_id = ${creatorsTable}.id`
