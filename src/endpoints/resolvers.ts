@@ -49,7 +49,7 @@ const AdmZip = require('adm-zip')
 const extract = require('extract-zip')
 
 const sarcToolPath = `${__dirname}/../../../SARC-Tool`
-const storagePath = `${__dirname}/../../../storage`
+const storagePath = `${__dirname}/../../../cdn`
 const urlNameREGEX = /[^a-zA-Z0-9_.]+/gm
 
 // Allowed files according to https://github.com/exelix11/SwitchThemeInjector/blob/master/SwitchThemesCommon/PatchTemplate.cs#L10-L29
@@ -1399,7 +1399,7 @@ export default {
 												bgType = 'dds'
 											}
 
-											// Move NXTheme contents to storage
+											// Move NXTheme contents to cdn
 											const moveAllPromises = filteredFilesInFolder.map((f) => {
 												return moveFile(
 													`${path}/${f}`,
@@ -1488,7 +1488,7 @@ export default {
 												themeDatas.map((t: any) => t.details.name).join('\n')
 											)
 											.setThumbnail(
-												`https://api.themezer.ga/storage/themes/${
+												`https://api.themezer.ga/cdn/themes/${
 													(themeDatas[0] as any).uuid
 												}/screenshot.jpg`
 											)
@@ -1516,7 +1516,7 @@ export default {
 													`https://themezer.ga/creators/${context.req.user.id}`
 												)
 												.setThumbnail(
-													`https://api.themezer.ga/storage/themes/${t.uuid}/screenshot.jpg`
+													`https://api.themezer.ga/cdn/themes/${t.uuid}/screenshot.jpg`
 												)
 												.setURL(
 													`https://themezer.ga/themes/${fileNameToWebName(
