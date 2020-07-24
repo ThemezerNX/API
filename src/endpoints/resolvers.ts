@@ -738,7 +738,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		mergeJsonByUUID: async (_parent, { uuid, piece_uuids }, _context, _info) => {
+		downloadLayout: async (_parent, { uuid, piece_uuids }, _context, _info) => {
 			try {
 				return await new Promise(async (resolve, _reject) => {
 					const json = await createJson(uuid, piece_uuids)
@@ -759,7 +759,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		getCommonJson: async (_parent, { uuid }, _context, _info) => {
+		downloadCommonLayout: async (_parent, { uuid }, _context, _info) => {
 			try {
 				return await new Promise(async (resolve, _reject) => {
 					const json = await createJson(uuid, null, true)
@@ -1004,7 +1004,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		profile: async (
+		updateProfile: async (
 			_parent,
 			{ custom_username, bio, profile_color, banner_image, logo_image, clear_banner_image, clear_logo_image },
 			context,

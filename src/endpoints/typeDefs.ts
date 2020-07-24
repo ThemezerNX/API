@@ -223,8 +223,8 @@ export default gql`
 		packsList(creator_id: String, limit: Int): [Pack!]
 
 		## Downloading
-		mergeJsonByUUID(uuid: GUID!, piece_uuids: [GUID!]): JSON! @cacheControl(maxAge: 300)
-		getCommonJson(uuid: GUID!): JSON! @cacheControl(maxAge: 300)
+		downloadLayout(uuid: GUID!, piece_uuids: [GUID!]): JSON! @cacheControl(maxAge: 300)
+		downloadCommonLayout(uuid: GUID!): JSON! @cacheControl(maxAge: 300)
 
 		downloadTheme(uuid: GUID!, piece_uuids: [GUID!]): File! @cacheControl(maxAge: 300)
 
@@ -241,7 +241,7 @@ export default gql`
 
 		restoreAccount(creator_id: String!, backup_code: String!): Boolean!
 
-		profile(
+		updateProfile(
 			custom_username: String
 			bio: String
 			profile_color: String
@@ -253,7 +253,6 @@ export default gql`
 
 		# Unauthed
 		## Submitting
-
 		uploadSingleOrZip(file: Upload!): [DetectedTheme!]
 		submitThemes(files: [Upload!], themes: [DetectedThemeInput!], details: DetailsInput!, type: String!): Boolean
 
