@@ -17,6 +17,7 @@ export const errorName = {
 	INVALID_TMP: 'INVALID_TMP',
 	INVALID_TARGET_NAME: 'INVALID_TARGET_NAME',
 	TARGETS_DONT_MATCH: 'TARGETS_DONT_MATCH',
+	NO_COMMON_ALLOWED: 'NO_COMMON_ALLOWED',
 	INVALID_CATEGORY_AMOUNT: 'INVALID_CATEGORY_AMOUNT',
 	INVALID_NXTHEME_CONTENTS: 'INVALID_NXTHEME_CONTENTS',
 	ZIP_READ_ERROR: 'ZIP_READ_ERROR',
@@ -100,9 +101,13 @@ export const errorType = {
 		message: "The target of the theme and the detected layout don't match",
 		statusCode: 4007
 	},
+	NO_COMMON_ALLOWED: {
+		message: 'A common layout is not allowed in this nxtheme file',
+		statusCode: 4008
+	},
 	INVALID_CATEGORY_AMOUNT: {
 		message: 'Max 10 categories allowed',
-		statusCode: 4008
+		statusCode: 4009
 	},
 
 	INVALID_NXTHEME_CONTENTS: {
@@ -141,11 +146,11 @@ export const errorType = {
 	},
 	THEME_NOT_FOUND: {
 		message: 'The requested theme does not exist',
-		statusCode: 4201
+		statusCode: 4200
 	},
 	PACK_NOT_FOUND: {
 		message: 'The requested pack does not exist',
-		statusCode: 4202
+		statusCode: 4200
 	},
 
 	// DB errors

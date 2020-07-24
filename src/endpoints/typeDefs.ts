@@ -14,7 +14,7 @@ export default gql`
 
 	directive @cacheControl(maxAge: Int, scope: CacheControlScope) on FIELD_DEFINITION | OBJECT | INTERFACE
 
-	type UserInfo {
+	type PrivateInfo {
 		id: String!
 		discord_user: DiscordUser!
 		custom_username: String
@@ -25,6 +25,19 @@ export default gql`
 		logo_image: String
 		profile_color: String
 		liked: MyLikes
+		like_count: Int
+	}
+
+	type UserInfo {
+		id: String!
+		discord_user: DiscordUser!
+		custom_username: String
+		bio: String
+		joined: DateTime!
+		role: String
+		banner_image: String
+		logo_image: String
+		profile_color: String
 		like_count: Int
 	}
 
@@ -82,7 +95,7 @@ export default gql`
 
 	type Layout {
 		uuid: GUID!
-		id: Int!
+		id: String!
 		creator: UserInfo!
 		details: LayoutDetails!
 		baselayout: JSON!
@@ -125,7 +138,7 @@ export default gql`
 
 	type Theme {
 		uuid: GUID!
-		id: Int!
+		id: String!
 		creator: UserInfo!
 		details: ThemeDetails!
 		layout: Layout
@@ -141,7 +154,7 @@ export default gql`
 
 	type Pack {
 		uuid: GUID!
-		id: Int!
+		id: String!
 		creator: UserInfo!
 		details: PackDetails!
 		last_updated: DateTime!
@@ -192,7 +205,7 @@ export default gql`
 
 	type Query {
 		# Authed
-		me: UserInfo! @cacheControl(scope: PRIVATE)
+		me: PrivateInfo! @cacheControl(scope: PRIVATE)
 
 		# Unauthed
 		## General
@@ -200,13 +213,13 @@ export default gql`
 
 		categories: [String!]
 
-		layout(id: Int!): Layout
+		layout(id: String!): Layout
 		layoutsList(target: String, creator_id: String, limit: Int): [Layout!]
 
-		theme(id: Int!): Theme
+		theme(id: String!): Theme
 		themesList(target: String, creator_id: String, limit: Int): [Theme!]
 
-		pack(id: Int!): Pack
+		pack(id: String!): Pack
 		packsList(creator_id: String, limit: Int): [Pack!]
 
 		## Downloading

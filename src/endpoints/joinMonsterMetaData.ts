@@ -13,7 +13,7 @@ export default {
 				where: (table, { id }) => format(`(${table}.id = $1) OR ($1 = ANY(${table}.old_ids))`, [id])
 			},
 			layout: {
-				where: (table, { id }) => format(`${table}.id = $1`, [id])
+				where: (table, { id }) => format(`LPAD(to_hex(${table}.id), 5, '0') = $1`, [id])
 			},
 			layoutsList: {
 				orderBy: {
@@ -35,7 +35,7 @@ export default {
 				}
 			},
 			theme: {
-				where: (table, { id }) => format(`${table}.id = $1`, [id])
+				where: (table, { id }) => format(`LPAD(to_hex(${table}.id), 5, '0') = $1`, [id])
 			},
 			themesList: {
 				orderBy: {
@@ -57,7 +57,7 @@ export default {
 				}
 			},
 			pack: {
-				where: (table, { id }) => format(`${table}.id = $1`, [id])
+				where: (table, { id }) => format(`LPAD(to_hex(${table}.id), 5, '0') = $1`, [id])
 			},
 			packsList: {
 				orderBy: {
@@ -76,7 +76,7 @@ export default {
 			}
 		}
 	},
-	UserInfo: {
+	PrivateInfo: {
 		sqlTable: 'creators',
 		uniqueKey: 'id',
 		fields: {
@@ -93,6 +93,29 @@ export default {
 			liked: {
 				sqlJoin: (table, creatorsTable) => `${table}.id = ${creatorsTable}.id`
 			},
+			like_count: {
+				sqlExpr: (table) => `(
+                    SELECT COUNT(*)
+					FROM creators
+					WHERE ${table}.id = ANY(liked_creators)
+                )`
+			}
+		}
+	},
+	UserInfo: {
+		sqlTable: 'creators',
+		uniqueKey: 'id',
+		fields: {
+			discord_user: {
+				sqlJoin: (table, detailsTable) => `${table}.id = ${detailsTable}.id`
+			},
+			custom_username: { sqlColumn: 'custom_username' },
+			bio: { sqlColumn: 'bio' },
+			joined: { sqlColumn: 'joined' },
+			role: { sqlColumn: 'role' },
+			banner_image: { sqlColumn: 'banner_image' },
+			logo_image: { sqlColumn: 'logo_image' },
+			profile_color: { sqlColumn: 'profile_color' },
 			like_count: {
 				sqlExpr: (table) => `(
                     SELECT COUNT(*)
@@ -194,7 +217,9 @@ export default {
 		sqlTable: 'layouts',
 		uniqueKey: 'uuid',
 		fields: {
-			id: { sqlColumn: 'id' },
+			id: {
+				sqlExpr: (table) => `LPAD(to_hex(${table}.id), 5, '0')`
+			},
 			creator: {
 				sqlJoin: (table, creatorsTable) =>
 					`(${table}.creator_id = ${creatorsTable}.id) OR (${table}.creator_id = ANY(${creatorsTable}.old_ids))`
@@ -230,7 +255,9 @@ export default {
 		sqlTable: 'themes',
 		uniqueKey: 'uuid',
 		fields: {
-			id: { sqlColumn: 'id' },
+			id: {
+				sqlExpr: (table) => `LPAD(to_hex(${table}.id), 5, '0')`
+			},
 			creator: {
 				sqlJoin: (table, creatorsTable) => `${table}.creator_id = ${creatorsTable}.id`
 			},
@@ -273,7 +300,9 @@ export default {
 		sqlTable: 'packs',
 		uniqueKey: 'uuid',
 		fields: {
-			id: { sqlColumn: 'id' },
+			id: {
+				sqlExpr: (table) => `LPAD(to_hex(${table}.id), 5, '0')`
+			},
 			creator: {
 				sqlJoin: (table, creatorsTable) => `${table}.creator_id = ${creatorsTable}.id`
 			},

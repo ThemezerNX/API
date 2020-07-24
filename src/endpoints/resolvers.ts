@@ -800,7 +800,14 @@ export default {
 								piecesJson.push(await readFile(`${path}/${files[1]}`, 'utf8'))
 							}
 
-							const json = mergeJson(JSON.parse(layoutJson), piecesJson)
+							const layoutJsonParsed = JSON.parse(layoutJson)
+
+							if (!!common && layoutJsonParsed.Target === 'common.szs') {
+								reject(errorName.NO_COMMON_ALLOWED)
+								return
+							}
+
+							const json = mergeJson(layoutJsonParsed, piecesJson)
 							await writeFile(`${path}/layout_merged.json`, JSON.stringify(json, null, 4))
 
 							const linkPromises = [
@@ -1086,12 +1093,7 @@ export default {
 
 							const query = () => pgp.helpers.update(object, updateCreatorCS)
 							try {
-								const dbData = await db.none(
-									query() +
-										` WHERE id = $1
-										`,
-									[context.req.user.id]
-								)
+								const dbData = await db.none(query() + ` WHERE id = $1`, [context.req.user.id])
 								resolve(true)
 							} catch (e) {
 								console.error(e)
@@ -1364,7 +1366,7 @@ export default {
 									const query = () => pgp.helpers.insert([packData], packsCS)
 									try {
 										insertedPack = await db.one(
-											query() + ` RETURNING id, details, last_updated, creator_id`
+											query() + ` RETURNING to_hex(id), details, last_updated, creator_id`
 										)
 									} catch (e) {
 										console.error(e)
@@ -1465,7 +1467,8 @@ export default {
 								const query = () => pgp.helpers.insert(themeDatas, themesCS)
 								try {
 									const insertedThemes = await db.any(
-										query() + ` RETURNING uuid, id, details, last_updated, creator_id, target`
+										query() +
+											` RETURNING uuid, to_hex(id), details, last_updated, creator_id, target`
 									)
 
 									resolve(true)
