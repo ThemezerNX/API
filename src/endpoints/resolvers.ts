@@ -101,13 +101,13 @@ function int(column) {
 
 const themesCS = new pgp.helpers.ColumnSet(
 	[
-		{ name: 'uuid', cast: 'uuid' },
-		{ name: 'layout_uuid', cast: 'uuid' },
+		{ name: 'id', cast: 'int' },
+		{ name: 'layout_id', cast: 'int' },
 		{ name: 'piece_uuids', cast: 'uuid[]' },
 		'target',
 		{ name: 'last_updated', cast: 'timestamp without time zone' },
 		{ name: 'categories', cast: 'varchar[]' },
-		{ name: 'pack_uuid', cast: 'uuid' },
+		{ name: 'pack_id', cast: 'int' },
 		{ name: 'creator_id', cast: 'varchar' },
 		{ name: 'details', cast: 'json' },
 		{ name: 'bg_type', cast: 'varchar (3)' }
@@ -119,7 +119,7 @@ const themesCS = new pgp.helpers.ColumnSet(
 
 const packsCS = new pgp.helpers.ColumnSet(
 	[
-		{ name: 'uuid', cast: 'uuid' },
+		{ name: 'id', cast: 'int' },
 		{ name: 'last_updated', cast: 'timestamp without time zone' },
 		{ name: 'creator_id', cast: 'varchar' },
 		{ name: 'details', cast: 'json' }
@@ -219,7 +219,7 @@ const mergeJson = (baseParsed, jsonArray) => {
 	return baseParsed
 }
 
-const createJson = async (uuid, piece_uuids = [], common?) => {
+const createJson = async (id, piece_uuids = [], common?) => {
 	let finalJsonObject = null
 	const usedPieces = []
 
@@ -227,34 +227,34 @@ const createJson = async (uuid, piece_uuids = [], common?) => {
 	if (common) {
 		const dbData = await db.oneOrNone(
 			`
-			SELECT commonlayout
+			SELECT commonlayout, uuid
 			FROM layouts
-			WHERE uuid = $1
+			WHERE to_themezer_hex(id) = $1
 			LIMIT 1
 		`,
-			[uuid]
+			[id]
 		)
 
 		finalJsonObject = JSON.parse(dbData.commonlayout)
 	} else {
 		const dbData = await db.oneOrNone(
 			`
-			SELECT baselayout,
+			SELECT baselayout, uuid,
 				(
 					SELECT array_agg(row_to_json(pcs)) AS pieces
 					FROM (
 						SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
 						FROM layouts
-						WHERE uuid = mt.uuid
+						WHERE id = mt.id
 					) as pcs
 					WHERE value ->> 'uuid' = ANY($2::text[])
 				)
 	
 			FROM layouts as mt
-			WHERE mt.uuid = $1
+			WHERE to_themezer_hex(mt.id) = $1
 			LIMIT 1
 		`,
-			[uuid, piece_uuids]
+			[id, piece_uuids]
 		)
 
 		// Create an array with all used pieces
@@ -283,7 +283,7 @@ const createJson = async (uuid, piece_uuids = [], common?) => {
 			TargetName: finalJsonObject.TargetName,
 			ID: stringifyThemeID({
 				service: 'Themezer',
-				uuid: uuid + (finalJsonObject.TargetName === 'common.szs' ? '-common' : ''),
+				id: id + (finalJsonObject.TargetName === 'common.szs' ? '-common' : ''),
 				piece_uuids: usedPieces.map((p) => p.uuid)
 			}),
 			Files: finalJsonObject.Files,
@@ -379,7 +379,7 @@ const unpackNXThemes = (paths) =>
 			})
 	)
 
-const prepareNXTheme = (uuid, piece_uuids) => {
+const prepareNXTheme = (id, piece_uuids) => {
 	return new Promise((resolve, reject) => {
 		tmp.dir({ unsafeCleanup: true }, async (err, path, cleanupCallback) => {
 			if (err) {
@@ -389,9 +389,9 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 
 			try {
 				// Get the theme details
-				const { layout_uuid, name, target, creator_name } = await db.oneOrNone(
+				const { layout_id, name, target, creator_name } = await db.oneOrNone(
 					`
-						SELECT layout_uuid, details ->> 'name' as name, target, 
+						SELECT layout_id, details ->> 'name' as name, target, 
 							(
 								SELECT discord_user ->> 'username'
 								FROM creators
@@ -399,33 +399,33 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 								LIMIT 1
 							) as creator_name
 						FROM themes
-						WHERE uuid = $1
+						WHERE to_themezer_hex(id) = $1
 						LIMIT 1
 					`,
-					[uuid]
+					[id]
 				)
 
 				// Get merged layout json if any
 				let layoutJson = null
-				if (layout_uuid) {
-					const layoutJson = await createJson(layout_uuid, piece_uuids)
+				if (layout_id) {
+					const layoutJson = await createJson(layout_id, piece_uuids)
 					await writeFile(`${path}/layout.json`, layoutJson, 'utf8')
 				}
 
 				// Get optional common json
 				let commonJson = null
-				if (layout_uuid) {
-					commonJson = await createJson(layout_uuid, null, true)
+				if (layout_id) {
+					commonJson = await createJson(layout_id, null, true)
 					if (commonJson) {
 						await writeFile(`${path}/common.json`, commonJson, 'utf8')
 					}
 				}
 
 				// Symlink all other allowedFilesInNXTheme
-				const filesInFolder = await readdirPromisified(`${storagePath}/themes/${uuid}`)
+				const filesInFolder = await readdirPromisified(`${storagePath}/themes/${id}`)
 				const linkAllPromises = filesInFolder.map((file) => {
 					if (file !== 'screenshot.jpg') {
-						return link(`${storagePath}/themes/${uuid}/${file}`, `${path}/${file}`)
+						return link(`${storagePath}/themes/${id}/${file}`, `${path}/${file}`)
 					} else return null
 				})
 				await Promise.all(linkAllPromises)
@@ -450,9 +450,9 @@ const prepareNXTheme = (uuid, piece_uuids) => {
 					`
 						UPDATE themes
 							SET dl_count = dl_count + 1
-						WHERE uuid = $1
+						WHERE to_themezer_hex(id) = $1
 					`,
-					[uuid]
+					[id]
 				)
 
 				cleanupCallback()
@@ -643,11 +643,11 @@ export default {
 				throw new Error(e)
 			}
 		},
-		downloadTheme: async (_parent, { uuid, piece_uuids }, _context, _info) => {
+		downloadTheme: async (_parent, { id, piece_uuids }, _context, _info) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					try {
-						const themePromise = await prepareNXTheme(uuid, piece_uuids)
+						const themePromise = await prepareNXTheme(id, piece_uuids)
 
 						resolve(themePromise)
 					} catch (e) {
@@ -660,10 +660,10 @@ export default {
 				throw new Error(e)
 			}
 		},
-		downloadPack: async (_parent, { uuid }, _context, _info) => {
+		downloadPack: async (_parent, { id }, _context, _info) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
-					// Get the pack details and theme uuids
+					// Get the pack details and theme ids
 					let pack = null
 					try {
 						pack = await db.one(
@@ -676,16 +676,16 @@ export default {
 										LIMIT 1
 									) as creator_name,
 									(
-										SELECT array_agg(uuid)
+										SELECT id
 										FROM themes
-										WHERE pack_uuid = pck.uuid
+										WHERE pack_id = pck.id
 										LIMIT 1
 									) as themes
 								FROM packs pck
-								WHERE uuid = $1
+								WHERE to_themezer_hex(id) = $1
 								LIMIT 1
 							`,
-							[uuid]
+							[id]
 						)
 					} catch (e) {
 						console.error(e)
@@ -695,7 +695,7 @@ export default {
 
 					try {
 						// Create the NXThemes
-						const themePromises = pack.themes.map((uuid) => prepareNXTheme(uuid, null))
+						const themePromises = pack.themes.map((id) => prepareNXTheme(id, null))
 						const themesB64: Array<any> = await Promise.all(themePromises)
 
 						// Create zip from base64 buffers.
@@ -724,9 +724,9 @@ export default {
 							`
 								UPDATE packs
 									SET dl_count = dl_count + 1
-								WHERE uuid = $1
+								WHERE to_themezer_hex(id) = $1
 							`,
-							[uuid]
+							[id]
 						)
 					} catch (e) {
 						console.error(e)
@@ -738,10 +738,10 @@ export default {
 				throw new Error(e)
 			}
 		},
-		downloadLayout: async (_parent, { uuid, piece_uuids }, _context, _info) => {
+		downloadLayout: async (_parent, { id, piece_uuids }, _context, _info) => {
 			try {
 				return await new Promise(async (resolve, _reject) => {
-					const json = await createJson(uuid, piece_uuids)
+					const json = await createJson(id, piece_uuids)
 					resolve(json)
 
 					// Increase download count by 1
@@ -749,9 +749,9 @@ export default {
 						`
 							UPDATE layouts
 								SET dl_count = dl_count + 1
-							WHERE uuid = $1
+							WHERE to_themezer_hex(id) = $1
 						`,
-						[uuid]
+						[id]
 					)
 				})
 			} catch (e) {
@@ -759,10 +759,10 @@ export default {
 				throw new Error(e)
 			}
 		},
-		downloadCommonLayout: async (_parent, { uuid }, _context, _info) => {
+		downloadCommonLayout: async (_parent, { id }, _context, _info) => {
 			try {
 				return await new Promise(async (resolve, _reject) => {
-					const json = await createJson(uuid, null, true)
+					const json = await createJson(id, null, true)
 					resolve(json)
 				})
 			} catch (e) {
@@ -1207,7 +1207,7 @@ export default {
 													// If the layout has an ID specified get the uuid
 													let dbLayout = null
 													if (layout && layout.ID) {
-														const { service, uuid, piece_uuids } = parseThemeID(layout.ID)
+														const { service, id, piece_uuids } = parseThemeID(layout.ID)
 														// Only fetch the layout if it was created by Themezer
 														if (service === 'Themezer') {
 															dbLayout = await db.oneOrNone(
@@ -1217,15 +1217,15 @@ export default {
 																			FROM (
 																				SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
 																				FROM layouts
-																				WHERE uuid = $1
+																				WHERE to_themezer_hex(id) = $1
 																			) as p
 																			WHERE value ->> 'uuid' = ANY($2::text[])
 																		),
 																		CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
 																	FROM layouts
-																	WHERE uuid = $1
+																	WHERE to_themezer_hex(id) = $1
 																`,
-																[uuid, piece_uuids]
+																[id, piece_uuids]
 															)
 														}
 													}
@@ -1347,12 +1347,8 @@ export default {
 							// If all jpegs are valid
 							if (themePaths.length === savedFiles.length) {
 								// Insert pack into DB if user wants to and can submit as pack
-								let packUuid = null
 								if (type === 'pack' && savedFiles.length > 1) {
-									packUuid = uuid()
-
 									const packData = {
-										uuid: packUuid,
 										last_updated: new Date(),
 										creator_id: context.req.user.id,
 										details: {
@@ -1366,7 +1362,8 @@ export default {
 									const query = () => pgp.helpers.insert([packData], packsCS)
 									try {
 										insertedPack = await db.one(
-											query() + ` RETURNING to_hex(id), details, last_updated, creator_id`
+											query() +
+												` RETURNING to_themezer_hex(id) as id, details, last_updated, creator_id`
 										)
 									} catch (e) {
 										console.error(e)
@@ -1378,38 +1375,20 @@ export default {
 								// Save NXTheme contents
 								const themeDataPromises = themePaths.map((path, i) => {
 									return new Promise(async (resolve, reject) => {
-										const themeUuid = uuid()
 										let bgType = null
 
 										try {
 											// Read dir contents
 											const filesInFolder = await readdirPromisified(path)
 											// Filter allowed files, 'screenshot.jpg', not 'info.json', and not 'layout.json' if the layout is in the DB
-											const filteredFilesInFolder = filesInFolder.filter(
-												(f) =>
-													(allowedFilesInNXTheme.includes(f) &&
-														f !== 'info.json' &&
-														!(f === 'layout.json' && themes[i].layout_uuid)) ||
-													f === 'screenshot.jpg'
-											)
 
-											if (filteredFilesInFolder.includes('image.jpg')) {
+											if (filesInFolder.includes('image.jpg')) {
 												bgType = 'jpg'
-											} else if (filteredFilesInFolder.includes('image.dds')) {
+											} else if (filesInFolder.includes('image.dds')) {
 												bgType = 'dds'
 											}
-
-											// Move NXTheme contents to cdn
-											const moveAllPromises = filteredFilesInFolder.map((f) => {
-												return moveFile(
-													`${path}/${f}`,
-													`${storagePath}/themes/${themeUuid}/${f}`
-												)
-											})
-											await Promise.all(moveAllPromises)
 										} catch (e) {
 											console.error(e)
-											reject(errorName.FILE_SAVE_ERROR)
 											return
 										}
 
@@ -1432,8 +1411,7 @@ export default {
 										}
 
 										resolve({
-											uuid: themeUuid,
-											layout_uuid: themes[i].layout_uuid,
+											layout_id: themes[i].layout_id,
 											piece_uuids:
 												themes[i].used_pieces && themes[i].used_pieces.length > 0
 													? themes[i].used_pieces.map((p) => p.value.uuid)
@@ -1443,7 +1421,7 @@ export default {
 												: reject(errorName.INVALID_TARGET_NAME),
 											last_updated: new Date(),
 											categories: categories.sort(),
-											pack_uuid: packUuid,
+											pack_id: insertedPack.id,
 											creator_id: context.req.user.id,
 											details: {
 												name: themes[i].info.ThemeName.trim(),
@@ -1468,8 +1446,40 @@ export default {
 								try {
 									const insertedThemes = await db.any(
 										query() +
-											` RETURNING uuid, to_hex(id), details, last_updated, creator_id, target`
+											` RETURNING to_themezer_hex(id) as id, details, last_updated, creator_id, target`
 									)
+
+									const themeMovePromises = themePaths.map((path, i) => {
+										return new Promise(async (resolve, reject) => {
+											try {
+												// Read dir contents
+												const filesInFolder = await readdirPromisified(path)
+												// Filter allowed files, 'screenshot.jpg', not 'info.json', and not 'layout.json' if the layout is in the DB
+												const filteredFilesInFolder = filesInFolder.filter(
+													(f) =>
+														(allowedFilesInNXTheme.includes(f) &&
+															f !== 'info.json' &&
+															!(f === 'layout.json' && themes[i].layout_id)) ||
+														f === 'screenshot.jpg'
+												)
+
+												// Move NXTheme contents to cdn
+												const moveAllPromises = filteredFilesInFolder.map((f) => {
+													return moveFile(
+														`${path}/${f}`,
+														`${storagePath}/themes/${insertedThemes[i].id}/${f}`
+													)
+												})
+												await Promise.all(moveAllPromises)
+											} catch (e) {
+												console.error(e)
+												reject(errorName.FILE_SAVE_ERROR)
+												return
+											}
+										})
+									})
+
+									await Promise.all(themeMovePromises)
 
 									resolve(true)
 
@@ -1489,7 +1499,7 @@ export default {
 											)
 											.setThumbnail(
 												`https://api.themezer.ga/cdn/themes/${
-													(themeDatas[0] as any).uuid
+													(themeDatas[0] as any).id
 												}/screenshot.jpg`
 											)
 											.setURL(
@@ -1516,7 +1526,7 @@ export default {
 													`https://themezer.ga/creators/${context.req.user.id}`
 												)
 												.setThumbnail(
-													`https://api.themezer.ga/cdn/themes/${t.uuid}/screenshot.jpg`
+													`https://api.themezer.ga/cdn/themes/${t.id}/screenshot.jpg`
 												)
 												.setURL(
 													`https://themezer.ga/themes/${fileNameToWebName(

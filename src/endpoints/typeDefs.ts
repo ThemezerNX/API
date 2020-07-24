@@ -137,7 +137,6 @@ export default gql`
 	}
 
 	type Theme {
-		uuid: GUID!
 		id: String!
 		creator: UserInfo!
 		details: ThemeDetails!
@@ -153,7 +152,6 @@ export default gql`
 	}
 
 	type Pack {
-		uuid: GUID!
 		id: String!
 		creator: UserInfo!
 		details: PackDetails!
@@ -193,7 +191,7 @@ export default gql`
 	input DetectedThemeInput {
 		info: ThemeInfoInput
 		tmp: String!
-		layout_uuid: GUID
+		layout_id: GUID
 		used_pieces: [UsedPieceInput!]
 		target: String!
 		description: String
@@ -223,12 +221,12 @@ export default gql`
 		packsList(creator_id: String, limit: Int): [Pack!]
 
 		## Downloading
-		downloadLayout(uuid: GUID!, piece_uuids: [GUID!]): JSON! @cacheControl(maxAge: 300)
-		downloadCommonLayout(uuid: GUID!): JSON! @cacheControl(maxAge: 300)
+		downloadLayout(id: String!, piece_uuids: [GUID!]): JSON! @cacheControl(maxAge: 300)
+		downloadCommonLayout(id: String!): JSON! @cacheControl(maxAge: 300)
 
-		downloadTheme(uuid: GUID!, piece_uuids: [GUID!]): File! @cacheControl(maxAge: 300)
+		downloadTheme(id: String!, piece_uuids: [GUID!]): File! @cacheControl(maxAge: 300)
 
-		downloadPack(uuid: GUID!): File! @cacheControl(maxAge: 300)
+		downloadPack(id: String!): File! @cacheControl(maxAge: 300)
 
 		## Overlay creation tool
 		createOverlayNXThemes(layout: Upload!, piece: Upload, common: Upload): [File!] @cacheControl(maxAge: 0)

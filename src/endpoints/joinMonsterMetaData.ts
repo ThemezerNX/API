@@ -13,7 +13,7 @@ export default {
 				where: (table, { id }) => format(`(${table}.id = $1) OR ($1 = ANY(${table}.old_ids))`, [id])
 			},
 			layout: {
-				where: (table, { id }) => format(`LPAD(to_hex(${table}.id), 5, '0') = $1`, [id])
+				where: (table, { id }) => format(`to_themezer_hex(${table}.id) = $1`, [id])
 			},
 			layoutsList: {
 				orderBy: {
@@ -35,7 +35,7 @@ export default {
 				}
 			},
 			theme: {
-				where: (table, { id }) => format(`LPAD(to_hex(${table}.id), 5, '0') = $1`, [id])
+				where: (table, { id }) => format(`to_themezer_hex(${table}.id) = $1`, [id])
 			},
 			themesList: {
 				orderBy: {
@@ -57,7 +57,7 @@ export default {
 				}
 			},
 			pack: {
-				where: (table, { id }) => format(`LPAD(to_hex(${table}.id), 5, '0') = $1`, [id])
+				where: (table, { id }) => format(`to_themezer_hex(${table}.id) = $1`, [id])
 			},
 			packsList: {
 				orderBy: {
@@ -155,13 +155,13 @@ export default {
 				sqlJoin: (table, creatorsTable) => `${creatorsTable}.id = ANY(${table}.liked_creators)`
 			},
 			layouts: {
-				sqlJoin: (table, creatorsTable) => `${creatorsTable}.uuid = ANY(${table}.liked_layouts)`
+				sqlJoin: (table, creatorsTable) => `${creatorsTable}.id = ANY(${table}.liked_layouts)`
 			},
 			themes: {
-				sqlJoin: (table, creatorsTable) => `${creatorsTable}.uuid = ANY(${table}.liked_themes)`
+				sqlJoin: (table, creatorsTable) => `${creatorsTable}.id = ANY(${table}.liked_themes)`
 			},
 			packs: {
-				sqlJoin: (table, creatorsTable) => `${creatorsTable}.uuid = ANY(${table}.liked_packs)`
+				sqlJoin: (table, creatorsTable) => `${creatorsTable}.id = ANY(${table}.liked_packs)`
 			}
 		}
 	},
@@ -185,7 +185,7 @@ export default {
 	},
 	ThemeDetails: {
 		sqlTable: 'themes',
-		uniqueKey: 'uuid',
+		uniqueKey: 'id',
 		fields: {
 			name: {
 				sqlExpr: (table) => `${table}.details ->> 'name'`
@@ -200,7 +200,7 @@ export default {
 	},
 	PackDetails: {
 		sqlTable: 'packs',
-		uniqueKey: 'uuid',
+		uniqueKey: 'id',
 		fields: {
 			name: {
 				sqlExpr: (table) => `${table}.details ->> 'name'`
@@ -218,14 +218,14 @@ export default {
 		uniqueKey: 'uuid',
 		fields: {
 			id: {
-				sqlExpr: (table) => `LPAD(to_hex(${table}.id), 5, '0')`
+				sqlExpr: (table) => `to_themezer_hex(${table}.id)`
 			},
 			creator: {
 				sqlJoin: (table, creatorsTable) =>
 					`(${table}.creator_id = ${creatorsTable}.id) OR (${table}.creator_id = ANY(${creatorsTable}.old_ids))`
 			},
 			details: {
-				sqlJoin: (table, detailsTable) => `${table}.uuid = ${detailsTable}.uuid`
+				sqlJoin: (table, detailsTable) => `${table}.id = ${detailsTable}.id`
 			},
 			baselayout: { sqlColumn: 'baselayout' },
 			target: { sqlColumn: 'target' },
@@ -246,29 +246,29 @@ export default {
 				sqlExpr: (table) => `(
                     SELECT COUNT(*)
 					FROM creators
-					WHERE ${table}.uuid = ANY(liked_layouts)
+					WHERE ${table}.id = ANY(liked_layouts)
                 )`
 			}
 		}
 	},
 	Theme: {
 		sqlTable: 'themes',
-		uniqueKey: 'uuid',
+		uniqueKey: 'id',
 		fields: {
 			id: {
-				sqlExpr: (table) => `LPAD(to_hex(${table}.id), 5, '0')`
+				sqlExpr: (table) => `to_themezer_hex(${table}.id)`
 			},
 			creator: {
 				sqlJoin: (table, creatorsTable) => `${table}.creator_id = ${creatorsTable}.id`
 			},
 			details: {
-				sqlJoin: (table, detailsTable) => `${table}.uuid = ${detailsTable}.uuid`
+				sqlJoin: (table, detailsTable) => `${table}.id = ${detailsTable}.id`
 			},
 			layout: {
-				sqlJoin: (table, layoutsTable) => `${table}.layout_uuid = ${layoutsTable}.uuid`
+				sqlJoin: (table, layoutsTable) => `${table}.layout_id = ${layoutsTable}.id`
 			},
 			pack: {
-				sqlJoin: (table, packsTable) => `${table}.pack_uuid = ${packsTable}.uuid`
+				sqlJoin: (table, packsTable) => `${table}.pack_id = ${packsTable}.id`
 			},
 			target: { sqlColumn: 'target' },
 			last_updated: { sqlColumn: 'last_updated' },
@@ -279,7 +279,7 @@ export default {
                     FROM (
                         SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
                         FROM layouts
-                        WHERE uuid = ${table}.layout_uuid
+                        WHERE id = ${table}.layout_id
                     ) as pcs
                     WHERE value ->> 'uuid' = ANY(${table}.piece_uuids::text[])
                 )`
@@ -290,7 +290,7 @@ export default {
 				sqlExpr: (table) => `(
                     SELECT COUNT(*)
 					FROM creators
-					WHERE ${table}.uuid = ANY(liked_themes)
+					WHERE ${table}.id = ANY(liked_themes)
                 )`
 			},
 			bg_type: { sqlColumn: 'bg_type' }
@@ -298,16 +298,16 @@ export default {
 	},
 	Pack: {
 		sqlTable: 'packs',
-		uniqueKey: 'uuid',
+		uniqueKey: 'id',
 		fields: {
 			id: {
-				sqlExpr: (table) => `LPAD(to_hex(${table}.id), 5, '0')`
+				sqlExpr: (table) => `to_themezer_hex(${table}.id)`
 			},
 			creator: {
 				sqlJoin: (table, creatorsTable) => `${table}.creator_id = ${creatorsTable}.id`
 			},
 			details: {
-				sqlJoin: (table, detailsTable) => `${table}.uuid = ${detailsTable}.uuid`
+				sqlJoin: (table, detailsTable) => `${table}.id = ${detailsTable}.id`
 			},
 			last_updated: { sqlColumn: 'last_updated' },
 			categories: {
@@ -316,7 +316,7 @@ export default {
                     FROM (
                         SELECT DISTINCT UNNEST(categories)
                         FROM themes
-                        WHERE pack_uuid = ${table}.uuid
+                        WHERE pack_id = ${table}.id
                     ) as t(c)
                 )
                 `
@@ -326,11 +326,11 @@ export default {
 				sqlExpr: (table) => `(
                     SELECT COUNT(*)
 					FROM creators
-					WHERE ${table}.uuid = ANY(liked_packs)
+					WHERE ${table}.id = ANY(liked_packs)
                 )`
 			},
 			themes: {
-				sqlJoin: (table, themesTable) => `${table}.uuid = ${themesTable}.pack_uuid`
+				sqlJoin: (table, themesTable) => `${table}.id = ${themesTable}.pack_id`
 			}
 		}
 	}

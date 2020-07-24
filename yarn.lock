@@ -125,7 +125,7 @@
 
 "@themezernx/layout-id-parser@https://github.com/ThemezerNX/Layout-ID-Parser.git":
   version "1.0.1"
-  resolved "https://github.com/ThemezerNX/Layout-ID-Parser.git#e4d555936e1350e4f88a84a24a6530c5bf7d09cc"
+  resolved "https://github.com/ThemezerNX/Layout-ID-Parser.git#9861bc2dca72ff0c7979472fca540b29c8c2311f"
 
 "@tromkom/aurora-strategic-json-merge-patch@https://github.com/Migushthe2nd/aurora-strategic-json-merge-patch.git":
   version "1.0.2"
