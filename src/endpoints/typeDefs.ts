@@ -210,7 +210,7 @@ export default gql`
 
 	type Query {
 		# Authed
-		me: PrivateInfo! @cacheControl(scope: PRIVATE)
+		me: PrivateInfo! @cacheControl(scope: PRIVATE, maxAge: 0)
 
 		# Unauthed
 		## General
