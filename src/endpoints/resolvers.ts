@@ -7,6 +7,8 @@ import {
 	validFileName,
 	validThemeTarget
 } from '../util/targetParser'
+import graphqlFields from 'graphql-fields'
+import MiniSearch from 'minisearch'
 import { errorName } from '../util/errorTypes'
 
 import webhook from 'webhook-discord'
@@ -463,6 +465,149 @@ const prepareNXTheme = (id, piece_uuids) => {
 	})
 }
 
+const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc', creators, layouts, nsfw = false }) => {
+	const queryFields = graphqlFields(info)
+
+	if (items && items.length > 0) {
+		if (query) {
+			if (
+				!(
+					!!queryFields.id &&
+					!!queryFields.details?.name &&
+					!!queryFields.details?.description &&
+					!!(info.fieldName !== 'layoutList' ? queryFields.categories : true)
+				)
+			) {
+				throw errorName.CANNOT_SEARCH_QUERY
+			}
+
+			const miniSearch = new MiniSearch({
+				fields: ['id', 'name', 'description', 'categories'],
+				storeFields: ['id'],
+				searchOptions: {
+					// boost: { name: 2 },
+					fuzzy: 0.1
+				}
+			})
+
+			const itms = items.map((item: any) => {
+				return {
+					id: item.id,
+					name: item.details.name,
+					description: item.details.name,
+					categories: item.categories ? item.categories.join('|') : ''
+				}
+			})
+
+			miniSearch.addAll(itms)
+			const rs = miniSearch.search(query, {
+				prefix: true
+			})
+			const resultIDs = rs.map((r: any) => r.id)
+
+			items = items.filter((item: any) => resultIDs.includes(item.id))
+		}
+
+		items = items
+			.filter((item: any): boolean => {
+				if (nsfw) {
+					if (!queryFields.categories) throw errorName.CANNOT_FILTER_NSFW
+					else return !(Array.isArray(item.categories) && item.categories.includes('NSFW'))
+				} else return true
+			})
+			.filter((item: any): boolean => {
+				if (layouts && layouts.length > 0) {
+					if (!queryFields.layout?.id) throw errorName.CANNOT_FILTER_LAYOUTS
+					return layouts.some((id: string) => {
+						if (item.themes) {
+							// Pack
+							return item.themes.some((t: any) => t.layout?.id === id)
+						} else if (item.layout) {
+							// Theme
+							return item.layout.id === id
+						} else return false
+					})
+				} else return true
+			})
+			.sort((a: any, b: any) => {
+				if (sort) {
+					const sortOptions = [
+						{
+							title: 'Downloads',
+							id: 'downloads',
+							key: 'dl_count',
+							icon: 'mdi-download-outline'
+						},
+						{
+							title: 'Likes',
+							id: 'likes',
+							key: 'like_count',
+							icon: 'mdi-heart'
+						},
+						{
+							title: 'Updated',
+							id: 'updated',
+							key: 'last_updated',
+							icon: 'mdi-calendar-clock'
+						}
+					]
+
+					const sortOption = sortOptions.find((o: any) => o.id === sort)
+					if (!sortOption) throw errorName.INVALID_SORT
+
+					if (sortOption.id === 'downloads' || sortOption.id === 'likes') {
+						if (sortOption.id === 'downloads' && !queryFields.dl_count)
+							throw errorName.CANNOT_SORT_BY_DOWNLOADS
+						if (sortOption.id === 'likes' && !queryFields.dl_count) throw errorName.CANNOT_SORT_BY_LIKES
+
+						if (order === 'asc') {
+							return a[sortOption.key] - b[sortOption.key]
+						} else if (order === 'desc') {
+							return b[sortOption.key] - a[sortOption.key]
+						}
+					} else if (sortOption.id === 'updated') {
+						if (!queryFields.last_updated) throw errorName.CANNOT_SORT_BY_UPDATED
+						if (order === 'asc') {
+							return new Date(a[sortOption.key]).getTime() - new Date(b[sortOption.key]).getTime()
+						} else if (order === 'desc') {
+							return new Date(b[sortOption.key]).getTime() - new Date(a[sortOption.key]).getTime()
+						}
+					}
+				}
+			})
+
+		const item_count = items.length
+
+		let page_count = 1
+		if (limit) {
+			page_count = Math.ceil(item_count / limit)
+		}
+
+		const start = (page - 1) * limit
+		const end = start + limit
+
+		return {
+			items: limit ? items.slice(start, end) : items,
+			pagination: {
+				page: page || 1,
+				limit,
+				page_count,
+				item_count
+			}
+		}
+	} else {
+		return {
+			items: [],
+			pagination: {
+				page,
+				limit,
+				page_count: 0,
+				item_count: 0
+			}
+		}
+	}
+}
+
 export default {
 	JSON: GraphQLJSON,
 	Query: {
@@ -551,16 +696,26 @@ export default {
 				throw new Error(e)
 			}
 		},
-		layoutsList: async (_parent, _args, context, info) => {
+		layoutList: async (_parent, args, context, info) => {
 			try {
-				return joinMonster(
-					info,
-					context,
-					(sql) => {
-						return db.any(sql)
-					},
-					joinMonsterOptions
-				)
+				return await new Promise(async (resolve, reject) => {
+					let dbData = await joinMonster(
+						info,
+						context,
+						(sql) => {
+							return db.any(sql)
+						},
+						joinMonsterOptions
+					)
+
+					try {
+						const filtered = filterData(dbData, info, args)
+						context.pagination = filtered.pagination
+						resolve(filtered.items)
+					} catch (e) {
+						reject(e)
+					}
+				})
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -579,7 +734,7 @@ export default {
 					)
 
 					if (dbData) {
-						resolve(dbData)
+						resolve(dbData.items)
 					} else {
 						reject(errorName.THEME_NOT_FOUND)
 					}
@@ -588,16 +743,26 @@ export default {
 				throw new Error(e)
 			}
 		},
-		themesList: async (_parent, _args, context, info) => {
+		themeList: async (_parent, args, context, info) => {
 			try {
-				return joinMonster(
-					info,
-					context,
-					(sql) => {
-						return db.any(sql)
-					},
-					joinMonsterOptions
-				)
+				return await new Promise(async (resolve, reject) => {
+					let dbData = await joinMonster(
+						info,
+						context,
+						(sql) => {
+							return db.any(sql)
+						},
+						joinMonsterOptions
+					)
+
+					try {
+						const filtered = filterData(dbData, info, args)
+						context.pagination = filtered.pagination
+						resolve(filtered.items)
+					} catch (e) {
+						reject(e)
+					}
+				})
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -625,16 +790,26 @@ export default {
 				throw new Error(e)
 			}
 		},
-		packsList: async (_parent, _args, context, info) => {
+		packList: async (_parent, args, context, info) => {
 			try {
-				return joinMonster(
-					info,
-					context,
-					(sql) => {
-						return db.any(sql)
-					},
-					joinMonsterOptions
-				)
+				return await new Promise(async (resolve, reject) => {
+					let dbData = await joinMonster(
+						info,
+						context,
+						(sql) => {
+							return db.any(sql)
+						},
+						joinMonsterOptions
+					)
+
+					try {
+						const filtered = filterData(dbData, info, args)
+						context.pagination = filtered.pagination
+						resolve(filtered.items)
+					} catch (e) {
+						reject(e)
+					}
+				})
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)
@@ -1413,15 +1588,18 @@ export default {
 											categories.push('NSFW')
 										}
 
+										if (!validFileName(themes[i].target)) {
+											reject(errorName.INVALID_TARGET_NAME)
+											return ''
+										}
+
 										resolve({
 											layout_id: themes[i].layout_id,
 											piece_uuids:
 												themes[i].used_pieces && themes[i].used_pieces.length > 0
 													? themes[i].used_pieces.map((p) => p.value.uuid)
 													: null,
-											target: validFileName(themes[i].target)
-												? themes[i].target
-												: reject(errorName.INVALID_TARGET_NAME),
+											target: themes[i].target,
 											last_updated: new Date(),
 											categories: categories.sort(),
 											pack_id: insertedPack?.id,

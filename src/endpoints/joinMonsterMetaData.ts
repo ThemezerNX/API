@@ -15,20 +15,19 @@ export default {
 			layout: {
 				where: (table, { id }) => format(`${table}.id = hex_to_int('$1^')`, [id])
 			},
-			layoutsList: {
+			layoutList: {
 				orderBy: {
 					last_updated: 'DESC'
 				},
-				limit: ({ limit }) => limit,
-				where: (table, { target, creator_id }) => {
+				where: (table, { target, creators }) => {
 					const wheres = []
 
 					if (target) {
 						wheres.push(format(`${table}.target = $1`, [target]))
 					}
 
-					if (creator_id) {
-						wheres.push(format(`${table}.creator_id = $1`, [creator_id]))
+					if (creators?.length > 0) {
+						wheres.push(format(`${table}.creator_id = ANY($1)`, [creators]))
 					}
 
 					return wheres.join(' AND ')
@@ -37,20 +36,19 @@ export default {
 			theme: {
 				where: (table, { id }) => format(`${table}.id = hex_to_int('$1^')`, [id])
 			},
-			themesList: {
+			themeList: {
 				orderBy: {
 					last_updated: 'DESC'
 				},
-				limit: ({ limit }) => limit,
-				where: (table, { target, creator_id }) => {
+				where: (table, { target, creators }) => {
 					const wheres = []
 
 					if (target) {
 						wheres.push(format(`${table}.target = $1`, [target]))
 					}
 
-					if (creator_id) {
-						wheres.push(format(`${table}.creator_id = $1`, [creator_id]))
+					if (creators?.length > 0) {
+						wheres.push(format(`${table}.creator_id = ANY($1)`, [creators]))
 					}
 
 					return wheres.join(' AND ')
@@ -59,16 +57,15 @@ export default {
 			pack: {
 				where: (table, { id }) => format(`${table}.id = hex_to_int('$1^')`, [id])
 			},
-			packsList: {
+			packList: {
 				orderBy: {
 					last_updated: 'DESC'
 				},
-				limit: ({ limit }) => limit,
-				where: (table, { creator_id }) => {
+				where: (table, { creators }) => {
 					const wheres = []
 
-					if (creator_id) {
-						wheres.push(format(`${table}.creator_id = $1`, [creator_id]))
+					if (creators?.length > 0) {
+						wheres.push(format(`${table}.creator_id = ANY($1)`, [creators]))
 					}
 
 					return wheres.join(' AND ')

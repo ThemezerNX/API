@@ -125,7 +125,7 @@
 
 "@themezernx/layout-id-parser@https://github.com/ThemezerNX/Layout-ID-Parser.git":
   version "1.0.1"
-  resolved "https://github.com/ThemezerNX/Layout-ID-Parser.git#9861bc2dca72ff0c7979472fca540b29c8c2311f"
+  resolved "https://github.com/ThemezerNX/Layout-ID-Parser.git#2dd973b44d1e4c51dc4b390e67abde73ed794bb7"
 
 "@tromkom/aurora-strategic-json-merge-patch@https://github.com/Migushthe2nd/aurora-strategic-json-merge-patch.git":
   version "1.0.2"
@@ -1786,6 +1786,11 @@ minimist@^1.2.5:
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
   integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
 
+minisearch@^2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/minisearch/-/minisearch-2.4.1.tgz#589fdbe27b48f7a679f9c5f5f2bc7ed0f8654f6c"
+  integrity sha512-BlYCccDlrC25KRw6DrFxMOyNgVzl1GbSr+ITrqdodrYcEAVFXMXMrzg/3ZoCcJ0CiZVmnudRWhMXGRygKWUZFA==
+
 mkdirp-then@1:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/mkdirp-then/-/mkdirp-then-1.2.0.tgz#a492c879ca4d873f5ee45008f8f55fd0150de3c5"
@@ -1871,6 +1876,11 @@ object-assign@^4, object-assign@^4.0.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
   integrity sha1-IQmtx5ZYh8/AXLvUQsrIv7s2CGM=
+
+object-hash@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/object-hash/-/object-hash-2.0.3.tgz#d12db044e03cd2ca3d77c0570d87225b02e1e6ea"
+  integrity sha512-JPKn0GMu+Fa3zt3Bmr66JhokJU5BaNBIh4ZeTlaCBzrBsOeXzwcKKAK1tbLiPKgvwmPXsDvvLHoWh5Bm7ofIYg==
 
 object-inspect@^1.7.0:
   version "1.8.0"

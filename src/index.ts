@@ -68,6 +68,14 @@ const server = new ApolloServer({
 		}
 
 		return err
+	},
+
+	formatResponse: (response, requestContext) => {
+		if (response?.data && requestContext?.context?.pagination) {
+			response.data.pagination = requestContext.context.pagination
+		}
+
+		return response
 	}
 })
 

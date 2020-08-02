@@ -33,6 +33,15 @@ export const errorName = {
 	THEME_NOT_FOUND: 'THEME_NOT_FOUND',
 	PACK_NOT_FOUND: 'PACK_NOT_FOUND',
 
+	CANNOT_SEARCH_QUERY: 'CANNOT_SEARCH_QUERY',
+	CANNOT_FILTER_NSFW: 'CANNOT_FILTER_NSFW',
+	CANNOT_FILTER_CREATORS: 'CANNOT_FILTER_CREATORS',
+	CANNOT_FILTER_LAYOUTS: 'CANNOT_FILTER_LAYOUTS',
+	INVALID_SORT: 'INVALID_SORT',
+	CANNOT_SORT_BY_DOWNLOADS: 'CANNOT_SORT_BY_DOWNLOADS',
+	CANNOT_SORT_BY_LIKES: 'CANNOT_SORT_BY_LIKES',
+	CANNOT_SORT_BY_UPDATED: 'CANNOT_SORT_BY_UPDATED',
+
 	DB_SAVE_ERROR: 'DB_SAVE_ERROR'
 }
 
@@ -47,6 +56,7 @@ export const errorType = {
 			statusCode: 1
 		}
 	},
+
 	// Status
 	UNAUTHORIZED: {
 		message: 'Authentication is required',
@@ -64,11 +74,13 @@ export const errorType = {
 		message: 'No data to return',
 		statusCode: 204
 	},
+
 	// Creator messages
 	CREATOR_NOT_EXIST: {
 		message: 'Creator not found',
 		statusCode: 1000
 	},
+
 	// Themes
 	FILE_READ_ERROR: {
 		message: "Couldn't read file",
@@ -158,9 +170,45 @@ export const errorType = {
 		statusCode: 4500
 	},
 
+	// Filter errors
+	CANNOT_SEARCH_QUERY: {
+		message:
+			"The 'id', 'details.name', 'details.description' and if not layouts: 'categories' fields are required when the 'query' argument is used",
+		statusCode: 5000
+	},
+	CANNOT_FILTER_NSFW: {
+		message: "The 'categories' field is required when the 'nsfw' argument is used",
+		statusCode: 5001
+	},
+	CANNOT_FILTER_CREATORS: {
+		message: "The 'creator.id' field is required when the 'creators' argument is used",
+		statusCode: 5002
+	},
+	CANNOT_FILTER_LAYOUTS: {
+		message: "The 'layout.id' field is required when the 'layouts' argument is used",
+		statusCode: 5003
+	},
+
+	INVALID_SORT: {
+		message: "The sort argument value may only be 'downloads', 'likes', 'updated'",
+		statusCode: 5010
+	},
+	CANNOT_SORT_BY_DOWNLOADS: {
+		message: "The 'dl_count' field is required required when sorting by 'downloads'",
+		statusCode: 5011
+	},
+	CANNOT_SORT_BY_LIKES: {
+		message: "The 'like_count' field is required required when sorting by 'likes'",
+		statusCode: 5012
+	},
+	CANNOT_SORT_BY_UPDATED: {
+		message: "The 'last_updated' field is required required when sorting by 'updated'",
+		statusCode: 5013
+	},
+
 	// DB errors
 	DB_SAVE_ERROR: {
 		message: 'Failed saving data to DB',
-		statusCode: 5000
+		statusCode: 10000
 	}
 }

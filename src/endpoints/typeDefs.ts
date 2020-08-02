@@ -14,6 +14,13 @@ export default gql`
 
 	directive @cacheControl(maxAge: Int, scope: CacheControlScope) on FIELD_DEFINITION | OBJECT | INTERFACE
 
+	type Pagination {
+		page: Int!
+		limit: Int
+		page_count: Int!
+		item_count: Int!
+	}
+
 	type PrivateInfo {
 		id: String!
 		discord_user: DiscordUser!
@@ -212,13 +219,40 @@ export default gql`
 		categories: [String!]
 
 		layout(id: String!): Layout
-		layoutsList(target: String, creator_id: String, limit: Int): [Layout!]
+		layoutList(
+			target: String
+			limit: Int
+			page: Int
+			query: String
+			sort: String
+			order: String
+			creators: [String!]
+		): [Layout!]
 
 		theme(id: String!): Theme
-		themesList(target: String, creator_id: String, limit: Int): [Theme!]
+		themeList(
+			target: String
+			limit: Int
+			page: Int
+			query: String
+			sort: String
+			order: String
+			creators: [String!]
+			layouts: [String!]
+			nsfw: Boolean
+		): [Theme!]
 
 		pack(id: String!): Pack
-		packsList(creator_id: String, limit: Int): [Pack!]
+		packList(
+			limit: Int
+			page: Int
+			query: String
+			sort: String
+			order: String
+			creators: [String!]
+			layouts: [String!]
+			nsfw: Boolean
+		): [Pack!]
 
 		## Downloading
 		downloadLayout(id: String!, piece_uuids: [GUID!]): JSON! @cacheControl(maxAge: 300)
@@ -231,6 +265,8 @@ export default gql`
 		## Overlay creation tool
 		createOverlayNXThemes(layout: Upload!, piece: Upload, common: Upload): [File!] @cacheControl(maxAge: 0)
 		createOverlay(blackImg: Upload!, whiteImg: Upload!): File! @cacheControl(maxAge: 0)
+
+		pagination(hash: String!): Pagination
 	}
 
 	type Mutation {
