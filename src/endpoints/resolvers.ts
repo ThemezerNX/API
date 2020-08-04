@@ -732,9 +732,10 @@ export default {
 						},
 						joinMonsterOptions
 					)
+					console.log(_args, dbData)
 
 					if (dbData) {
-						resolve(dbData.items)
+						resolve(dbData)
 					} else {
 						reject(errorName.THEME_NOT_FOUND)
 					}
