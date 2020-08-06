@@ -160,8 +160,8 @@ export const errorType = {
 	},
 
 	NXINSTALLER_ID_INVALID: {
-		message: "The ID should start with a 'P' for Packs or a 't' for Themes",
-		statusCode: 4500
+		message: "The ID should start with a 'p' for Packs or a 't' for Themes",
+		statusCode: 4300
 	},
 
 	LAYOUT_NOT_FOUND: {
