@@ -76,9 +76,9 @@ const server = new ApolloServer({
 			response.data.pagination = requestContext.context.pagination
 		}
 
-		// if (response?.data?.nxinstaller) {
-		// 	response = response?.data?.nxinstaller
-		// }
+		if (response?.data?.nxinstaller) {
+			response.data = response?.data?.nxinstaller
+		}
 
 		return response
 	}
