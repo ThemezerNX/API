@@ -471,14 +471,16 @@ const prepareNXTheme = (id, piece_uuids = []) => {
 
 					await moveFile(
 						themesReturned[0].path,
-						`${storagePath}/cache/themes/${ID.replace(noSpecialCharsREGEX, '_')}.nxtheme`
+						`${storagePath}/cache/themes/${id +
+							(piece_uuids.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`
 					)
 				}
 
 				resolve({
 					ID: ID,
 					filename: newFilename || cacheEntry.filename,
-					path: `${storagePath}/cache/themes/${ID.replace(noSpecialCharsREGEX, '_')}.nxtheme`,
+					path: `${storagePath}/cache/themes/${id +
+						(piece_uuids.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
 					mimetype: 'application/nxtheme'
 				})
 
@@ -869,10 +871,8 @@ export default {
 
 						resolve({
 							filename: themePromise.filename,
-							url: `${process.env.API_ENDPOINT}cdn/cache/themes/${themePromise.ID.replace(
-								noSpecialCharsREGEX,
-								'_'
-							)}.nxtheme`,
+							url: `${process.env.API_ENDPOINT}cdn/cache/themes/${id +
+								(piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
 							mimetype: themePromise.mimetype
 						})
 

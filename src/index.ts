@@ -80,14 +80,13 @@ const server = new ApolloServer({
 	}
 })
 
-app.use(
-	cors({
-		credentials: true,
-		origin: process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : 'https://themezer.ga'
-	})
-)
-
 if (process.env.NODE_ENV === 'development') {
+	app.use(
+		cors({
+			credentials: true,
+			origin: process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : 'https://themezer.ga'
+		})
+	)
 	app.use('/cdn', express.static('../cdn'))
 }
 
