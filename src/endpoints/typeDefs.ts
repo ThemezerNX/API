@@ -170,12 +170,11 @@ export default gql`
 	}
 
 	type NXInstallerResponse {
+		name: String
 		target: String!
-		screenshot: String!
-		filename: String
-		short_filename: String
 		url: String!
-		mimetype: String
+		preview: String!
+		id: String!
 	}
 
 	type FileUrl {

@@ -338,7 +338,7 @@ const createNXThemes = (themes) =>
 
 						// Return NXTheme data as Base64 encoded string
 						resolve({
-							short_filename: `${theme.themeName} by ${info.Author}`,
+							name: `${theme.themeName} by ${info.Author}`,
 							filename:
 								`${theme.themeName} by ${info.Author}` +
 								(info.LayoutInfo ? ` using ${info.LayoutInfo}` : '') +
@@ -418,22 +418,16 @@ const prepareNXTheme = (id, piece_uuids) => {
 				)
 
 				try {
-					const ID = stringifyThemeID({
-						service: 'Themezer',
-						id: id,
-						piece_uuids: piece_uuids || theme_piece_uuids || undefined
-					})
-
 					const cacheEntry = await db.oneOrNone(
 						`
-							SELECT filename, short_filename, last_built
+							SELECT filename, name, last_built
 							FROM themes_cache
 							WHERE id = hex_to_int('$1^') AND piece_uuids = $2::uuid[]
 						`,
 						[id, piece_uuids || []]
 					)
 
-					let newFilename, shortFileName
+					let newFilename, newName
 					if (
 						!cacheEntry ||
 						last_updated > cacheEntry.last_built ||
@@ -479,7 +473,7 @@ const prepareNXTheme = (id, piece_uuids) => {
 						const themesReturned: any = await Promise.all(themePromises)
 
 						newFilename = themesReturned[0].filename
-						shortFileName = themesReturned[0].short_filename
+						newName = themesReturned[0].name
 
 						await moveFile(
 							themesReturned[0].path,
@@ -489,11 +483,11 @@ const prepareNXTheme = (id, piece_uuids) => {
 					}
 
 					resolve({
-						ID: ID,
+						id: id,
+						name: newName || cacheEntry.name,
 						target: fileNameToThemeTarget(target),
 						screenshot: `${process.env.API_ENDPOINT}cdn/themes/${id}/screenshot.jpg`,
 						localfilename: `${id + (piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
-						short_filename: shortFileName || cacheEntry.short_filename,
 						filename: newFilename || cacheEntry.filename,
 						path: `${storagePath}/cache/themes/${id +
 							(piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
@@ -507,22 +501,17 @@ const prepareNXTheme = (id, piece_uuids) => {
 								SET dl_count = dl_count + 1
 							WHERE id = hex_to_int('$1^');
 	
-							INSERT INTO themes_cache (id, piece_uuids, filename, short_filename, last_built)
+							INSERT INTO themes_cache (id, piece_uuids, filename, name, last_built)
 							VALUES(hex_to_int('$1^'), $2::uuid[], $3, $4, NOW()) 
 							ON CONFLICT (id, piece_uuids) 
 							DO 
 								UPDATE SET 
 									filename = $3,
-									short_filename = $4,
+									name = $4,
 									last_built = NOW();
 								
 						`,
-						[
-							id,
-							piece_uuids || [],
-							newFilename || cacheEntry.filename,
-							shortFileName || cacheEntry.short_filename
-						]
+						[id, piece_uuids || [], newFilename || cacheEntry.filename, name || cacheEntry.name]
 					)
 
 					cleanupCallback()
@@ -546,10 +535,11 @@ const downloadTheme = (id, piece_uuids) => {
 			const themePromise: any = await prepareNXTheme(id, piece_uuids)
 
 			resolve({
+				name: themePromise.name,
 				target: themePromise.target,
-				screenshot: themePromise.screenshot,
-				short_filename: themePromise.short_filename,
+				preview: themePromise.screenshot,
 				filename: themePromise.filename,
+				id: themePromise.id,
 				url: `${process.env.API_ENDPOINT}cdn/cache/themes/${id +
 					(piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
 				mimetype: themePromise.mimetype
@@ -595,10 +585,11 @@ const downloadPackSeperate = (id) => {
 
 			themesReturned.forEach((t) => {
 				shouldResolve.push({
+					name: t.name,
 					target: t.target,
-					screenshot: t.screenshot,
-					short_filename: t.short_filename,
+					preview: t.screenshot,
 					filename: t.filename,
+					id: t.id,
 					url: `${process.env.API_ENDPOINT}cdn/cache/themes/${t.localfilename}`,
 					mimetype: t.mimetype
 				})
