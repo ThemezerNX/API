@@ -821,7 +821,6 @@ export default {
 						info,
 						context,
 						(sql) => {
-							console.log(sql)
 							return db.any(sql)
 						},
 						joinMonsterOptions
@@ -945,7 +944,6 @@ export default {
 						}
 
 						if (shouldRebuild) {
-							console.log('rebuilt!')
 							// Create the NXThemes
 							const themePromises = pack.map((pack) => prepareNXTheme(pack.theme_id))
 							const themesReturned: Array<any> = await Promise.all(themePromises)
