@@ -267,6 +267,9 @@ export default gql`
 		downloadTheme(id: String!, piece_uuids: [GUID!]): FileUrl! @cacheControl(maxAge: 300)
 
 		downloadPack(id: String!): FileUrl! @cacheControl(maxAge: 300)
+		downloadPackSeperate(id: String!): [FileUrl!] @cacheControl(maxAge: 300)
+
+		nxinstaller(id: String!): [FileUrl!] @cacheControl(maxAge: 300)
 
 		## Overlay creation tool
 		createOverlayNXThemes(layout: Upload!, piece: Upload, common: Upload): [File!] @cacheControl(maxAge: 0)

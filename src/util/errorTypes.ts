@@ -29,6 +29,8 @@ export const errorName = {
 	NXTHEME_UNPACK_FAILED: 'NXTHEME_UNPACK_FAILED',
 	PACK_CREATE_FAILED: 'PACK_CREATE_FAILED',
 
+	NXINSTALLER_ID_INVALID: 'NXINSTALLER_ID_INVALID',
+
 	LAYOUT_NOT_FOUND: 'LAYOUT_NOT_FOUND',
 	THEME_NOT_FOUND: 'THEME_NOT_FOUND',
 	PACK_NOT_FOUND: 'PACK_NOT_FOUND',
@@ -145,7 +147,7 @@ export const errorType = {
 	},
 
 	NXTHEME_CREATE_FAILED: {
-		message: 'Failed to create the NXTheme, please report this with details.',
+		message: 'Failed to create the NXTheme, please report this with details',
 		statusCode: 4200
 	},
 	NXTHEME_UNPACK_FAILED: {
@@ -153,8 +155,13 @@ export const errorType = {
 		statusCode: 4201
 	},
 	PACK_CREATE_FAILED: {
-		message: 'Failed to create the pack, please report this with details.',
+		message: 'Failed to create the pack, please report this with details',
 		statusCode: 4202
+	},
+
+	NXINSTALLER_ID_INVALID: {
+		message: "The ID should start with a 'P' for Packs or a 't' for Themes",
+		statusCode: 4500
 	},
 
 	LAYOUT_NOT_FOUND: {
