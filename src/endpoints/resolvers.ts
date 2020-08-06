@@ -31,7 +31,7 @@ const {
 	unlink,
 	readdir,
 	lstat,
-	promises: { mkdir, access, readFile, writeFile },
+	promises: { mkdir, access, readFile, writeFile, rename },
 	constants
 } = require('fs')
 const readdirPromisified = util.promisify(readdir)
@@ -53,6 +53,7 @@ const extract = require('extract-zip')
 const sarcToolPath = `${__dirname}/../../../SARC-Tool`
 const storagePath = `${__dirname}/../../../cdn`
 const urlNameREGEX = /[^a-zA-Z0-9_.]+/gm
+const noSpecialCharsREGEX = /[^a-z\d\-]+/gi
 
 // Allowed files according to https://github.com/exelix11/SwitchThemeInjector/blob/master/SwitchThemesCommon/PatchTemplate.cs#L10-L29
 const allowedFilesInNXTheme = [
@@ -341,7 +342,7 @@ const createNXThemes = (themes) =>
 								`${theme.themeName} by ${info.Author}` +
 								(info.LayoutInfo ? ` using ${info.LayoutInfo}` : '') +
 								'.nxtheme',
-							data: await readFile(`${theme.path}/theme.nxtheme`, 'base64'),
+							path: `${theme.path}/theme.nxtheme`,
 							mimetype: 'application/nxtheme'
 						})
 					})
@@ -379,9 +380,9 @@ const unpackNXThemes = (paths) =>
 			})
 	)
 
-const prepareNXTheme = (id, piece_uuids) => {
+const prepareNXTheme = (id, piece_uuids = []) => {
 	return new Promise((resolve, reject) => {
-		tmp.dir({ unsafeCleanup: true }, async (err, path, cleanupCallback) => {
+		tmp.dir({ unsafeCleanup: false }, async (err, path, cleanupCallback) => {
 			if (err) {
 				reject(err)
 				return
@@ -389,70 +390,115 @@ const prepareNXTheme = (id, piece_uuids) => {
 
 			try {
 				// Get the theme details
-				const { layout_id, name, target, creator_name } = await db.one(
+				const ID = stringifyThemeID({
+					service: 'Themezer',
+					id: id,
+					piece_uuids: piece_uuids
+				})
+
+				const { layout_id, name, target, creator_name, last_updated, layout_last_updated } = await db.one(
 					`
-						SELECT int_to_padded_hex(layout_id) as layout_id, details ->> 'name' as name, target,
+						SELECT int_to_padded_hex(theme.layout_id) as layout_id, theme.details ->> 'name' as name, theme.target, theme.last_updated, layout.last_updated as layout_last_updated,
 							(	
-								SELECT discord_user ->> 'username'	
-								FROM creators	
-								WHERE id = themes.creator_id	
-								LIMIT 1	
+								SELECT discord_user ->> 'username'
+								FROM creators
+								WHERE id = theme.creator_id	
+								LIMIT 1
 							) as creator_name
-						FROM themes
-						WHERE id = hex_to_int('$1^')
+						FROM themes theme
+						LEFT JOIN layouts layout ON theme.layout_id = layout.id
+						WHERE theme.id = hex_to_int('$1^')
 						LIMIT 1
 					`,
 					[id]
 				)
 
-				// Get merged layout json if any
-				let layoutJson = null
-				if (layout_id) {
-					const layoutJson = await createJson(layout_id, piece_uuids)
-					await writeFile(`${path}/layout.json`, layoutJson, 'utf8')
-				}
+				const cacheEntry = await db.oneOrNone(
+					`
+						SELECT filename, last_built
+						FROM themes_cache
+						WHERE id = hex_to_int('$1^') AND piece_uuids = $2::uuid[]
+					`,
+					[id, piece_uuids]
+				)
 
-				// Get optional common json
-				let commonJson = null
-				if (layout_id) {
-					commonJson = await createJson(layout_id, null, true)
-					if (commonJson) {
-						await writeFile(`${path}/common.json`, commonJson, 'utf8')
+				let newFilename
+				if (
+					!cacheEntry ||
+					last_updated > cacheEntry.last_built ||
+					layout_last_updated > cacheEntry.last_built
+				) {
+					// Rebuild
+
+					// Get merged layout json if any
+					if (layout_id) {
+						const layoutJson = await createJson(layout_id, piece_uuids)
+						await writeFile(`${path}/layout.json`, layoutJson, 'utf8')
 					}
+
+					// Get optional common json
+					let commonJson = null
+					if (layout_id) {
+						commonJson = await createJson(layout_id, null, true)
+						if (commonJson) {
+							await writeFile(`${path}/common.json`, commonJson, 'utf8')
+						}
+					}
+
+					// Symlink all other allowedFilesInNXTheme
+					const filesInFolder = await readdirPromisified(`${storagePath}/themes/${id}`)
+					const linkAllPromises = filesInFolder.map((file) => {
+						if (file !== 'screenshot.jpg') {
+							return link(`${storagePath}/themes/${id}/${file}`, `${path}/${file}`)
+						} else return null
+					})
+					await Promise.all(linkAllPromises)
+
+					// Make NXTheme
+					const themes = [
+						{
+							path: path,
+							themeName: name,
+							targetName: target,
+							creatorName: creator_name
+						}
+					]
+
+					const themePromises = createNXThemes(themes)
+					const themesReturned: any = await Promise.all(themePromises)
+
+					newFilename = themesReturned[0].filename
+
+					await moveFile(
+						themesReturned[0].path,
+						`${storagePath}/cache/themes/${ID.replace(noSpecialCharsREGEX, '_')}.nxtheme`
+					)
 				}
 
-				// Symlink all other allowedFilesInNXTheme
-				const filesInFolder = await readdirPromisified(`${storagePath}/themes/${id}`)
-				const linkAllPromises = filesInFolder.map((file) => {
-					if (file !== 'screenshot.jpg') {
-						return link(`${storagePath}/themes/${id}/${file}`, `${path}/${file}`)
-					} else return null
+				resolve({
+					ID: ID,
+					filename: newFilename || cacheEntry.filename,
+					path: `${storagePath}/cache/themes/${ID.replace(noSpecialCharsREGEX, '_')}.nxtheme`,
+					mimetype: 'application/nxtheme'
 				})
-				await Promise.all(linkAllPromises)
 
-				// Make NXTheme
-				const themes = [
-					{
-						path: path,
-						themeName: name,
-						targetName: target,
-						creatorName: creator_name
-					}
-				]
-
-				const themePromises = createNXThemes(themes)
-				const themesB64 = await Promise.all(themePromises)
-
-				resolve(themesB64[0])
-
-				// Increase download count by 1
+				// Increase download count by 1 and set cache
 				db.none(
 					`
 						UPDATE themes
 							SET dl_count = dl_count + 1
-						WHERE id = hex_to_int('$1^')
+						WHERE id = hex_to_int('$1^');
+
+						INSERT INTO themes_cache (id, piece_uuids, filename, last_built)
+						VALUES(hex_to_int('$1^'), $2::uuid[], $3, NOW()) 
+						ON CONFLICT (id, piece_uuids) 
+						DO 
+							UPDATE SET 
+								filename = $3,
+								last_built = NOW();
+							
 					`,
-					[id]
+					[id, piece_uuids, newFilename || cacheEntry.filename]
 				)
 
 				cleanupCallback()
@@ -732,7 +778,6 @@ export default {
 						},
 						joinMonsterOptions
 					)
-					console.log(_args, dbData)
 
 					if (dbData) {
 						resolve(dbData)
@@ -776,6 +821,7 @@ export default {
 						info,
 						context,
 						(sql) => {
+							console.log(sql)
 							return db.any(sql)
 						},
 						joinMonsterOptions
@@ -816,11 +862,20 @@ export default {
 				throw new Error(e)
 			}
 		},
-		downloadTheme: async (_parent, { id, piece_uuids }, _context, _info) => {
+		downloadTheme: async (_parent, { id, piece_uuids }, context, info) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					try {
-						const themePromise = await prepareNXTheme(id, piece_uuids)
+						const themePromise: any = await prepareNXTheme(id, piece_uuids)
+
+						resolve({
+							filename: themePromise.filename,
+							url: `${process.env.API_ENDPOINT}cdn/cache/themes/${themePromise.ID.replace(
+								noSpecialCharsREGEX,
+								'_'
+							)}.nxtheme`,
+							mimetype: themePromise.mimetype
+						})
 
 						resolve(themePromise)
 					} catch (e) {
@@ -839,24 +894,22 @@ export default {
 					// Get the pack details and theme ids
 					let pack = null
 					try {
-						pack = await db.one(
+						pack = await db.many(
 							`
-								SELECT details ->> 'name' as name,
-									(
-										SELECT discord_user ->> 'username'
-										FROM creators
-										WHERE id = pck.creator_id
-										LIMIT 1
-									) as creator_name,
-									(
-										SELECT array_agg(int_to_padded_hex(id))
-										FROM themes
-										WHERE pack_id = pck.id
-										LIMIT 1
-									) as themes
-								FROM packs pck
-								WHERE id = hex_to_int('$1^')
-								LIMIT 1
+								SELECT
+									"details".details ->> 'name' AS "name",
+									CASE WHEN "discord_us".custom_username IS NOT NULL THEN "discord_us".custom_username ELSE "discord_us".discord_user ->> 'username' END AS "creator_name",
+									int_to_padded_hex("themes".id) AS "theme_id",
+									"pack"."last_updated" AS "last_updated",
+									"themes"."last_updated" AS "theme_last_updated",
+									"layout"."last_updated" AS "layout_last_updated"
+								FROM packs "pack"
+								LEFT JOIN packs "details" ON "pack".id = "details".id
+								LEFT JOIN creators "creator" ON "pack".creator_id = "creator".id
+								LEFT JOIN creators "discord_us" ON "creator".id = "discord_us".id
+								LEFT JOIN themes "themes" ON "pack".id = "themes".pack_id
+								LEFT JOIN layouts "layout" ON "themes".layout_id = "layout".id
+								WHERE "pack".id = hex_to_int('$1^')
 							`,
 							[id]
 						)
@@ -867,29 +920,57 @@ export default {
 					}
 
 					try {
-						// Create the NXThemes
-						const themePromises = pack.themes.map((id) => prepareNXTheme(id, null))
-						const themesB64: Array<any> = await Promise.all(themePromises)
+						const cacheEntry = await db.oneOrNone(
+							`
+								SELECT last_built
+								FROM packs_cache
+								WHERE id = hex_to_int('$1^')
+							`,
+							[id]
+						)
 
-						// Create zip from base64 buffers.
-						// Use basic for loop to prevent 'MaxListenersExceededWarning' (I guess):
-						const zip = new AdmZip()
-						for (const i in themesB64) {
-							try {
-								await zip.addFile(themesB64[i].filename, Buffer.from(themesB64[i].data, 'base64'))
-							} catch (e) {
-								console.error(e)
-								reject(errorName.PACK_CREATE_FAILED)
-								return
-							}
+						let shouldRebuild = false
+
+						if (cacheEntry) {
+							pack.forEach((t) => {
+								if (
+									t.last_updated > cacheEntry.last_built ||
+									t.theme_last_updated > cacheEntry.last_built ||
+									t.layout_last_updated > cacheEntry.last_built
+								)
+									shouldRebuild = true
+							})
+						} else {
+							shouldRebuild = true
 						}
 
-						// Return zip data as Base64 encoded string
-						const buff = await zip.toBuffer()
+						if (shouldRebuild) {
+							console.log('rebuilt!')
+							// Create the NXThemes
+							const themePromises = pack.map((pack) => prepareNXTheme(pack.theme_id))
+							const themesReturned: Array<any> = await Promise.all(themePromises)
+
+							// Create zip
+							// Use basic for-loop instead of promises to prevent 'MaxListenersExceededWarning' (I guess):
+							const zip = new AdmZip()
+							for (const i in themesReturned) {
+								try {
+									await zip.addLocalFile(themesReturned[i].path, null, themesReturned[i].filename)
+								} catch (e) {
+									console.error(e)
+									reject(errorName.PACK_CREATE_FAILED)
+									return
+								}
+							}
+
+							// Write zip to cache
+							await zip.writeZip(`${storagePath}/cache/packs/${id}.zip`)
+						}
+
 						resolve({
-							filename: `${pack.name} by ${pack.creator_name} via Themezer.zip`,
-							data: buff.toString('base64'),
-							mimetype: 'application/nxtheme'
+							filename: `${pack[0].name} by ${pack[0].creator_name} via Themezer.zip`,
+							url: `${process.env.API_ENDPOINT}cdn/cache/packs/${id}.zip`,
+							mimetype: 'application/zip'
 						})
 
 						// Increase download count by 1
@@ -897,7 +978,14 @@ export default {
 							`
 								UPDATE packs
 									SET dl_count = dl_count + 1
-								WHERE  id = hex_to_int('$1^')
+								WHERE  id = hex_to_int('$1^');
+
+								INSERT INTO packs_cache (id, last_built)
+								VALUES(hex_to_int('$1^'), NOW()) 
+								ON CONFLICT (id) 
+								DO 
+									UPDATE SET 
+										last_built = NOW();
 							`,
 							[id]
 						)
@@ -1010,7 +1098,16 @@ export default {
 								}
 							]
 							const themePromises = createNXThemes(themes)
-							const themesB64 = await Promise.all(themePromises)
+							const themesReturned: Array<any> = await Promise.all(themePromises)
+
+							const themesB64 = []
+							for (const i in themesReturned) {
+								themesB64.push({
+									filename: themesReturned[i].filename,
+									url: await readFile(`${themesReturned[i].path}/theme.nxtheme`, 'base64'),
+									mimetype: themesReturned[i].mimetype
+								})
+							}
 
 							resolve(themesB64)
 
@@ -1682,7 +1779,7 @@ export default {
 												themeDatas.map((t: any) => t.details.name).join('\n')
 											)
 											.setThumbnail(
-												`https://api.themezer.ga/cdn/themes/${
+												`${process.env.API_ENDPOINT}cdn/themes/${
 													(themeDatas[0] as any).hex_id
 												}/screenshot.jpg`
 											)
@@ -1710,7 +1807,7 @@ export default {
 													`https://themezer.ga/creators/${context.req.user.id}`
 												)
 												.setThumbnail(
-													`https://api.themezer.ga/cdn/themes/${t.hex_id}/screenshot.jpg`
+													`${process.env.API_ENDPOINT}cdn/themes/${t.hex_id}/screenshot.jpg`
 												)
 												.setURL(
 													`https://themezer.ga/themes/${fileNameToWebName(

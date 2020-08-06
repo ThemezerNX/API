@@ -169,6 +169,12 @@ export default gql`
 		themes: [Theme!]
 	}
 
+	type FileUrl {
+		filename: String
+		url: String!
+		mimetype: String
+	}
+
 	type File {
 		filename: String
 		data: String!
@@ -258,9 +264,9 @@ export default gql`
 		downloadLayout(id: String!, piece_uuids: [GUID!]): JSON! @cacheControl(maxAge: 300)
 		downloadCommonLayout(id: String!): JSON! @cacheControl(maxAge: 300)
 
-		downloadTheme(id: String!, piece_uuids: [GUID!]): File! @cacheControl(maxAge: 300)
+		downloadTheme(id: String!, piece_uuids: [GUID!]): FileUrl! @cacheControl(maxAge: 300)
 
-		downloadPack(id: String!): File! @cacheControl(maxAge: 300)
+		downloadPack(id: String!): FileUrl! @cacheControl(maxAge: 300)
 
 		## Overlay creation tool
 		createOverlayNXThemes(layout: Upload!, piece: Upload, common: Upload): [File!] @cacheControl(maxAge: 0)

@@ -2,6 +2,7 @@ require('dotenv').config()
 const consola = require('consola')
 const express = require('express')
 const app = express()
+const cors = require('cors')
 const bodyParser = require('body-parser')
 
 const { ApolloServer } = require('apollo-server-express')
@@ -78,6 +79,17 @@ const server = new ApolloServer({
 		return response
 	}
 })
+
+app.use(
+	cors({
+		credentials: true,
+		origin: process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : 'https://themezer.ga'
+	})
+)
+
+if (process.env.NODE_ENV === 'development') {
+	app.use('/cdn', express.static('../cdn'))
+}
 
 app.get(/\/.+/, function(req, res) {
 	res.send('No frii gaems here')
