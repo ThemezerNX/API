@@ -380,7 +380,7 @@ const unpackNXThemes = (paths) =>
 			})
 	)
 
-const prepareNXTheme = (id, piece_uuids = []) => {
+const prepareNXTheme = (id, piece_uuids) => {
 	return new Promise((resolve, reject) => {
 		tmp.dir({ unsafeCleanup: false }, async (err, path, cleanupCallback) => {
 			if (err) {
@@ -390,15 +390,18 @@ const prepareNXTheme = (id, piece_uuids = []) => {
 
 			try {
 				// Get the theme details
-				const ID = stringifyThemeID({
-					service: 'Themezer',
-					id: id,
-					piece_uuids: piece_uuids
-				})
 
-				const { layout_id, name, target, creator_name, last_updated, layout_last_updated } = await db.one(
+				const {
+					layout_id,
+					name,
+					target,
+					creator_name,
+					theme_piece_uuids,
+					last_updated,
+					layout_last_updated
+				} = await db.one(
 					`
-						SELECT int_to_padded_hex(theme.layout_id) as layout_id, theme.details ->> 'name' as name, theme.target, theme.last_updated, layout.last_updated as layout_last_updated,
+						SELECT int_to_padded_hex(theme.layout_id) as layout_id, theme.details ->> 'name' as name, theme.target, piece_uuids as theme_piece_uuids, theme.last_updated, layout.last_updated as layout_last_updated,
 							(	
 								SELECT discord_user ->> 'username'
 								FROM creators
@@ -413,13 +416,19 @@ const prepareNXTheme = (id, piece_uuids = []) => {
 					[id]
 				)
 
+				const ID = stringifyThemeID({
+					service: 'Themezer',
+					id: id,
+					piece_uuids: piece_uuids || theme_piece_uuids || undefined
+				})
+
 				const cacheEntry = await db.oneOrNone(
 					`
 						SELECT filename, last_built
 						FROM themes_cache
 						WHERE id = hex_to_int('$1^') AND piece_uuids = $2::uuid[]
 					`,
-					[id, piece_uuids]
+					[id, piece_uuids || []]
 				)
 
 				let newFilename
@@ -472,7 +481,7 @@ const prepareNXTheme = (id, piece_uuids = []) => {
 					await moveFile(
 						themesReturned[0].path,
 						`${storagePath}/cache/themes/${id +
-							(piece_uuids.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`
+							(piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`
 					)
 				}
 
@@ -480,7 +489,7 @@ const prepareNXTheme = (id, piece_uuids = []) => {
 					ID: ID,
 					filename: newFilename || cacheEntry.filename,
 					path: `${storagePath}/cache/themes/${id +
-						(piece_uuids.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
+						(piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
 					mimetype: 'application/nxtheme'
 				})
 
@@ -500,7 +509,7 @@ const prepareNXTheme = (id, piece_uuids = []) => {
 								last_built = NOW();
 							
 					`,
-					[id, piece_uuids, newFilename || cacheEntry.filename]
+					[id, piece_uuids || [], newFilename || cacheEntry.filename]
 				)
 
 				cleanupCallback()
@@ -945,7 +954,7 @@ export default {
 
 						if (shouldRebuild) {
 							// Create the NXThemes
-							const themePromises = pack.map((pack) => prepareNXTheme(pack.theme_id))
+							const themePromises = pack.map((pack) => prepareNXTheme(pack.theme_id, undefined))
 							const themesReturned: Array<any> = await Promise.all(themePromises)
 
 							// Create zip
