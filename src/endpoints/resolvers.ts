@@ -1979,7 +1979,9 @@ export default {
 									UPDATE creators
 										SET liked_${typeLowercase} = array_append(liked_${typeLowercase}, $2)
 									WHERE id = $1
-										AND (liked_${typeLowercase} IS NULL OR NOT hex_to_int('$1^') = ANY(liked_${typeLowercase}))
+										AND (liked_${typeLowercase} IS NULL OR NOT ${
+									typeLowercase === 'creators' ? '$2' : "hex_to_int('$2^')"
+								} = ANY(liked_${typeLowercase}))
 								`,
 								[context.req.user.id, id]
 							)
@@ -1991,7 +1993,7 @@ export default {
 										SET liked_${typeLowercase} = array_remove(liked_${typeLowercase}, $2)
 									WHERE id = $1
 										AND liked_${typeLowercase} IS NOT NULL
-										AND hex_to_int('$1^') = ANY(liked_${typeLowercase})
+										AND ${typeLowercase === 'creators' ? '$2' : "hex_to_int('$2^')"} = ANY(liked_${typeLowercase})
 								`,
 								[context.req.user.id, id]
 							)
@@ -2002,6 +2004,70 @@ export default {
 				} else {
 					throw errorName.UNAUTHORIZED
 				}
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
+		deleteTheme: async (_parent, { id }, context, _info) => {
+			try {
+				return await new Promise(async (resolve, reject) => {
+					if (await context.authenticate()) {
+						try {
+							await db.one(
+								`
+									DELETE FROM themes CASCADE
+									WHERE creator_id = $1
+										AND id = hex_to_int('$2^')
+									RETURNING id
+								`,
+								[context.req.user.id, id]
+							)
+							rimraf(`${storagePath}/themes/${id}`, () => {})
+							resolve(true)
+						} catch (e) {
+							console.error(e)
+							reject(errorName.UNAUTHORIZED)
+						}
+					} else {
+						throw errorName.UNAUTHORIZED
+					}
+				})
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
+		deletePack: async (_parent, { id }, context, _info) => {
+			try {
+				return await new Promise(async (resolve, reject) => {
+					if (await context.authenticate()) {
+						try {
+							const dbData = await db.one(
+								`
+									DELETE FROM packs CASCADE
+									WHERE creator_id = $1
+										AND id = hex_to_int('$2^')
+									RETURNING (
+										SELECT array_agg(id)
+										FROM themes
+										WHERE pack_id = hex_to_int('$2^')
+									) as ids;
+								`,
+								[context.req.user.id, id]
+							)
+							dbData.ids.forEach((id) => {
+								rimraf(`${storagePath}/themes/${id}`, () => {})
+							})
+							resolve(true)
+						} catch (e) {
+							console.error(e)
+							reject(errorName.UNAUTHORIZED)
+						}
+					} else {
+						throw errorName.UNAUTHORIZED
+					}
+				})
 			} catch (e) {
 				console.error(e)
 				throw new Error(e)

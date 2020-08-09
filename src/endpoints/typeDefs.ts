@@ -303,13 +303,15 @@ export default gql`
 			clear_logo_image: Boolean
 		): Boolean
 
-		# Unauthed
 		## Submitting
 		uploadSingleOrZip(file: Upload!): [DetectedTheme!]
 		submitThemes(files: [Upload!], themes: [DetectedThemeInput!], details: DetailsInput!, type: String!): Boolean
 
 		## Upvoting
 		setLike(type: String!, id: String!, value: Boolean!): Boolean
+
+		deleteTheme(id: String!): Boolean
+		deletePack(id: String!): Boolean
 	}
 
 	schema {
