@@ -707,24 +707,25 @@ const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc',
 						}
 					]
 
-					const sortOption = sortOptions.find((o: any) => o.id === sort)
+					const sortOption = sort ? sortOptions.find((o: any) => o.id === sort) : sortOptions[2]
 					if (!sortOption) throw errorName.INVALID_SORT
+					if (order.toLowerCase() !== 'asc' || order.toLowerCase() !== 'desc') throw errorName.INVALID_ORDER
 
 					if (sortOption.id === 'downloads' || sortOption.id === 'likes') {
 						if (sortOption.id === 'downloads' && !queryFields.dl_count)
 							throw errorName.CANNOT_SORT_BY_DOWNLOADS
 						if (sortOption.id === 'likes' && !queryFields.dl_count) throw errorName.CANNOT_SORT_BY_LIKES
 
-						if (order === 'asc') {
+						if (order.toLowerCase() === 'asc') {
 							return a[sortOption.key] - b[sortOption.key]
-						} else if (order === 'desc') {
+						} else if (order.toLowerCase() === 'desc') {
 							return b[sortOption.key] - a[sortOption.key]
 						}
 					} else if (sortOption.id === 'updated') {
 						if (!queryFields.last_updated) throw errorName.CANNOT_SORT_BY_UPDATED
-						if (order === 'asc') {
+						if (order.toLowerCase() === 'asc') {
 							return new Date(a[sortOption.key]).getTime() - new Date(b[sortOption.key]).getTime()
-						} else if (order === 'desc') {
+						} else if (order.toLowerCase() === 'desc') {
 							return new Date(b[sortOption.key]).getTime() - new Date(a[sortOption.key]).getTime()
 						}
 					}

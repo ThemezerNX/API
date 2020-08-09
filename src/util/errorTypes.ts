@@ -43,6 +43,7 @@ export const errorName = {
 	CANNOT_SORT_BY_DOWNLOADS: 'CANNOT_SORT_BY_DOWNLOADS',
 	CANNOT_SORT_BY_LIKES: 'CANNOT_SORT_BY_LIKES',
 	CANNOT_SORT_BY_UPDATED: 'CANNOT_SORT_BY_UPDATED',
+	INVALID_ORDER: 'INVALID_ORDER',
 
 	DB_SAVE_ERROR: 'DB_SAVE_ERROR'
 }
@@ -211,6 +212,10 @@ export const errorType = {
 	CANNOT_SORT_BY_UPDATED: {
 		message: "The 'last_updated' field is required required when sorting by 'updated'",
 		statusCode: 5013
+	},
+	INVALID_ORDER: {
+		message: "The order argument value may only be 'asc' or 'desc'",
+		statusCode: 5050
 	},
 
 	// DB errors
