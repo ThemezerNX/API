@@ -685,7 +685,7 @@ const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc',
 				} else return true
 			})
 			.sort((a: any, b: any) => {
-				if (sort || order) {
+				if (sort) {
 					const sortOptions = [
 						{
 							title: 'Downloads',
@@ -707,7 +707,7 @@ const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc',
 						}
 					]
 
-					const sortOption = sort ? sortOptions.find((o: any) => o.id === sort) : sortOptions[2]
+					const sortOption = sortOptions.find((o: any) => o.id === sort)
 					if (!sortOption) throw errorName.INVALID_SORT
 					if (order.toLowerCase() !== 'asc' && order.toLowerCase() !== 'desc') throw errorName.INVALID_ORDER
 
@@ -1217,7 +1217,7 @@ export default {
 							for (const i in themesReturned) {
 								themesB64.push({
 									filename: themesReturned[i].filename,
-									url: await readFile(`${themesReturned[i].path}/theme.nxtheme`, 'base64'),
+									data: await readFile(themesReturned[i].path, 'base64'),
 									mimetype: themesReturned[i].mimetype
 								})
 							}
@@ -1605,6 +1605,7 @@ export default {
 																				) as p
 																				WHERE value ->> 'uuid' = ANY($2::text[])
 																			),
+																			int_to_padded_hex(id) as id,
 																			CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
 																		FROM layouts
 																		WHERE id = hex_to_int('$1^')
