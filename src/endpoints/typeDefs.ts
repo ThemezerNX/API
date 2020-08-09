@@ -23,8 +23,9 @@ export default gql`
 
 	type PrivateInfo {
 		id: String!
-		discord_user: DiscordUser!
+		display_name: String!
 		custom_username: String
+		discord_user: DiscordUser!
 		bio: String
 		joined: DateTime!
 		role: String
@@ -37,8 +38,9 @@ export default gql`
 
 	type UserInfo {
 		id: String!
-		discord_user: DiscordUser!
+		display_name: String!
 		custom_username: String
+		discord_user: DiscordUser!
 		bio: String
 		joined: DateTime!
 		role: String
@@ -49,11 +51,11 @@ export default gql`
 	}
 
 	type DiscordUser {
-		username: String!
+		username: String
 		discriminator: String!
 		avatar: String
-		system: Boolean
-		locale: String
+		# system: Boolean
+		# locale: String
 	}
 
 	type MyLikes {

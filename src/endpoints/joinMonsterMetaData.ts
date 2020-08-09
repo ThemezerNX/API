@@ -77,10 +77,14 @@ export default {
 		sqlTable: 'creators',
 		uniqueKey: 'id',
 		fields: {
+			display_name: {
+				sqlExpr: (table) =>
+					`CASE WHEN ${table}.custom_username IS NOT NULL THEN ${table}.custom_username ELSE ${table}.discord_user ->> 'username' END`
+			},
+			custom_username: { sqlColumn: 'custom_username' },
 			discord_user: {
 				sqlJoin: (table, detailsTable) => `${table}.id = ${detailsTable}.id`
 			},
-			custom_username: { sqlColumn: 'custom_username' },
 			bio: { sqlColumn: 'bio' },
 			joined: { sqlColumn: 'joined' },
 			role: { sqlColumn: 'role' },
@@ -103,10 +107,14 @@ export default {
 		sqlTable: 'creators',
 		uniqueKey: 'id',
 		fields: {
+			display_name: {
+				sqlExpr: (table) =>
+					`CASE WHEN ${table}.custom_username IS NOT NULL THEN ${table}.custom_username ELSE ${table}.discord_user ->> 'username' END`
+			},
+			custom_username: { sqlColumn: 'custom_username' },
 			discord_user: {
 				sqlJoin: (table, detailsTable) => `${table}.id = ${detailsTable}.id`
 			},
-			custom_username: { sqlColumn: 'custom_username' },
 			bio: { sqlColumn: 'bio' },
 			joined: { sqlColumn: 'joined' },
 			role: { sqlColumn: 'role' },
@@ -128,20 +136,20 @@ export default {
 		fields: {
 			username: {
 				sqlExpr: (table) =>
-					`CASE WHEN ${table}.custom_username IS NOT NULL THEN ${table}.custom_username ELSE ${table}.discord_user ->> 'username' END`
+					`CASE WHEN ${table}.custom_username IS NULL THEN ${table}.discord_user ->> 'username' END`
 			},
 			discriminator: {
 				sqlExpr: (table) => `${table}.discord_user ->> 'discriminator'`
 			},
 			avatar: {
 				sqlExpr: (table) => `${table}.discord_user ->> 'avatar'`
-			},
-			system: {
-				sqlExpr: (table) => `${table}.discord_user ->> 'system'`
-			},
-			locale: {
-				sqlExpr: (table) => `${table}.discord_user ->> 'locale'`
 			}
+			// system: {
+			// 	sqlExpr: (table) => `${table}.discord_user ->> 'system'`
+			// },
+			// locale: {
+			// 	sqlExpr: (table) => `${table}.discord_user ->> 'locale'`
+			// }
 		}
 	},
 	MyLikes: {

@@ -404,7 +404,7 @@ const prepareNXTheme = (id, piece_uuids) => {
 					`
 						SELECT int_to_padded_hex(theme.layout_id) as layout_id, theme.details ->> 'name' as name, theme.target, piece_uuids as theme_piece_uuids, theme.last_updated, layout.last_updated as layout_last_updated,
 							(	
-								SELECT discord_user ->> 'username'
+								SELECT CASE WHEN custom_username IS NOT NULL THEN custom_username ELSE discord_user ->> 'username' END
 								FROM creators
 								WHERE id = theme.creator_id	
 								LIMIT 1
@@ -620,7 +620,7 @@ const downloadPackSeperate = (id) => {
 	})
 }
 
-const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc', creators, layouts, nsfw = false }) => {
+const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc', layouts, nsfw = false }) => {
 	const queryFields = graphqlFields(info)
 
 	if (items && items.length > 0) {
@@ -709,7 +709,7 @@ const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc',
 
 					const sortOption = sort ? sortOptions.find((o: any) => o.id === sort) : sortOptions[2]
 					if (!sortOption) throw errorName.INVALID_SORT
-					if (order.toLowerCase() !== 'asc' || order.toLowerCase() !== 'desc') throw errorName.INVALID_ORDER
+					if (order.toLowerCase() !== 'asc' && order.toLowerCase() !== 'desc') throw errorName.INVALID_ORDER
 
 					if (sortOption.id === 'downloads' || sortOption.id === 'likes') {
 						if (sortOption.id === 'downloads' && !queryFields.dl_count)
@@ -1883,7 +1883,7 @@ export default {
 										newPackMessage
 											.setTitle(insertedPack.details.name)
 											.setAuthor(
-												context.req.user.discord_user.username,
+												context.req.user.display_name,
 												avatar(context.req.user.id, context.req.user.discord_user) + '?size=64',
 												`https://themezer.ga/creators/${context.req.user.id}`
 											)
@@ -1914,7 +1914,7 @@ export default {
 											newThemeMessage
 												.setTitle(t.details.name)
 												.setAuthor(
-													context.req.user.discord_user.username,
+													context.req.user.display_name,
 													avatar(context.req.user.id, context.req.user.discord_user) +
 														'?size=64',
 													`https://themezer.ga/creators/${context.req.user.id}`

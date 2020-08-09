@@ -27,14 +27,10 @@ const buildCommonContext = (req, additionalContext: {}) => ({
 									DO
 										UPDATE
 										SET discord_user = EXCLUDED.discord_user
-									RETURNING *
+									RETURNING *, CASE WHEN custom_username IS NOT NULL THEN custom_username ELSE discord_user ->> 'username' END AS display_name
 								`,
 								[id, res.data]
 							)
-
-							if (!!user.custom_username) {
-								user.discord_user.username = user.custom_username
-							}
 
 							// Then add the user object to the original req object
 							req.user = user
