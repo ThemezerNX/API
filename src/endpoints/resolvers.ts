@@ -709,7 +709,6 @@ const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc',
 
 					const sortOption = sortOptions.find((o: any) => o.id === sort)
 					if (!sortOption) throw errorName.INVALID_SORT
-					console.log(sortOption)
 
 					if (sortOption.id === 'downloads' || sortOption.id === 'likes') {
 						if (sortOption.id === 'downloads' && !queryFields.dl_count)
