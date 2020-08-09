@@ -1979,7 +1979,7 @@ export default {
 									UPDATE creators
 										SET liked_${typeLowercase} = array_append(liked_${typeLowercase}, $2)
 									WHERE id = $1
-										AND (liked_${typeLowercase} IS NULL OR NOT $2 = ANY(liked_${typeLowercase}))
+										AND (liked_${typeLowercase} IS NULL OR NOT hex_to_int('$1^') = ANY(liked_${typeLowercase}))
 								`,
 								[context.req.user.id, id]
 							)
@@ -1991,7 +1991,7 @@ export default {
 										SET liked_${typeLowercase} = array_remove(liked_${typeLowercase}, $2)
 									WHERE id = $1
 										AND liked_${typeLowercase} IS NOT NULL
-										AND $2 = ANY(liked_${typeLowercase})
+										AND hex_to_int('$1^') = ANY(liked_${typeLowercase})
 								`,
 								[context.req.user.id, id]
 							)
