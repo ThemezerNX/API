@@ -171,12 +171,17 @@ export default gql`
 		themes: [Theme!]
 	}
 
-	type NXInstallerResponse {
+	type NXInstallerThemes {
 		id: String!
 		name: String
 		target: String!
 		url: String!
 		preview: String!
+	}
+
+	type NXInstallerResponse {
+		groupname: String
+		themes: [NXInstallerThemes!]!
 	}
 
 	type FileUrl {
@@ -278,7 +283,7 @@ export default gql`
 
 		downloadPack(id: String!): FileUrl! @cacheControl(maxAge: 300)
 
-		nxinstaller(id: String!): [NXInstallerResponse!] @cacheControl(maxAge: 300)
+		nxinstaller(id: String!): NXInstallerResponse! @cacheControl(maxAge: 0)
 
 		## Overlay creation tool
 		createOverlayNXThemes(layout: Upload!, piece: Upload, common: Upload): [File!] @cacheControl(maxAge: 0)

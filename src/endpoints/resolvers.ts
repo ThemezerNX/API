@@ -561,11 +561,11 @@ const downloadPackSeperate = (id) => {
 			pack = await db.many(
 				`
 						SELECT
-							int_to_padded_hex("themes".id) AS "theme_id"
+							int_to_padded_hex("themes".id) AS "theme_id",
+							"pack".details -> 'name' as pack_name
 						FROM packs "pack"
 						LEFT JOIN packs "details" ON "pack".id = "details".id
 						LEFT JOIN themes "themes" ON "pack".id = "themes".pack_id
-						LEFT JOIN layouts "layout" ON "themes".layout_id = "layout".id
 						WHERE "pack".id = hex_to_int('$1^')
 					`,
 				[id]
@@ -586,6 +586,7 @@ const downloadPackSeperate = (id) => {
 			themesReturned.forEach((t) => {
 				shouldResolve.push({
 					name: t.name,
+					pack_name: pack[0].pack_name,
 					target: t.target,
 					preview: t.screenshot,
 					filename: t.filename,
@@ -977,10 +978,19 @@ export default {
 					try {
 						if (id.toLowerCase().startsWith('t')) {
 							// Theme Download
-							resolve([await downloadTheme(id.replace(/t/i, ''), piece_uuids)])
+							resolve({
+								themes: [await downloadTheme(id.replace(/t/i, ''), piece_uuids)]
+							})
 						} else if (id.toLowerCase().startsWith('p')) {
 							// Pack Download
-							resolve(await downloadPackSeperate(id.replace(/p/i, '')))
+
+							const themes = await downloadPackSeperate(id.replace(/p/i, ''))
+							// hacky way but idc bc is saves an extra call and allows the function response to remain the same basically
+							console.log(themes[0])
+							resolve({
+								groupname: themes[0].pack_name,
+								themes
+							})
 						} else {
 							reject(errorName.NXINSTALLER_ID_INVALID)
 						}
