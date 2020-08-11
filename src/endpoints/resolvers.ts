@@ -393,6 +393,7 @@ const prepareNXTheme = (id, piece_uuids) => {
 				// Get the theme details
 
 				const {
+					theme_id,
 					layout_id,
 					name,
 					target,
@@ -402,7 +403,7 @@ const prepareNXTheme = (id, piece_uuids) => {
 					layout_last_updated
 				} = await db.one(
 					`
-						SELECT to_hex(theme.layout_id) as layout_id, theme.details ->> 'name' as name, theme.target, piece_uuids as theme_piece_uuids, theme.last_updated, layout.last_updated as layout_last_updated,
+						SELECT to_hex(theme.id) as theme_id, to_hex(theme.layout_id) as layout_id, theme.details ->> 'name' as name, theme.target, piece_uuids as theme_piece_uuids, theme.last_updated, layout.last_updated as layout_last_updated,
 							(	
 								SELECT CASE WHEN custom_username IS NOT NULL THEN custom_username ELSE discord_user ->> 'username' END
 								FROM creators
@@ -424,7 +425,7 @@ const prepareNXTheme = (id, piece_uuids) => {
 							FROM themes_cache
 							WHERE id = hex_to_int('$1^') AND piece_uuids = $2::uuid[]
 						`,
-						[id, piece_uuids || []]
+						[theme_id, piece_uuids || []]
 					)
 
 					let newFilename, newName
@@ -451,10 +452,10 @@ const prepareNXTheme = (id, piece_uuids) => {
 						}
 
 						// Symlink all other allowedFilesInNXTheme
-						const filesInFolder = await readdirPromisified(`${storagePath}/themes/${id}`)
+						const filesInFolder = await readdirPromisified(`${storagePath}/themes/${theme_id}`)
 						const linkAllPromises = filesInFolder.map((file) => {
 							if (file !== 'screenshot.jpg') {
-								return link(`${storagePath}/themes/${id}/${file}`, `${path}/${file}`)
+								return link(`${storagePath}/themes/${theme_id}/${file}`, `${path}/${file}`)
 							} else return null
 						})
 						await Promise.all(linkAllPromises)
@@ -477,19 +478,20 @@ const prepareNXTheme = (id, piece_uuids) => {
 
 						await moveFile(
 							themesReturned[0].path,
-							`${storagePath}/cache/themes/${id +
+							`${storagePath}/cache/themes/${theme_id +
 								(piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`
 						)
 					}
 
 					resolve({
-						id: id,
+						id: theme_id,
 						name: newName || cacheEntry.name,
 						target: fileNameToThemeTarget(target),
-						screenshot: `${process.env.API_ENDPOINT}cdn/themes/${id}/screenshot.jpg`,
-						localfilename: `${id + (piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
+						screenshot: `${process.env.API_ENDPOINT}cdn/themes/${theme_id}/screenshot.jpg`,
+						localfilename: `${theme_id +
+							(piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
 						filename: newFilename || cacheEntry.filename,
-						path: `${storagePath}/cache/themes/${id +
+						path: `${storagePath}/cache/themes/${theme_id +
 							(piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
 						mimetype: 'application/nxtheme'
 					})
@@ -511,7 +513,7 @@ const prepareNXTheme = (id, piece_uuids) => {
 									last_built = NOW();
 								
 						`,
-						[id, piece_uuids || [], newFilename || cacheEntry.filename, name || cacheEntry.name]
+						[theme_id, piece_uuids || [], newFilename || cacheEntry.filename, newName || cacheEntry.name]
 					)
 
 					cleanupCallback()
@@ -540,7 +542,7 @@ const downloadTheme = (id, piece_uuids) => {
 				preview: themePromise.screenshot,
 				filename: themePromise.filename,
 				id: themePromise.id,
-				url: `${process.env.API_ENDPOINT}cdn/cache/themes/${id +
+				url: `${process.env.API_ENDPOINT}cdn/cache/themes/${themePromise.id +
 					(piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
 				mimetype: themePromise.mimetype
 			})
@@ -567,6 +569,7 @@ const downloadPackSeperate = (id) => {
 						LEFT JOIN packs "details" ON "pack".id = "details".id
 						LEFT JOIN themes "themes" ON "pack".id = "themes".pack_id
 						WHERE "pack".id = hex_to_int('$1^')
+						ORDER BY "themes".id
 					`,
 				[id]
 			)
@@ -577,14 +580,13 @@ const downloadPackSeperate = (id) => {
 		}
 
 		try {
+			console.log(pack)
 			// Create the NXThemes
 			const themePromises = pack.map((pack) => prepareNXTheme(pack.theme_id, undefined))
 			const themesReturned: Array<any> = await Promise.all(themePromises)
 
-			const shouldResolve = []
-
-			themesReturned.forEach((t) => {
-				shouldResolve.push({
+			const shouldResolve = themesReturned.map((t) => {
+				return {
 					name: t.name,
 					pack_name: pack[0].pack_name,
 					target: t.target,
@@ -593,7 +595,7 @@ const downloadPackSeperate = (id) => {
 					id: t.id,
 					url: `${process.env.API_ENDPOINT}cdn/cache/themes/${t.localfilename}`,
 					mimetype: t.mimetype
-				})
+				}
 			})
 
 			resolve(shouldResolve)
@@ -986,7 +988,6 @@ export default {
 
 							const themes = await downloadPackSeperate(id.replace(/p/i, ''))
 							// hacky way but idc bc is saves an extra call and allows the function response to remain the same basically
-							console.log(themes[0])
 							resolve({
 								groupname: themes[0].pack_name,
 								themes
