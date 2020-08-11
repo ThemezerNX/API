@@ -34,6 +34,7 @@ export default gql`
 		profile_color: String
 		liked: MyLikes
 		like_count: Int
+		old_ids: [String!]
 	}
 
 	type UserInfo {
@@ -48,6 +49,7 @@ export default gql`
 		logo_image: String
 		profile_color: String
 		like_count: Int
+		old_ids: [String!]
 	}
 
 	type DiscordUser {
@@ -299,6 +301,7 @@ export default gql`
 		restoreAccount(creator_id: String!, backup_code: String!): Boolean!
 
 		updateProfile(
+			id: String!
 			custom_username: String
 			bio: String
 			profile_color: String

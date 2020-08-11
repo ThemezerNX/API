@@ -100,7 +100,8 @@ export default {
 					FROM creators
 					WHERE ${table}.id = ANY(liked_creators)
                 )`
-			}
+			},
+			old_ids: { sqlColumn: 'old_ids' }
 		}
 	},
 	UserInfo: {
@@ -127,7 +128,8 @@ export default {
 					FROM creators
 					WHERE ${table}.id = ANY(liked_creators)
                 )`
-			}
+			},
+			old_ids: { sqlColumn: 'old_ids' }
 		}
 	},
 	DiscordUser: {

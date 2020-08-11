@@ -1400,12 +1400,14 @@ export default {
 		},
 		updateProfile: async (
 			_parent,
-			{ custom_username, bio, profile_color, banner_image, logo_image, clear_banner_image, clear_logo_image },
+			{ id, custom_username, bio, profile_color, banner_image, logo_image, clear_banner_image, clear_logo_image },
 			context,
 			_info
 		) => {
 			try {
-				if (await context.authenticate()) {
+				await context.authenticate()
+
+				if (context.req.user.id === id || context.req.user.role === 'admin') {
 					return await new Promise(async (resolve, reject) => {
 						try {
 							let object: any = {
@@ -1415,7 +1417,7 @@ export default {
 							}
 
 							const toSavePromises = []
-							const bannerPath = `${storagePath}/creators/${context.req.user.id}/banner`
+							const bannerPath = `${storagePath}/creators/${id}/banner`
 							if (!clear_banner_image && !!banner_image) {
 								toSavePromises.push(
 									new Promise(async (resolve, reject) => {
@@ -1449,7 +1451,7 @@ export default {
 								rimraf(bannerPath, () => {})
 							}
 
-							const logoPath = `${storagePath}/creators/${context.req.user.id}/logo`
+							const logoPath = `${storagePath}/creators/${id}/logo`
 							if (!clear_logo_image && !!logo_image) {
 								toSavePromises.push(
 									new Promise(async (resolve, reject) => {
@@ -1487,7 +1489,7 @@ export default {
 
 							const query = () => pgp.helpers.update(object, updateCreatorCS)
 							try {
-								const dbData = await db.none(query() + ` WHERE id = $1`, [context.req.user.id])
+								await db.none(query() + ` WHERE id = $1`, [id])
 								resolve(true)
 							} catch (e) {
 								console.error(e)
@@ -2028,7 +2030,7 @@ export default {
 							const dbData = await db.one(
 								`
 									DELETE FROM themes CASCADE
-									WHERE "cascade".creator_id = $1
+									WHERE ("cascade".creator_id = $1 OR is_admin($1))
 										AND "cascade".id = hex_to_int('$2^')
 									RETURNING "cascade".id as id, "cascade".pack_id, (
 										SELECT array_agg(id)
@@ -2040,6 +2042,8 @@ export default {
 								[context.req.user.id, id]
 							)
 							rimraf(`${storagePath}/themes/${dbData.id}`, () => {})
+
+							// This stuff is for redirecting to the single theme left's page. The pack is removed if there's only one theme left in it.
 							if (dbData.pack_id && dbData.ids.length === 2) {
 								const lastTheme = await db.one(
 									`
@@ -2080,7 +2084,7 @@ export default {
 							const dbData = await db.one(
 								`
 									DELETE FROM packs CASCADE
-									WHERE creator_id = $1
+									WHERE (creator_id = $1 OR is_admin($1))
 										AND id = hex_to_int('$2^')
 									RETURNING (
 										SELECT array_agg(id)
