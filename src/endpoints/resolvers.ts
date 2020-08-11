@@ -2030,7 +2030,7 @@ export default {
 							const dbData = await db.one(
 								`
 									DELETE FROM themes CASCADE
-									WHERE ("cascade".creator_id = $1 OR is_admin($1))
+									WHERE ("cascade".creator_id = $1 OR $3)
 										AND "cascade".id = hex_to_int('$2^')
 									RETURNING "cascade".id as id, "cascade".pack_id, (
 										SELECT array_agg(id)
@@ -2039,7 +2039,7 @@ export default {
 											AND pack_id = "cascade".pack_id
 									) as ids;
 								`,
-								[context.req.user.id, id]
+								[context.req.user.id, id, context.req.user.role === 'admin']
 							)
 							rimraf(`${storagePath}/themes/${dbData.id}`, () => {})
 
@@ -2084,7 +2084,7 @@ export default {
 							const dbData = await db.one(
 								`
 									DELETE FROM packs CASCADE
-									WHERE (creator_id = $1 OR is_admin($1))
+									WHERE (creator_id = $1 OR $3)
 										AND id = hex_to_int('$2^')
 									RETURNING (
 										SELECT array_agg(id)
@@ -2092,7 +2092,7 @@ export default {
 										WHERE pack_id = hex_to_int('$2^')
 									) as ids;
 								`,
-								[context.req.user.id, id]
+								[context.req.user.id, id, context.req.user.role === 'admin']
 							)
 							dbData.ids.forEach((id) => {
 								rimraf(`${storagePath}/themes/${id}`, () => {})

@@ -278,12 +278,12 @@ export default gql`
 		): [Pack!]
 
 		## Downloading
-		downloadLayout(id: String!, piece_uuids: [GUID!]): JSON! @cacheControl(maxAge: 300)
-		downloadCommonLayout(id: String!): JSON! @cacheControl(maxAge: 300)
+		downloadLayout(id: String!, piece_uuids: [GUID!]): JSON! @cacheControl(maxAge: 0)
+		downloadCommonLayout(id: String!): JSON! @cacheControl(maxAge: 0)
 
-		downloadTheme(id: String!, piece_uuids: [GUID!]): FileUrl! @cacheControl(maxAge: 300)
+		downloadTheme(id: String!, piece_uuids: [GUID!]): FileUrl! @cacheControl(maxAge: 0)
 
-		downloadPack(id: String!): FileUrl! @cacheControl(maxAge: 300)
+		downloadPack(id: String!): FileUrl! @cacheControl(maxAge: 0)
 
 		nxinstaller(id: String!): NXInstallerResponse! @cacheControl(maxAge: 0)
 
