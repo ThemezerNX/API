@@ -322,7 +322,8 @@ export default {
                     FROM (
                         SELECT DISTINCT UNNEST(categories)
                         FROM themes
-                        WHERE pack_id = ${table}.id
+						WHERE pack_id = ${table}.id
+						ORDER BY "unnest" ASC
                     ) as t(c)
                 )
                 `
@@ -336,6 +337,9 @@ export default {
                 )`
 			},
 			themes: {
+				orderBy: {
+					id: 'ASC'
+				},
 				sqlJoin: (table, themesTable) => `${table}.id = ${themesTable}.pack_id`
 			}
 		}
