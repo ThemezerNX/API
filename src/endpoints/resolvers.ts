@@ -2025,20 +2025,43 @@ export default {
 				return await new Promise(async (resolve, reject) => {
 					if (await context.authenticate()) {
 						try {
-							await db.one(
+							const dbData = await db.one(
 								`
 									DELETE FROM themes CASCADE
-									WHERE creator_id = $1
-										AND id = hex_to_int('$2^')
-									RETURNING id
+									WHERE "cascade".creator_id = $1
+										AND "cascade".id = hex_to_int('$2^')
+									RETURNING "cascade".id as id, "cascade".pack_id, (
+										SELECT array_agg(id)
+										FROM themes
+										WHERE pack_id IS NOT NULL
+											AND pack_id = "cascade".pack_id
+									) as ids;
 								`,
 								[context.req.user.id, id]
 							)
-							rimraf(`${storagePath}/themes/${id}`, () => {})
-							resolve(true)
+							rimraf(`${storagePath}/themes/${dbData.id}`, () => {})
+							if (dbData.pack_id && dbData.ids.length === 2) {
+								const lastTheme = await db.one(
+									`
+										UPDATE themes
+											SET pack_id = NULL
+										WHERE pack_id = $1
+										RETURNING to_hex(id) as id, target
+									`,
+									[dbData.pack_id]
+								)
+								await db.none(
+									`
+										DELETE FROM packs
+										WHERE id = $1;
+									`,
+									[dbData.pack_id]
+								)
+								resolve(`/themes/${fileNameToWebName(lastTheme.target)}/${lastTheme.id}`)
+							} else resolve(null)
 						} catch (e) {
 							console.error(e)
-							reject(errorName.UNAUTHORIZED)
+							reject(errorName.THEME_NOT_FOUND)
 						}
 					} else {
 						throw errorName.UNAUTHORIZED
@@ -2073,7 +2096,7 @@ export default {
 							resolve(true)
 						} catch (e) {
 							console.error(e)
-							reject(errorName.UNAUTHORIZED)
+							reject(errorName.PACK_NOT_FOUND)
 						}
 					} else {
 						throw errorName.UNAUTHORIZED

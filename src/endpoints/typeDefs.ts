@@ -315,7 +315,7 @@ export default gql`
 		## Upvoting
 		setLike(type: String!, id: String!, value: Boolean!): Boolean
 
-		deleteTheme(id: String!): Boolean
+		deleteTheme(id: String!): String
 		deletePack(id: String!): Boolean
 	}
 
