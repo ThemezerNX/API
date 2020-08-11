@@ -338,7 +338,7 @@ const createNXThemes = (themes) =>
 
 						// Return NXTheme data as Base64 encoded string
 						resolve({
-							name: `${theme.themeName} by ${info.Author}`,
+							name: theme.themeName,
 							filename:
 								`${theme.themeName} by ${info.Author}` +
 								(info.LayoutInfo ? ` using ${info.LayoutInfo}` : '') +
