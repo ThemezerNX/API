@@ -56,7 +56,7 @@ const server = new ApolloServer({
 					}
 			  }
 			: false,
-	formatError: (err, params) => {
+	formatError: (err, _params) => {
 		let error = null
 		console.error(err)
 

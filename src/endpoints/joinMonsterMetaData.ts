@@ -224,7 +224,7 @@ export default {
 		fields: {
 			uuid: { sqlColumn: 'uuid' },
 			id: {
-				sqlExpr: (table) => `int_to_padded_hex(${table}.id)`
+				sqlExpr: (table) => `to_hex(${table}.id)`
 			},
 			creator: {
 				sqlJoin: (table, creatorsTable) =>
@@ -262,7 +262,7 @@ export default {
 		uniqueKey: 'id',
 		fields: {
 			id: {
-				sqlExpr: (table) => `int_to_padded_hex(${table}.id)`
+				sqlExpr: (table) => `to_hex(${table}.id)`
 			},
 			creator: {
 				sqlJoin: (table, creatorsTable) => `${table}.creator_id = ${creatorsTable}.id`
@@ -307,7 +307,7 @@ export default {
 		uniqueKey: 'id',
 		fields: {
 			id: {
-				sqlExpr: (table) => `int_to_padded_hex(${table}.id)`
+				sqlExpr: (table) => `to_hex(${table}.id)`
 			},
 			creator: {
 				sqlJoin: (table, creatorsTable) => `${table}.creator_id = ${creatorsTable}.id`

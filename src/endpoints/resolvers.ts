@@ -402,7 +402,7 @@ const prepareNXTheme = (id, piece_uuids) => {
 					layout_last_updated
 				} = await db.one(
 					`
-						SELECT int_to_padded_hex(theme.layout_id) as layout_id, theme.details ->> 'name' as name, theme.target, piece_uuids as theme_piece_uuids, theme.last_updated, layout.last_updated as layout_last_updated,
+						SELECT to_hex(theme.layout_id) as layout_id, theme.details ->> 'name' as name, theme.target, piece_uuids as theme_piece_uuids, theme.last_updated, layout.last_updated as layout_last_updated,
 							(	
 								SELECT CASE WHEN custom_username IS NOT NULL THEN custom_username ELSE discord_user ->> 'username' END
 								FROM creators
@@ -561,7 +561,7 @@ const downloadPackSeperate = (id) => {
 			pack = await db.many(
 				`
 						SELECT
-							int_to_padded_hex("themes".id) AS "theme_id",
+							to_hex("themes".id) AS "theme_id",
 							"pack".details -> 'name' as pack_name
 						FROM packs "pack"
 						LEFT JOIN packs "details" ON "pack".id = "details".id
@@ -1023,7 +1023,7 @@ export default {
 									SELECT
 										"details".details ->> 'name' AS "name",
 										CASE WHEN "discord_us".custom_username IS NOT NULL THEN "discord_us".custom_username ELSE "discord_us".discord_user ->> 'username' END AS "creator_name",
-										int_to_padded_hex("themes".id) AS "theme_id",
+										to_hex("themes".id) AS "theme_id",
 										"pack"."last_updated" AS "last_updated",
 										"themes"."last_updated" AS "theme_last_updated",
 										"layout"."last_updated" AS "layout_last_updated"
@@ -1615,7 +1615,7 @@ export default {
 																				) as p
 																				WHERE value ->> 'uuid' = ANY($2::text[])
 																			),
-																			int_to_padded_hex(id) as id,
+																			to_hex(id) as id,
 																			CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
 																		FROM layouts
 																		WHERE id = hex_to_int('$1^')
@@ -1763,7 +1763,7 @@ export default {
 									try {
 										insertedPack = await db.one(
 											query() +
-												` RETURNING id, int_to_padded_hex(id) as hex_id, details, last_updated, creator_id`
+												` RETURNING id, to_hex(id) as hex_id, details, last_updated, creator_id`
 										)
 									} catch (e) {
 										console.error(e)
@@ -1849,7 +1849,7 @@ export default {
 								try {
 									const insertedThemes = await db.any(
 										query() +
-											` RETURNING id, int_to_padded_hex(id) as hex_id, details, last_updated, creator_id, target`
+											` RETURNING id, to_hex(id) as hex_id, details, last_updated, creator_id, target`
 									)
 
 									const themeMovePromises = themePaths.map((path, i) => {
