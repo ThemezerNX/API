@@ -1112,7 +1112,7 @@ export default {
 								schema: info.schema,
 								variableValues: {
 									limit: 12,
-									query: idLower.split(':')[1]
+									query: idLower
 								},
 								contextValue: context,
 								rootValue: info.rootValue,

@@ -1,7 +1,7 @@
 {
   "name": "themezer_api",
   "version": "1.0.0",
-  "description": "The Api for Themezer",
+  "description": "The API for Themezer",
   "private": false,
   "license": "GPL-3.0",
   "scripts": {
