@@ -265,11 +265,11 @@ export default {
 		fields: {
 			original: {
 				sqlExpr: (table) =>
-					`CONCAT('//api.themezer.ga/cdn/themes/', to_hex(${table}.id), '/images/original.jpg')`
+					`CONCAT('https://api.themezer.ga/cdn/themes/', to_hex(${table}.id), '/images/original.jpg')`
 			},
 			thumb: {
 				sqlExpr: (table) =>
-					`CONCAT('//api.themezer.ga/cdn/themes/', to_hex(${table}.id), '/images/original.jpg')`
+					`CONCAT('https://api.themezer.ga/cdn/themes/', to_hex(${table}.id), '/images/original.jpg')`
 			}
 		}
 	},
