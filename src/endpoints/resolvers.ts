@@ -1107,7 +1107,7 @@ export default {
 									themes: await Promise.all(promises)
 								})
 							} else reject(errorName.UNKNOWN)
-						} else if (idLower.startsWith('search:')) {
+						} else {
 							const { data } = await graphql({
 								schema: info.schema,
 								variableValues: {
@@ -1141,8 +1141,8 @@ export default {
 									themes: await Promise.all(promises)
 								})
 							} else reject(errorName.UNKNOWN)
-						} else {
-							reject(errorName.NXINSTALLER_ID_INVALID)
+							// } else {
+							// 	reject(errorName.NXINSTALLER_ID_INVALID)
 						}
 					} catch (e) {
 						console.error(e)
