@@ -259,6 +259,20 @@ export default {
 			}
 		}
 	},
+	PreviewTypes: {
+		sqlTable: 'themes',
+		uniqueKey: 'id',
+		fields: {
+			original: {
+				sqlExpr: (table) =>
+					`CONCAT('//api.themezer.ga/cdn/themes/', to_hex(${table}.id), '/images/original.jpg')`
+			},
+			thumb: {
+				sqlExpr: (table) =>
+					`CONCAT('//api.themezer.ga/cdn/themes/', to_hex(${table}.id), '/images/original.jpg')`
+			}
+		}
+	},
 	Theme: {
 		sqlTable: 'themes',
 		uniqueKey: 'id',
@@ -302,14 +316,8 @@ export default {
                 )`
 			},
 			bg_type: { sqlColumn: 'bg_type' },
-			screenshot: {
-				jmIgnoreTable: true,
-				fields: {
-					original: {
-						sqlExpr: (table) =>
-							`CONCAT('//api.themezer.ga/cdn/themes/', to_hex(${table}.id, '/screenshot.jpg')`
-					}
-				}
+			preview: {
+				sqlJoin: (table, previewTable) => `${table}.id = ${previewTable}.id`
 			}
 		}
 	},

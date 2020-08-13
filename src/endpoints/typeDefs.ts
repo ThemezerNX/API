@@ -147,8 +147,9 @@ export default gql`
 		value: ValueInput!
 	}
 
-	type ScreenshotTypes {
+	type PreviewTypes {
 		original: String!
+		thumb: String!
 	}
 
 	type Theme {
@@ -164,7 +165,7 @@ export default gql`
 		bg_type: String
 		dl_count: Int!
 		like_count: Int
-		screenshot: ScreenshotTypes
+		preview: PreviewTypes
 	}
 
 	type Pack {

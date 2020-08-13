@@ -457,11 +457,9 @@ const prepareNXTheme = (id, piece_uuids) => {
 
 						// Symlink all other allowedFilesInNXTheme
 						const filesInFolder = await readdirPromisified(`${storagePath}/themes/${theme_id}`)
-						const linkAllPromises = filesInFolder.map((file) => {
-							if (file !== 'screenshot.jpg') {
-								return link(`${storagePath}/themes/${theme_id}/${file}`, `${path}/${file}`)
-							} else return null
-						})
+						const linkAllPromises = filesInFolder.map((file) =>
+							link(`${storagePath}/themes/${theme_id}/${file}`, `${path}/${file}`)
+						)
 						await Promise.all(linkAllPromises)
 
 						// Make NXTheme
@@ -491,7 +489,7 @@ const prepareNXTheme = (id, piece_uuids) => {
 						id: theme_id,
 						name: newName || cacheEntry.name,
 						target: fileNameToThemeTarget(target),
-						screenshot: `${process.env.API_ENDPOINT}cdn/themes/${theme_id}/screenshot.jpg`,
+						preview: `${process.env.API_ENDPOINT}cdn/themes/${theme_id}/images/original.jpg`,
 						localfilename: `${theme_id +
 							(piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
 						filename: newFilename || cacheEntry.filename,
@@ -543,7 +541,7 @@ const downloadTheme = (id, piece_uuids) => {
 			resolve({
 				name: themePromise.name,
 				target: themePromise.target,
-				preview: themePromise.screenshot,
+				preview: themePromise.preview,
 				filename: themePromise.filename,
 				id: themePromise.id,
 				url: `${process.env.API_ENDPOINT}cdn/cache/themes/${themePromise.id +
@@ -593,7 +591,7 @@ const downloadPackSeperate = (id) => {
 					name: t.name,
 					pack_name: pack[0].pack_name,
 					target: t.target,
-					preview: t.screenshot,
+					preview: t.preview,
 					filename: t.filename,
 					id: t.id,
 					url: `${process.env.API_ENDPOINT}cdn/cache/themes/${t.localfilename}`,
@@ -844,6 +842,7 @@ export default {
 							reject(errorName.LAYOUT_NOT_FOUND)
 						}
 					} catch (e) {
+						console.error(e)
 						reject(errorName.LAYOUT_NOT_FOUND)
 					}
 				})
@@ -916,6 +915,7 @@ export default {
 							reject(errorName.THEME_NOT_FOUND)
 						}
 					} catch (e) {
+						console.error(e)
 						reject(errorName.THEME_NOT_FOUND)
 					}
 				})
@@ -989,6 +989,7 @@ export default {
 							reject(errorName.PACK_NOT_FOUND)
 						}
 					} catch (e) {
+						console.error(e)
 						reject(errorName.PACK_NOT_FOUND)
 					}
 				})
@@ -1886,7 +1887,7 @@ export default {
 
 									resolve({
 										file: f,
-										savename: 'screenshot',
+										savename: 'original.jpg',
 										path: path
 									})
 								})
@@ -1947,7 +1948,6 @@ export default {
 										try {
 											// Read dir contents
 											const filesInFolder = await readdirPromisified(path)
-											// Filter allowed files, 'screenshot.jpg', not 'info.json', and not 'layout.json' if the layout is in the DB
 
 											if (filesInFolder.includes('image.jpg')) {
 												bgType = 'jpg'
@@ -2030,14 +2030,16 @@ export default {
 														(allowedFilesInNXTheme.includes(f) &&
 															f !== 'info.json' &&
 															!(f === 'layout.json' && themes[i].layout_id)) ||
-														f === 'screenshot.jpg'
+														f === 'original.jpg'
 												)
 
 												// Move NXTheme contents to cdn
 												const moveAllPromises = filteredFilesInFolder.map((f) => {
 													return moveFile(
 														`${path}/${f}`,
-														`${storagePath}/themes/${insertedThemes[i].hex_id}/${f}`
+														`${storagePath}/themes/${insertedThemes[i].hex_id}/${
+															f === 'original.jpg' ? `images/${f}` : f
+														}`
 													)
 												})
 												await Promise.all(moveAllPromises)
@@ -2072,7 +2074,7 @@ export default {
 											.setThumbnail(
 												`${process.env.API_ENDPOINT}cdn/themes/${
 													(themeDatas[0] as any).hex_id
-												}/screenshot.jpg`
+												}/images/original.jpg`
 											)
 											.setURL(
 												`https://themezer.ga/packs/${insertedPack.details.name.replace(
@@ -2098,7 +2100,7 @@ export default {
 													`https://themezer.ga/creators/${context.req.user.id}`
 												)
 												.setThumbnail(
-													`${process.env.API_ENDPOINT}cdn/themes/${t.hex_id}/screenshot.jpg`
+													`${process.env.API_ENDPOINT}cdn/themes/${t.hex_id}/images/original.jpg`
 												)
 												.setURL(
 													`https://themezer.ga/themes/${fileNameToWebName(
