@@ -17,7 +17,7 @@ export default {
 			},
 			layoutList: {
 				orderBy: {
-					last_updated: 'DESC'
+					id: 'DESC'
 				},
 				where: (table, { target, creators }) => {
 					const wheres = []
@@ -36,9 +36,13 @@ export default {
 			theme: {
 				where: (table, { id }) => format(`${table}.id = hex_to_int('$1^')`, [id])
 			},
+			randomThemeID: {
+				jmIgnoreAll: true,
+				sqlExpr: (table) => `SELECT id FROM themes OFFSET floor(random()*N) LIMIT 1`
+			},
 			themeList: {
 				orderBy: {
-					last_updated: 'DESC'
+					id: 'DESC'
 				},
 				where: (table, { target, creators }) => {
 					const wheres = []
@@ -59,7 +63,7 @@ export default {
 			},
 			packList: {
 				orderBy: {
-					last_updated: 'DESC'
+					id: 'DESC'
 				},
 				where: (table, { creators }) => {
 					const wheres = []

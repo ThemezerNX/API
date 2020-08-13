@@ -198,7 +198,7 @@ export const errorType = {
 	},
 
 	INVALID_SORT: {
-		message: "The sort argument value may only be 'downloads', 'likes', 'updated'",
+		message: "The sort argument value may only be 'downloads', 'likes', 'updated' or 'id' (default)",
 		statusCode: 5010
 	},
 	CANNOT_SORT_BY_DOWNLOADS: {

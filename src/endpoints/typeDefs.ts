@@ -242,6 +242,7 @@ export default gql`
 		categories: [String!]
 
 		layout(id: String!): Layout
+		randomLayoutID(target: String): String!
 		layoutList(
 			target: String
 			limit: Int
@@ -253,6 +254,7 @@ export default gql`
 		): [Layout!]
 
 		theme(id: String!): Theme
+		randomThemeID(target: String): String!
 		themeList(
 			target: String
 			limit: Int
@@ -266,6 +268,7 @@ export default gql`
 		): [Theme!]
 
 		pack(id: String!): Pack
+		randomPackID: String!
 		packList(
 			limit: Int
 			page: Int

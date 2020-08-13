@@ -1,5 +1,9 @@
 const util = require('util')
+import { graphql } from 'graphql'
 import { pgp, db } from '../db/db'
+const {
+	as: { format }
+} = pgp
 import {
 	fileNameToThemeTarget,
 	themeTargetToFileName,
@@ -580,7 +584,6 @@ const downloadPackSeperate = (id) => {
 		}
 
 		try {
-			console.log(pack)
 			// Create the NXThemes
 			const themePromises = pack.map((pack) => prepareNXTheme(pack.theme_id, undefined))
 			const themesReturned: Array<any> = await Promise.all(themePromises)
@@ -623,7 +626,7 @@ const downloadPackSeperate = (id) => {
 	})
 }
 
-const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc', layouts, nsfw = false }) => {
+const filterData = (items, info, { page = 1, limit, query, sort = 'id', order = 'desc', layouts, nsfw = false }) => {
 	const queryFields = graphqlFields(info)
 
 	if (items && items.length > 0) {
@@ -688,34 +691,37 @@ const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc',
 				} else return true
 			})
 			.sort((a: any, b: any) => {
-				// console.log(sort, order)
-					const sortOptions = [
-						{
-							id: 'downloads',
+				const sortOptions = [
+					{
+						id: 'downloads',
 						key: 'dl_count'
-						},
-						{
-							id: 'likes',
+					},
+					{
+						id: 'likes',
 						key: 'like_count'
-						},
-						{
-							id: 'updated',
+					},
+					{
+						id: 'updated',
 						key: 'last_updated'
-						}
-					]
+					},
+					{
+						id: 'id',
+						key: 'id'
+					}
+				]
 
-					const sortOption = sortOptions.find((o: any) => o.id === sort)
-					if (!sortOption) throw errorName.INVALID_SORT
+				const sortOption = sortOptions.find((o: any) => o.id === sort)
+				if (!sortOption) throw errorName.INVALID_SORT
 
 				if (sortOption.id === 'downloads' && !queryFields.dl_count) throw errorName.CANNOT_SORT_BY_DOWNLOADS
 				if (sortOption.id === 'likes' && !queryFields.like_count) throw errorName.CANNOT_SORT_BY_LIKES
 				if (sortOption.id === 'updated' && order.toLowerCase() === 'asc' && !queryFields.last_updated)
 					throw errorName.CANNOT_SORT_BY_UPDATED
 
-						if (order.toLowerCase() === 'asc') {
-							return a[sortOption.key] - b[sortOption.key]
-						} else if (order.toLowerCase() === 'desc') {
-							return b[sortOption.key] - a[sortOption.key]
+				if (order.toLowerCase() === 'asc') {
+					return a[sortOption.key] - b[sortOption.key]
+				} else if (order.toLowerCase() === 'desc') {
+					return b[sortOption.key] - a[sortOption.key]
 				} else {
 					throw errorName.INVALID_ORDER
 				}
@@ -822,19 +828,46 @@ export default {
 		layout: async (_parent, _args, context, info) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
-					const dbData = await joinMonster(
-						info,
-						context,
-						(sql) => {
-							return db.any(sql)
-						},
-						joinMonsterOptions
-					)
+					try {
+						const dbData = await joinMonster(
+							info,
+							context,
+							(sql) => {
+								return db.any(sql)
+							},
+							joinMonsterOptions
+						)
 
-					if (dbData) {
-						resolve(dbData)
-					} else {
+						if (dbData) {
+							resolve(dbData)
+						} else {
+							reject(errorName.LAYOUT_NOT_FOUND)
+						}
+					} catch (e) {
 						reject(errorName.LAYOUT_NOT_FOUND)
+					}
+				})
+			} catch (e) {
+				throw new Error(e)
+			}
+		},
+		randomLayoutID: async (_parent, { target }, context, info) => {
+			try {
+				return await new Promise(async (resolve, reject) => {
+					try {
+						let query = `SELECT to_hex(id) as id FROM layouts ${
+							target ? `WHERE ${format(`target = $1`, [target])}` : ''
+						} OFFSET floor(random()*(SELECT COUNT(*) from layouts)) LIMIT 1`
+
+						const { id } = await db.one(query)
+						if (id) {
+							resolve(id)
+						} else {
+							reject(errorName.NO_CONTENT)
+						}
+					} catch (e) {
+						console.error(e)
+						reject(errorName.NO_CONTENT)
 					}
 				})
 			} catch (e) {
@@ -869,19 +902,46 @@ export default {
 		theme: async (_parent, _args, context, info) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
-					const dbData = await joinMonster(
-						info,
-						context,
-						(sql) => {
-							return db.any(sql)
-						},
-						joinMonsterOptions
-					)
+					try {
+						const dbData = await joinMonster(
+							info,
+							context,
+							(sql) => {
+								return db.any(sql)
+							},
+							joinMonsterOptions
+						)
 
-					if (dbData) {
-						resolve(dbData)
-					} else {
+						if (dbData) {
+							resolve(dbData)
+						} else {
+							reject(errorName.THEME_NOT_FOUND)
+						}
+					} catch (e) {
 						reject(errorName.THEME_NOT_FOUND)
+					}
+				})
+			} catch (e) {
+				throw new Error(e)
+			}
+		},
+		randomThemeID: async (_parent, { target }, context, info) => {
+			try {
+				return await new Promise(async (resolve, reject) => {
+					try {
+						let query = `SELECT to_hex(id) as id FROM themes ${
+							target ? `WHERE ${format(`target = $1`, [target])}` : ''
+						} OFFSET floor(random()*(SELECT COUNT(*) from themes)) LIMIT 1`
+
+						const { id } = await db.one(query)
+						if (id) {
+							resolve(id)
+						} else {
+							reject(errorName.NO_CONTENT)
+						}
+					} catch (e) {
+						console.error(e)
+						reject(errorName.NO_CONTENT)
 					}
 				})
 			} catch (e) {
@@ -900,6 +960,8 @@ export default {
 						joinMonsterOptions
 					)
 
+					console.log(dbData)
+
 					try {
 						const filtered = filterData(dbData, info, args)
 						context.pagination = filtered.pagination
@@ -916,19 +978,43 @@ export default {
 		pack: async (_parent, _args, context, info) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
-					const dbData = await joinMonster(
-						info,
-						context,
-						(sql) => {
-							return db.any(sql)
-						},
-						joinMonsterOptions
-					)
-
-					if (dbData) {
-						resolve(dbData)
-					} else {
+					try {
+						const dbData = await joinMonster(
+							info,
+							context,
+							(sql) => {
+								return db.any(sql)
+							},
+							joinMonsterOptions
+						)
+						if (dbData) {
+							resolve(dbData)
+						} else {
+							reject(errorName.PACK_NOT_FOUND)
+						}
+					} catch (e) {
 						reject(errorName.PACK_NOT_FOUND)
+					}
+				})
+			} catch (e) {
+				throw new Error(e)
+			}
+		},
+		randomPackID: async (_parent, _args, context, info) => {
+			try {
+				return await new Promise(async (resolve, reject) => {
+					try {
+						let query = `SELECT to_hex(id) as id FROM packs OFFSET floor(random()*(SELECT COUNT(*) from packs)) LIMIT 1`
+
+						const { id } = await db.one(query)
+						if (id) {
+							resolve(id)
+						} else {
+							reject(errorName.NO_CONTENT)
+						}
+					} catch (e) {
+						console.error(e)
+						reject(errorName.NO_CONTENT)
 					}
 				})
 			} catch (e) {
@@ -964,20 +1050,101 @@ export default {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					try {
-						if (id.toLowerCase().startsWith('t')) {
+						const idLower = id.toLowerCase()
+						if (idLower.startsWith('t')) {
 							// Theme Download
 							resolve({
-								themes: [await downloadTheme(id.replace(/t/i, ''), piece_uuids)]
+								themes: [await downloadTheme(id.replace('t', ''), piece_uuids)]
 							})
-						} else if (id.toLowerCase().startsWith('p')) {
+						} else if (idLower.startsWith('p')) {
 							// Pack Download
 
-							const themes = await downloadPackSeperate(id.replace(/p/i, ''))
+							const themes = await downloadPackSeperate(id.replace('p', ''))
 							// hacky way but idc bc is saves an extra call and allows the function response to remain the same basically
 							resolve({
 								groupname: themes[0].pack_name,
 								themes
 							})
+						} else if (idLower === 'random') {
+							const { data } = await graphql({
+								schema: info.schema,
+								variableValues: {
+									limit: 12,
+									query: idLower.split(':')[1]
+								},
+								contextValue: context,
+								rootValue: info.rootValue,
+								source: `
+									query randomThemeID {
+										randomThemeID
+									}
+								`
+							})
+							if (data?.randomThemeID) {
+								resolve({
+									themes: [await downloadTheme(data.randomThemeID, undefined)]
+								})
+							} else reject(errorName.UNKNOWN)
+						} else if (idLower === 'recent') {
+							const { data } = await graphql({
+								schema: info.schema,
+								variableValues: {
+									limit: 12
+								},
+								contextValue: context,
+								rootValue: info.rootValue,
+								source: `
+									query themeList(
+										$limit: Int
+									) {
+										themeList(
+											limit: $limit
+										) {
+											id
+										}
+									}
+								`
+							})
+							if (data?.themeList) {
+								const promises = data.themeList.map((t) => downloadTheme(t.id, undefined))
+								resolve({
+									themes: await Promise.all(promises)
+								})
+							} else reject(errorName.UNKNOWN)
+						} else if (idLower.startsWith('search:')) {
+							const { data } = await graphql({
+								schema: info.schema,
+								variableValues: {
+									limit: 12,
+									query: idLower.split(':')[1]
+								},
+								contextValue: context,
+								rootValue: info.rootValue,
+								source: `
+									query themeList(
+										$limit: Int
+										$query: String
+									) {
+										themeList(
+											limit: $limit
+											query: $query
+										) {
+											id
+											details {
+												name
+												description
+											}
+											categories
+										}
+									}
+								`
+							})
+							if (data?.themeList) {
+								const promises = data.themeList.map((t) => downloadTheme(t.id, undefined))
+								resolve({
+									themes: await Promise.all(promises)
+								})
+							} else reject(errorName.UNKNOWN)
 						} else {
 							reject(errorName.NXINSTALLER_ID_INVALID)
 						}
@@ -999,31 +1166,44 @@ export default {
 				throw new Error(e)
 			}
 		},
-		downloadPack: async (_parent, { id }, _context, _info) => {
+		downloadPack: async (_parent, { id }, context, info) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					// Get the pack details and theme ids
 					let pack = null
 					try {
-						pack = await db.many(
-							`
-									SELECT
-										"details".details ->> 'name' AS "name",
-										CASE WHEN "discord_us".custom_username IS NOT NULL THEN "discord_us".custom_username ELSE "discord_us".discord_user ->> 'username' END AS "creator_name",
-										to_hex("themes".id) AS "theme_id",
-										"pack"."last_updated" AS "last_updated",
-										"themes"."last_updated" AS "theme_last_updated",
-										"layout"."last_updated" AS "layout_last_updated"
-									FROM packs "pack"
-									LEFT JOIN packs "details" ON "pack".id = "details".id
-									LEFT JOIN creators "creator" ON "pack".creator_id = "creator".id
-									LEFT JOIN creators "discord_us" ON "creator".id = "discord_us".id
-									LEFT JOIN themes "themes" ON "pack".id = "themes".pack_id
-									LEFT JOIN layouts "layout" ON "themes".layout_id = "layout".id
-									WHERE "pack".id = hex_to_int('$1^')
-								`,
-							[id]
-						)
+						const { data } = await graphql({
+							schema: info.schema,
+							variableValues: {
+								id
+							},
+							contextValue: context,
+							rootValue: info.rootValue,
+							source: `
+									query pack($id: String!) {
+										pack(id: $id) {
+											id
+											details {
+												name
+											}
+											creator {
+												display_name
+											}
+											last_updated
+											themes {
+												id
+												last_updated
+												layout {
+													last_updated
+												}
+											}
+										}
+									}
+								`
+						})
+						if (data?.pack) {
+							pack = data.pack
+						}
 					} catch (e) {
 						console.error(e)
 						reject(errorName.PACK_NOT_FOUND)
@@ -1033,31 +1213,33 @@ export default {
 					try {
 						const cacheEntry = await db.oneOrNone(
 							`
-									SELECT last_built
-									FROM packs_cache
-									WHERE id = hex_to_int('$1^')
-								`,
-							[id]
+								SELECT last_built
+								FROM packs_cache
+								WHERE id = hex_to_int('$1^')
+							`,
+							[pack.id]
 						)
 
 						let shouldRebuild = false
 
 						if (cacheEntry) {
-							pack.forEach((t) => {
-								if (
-									t.last_updated > cacheEntry.last_built ||
-									t.theme_last_updated > cacheEntry.last_built ||
-									t.layout_last_updated > cacheEntry.last_built
+							if (
+								pack.last_updated > cacheEntry.last_built ||
+								pack.themes.some(
+									(t) =>
+										t.last_updated > cacheEntry.last_built ||
+										t.layout?.last_updated > cacheEntry.last_built
 								)
-									shouldRebuild = true
-							})
+							) {
+								shouldRebuild = true
+							}
 						} else {
 							shouldRebuild = true
 						}
 
 						if (shouldRebuild) {
 							// Create the NXThemes
-							const themePromises = pack.map((pack) => prepareNXTheme(pack.theme_id, undefined))
+							const themePromises = pack.themes.map((t) => prepareNXTheme(t.id, undefined))
 							const themesReturned: Array<any> = await Promise.all(themePromises)
 
 							// Create zip
@@ -1074,12 +1256,12 @@ export default {
 							}
 
 							// Write zip to cache
-							await zip.writeZip(`${storagePath}/cache/packs/${id}.zip`)
+							await zip.writeZip(`${storagePath}/cache/packs/${pack.id}.zip`)
 						}
 
 						resolve({
-							filename: `${pack[0].name} by ${pack[0].creator_name} via Themezer.zip`,
-							url: `${process.env.API_ENDPOINT}cdn/cache/packs/${id}.zip`,
+							filename: `${pack.details.name} by ${pack.creator.display_name} via Themezer.zip`,
+							url: `${process.env.API_ENDPOINT}cdn/cache/packs/${pack.id}.zip`,
 							mimetype: 'application/zip'
 						})
 
@@ -1097,7 +1279,7 @@ export default {
 										UPDATE SET 
 											last_built = NOW();
 								`,
-							[id]
+							[pack.id]
 						)
 					} catch (e) {
 						console.error(e)

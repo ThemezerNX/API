@@ -42,7 +42,7 @@ const server = new ApolloServer({
 			  },
 	plugins: [
 		responseCachePlugin({
-			sessionId: (context) => context.request.http.headers.get('token') || null
+			sessionId: (context) => context.request.http?.headers.get('token') || null
 		})
 	],
 	schema,
@@ -110,7 +110,7 @@ server.applyMiddleware({
 const port = process.env.PORT
 const host = process.env.HOST
 
-app.listen({ port, host }, () => {
+app.listen({ port, host }, async () => {
 	consola.ready({
 		message: `🚀 Server ready at http://${host}:${port}${server.graphqlPath}`,
 		badge: true
