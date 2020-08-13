@@ -688,50 +688,36 @@ const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc',
 				} else return true
 			})
 			.sort((a: any, b: any) => {
-				if (sort) {
+				// console.log(sort, order)
 					const sortOptions = [
 						{
-							title: 'Downloads',
 							id: 'downloads',
-							key: 'dl_count',
-							icon: 'mdi-download-outline'
+						key: 'dl_count'
 						},
 						{
-							title: 'Likes',
 							id: 'likes',
-							key: 'like_count',
-							icon: 'mdi-heart'
+						key: 'like_count'
 						},
 						{
-							title: 'Updated',
 							id: 'updated',
-							key: 'last_updated',
-							icon: 'mdi-calendar-clock'
+						key: 'last_updated'
 						}
 					]
 
 					const sortOption = sortOptions.find((o: any) => o.id === sort)
 					if (!sortOption) throw errorName.INVALID_SORT
-					if (order.toLowerCase() !== 'asc' && order.toLowerCase() !== 'desc') throw errorName.INVALID_ORDER
 
-					if (sortOption.id === 'downloads' || sortOption.id === 'likes') {
-						if (sortOption.id === 'downloads' && !queryFields.dl_count)
-							throw errorName.CANNOT_SORT_BY_DOWNLOADS
-						if (sortOption.id === 'likes' && !queryFields.dl_count) throw errorName.CANNOT_SORT_BY_LIKES
+				if (sortOption.id === 'downloads' && !queryFields.dl_count) throw errorName.CANNOT_SORT_BY_DOWNLOADS
+				if (sortOption.id === 'likes' && !queryFields.like_count) throw errorName.CANNOT_SORT_BY_LIKES
+				if (sortOption.id === 'updated' && order.toLowerCase() === 'asc' && !queryFields.last_updated)
+					throw errorName.CANNOT_SORT_BY_UPDATED
 
 						if (order.toLowerCase() === 'asc') {
 							return a[sortOption.key] - b[sortOption.key]
 						} else if (order.toLowerCase() === 'desc') {
 							return b[sortOption.key] - a[sortOption.key]
-						}
-					} else if (sortOption.id === 'updated') {
-						if (!queryFields.last_updated) throw errorName.CANNOT_SORT_BY_UPDATED
-						if (order.toLowerCase() === 'asc') {
-							return new Date(a[sortOption.key]).getTime() - new Date(b[sortOption.key]).getTime()
-						} else if (order.toLowerCase() === 'desc') {
-							return new Date(b[sortOption.key]).getTime() - new Date(a[sortOption.key]).getTime()
-						}
-					}
+				} else {
+					throw errorName.INVALID_ORDER
 				}
 			})
 

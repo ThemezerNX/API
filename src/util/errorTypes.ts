@@ -210,7 +210,7 @@ export const errorType = {
 		statusCode: 5012
 	},
 	CANNOT_SORT_BY_UPDATED: {
-		message: "The 'last_updated' field is required required when sorting by 'updated'",
+		message: "The 'last_updated' field is required required when sorting by 'updated' + 'asc'",
 		statusCode: 5013
 	},
 	INVALID_ORDER: {
