@@ -36,10 +36,6 @@ export default {
 			theme: {
 				where: (table, { id }) => format(`${table}.id = hex_to_int('$1^')`, [id])
 			},
-			randomThemeID: {
-				jmIgnoreAll: true,
-				sqlExpr: (table) => `SELECT id FROM themes OFFSET floor(random()*N) LIMIT 1`
-			},
 			themeList: {
 				orderBy: {
 					id: 'DESC'
@@ -305,7 +301,16 @@ export default {
 					WHERE ${table}.id = ANY(liked_themes)
                 )`
 			},
-			bg_type: { sqlColumn: 'bg_type' }
+			bg_type: { sqlColumn: 'bg_type' },
+			screenshot: {
+				jmIgnoreTable: true,
+				fields: {
+					original: {
+						sqlExpr: (table) =>
+							`CONCAT('//api.themezer.ga/cdn/themes/', to_hex(${table}.id, '/screenshot.jpg')`
+					}
+				}
+			}
 		}
 	},
 	Pack: {

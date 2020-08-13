@@ -851,17 +851,15 @@ export default {
 				throw new Error(e)
 			}
 		},
-		randomLayoutID: async (_parent, { target }, context, info) => {
+		randomLayoutIDs: async (_parent, { target, limit = 1 }, context, info) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					try {
-						let query = `SELECT to_hex(id) as id FROM layouts ${
-							target ? `WHERE ${format(`target = $1`, [target])}` : ''
-						} OFFSET floor(random()*(SELECT COUNT(*) from layouts)) LIMIT 1`
+						let query = `SELECT to_hex(id) as id FROM layouts WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END ORDER BY random() LIMIT $2`
 
-						const { id } = await db.one(query)
-						if (id) {
-							resolve(id)
+						const dbData = await db.many(query, [target, limit])
+						if (dbData.length > 0) {
+							resolve(dbData.map((r) => r.id))
 						} else {
 							reject(errorName.NO_CONTENT)
 						}
@@ -925,17 +923,15 @@ export default {
 				throw new Error(e)
 			}
 		},
-		randomThemeID: async (_parent, { target }, context, info) => {
+		randomThemeIDs: async (_parent, { target, limit = 1 }, context, info) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					try {
-						let query = `SELECT to_hex(id) as id FROM themes ${
-							target ? `WHERE ${format(`target = $1`, [target])}` : ''
-						} OFFSET floor(random()*(SELECT COUNT(*) from themes)) LIMIT 1`
+						let query = `SELECT to_hex(id) as id FROM themes WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END ORDER BY random() LIMIT $2`
 
-						const { id } = await db.one(query)
-						if (id) {
-							resolve(id)
+						const dbData = await db.many(query, [target, limit])
+						if (dbData.length > 0) {
+							resolve(dbData.map((r) => r.id))
 						} else {
 							reject(errorName.NO_CONTENT)
 						}
@@ -1000,15 +996,15 @@ export default {
 				throw new Error(e)
 			}
 		},
-		randomPackID: async (_parent, _args, context, info) => {
+		randomPackIDs: async (_parent, { limit = 1 }, context, info) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					try {
-						let query = `SELECT to_hex(id) as id FROM packs OFFSET floor(random()*(SELECT COUNT(*) from packs)) LIMIT 1`
+						let query = `SELECT to_hex(id) as id FROM packs ORDER BY random() LIMIT $2`
 
-						const { id } = await db.one(query)
-						if (id) {
-							resolve(id)
+						const dbData = await db.many(query, [limit])
+						if (dbData.length > 0) {
+							resolve(dbData.map((r) => r.id))
 						} else {
 							reject(errorName.NO_CONTENT)
 						}
@@ -1069,20 +1065,20 @@ export default {
 							const { data } = await graphql({
 								schema: info.schema,
 								variableValues: {
-									limit: 12,
-									query: idLower.split(':')[1]
+									limit: 3
 								},
 								contextValue: context,
 								rootValue: info.rootValue,
 								source: `
-									query randomThemeID {
-										randomThemeID
+									query randomThemeIDs($limit: Int!) {
+										randomThemeIDs(limit: $limit)
 									}
 								`
 							})
-							if (data?.randomThemeID) {
+							if (data?.randomThemeIDs) {
+								const promises = data.randomThemeIDs.map((id) => downloadTheme(id, undefined))
 								resolve({
-									themes: [await downloadTheme(data.randomThemeID, undefined)]
+									themes: await Promise.all(promises)
 								})
 							} else reject(errorName.UNKNOWN)
 						} else if (idLower === 'recent') {

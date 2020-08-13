@@ -147,6 +147,10 @@ export default gql`
 		value: ValueInput!
 	}
 
+	type ScreenshotTypes {
+		original: String!
+	}
+
 	type Theme {
 		id: String!
 		creator: UserInfo!
@@ -160,6 +164,7 @@ export default gql`
 		bg_type: String
 		dl_count: Int!
 		like_count: Int
+		screenshot: ScreenshotTypes
 	}
 
 	type Pack {
@@ -242,7 +247,7 @@ export default gql`
 		categories: [String!]
 
 		layout(id: String!): Layout
-		randomLayoutID(target: String): String!
+		randomLayoutIDs(target: String, limit: Int): [String!]!
 		layoutList(
 			target: String
 			limit: Int
@@ -254,7 +259,7 @@ export default gql`
 		): [Layout!]
 
 		theme(id: String!): Theme
-		randomThemeID(target: String): String!
+		randomThemeIDs(target: String, limit: Int): [String!]!
 		themeList(
 			target: String
 			limit: Int
@@ -268,7 +273,7 @@ export default gql`
 		): [Theme!]
 
 		pack(id: String!): Pack
-		randomPackID: String!
+		randomPackIDs(limit: Int): [String!]!
 		packList(
 			limit: Int
 			page: Int
