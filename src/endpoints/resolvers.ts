@@ -58,6 +58,8 @@ const sarcToolPath = `${__dirname}/../../../SARC-Tool`
 const storagePath = `${__dirname}/../../../cdn`
 const urlNameREGEX = /[^a-zA-Z0-9_.]+/gm
 const noSpecialCharsREGEX = /[^a-z\d\-]+/gi
+const themeHexREGEX = /^t[0-9a-f]+$/
+const packHexREGEX = /^p[0-9a-f]+$/
 
 // Allowed files according to https://github.com/exelix11/SwitchThemeInjector/blob/master/SwitchThemesCommon/PatchTemplate.cs#L10-L29
 const allowedFilesInNXTheme = [
@@ -956,8 +958,6 @@ export default {
 						joinMonsterOptions
 					)
 
-					console.log(dbData)
-
 					try {
 						const filtered = filterData(dbData, info, args)
 						context.pagination = filtered.pagination
@@ -1048,15 +1048,16 @@ export default {
 				return await new Promise(async (resolve, reject) => {
 					try {
 						const idLower = id.toLowerCase()
-						if (idLower.startsWith('t')) {
+						// Use rexhex :verycool:
+						if (themeHexREGEX.exec(idLower)) {
 							// Theme Download
 							resolve({
-								themes: [await downloadTheme(id.replace('t', ''), piece_uuids)]
+								themes: [await downloadTheme(idLower.replace('t', ''), piece_uuids)]
 							})
-						} else if (idLower.startsWith('p')) {
+						} else if (packHexREGEX.exec(idLower)) {
 							// Pack Download
 
-							const themes = await downloadPackSeperate(id.replace('p', ''))
+							const themes = await downloadPackSeperate(idLower.replace('p', ''))
 							// hacky way but idc bc is saves an extra call and allows the function response to remain the same basically
 							resolve({
 								groupname: themes[0].pack_name,
