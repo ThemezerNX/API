@@ -626,7 +626,7 @@ const downloadPackSeperate = (id) => {
 	})
 }
 
-const filterData = (items, info, { page = 1, limit, query, sort = 'id', order = 'desc', layouts, nsfw = false }) => {
+const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc', layouts, nsfw = false }) => {
 	const queryFields = graphqlFields(info)
 
 	if (items && items.length > 0) {
@@ -691,40 +691,38 @@ const filterData = (items, info, { page = 1, limit, query, sort = 'id', order = 
 				} else return true
 			})
 			.sort((a: any, b: any) => {
-				const sortOptions = [
-					{
-						id: 'downloads',
-						key: 'dl_count'
-					},
-					{
-						id: 'likes',
-						key: 'like_count'
-					},
-					{
-						id: 'updated',
-						key: 'last_updated'
-					},
-					{
-						id: 'id',
-						key: 'id'
+				if (sort) {
+					const sortOptions = [
+						{
+							id: 'downloads',
+							key: 'dl_count'
+						},
+						{
+							id: 'likes',
+							key: 'like_count'
+						},
+						{
+							id: 'updated',
+							key: 'last_updated'
+						}
+					]
+
+					const sortOption = sortOptions.find((o: any) => o.id === sort)
+					if (!sortOption) throw errorName.INVALID_SORT
+
+					if (sortOption.id === 'downloads' && !queryFields.dl_count) throw errorName.CANNOT_SORT_BY_DOWNLOADS
+					if (sortOption.id === 'likes' && !queryFields.like_count) throw errorName.CANNOT_SORT_BY_LIKES
+					if (sortOption.id === 'updated' && order.toLowerCase() === 'asc' && !queryFields.last_updated)
+						throw errorName.CANNOT_SORT_BY_UPDATED
+
+					if (order.toLowerCase() === 'asc') {
+						return a[sortOption.key] - b[sortOption.key]
+					} else if (order.toLowerCase() === 'desc') {
+						return b[sortOption.key] - a[sortOption.key]
+					} else {
+						throw errorName.INVALID_ORDER
 					}
-				]
-
-				const sortOption = sortOptions.find((o: any) => o.id === sort)
-				if (!sortOption) throw errorName.INVALID_SORT
-
-				if (sortOption.id === 'downloads' && !queryFields.dl_count) throw errorName.CANNOT_SORT_BY_DOWNLOADS
-				if (sortOption.id === 'likes' && !queryFields.like_count) throw errorName.CANNOT_SORT_BY_LIKES
-				if (sortOption.id === 'updated' && order.toLowerCase() === 'asc' && !queryFields.last_updated)
-					throw errorName.CANNOT_SORT_BY_UPDATED
-
-				if (order.toLowerCase() === 'asc') {
-					return a[sortOption.key] - b[sortOption.key]
-				} else if (order.toLowerCase() === 'desc') {
-					return b[sortOption.key] - a[sortOption.key]
-				} else {
-					throw errorName.INVALID_ORDER
-				}
+				} else return 0
 			})
 
 		const item_count = items.length

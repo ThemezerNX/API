@@ -16,8 +16,8 @@ export default {
 				where: (table, { id }) => format(`${table}.id = hex_to_int('$1^')`, [id])
 			},
 			layoutList: {
-				orderBy: {
-					id: 'DESC'
+				orderBy: ({ order = 'desc' }) => {
+					return { id: order }
 				},
 				where: (table, { target, creators }) => {
 					const wheres = []
@@ -37,8 +37,8 @@ export default {
 				where: (table, { id }) => format(`${table}.id = hex_to_int('$1^')`, [id])
 			},
 			themeList: {
-				orderBy: {
-					id: 'DESC'
+				orderBy: ({ order = 'desc' }) => {
+					return { id: order }
 				},
 				where: (table, { target, creators }) => {
 					const wheres = []
@@ -58,8 +58,8 @@ export default {
 				where: (table, { id }) => format(`${table}.id = hex_to_int('$1^')`, [id])
 			},
 			packList: {
-				orderBy: {
-					id: 'DESC'
+				orderBy: ({ order = 'desc' }) => {
+					return { id: order }
 				},
 				where: (table, { creators }) => {
 					const wheres = []
