@@ -1058,7 +1058,7 @@ export default {
 							// Pack Download
 
 							const themes = await downloadPackSeperate(idLower.replace('p', ''))
-							// hacky way but idc bc is saves an extra call and allows the function response to remain the same basically
+							// hacky but idc cuz it saves an extra call and allows the function response to remain the same basically
 							resolve({
 								groupname: themes[0].pack_name,
 								themes
@@ -1888,7 +1888,7 @@ export default {
 
 									resolve({
 										file: f,
-										savename: 'original.jpg',
+										savename: 'original',
 										path: path
 									})
 								})
@@ -1924,7 +1924,7 @@ export default {
 											name: details.name.trim(),
 											description: details.description.trim(),
 											color: details.color,
-											version: details.version ? details.version.trim() : '1.0.0'
+											version: details.version ? details.version.trim() : '1.0'
 										}
 									}
 
@@ -1980,7 +1980,7 @@ export default {
 
 										if (!validFileName(themes[i].target)) {
 											reject(errorName.INVALID_TARGET_NAME)
-											return ''
+											return
 										}
 
 										resolve({
@@ -2004,7 +2004,7 @@ export default {
 													? details.version.trim()
 													: themes[i].version
 													? themes[i].version.trim()
-													: '1.0.0'
+													: '1.0'
 											},
 											bg_type: bgType
 										})
@@ -2033,6 +2033,8 @@ export default {
 															!(f === 'layout.json' && themes[i].layout_id)) ||
 														f === 'original.jpg'
 												)
+
+												console.log(filesInFolder, filteredFilesInFolder)
 
 												// Move NXTheme contents to cdn
 												const moveAllPromises = filteredFilesInFolder.map((f) => {
