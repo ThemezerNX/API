@@ -2034,8 +2034,6 @@ export default {
 														f === 'original.jpg'
 												)
 
-												console.log(filesInFolder, filteredFilesInFolder)
-
 												// Move NXTheme contents to cdn
 												const moveAllPromises = filteredFilesInFolder.map((f) => {
 													return moveFile(
@@ -2094,6 +2092,9 @@ export default {
 									} else {
 										insertedThemes.forEach((t: any) => {
 											const newThemeMessage = themeMessage
+											console.log(
+												`${process.env.API_ENDPOINT}cdn/themes/${t.hex_id}/images/original.jpg`
+											)
 											newThemeMessage
 												.setTitle(t.details.name)
 												.setAuthor(
