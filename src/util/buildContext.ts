@@ -3,6 +3,16 @@ import { db } from '../db/db'
 
 const discordApiBase = 'https://discord.com/api'
 
+function cleanString(input) {
+	var output = ''
+	for (var i = 0; i < input.length; i++) {
+		if (input.charCodeAt(i) <= 127) {
+			output += input.charAt(i)
+		}
+	}
+	return output
+}
+
 const buildCommonContext = (req, additionalContext: {}) => ({
 	authenticate: () => {
 		const token = req.headers.token
@@ -17,6 +27,8 @@ const buildCommonContext = (req, additionalContext: {}) => ({
 					.then(async (res) => {
 						const id = res.data.id
 						delete res.data.id
+
+						res.data.username = cleanString(res.data.username)
 
 						try {
 							const user = await db.oneOrNone(
