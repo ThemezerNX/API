@@ -704,6 +704,10 @@ const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc',
 						{
 							id: 'updated',
 							key: 'last_updated'
+						},
+						{
+							id: 'id',
+							key: 'id'
 						}
 					]
 
@@ -714,6 +718,7 @@ const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc',
 					if (sortOption.id === 'likes' && !queryFields.like_count) throw errorName.CANNOT_SORT_BY_LIKES
 					if (sortOption.id === 'updated' && order.toLowerCase() === 'asc' && !queryFields.last_updated)
 						throw errorName.CANNOT_SORT_BY_UPDATED
+					if (sortOption.id === 'id') return 0
 
 					if (order.toLowerCase() === 'asc') {
 						return a[sortOption.key] - b[sortOption.key]
