@@ -669,7 +669,7 @@ const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc',
 			items = items.filter((item: any) => resultIDs.includes(item.id))
 		}
 
-		if (!nsfw) {
+		if (!nsfw && info.fieldName !== 'layoutList') {
 			items = items.filter((item: any): boolean => {
 				if (!queryFields.categories) throw errorName.CANNOT_FILTER_NSFW
 				else return !(Array.isArray(item.categories) && item.categories.includes('NSFW'))
