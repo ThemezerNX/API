@@ -678,7 +678,7 @@ const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc',
 
 		if (layouts?.length > 0) {
 			items = items.filter((item: any): boolean => {
-				if (info.fieldName === 'packList' ? !queryFields.themes.layout?.id! : queryFields.layout?.id)
+				if (info.fieldName === 'packList' ? !queryFields.themes.layout?.id : !queryFields.layout?.id)
 					throw errorName.CANNOT_FILTER_LAYOUTS
 				return layouts.some((id: string) => {
 					if (item.themes) {
