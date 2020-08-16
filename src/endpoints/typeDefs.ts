@@ -248,7 +248,7 @@ export default gql`
 		categories: [String!]
 
 		layout(id: String!): Layout
-		randomLayoutIDs(target: String, limit: Int): [String!]!
+		randomLayoutIDs(target: String, limit: Int): [String!]! @cacheControl(maxAge: 0)
 		layoutList(
 			target: String
 			limit: Int
@@ -260,7 +260,7 @@ export default gql`
 		): [Layout!]
 
 		theme(id: String!): Theme
-		randomThemeIDs(target: String, limit: Int): [String!]!
+		randomThemeIDs(target: String, limit: Int): [String!]! @cacheControl(maxAge: 0)
 		themeList(
 			target: String
 			limit: Int
@@ -274,7 +274,7 @@ export default gql`
 		): [Theme!]
 
 		pack(id: String!): Pack
-		randomPackIDs(limit: Int): [String!]!
+		randomPackIDs(limit: Int): [String!]! @cacheControl(maxAge: 0)
 		packList(
 			limit: Int
 			page: Int
