@@ -629,7 +629,7 @@ const downloadPackSeperate = (id) => {
 const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc', layouts, nsfw = false }) => {
 	const queryFields = graphqlFields(info)
 
-	if (items && items.length > 0) {
+	if (items?.length > 0) {
 		if (query) {
 			if (
 				!(
@@ -669,66 +669,67 @@ const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc',
 			items = items.filter((item: any) => resultIDs.includes(item.id))
 		}
 
-		items = items
-			.filter((item: any): boolean => {
-				if (nsfw) {
-					if (!queryFields.categories) throw errorName.CANNOT_FILTER_NSFW
-					else return !(Array.isArray(item.categories) && item.categories.includes('NSFW'))
-				} else return true
+		if (!nsfw) {
+			items = items.filter((item: any): boolean => {
+				if (!queryFields.categories) throw errorName.CANNOT_FILTER_NSFW
+				else return !(Array.isArray(item.categories) && item.categories.includes('NSFW'))
 			})
-			.filter((item: any): boolean => {
-				if (layouts && layouts.length > 0) {
-					if (!queryFields.layout?.id) throw errorName.CANNOT_FILTER_LAYOUTS
-					return layouts.some((id: string) => {
-						if (item.themes) {
-							// Pack
-							return item.themes.some((t: any) => t.layout?.id === id)
-						} else if (item.layout) {
-							// Theme
-							return item.layout.id === id
-						} else return false
-					})
-				} else return true
+		}
+
+		if (layouts?.length > 0) {
+			items = items.filter((item: any): boolean => {
+				if (!queryFields.layout?.id) throw errorName.CANNOT_FILTER_LAYOUTS
+				return layouts.some((id: string) => {
+					if (item.themes) {
+						// Pack
+						return item.themes.some((t: any) => t.layout?.id === id)
+					} else if (item.layout) {
+						// Theme
+						return item.layout.id === id
+					} else return false
+				})
 			})
-			.sort((a: any, b: any) => {
-				if (sort) {
-					const sortOptions = [
-						{
-							id: 'downloads',
-							key: 'dl_count'
-						},
-						{
-							id: 'likes',
-							key: 'like_count'
-						},
-						{
-							id: 'updated',
-							key: 'last_updated'
-						},
-						{
-							id: 'id',
-							key: 'id'
-						}
-					]
+		}
 
-					const sortOption = sortOptions.find((o: any) => o.id === sort)
-					if (!sortOption) throw errorName.INVALID_SORT
-
-					if (sortOption.id === 'downloads' && !queryFields.dl_count) throw errorName.CANNOT_SORT_BY_DOWNLOADS
-					if (sortOption.id === 'likes' && !queryFields.like_count) throw errorName.CANNOT_SORT_BY_LIKES
-					if (sortOption.id === 'updated' && order.toLowerCase() === 'asc' && !queryFields.last_updated)
-						throw errorName.CANNOT_SORT_BY_UPDATED
-					if (sortOption.id === 'id') return 0
-
-					if (order.toLowerCase() === 'asc') {
-						return a[sortOption.key] - b[sortOption.key]
-					} else if (order.toLowerCase() === 'desc') {
-						return b[sortOption.key] - a[sortOption.key]
-					} else {
-						throw errorName.INVALID_ORDER
+		if (sort) {
+			items = items.sort((a: any, b: any) => {
+				const sortOptions = [
+					{
+						id: 'downloads',
+						key: 'dl_count'
+					},
+					{
+						id: 'likes',
+						key: 'like_count'
+					},
+					{
+						id: 'updated',
+						key: 'last_updated'
+					},
+					{
+						id: 'id',
+						key: 'id'
 					}
-				} else return 0
+				]
+
+				const sortOption = sortOptions.find((o: any) => o.id === sort)
+				if (!sortOption) throw errorName.INVALID_SORT
+
+				if (sortOption.id === 'downloads' && !queryFields.dl_count) throw errorName.CANNOT_SORT_BY_DOWNLOADS
+				if (sortOption.id === 'likes' && !queryFields.like_count) throw errorName.CANNOT_SORT_BY_LIKES
+				if (sortOption.id === 'updated' && order.toLowerCase() === 'asc' && !queryFields.last_updated)
+					throw errorName.CANNOT_SORT_BY_UPDATED
+				if (sortOption.id === 'id') return 0
+
+				if (order.toLowerCase() === 'asc') {
+					return a[sortOption.key] - b[sortOption.key]
+				} else if (order.toLowerCase() === 'desc') {
+					return b[sortOption.key] - a[sortOption.key]
+				} else {
+					throw errorName.INVALID_ORDER
+				}
 			})
+		}
 
 		const item_count = items.length
 
@@ -1844,9 +1845,9 @@ export default {
 									// Execute all the NXTheme read promises
 									const detectedThemes = await Promise.all(readThemePromises)
 
-									if (detectedThemes && detectedThemes.length > 0) {
+									if (detectedThemes?.length > 0) {
 										resolve(detectedThemes)
-									} else if (detectedThemes && detectedThemes.length === 0) {
+									} else if (detectedThemes?.length === 0) {
 										reject(errorName.NO_VALID_NXTHEMES)
 										rimraf(path, () => {})
 									} else {
@@ -1989,7 +1990,7 @@ export default {
 										resolve({
 											layout_id: themes[i].layout_id,
 											piece_uuids:
-												themes[i].used_pieces && themes[i].used_pieces.length > 0
+												themes[i].used_pieces?.length > 0
 													? themes[i].used_pieces.map((p) => p.value.uuid)
 													: null,
 											target: themes[i].target,
