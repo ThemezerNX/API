@@ -860,7 +860,12 @@ export default {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					try {
-						let query = `SELECT to_hex(id) as id FROM layouts WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END ORDER BY random() LIMIT $2`
+						let query = `
+							SELECT to_hex(id) as id
+							FROM layouts
+							WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END
+							ORDER BY random()
+							LIMIT $2`
 
 						const dbData = await db.many(query, [target, limit])
 						if (dbData.length > 0) {
@@ -933,7 +938,13 @@ export default {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					try {
-						let query = `SELECT to_hex(id) as id FROM themes WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END ORDER BY random() LIMIT $2`
+						let query = `
+							SELECT to_hex(id) as id
+							FROM themes
+							WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END
+								AND NOT 'NSFW' = any(categories)
+							ORDER BY random()
+							LIMIT $2`
 
 						const dbData = await db.many(query, [target, limit])
 						if (dbData.length > 0) {
@@ -1005,7 +1016,17 @@ export default {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					try {
-						let query = `SELECT to_hex(id) as id FROM packs ORDER BY random() LIMIT $2`
+						let query = `
+							SELECT to_hex(id) as id
+							FROM packs
+							WHERE (
+								SELECT id
+								FROM themes
+								WHERE pack_id = packs.id
+									AND 'NSFW' = any(categories)
+							) IS NULL
+							ORDER BY random()
+							LIMIT $2`
 
 						const dbData = await db.many(query, [limit])
 						if (dbData.length > 0) {
