@@ -653,7 +653,7 @@ const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc',
 
 			const itms = items.map((item: any) => {
 				return {
-					id: item.id,
+					id: info.fieldName.charAt(0) + item.id,
 					name: item.details.name,
 					description: item.details.name,
 					categories: item.categories ? item.categories.join('|') : ''
