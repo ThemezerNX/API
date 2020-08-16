@@ -1089,35 +1089,41 @@ export default {
 								groupname: themes[0].pack_name,
 								themes
 							})
-						} else if (idLower === 'random') {
-							const { data } = await graphql({
-								schema: info.schema,
-								variableValues: {
-									limit: 3
-								},
-								contextValue: context,
-								rootValue: info.rootValue,
-								source: `
+						} else if (idLower === '__special_random') {
+							try {
+								const { data } = await graphql({
+									schema: info.schema,
+									variableValues: {
+										limit: 3
+									},
+									contextValue: context,
+									rootValue: info.rootValue,
+									source: `
 									query randomThemeIDs($limit: Int!) {
 										randomThemeIDs(limit: $limit)
 									}
 								`
-							})
-							if (data?.randomThemeIDs) {
-								const promises = data.randomThemeIDs.map((id) => downloadTheme(id, undefined))
-								resolve({
-									themes: await Promise.all(promises)
 								})
-							} else reject(errorName.UNKNOWN)
-						} else if (idLower === 'recent') {
-							const { data } = await graphql({
-								schema: info.schema,
-								variableValues: {
-									limit: 12
-								},
-								contextValue: context,
-								rootValue: info.rootValue,
-								source: `
+								if (data?.randomThemeIDs) {
+									const promises = data.randomThemeIDs.map((id) => downloadTheme(id, undefined))
+									resolve({
+										themes: await Promise.all(promises)
+									})
+								} else reject(errorName.UNKNOWN)
+							} catch (e) {
+								console.error(e)
+								reject(e)
+							}
+						} else if (idLower === '__special_recent') {
+							try {
+								const { data } = await graphql({
+									schema: info.schema,
+									variableValues: {
+										limit: 12
+									},
+									contextValue: context,
+									rootValue: info.rootValue,
+									source: `
 									query themeList(
 										$limit: Int
 									) {
@@ -1125,26 +1131,32 @@ export default {
 											limit: $limit
 										) {
 											id
+											categories
 										}
 									}
 								`
-							})
-							if (data?.themeList) {
-								const promises = data.themeList.map((t) => downloadTheme(t.id, undefined))
-								resolve({
-									themes: await Promise.all(promises)
 								})
-							} else reject(errorName.UNKNOWN)
+								if (data?.themeList) {
+									const promises = data.themeList.map((t) => downloadTheme(t.id, undefined))
+									resolve({
+										themes: await Promise.all(promises)
+									})
+								} else reject(errorName.UNKNOWN)
+							} catch (e) {
+								console.error(e)
+								reject(e)
+							}
 						} else {
-							const { data } = await graphql({
-								schema: info.schema,
-								variableValues: {
-									limit: 12,
-									query: idLower
-								},
-								contextValue: context,
-								rootValue: info.rootValue,
-								source: `
+							try {
+								const { data } = await graphql({
+									schema: info.schema,
+									variableValues: {
+										limit: 12,
+										query: idLower
+									},
+									contextValue: context,
+									rootValue: info.rootValue,
+									source: `
 									query themeList(
 										$limit: Int
 										$query: String
@@ -1162,15 +1174,18 @@ export default {
 										}
 									}
 								`
-							})
-							if (data?.themeList) {
-								const promises = data.themeList.map((t) => downloadTheme(t.id, undefined))
-								resolve({
-									themes: await Promise.all(promises)
 								})
-							} else reject(errorName.UNKNOWN)
-							// } else {
-							// 	reject(errorName.NXINSTALLER_ID_INVALID)
+
+								if (data?.themeList) {
+									const promises = data.themeList.map((t) => downloadTheme(t.id, undefined))
+									resolve({
+										themes: await Promise.all(promises)
+									})
+								} else reject(errorName.UNKNOWN)
+							} catch (e) {
+								console.error(e)
+								reject(e)
+							}
 						}
 					} catch (e) {
 						console.error(e)
@@ -2118,9 +2133,6 @@ export default {
 									} else {
 										insertedThemes.forEach((t: any) => {
 											const newThemeMessage = themeMessage
-											console.log(
-												`${process.env.API_ENDPOINT}cdn/themes/${t.hex_id}/images/original.jpg`
-											)
 											newThemeMessage
 												.setTitle(t.details.name)
 												.setAuthor(
