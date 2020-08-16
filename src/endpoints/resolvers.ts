@@ -666,7 +666,7 @@ const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc',
 			})
 			const resultIDs = rs.map((r: any) => r.id)
 
-			items = items.filter((item: any) => resultIDs.includes(item.id))
+			items = items.filter((item: any) => resultIDs.includes(info.fieldName.charAt(0) + item.id))
 		}
 
 		if (!nsfw && info.fieldName !== 'layoutList') {
