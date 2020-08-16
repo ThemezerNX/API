@@ -869,7 +869,6 @@ export default {
 
 						const dbData = await db.many(query, [target, limit])
 						if (dbData.length > 0) {
-							console.log(dbData)
 							resolve(dbData.map((r) => r.id))
 						} else {
 							reject(errorName.NO_CONTENT)
