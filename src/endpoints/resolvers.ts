@@ -24,7 +24,7 @@ const joinMonsterOptions: any = { dialect: 'pg' }
 
 import { uuid } from 'uuidv4'
 import { encrypt, decrypt } from '../util/crypt'
-import { parseThemeID, stringifyThemeID } from '@themezernx/layout-id-parser'
+import { parseThemeID, stringifyThemeID, getDefaultLayoutID } from '@themezernx/layout-id-parser'
 const { patch } = require('@tromkom/aurora-strategic-json-merge-patch')
 import GraphQLJSON from 'graphql-type-json'
 import { PythonShell } from 'python-shell'
@@ -144,7 +144,7 @@ const updateCreatorCS = new pgp.helpers.ColumnSet(
 )
 
 const createInfo = (themeName, creatorName, target, layoutDetails) => {
-	let LayoutInfo = null
+	let LayoutInfo = ''
 	if (layoutDetails) {
 		LayoutInfo = `${layoutDetails.PatchName} by ${layoutDetails.AuthorName || 'Themezer'}`
 	}
@@ -347,7 +347,7 @@ const createNXThemes = (themes) =>
 							name: theme.themeName,
 							filename:
 								`${theme.themeName} by ${info.Author}` +
-								(info.LayoutInfo ? ` using ${info.LayoutInfo}` : '') +
+								(info.LayoutInfo.length > 0 ? ` using ${info.LayoutInfo}` : '') +
 								'.nxtheme',
 							path: `${theme.path}/theme.nxtheme`,
 							mimetype: 'application/nxtheme'
@@ -1808,9 +1808,15 @@ export default {
 												// Only proceed if info and at least layout or image is detected
 												if (info && (layout || image)) {
 													// If the layout has an ID specified get the uuid
+													let layoutID = layout?.ID
+
+													if (!layout) {
+														layoutID = getDefaultLayoutID(info.Target)
+													}
+
 													let dbLayout = null
-													if (layout && layout.ID) {
-														const { service, id, piece_uuids } = parseThemeID(layout.ID)
+													if (layoutID) {
+														const { service, id, piece_uuids } = parseThemeID(layoutID)
 														// Only fetch the layout if it was created by Themezer
 														if (service === 'Themezer') {
 															try {
@@ -1854,7 +1860,7 @@ export default {
 														used_pieces = dbLayout.used_pieces
 														delete dbLayout.used_pieces
 
-														if (target !== dbLayout.target) {
+														if (layout && target !== dbLayout.target) {
 															reject(errorName.TARGETS_DONT_MATCH)
 															return
 														}

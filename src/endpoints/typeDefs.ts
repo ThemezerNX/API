@@ -109,7 +109,7 @@ export default gql`
 		id: String!
 		creator: UserInfo!
 		details: LayoutDetails!
-		baselayout: JSON!
+		baselayout: JSON
 		target: String!
 		last_updated: DateTime!
 		has_pieces: Boolean!
@@ -297,7 +297,7 @@ export default gql`
 		nxinstaller(id: String!): NXInstallerResponse! @cacheControl(maxAge: 0)
 
 		## Overlay creation tool
-		createOverlayNXThemes(layout: Upload!, piece: Upload, common: Upload): [File!] @cacheControl(maxAge: 0)
+		createOverlayNXThemes(layout: Upload, piece: Upload, common: Upload): [File!] @cacheControl(maxAge: 0)
 		createOverlay(blackImg: Upload!, whiteImg: Upload!): File! @cacheControl(maxAge: 0)
 
 		pagination(hash: String!): Pagination
