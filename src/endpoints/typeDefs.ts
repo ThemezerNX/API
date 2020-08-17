@@ -28,7 +28,7 @@ export default gql`
 		discord_user: DiscordUser!
 		bio: String
 		joined: DateTime!
-		role: String
+		roles: [String!]
 		banner_image: String
 		logo_image: String
 		profile_color: String
@@ -44,7 +44,7 @@ export default gql`
 		discord_user: DiscordUser!
 		bio: String
 		joined: DateTime!
-		role: String
+		roles: [String!]
 		banner_image: String
 		logo_image: String
 		profile_color: String

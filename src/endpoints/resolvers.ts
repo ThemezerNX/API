@@ -137,7 +137,7 @@ const packsCS = new pgp.helpers.ColumnSet(
 )
 
 const updateCreatorCS = new pgp.helpers.ColumnSet(
-	[str('role'), str('custom_username'), str('bio'), str('banner_image'), str('logo_image'), str('profile_color')],
+	[str('custom_username'), str('bio'), str('banner_image'), str('logo_image'), str('profile_color')],
 	{
 		table: 'creators'
 	}
@@ -1614,7 +1614,7 @@ export default {
 			try {
 				await context.authenticate()
 
-				if (context.req.user.id === id || context.req.user.role === 'admin') {
+				if (context.req.user.id === id || context.req.user.roles?.includes('admin')) {
 					return await new Promise(async (resolve, reject) => {
 						try {
 							let object: any = {
@@ -2247,7 +2247,7 @@ export default {
 											AND pack_id = "cascade".pack_id
 									) as ids;
 								`,
-								[context.req.user.id, id, context.req.user.role === 'admin']
+								[context.req.user.id, id, context.req.user.roles?.includes('admin')]
 							)
 							rimraf(`${storagePath}/themes/${dbData.id}`, () => {})
 
@@ -2300,7 +2300,7 @@ export default {
 										WHERE pack_id = hex_to_int('$2^')
 									) as ids;
 								`,
-								[context.req.user.id, id, context.req.user.role === 'admin']
+								[context.req.user.id, id, context.req.user.roles?.includes('admin')]
 							)
 							dbData.ids.forEach((id) => {
 								rimraf(`${storagePath}/themes/${id}`, () => {})
