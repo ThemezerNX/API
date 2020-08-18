@@ -14,6 +14,15 @@ export default gql`
 
 	directive @cacheControl(maxAge: Int, scope: CacheControlScope) on FIELD_DEFINITION | OBJECT | INTERFACE
 
+	directive @auth(requires: Role = ADMIN) on OBJECT | FIELD_DEFINITION
+
+	enum Role {
+		ADMIN
+		REVIEWER
+		USER
+		UNKNOWN
+	}
+
 	type Pagination {
 		page: Int!
 		limit: Int
