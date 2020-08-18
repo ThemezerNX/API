@@ -338,6 +338,9 @@ export default gql`
 
 		deleteTheme(id: String!): String
 		deletePack(id: String!): Boolean
+
+		## Reporting
+		reportURL(url: String!, type: String!, nsfw: Boolean, reason: String): Boolean
 	}
 
 	schema {

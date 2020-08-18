@@ -16,8 +16,9 @@ import MiniSearch from 'minisearch'
 import { errorName } from '../util/errorTypes'
 
 import webhook from 'webhook-discord'
-import { packMessage, themeMessage } from '../util/webhookMessages'
+import { packMessage, themeMessage, reportMessage } from '../util/webhookMessages'
 const Hook = new webhook.Webhook(process.env.WEBHOOK_URL)
+const ReportHook = new webhook.Webhook(process.env.REPORT_WEBHOOK_URL)
 
 import joinMonster from 'join-monster'
 const joinMonsterOptions: any = { dialect: 'pg' }
@@ -2106,7 +2107,7 @@ export default {
 									resolve(true)
 
 									if (type === 'pack') {
-										const newPackMessage = packMessage
+										const newPackMessage = packMessage()
 
 										newPackMessage
 											.setTitle(insertedPack.details.name)
@@ -2145,7 +2146,7 @@ export default {
 										Hook.send(newPackMessage)
 									} else {
 										insertedThemes.forEach((t: any) => {
-											const newThemeMessage = themeMessage
+											const newThemeMessage = themeMessage()
 											newThemeMessage
 												.setAuthor(
 													context.req.user.display_name,
@@ -2328,6 +2329,43 @@ export default {
 						} catch (e) {
 							console.error(e)
 							reject(errorName.PACK_NOT_FOUND)
+						}
+					} else {
+						throw errorName.UNAUTHORIZED
+					}
+				})
+			} catch (e) {
+				console.error(e)
+				throw new Error(e)
+			}
+		},
+		reportURL: async (_parent, { url, type, nsfw, reason }, context, _info) => {
+			try {
+				return await new Promise(async (resolve, reject) => {
+					if (await context.authenticate()) {
+						try {
+							const newReportMessage = reportMessage()
+
+							newReportMessage
+								.setTitle('Link to reported item' + (nsfw ? ' (NSFW!)' : ''))
+								.setAuthor(
+									context.req.user.display_name,
+									avatar(context.req.user.id, context.req.user.discord_user) + '?size=64',
+									`https://themezer.ga/creators/${context.req.user.id}`
+								)
+								.addField('Type:', type)
+								.setURL(url)
+
+							if (reason) {
+								newReportMessage.addField('Reason:', reason)
+							}
+
+							ReportHook.send(newReportMessage)
+
+							resolve(true)
+						} catch (e) {
+							console.error(e)
+							reject(errorName.UNKNOWN)
 						}
 					} else {
 						throw errorName.UNAUTHORIZED
