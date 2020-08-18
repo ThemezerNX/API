@@ -2119,17 +2119,24 @@ export default {
 												'Themes in this pack:',
 												themeDatas.map((t: any) => t.details.name).join('\n')
 											)
-											.setThumbnail(
-												`${process.env.API_ENDPOINT}cdn/themes/${
-													(themeDatas[0] as any).hex_id
-												}/images/original.jpg`
-											)
 											.setURL(
 												`https://themezer.ga/packs/${insertedPack.details.name.replace(
 													urlNameREGEX,
 													'-'
 												)}-${insertedPack.hex_id}`
 											)
+
+										if (!(themeDatas[0] as any).categories.includes('NSFW')) {
+											newPackMessage
+												.setTitle(insertedPack.details.name)
+												.setThumbnail(
+													`${process.env.API_ENDPOINT}cdn/themes/${
+														(themeDatas[0] as any).hex_id
+													}/images/original.jpg`
+												)
+										} else {
+											newPackMessage.setTitle(`${insertedPack.details.name} (NSFW!)`)
+										}
 
 										if (insertedPack.details.description) {
 											newPackMessage.setDescription(insertedPack.details.description)
@@ -2140,21 +2147,27 @@ export default {
 										insertedThemes.forEach((t: any) => {
 											const newThemeMessage = themeMessage
 											newThemeMessage
-												.setTitle(t.details.name)
 												.setAuthor(
 													context.req.user.display_name,
 													avatar(context.req.user.id, context.req.user.discord_user) +
 														'?size=64',
 													`https://themezer.ga/creators/${context.req.user.id}`
 												)
-												.setThumbnail(
-													`${process.env.API_ENDPOINT}cdn/themes/${t.hex_id}/images/original.jpg`
-												)
 												.setURL(
 													`https://themezer.ga/themes/${fileNameToWebName(
 														t.target
 													)}/${t.details.name.replace(urlNameREGEX, '-')}-${t.hex_id}`
 												)
+
+											if (!t.categories.includes('NSFW')) {
+												newThemeMessage
+													.setTitle(t.details.name)
+													.setThumbnail(
+														`${process.env.API_ENDPOINT}cdn/themes/${t.hex_id}/images/original.jpg`
+													)
+											} else {
+												newThemeMessage.setTitle(`${t.details.name} (NSFW!)`)
+											}
 
 											if (t.details.description) {
 												newThemeMessage.setDescription(t.details.description)
