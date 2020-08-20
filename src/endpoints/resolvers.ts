@@ -2114,17 +2114,18 @@ export default {
 											.setAuthor(
 												context.req.user.display_name,
 												avatar(context.req.user.id, context.req.user.discord_user) + '?size=64',
-												`https://themezer.ga/creators/${context.req.user.id}`
+												`${process.env.WEBSITE_ENDPOINT}creators/${context.req.user.id}`
 											)
 											.addField(
 												'Themes in this pack:',
 												themeDatas.map((t: any) => t.details.name).join('\n')
 											)
 											.setURL(
-												`https://themezer.ga/packs/${insertedPack.details.name.replace(
-													urlNameREGEX,
-													'-'
-												)}-${insertedPack.hex_id}`
+												`${
+													process.env.WEBSITE_ENDPOINT
+												}/packs/${insertedPack.details.name.replace(urlNameREGEX, '-')}-${
+													insertedPack.hex_id
+												}`
 											)
 
 										if (!(themeDatas[0] as any).categories.includes('NSFW')) {
@@ -2152,10 +2153,10 @@ export default {
 													context.req.user.display_name,
 													avatar(context.req.user.id, context.req.user.discord_user) +
 														'?size=64',
-													`https://themezer.ga/creators/${context.req.user.id}`
+													`${process.env.WEBSITE_ENDPOINT}creators/${context.req.user.id}`
 												)
 												.setURL(
-													`https://themezer.ga/themes/${fileNameToWebName(
+													`${process.env.WEBSITE_ENDPOINT}themes/${fileNameToWebName(
 														t.target
 													)}/${t.details.name.replace(urlNameREGEX, '-')}-${t.hex_id}`
 												)
@@ -2351,7 +2352,7 @@ export default {
 								.setAuthor(
 									context.req.user.display_name,
 									avatar(context.req.user.id, context.req.user.discord_user) + '?size=64',
-									`https://themezer.ga/creators/${context.req.user.id}`
+									`${process.env.WEBSITE_ENDPOINT}creators/${context.req.user.id}`
 								)
 								.addField('Type:', type)
 								.setURL(url)
