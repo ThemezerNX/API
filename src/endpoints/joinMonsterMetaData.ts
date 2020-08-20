@@ -265,11 +265,11 @@ export default {
 		fields: {
 			original: {
 				sqlExpr: (table) =>
-					`CONCAT('${process.env.API_ENDPOINT}cdn/themes/', to_hex(${table}.id), '/images/original.jpg')`
+					`CONCAT('${process.env.API_ENDPOINT}/cdn/themes/', to_hex(${table}.id), '/images/original.jpg')`
 			},
 			thumb: {
 				sqlExpr: (table) =>
-					`CONCAT('${process.env.API_ENDPOINT}cdn/themes/', to_hex(${table}.id), '/images/original.jpg')`
+					`CONCAT('${process.env.API_ENDPOINT}/cdn/themes/', to_hex(${table}.id), '/images/original.jpg')`
 			}
 		}
 	},

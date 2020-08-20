@@ -492,7 +492,7 @@ const prepareNXTheme = (id, piece_uuids) => {
 						id: theme_id,
 						name: newName || cacheEntry.name,
 						target: fileNameToThemeTarget(target),
-						preview: `${process.env.API_ENDPOINT}cdn/themes/${theme_id}/images/original.jpg`,
+						preview: `${process.env.API_ENDPOINT}/cdn/themes/${theme_id}/images/original.jpg`,
 						localfilename: `${theme_id +
 							(piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
 						filename: newFilename || cacheEntry.filename,
@@ -547,7 +547,7 @@ const downloadTheme = (id, piece_uuids) => {
 				preview: themePromise.preview,
 				filename: themePromise.filename,
 				id: themePromise.id,
-				url: `${process.env.API_ENDPOINT}cdn/cache/themes/${themePromise.id +
+				url: `${process.env.API_ENDPOINT}/cdn/cache/themes/${themePromise.id +
 					(piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
 				mimetype: themePromise.mimetype
 			})
@@ -597,7 +597,7 @@ const downloadPackSeperate = (id) => {
 					preview: t.preview,
 					filename: t.filename,
 					id: t.id,
-					url: `${process.env.API_ENDPOINT}cdn/cache/themes/${t.localfilename}`,
+					url: `${process.env.API_ENDPOINT}/cdn/cache/themes/${t.localfilename}`,
 					mimetype: t.mimetype
 				}
 			})
@@ -1301,7 +1301,7 @@ export default {
 
 						resolve({
 							filename: `${pack.details.name} by ${pack.creator.display_name} via Themezer.zip`,
-							url: `${process.env.API_ENDPOINT}cdn/cache/packs/${pack.id}.zip`,
+							url: `${process.env.API_ENDPOINT}/cdn/cache/packs/${pack.id}.zip`,
 							mimetype: 'application/zip'
 						})
 
@@ -2114,7 +2114,7 @@ export default {
 											.setAuthor(
 												context.req.user.display_name,
 												avatar(context.req.user.id, context.req.user.discord_user) + '?size=64',
-												`${process.env.WEBSITE_ENDPOINT}creators/${context.req.user.id}`
+												`${process.env.WEBSITE_ENDPOINT}/creators/${context.req.user.id}`
 											)
 											.addField(
 												'Themes in this pack:',
@@ -2132,7 +2132,7 @@ export default {
 											newPackMessage
 												.setTitle(insertedPack.details.name)
 												.setThumbnail(
-													`${process.env.API_ENDPOINT}cdn/themes/${
+													`${process.env.API_ENDPOINT}/cdn/themes/${
 														(themeDatas[0] as any).hex_id
 													}/images/original.jpg`
 												)
@@ -2153,10 +2153,10 @@ export default {
 													context.req.user.display_name,
 													avatar(context.req.user.id, context.req.user.discord_user) +
 														'?size=64',
-													`${process.env.WEBSITE_ENDPOINT}creators/${context.req.user.id}`
+													`${process.env.WEBSITE_ENDPOINT}/creators/${context.req.user.id}`
 												)
 												.setURL(
-													`${process.env.WEBSITE_ENDPOINT}themes/${fileNameToWebName(
+													`${process.env.WEBSITE_ENDPOINT}/themes/${fileNameToWebName(
 														t.target
 													)}/${t.details.name.replace(urlNameREGEX, '-')}-${t.hex_id}`
 												)
@@ -2165,7 +2165,7 @@ export default {
 												newThemeMessage
 													.setTitle(t.details.name)
 													.setThumbnail(
-														`${process.env.API_ENDPOINT}cdn/themes/${t.hex_id}/images/original.jpg`
+														`${process.env.API_ENDPOINT}/cdn/themes/${t.hex_id}/images/original.jpg`
 													)
 											} else {
 												newThemeMessage.setTitle(`${t.details.name} (NSFW!)`)
@@ -2352,7 +2352,7 @@ export default {
 								.setAuthor(
 									context.req.user.display_name,
 									avatar(context.req.user.id, context.req.user.discord_user) + '?size=64',
-									`${process.env.WEBSITE_ENDPOINT}creators/${context.req.user.id}`
+									`${process.env.WEBSITE_ENDPOINT}/creators/${context.req.user.id}`
 								)
 								.addField('Type:', type)
 								.setURL(url)
