@@ -554,8 +554,7 @@ const downloadTheme = (id, piece_uuids) => {
 				thumbnail: themePromise.thumbnail,
 				filename: themePromise.filename,
 				id: themePromise.id,
-				url: `${process.env.API_ENDPOINT}/cdn/cache/themes/${themePromise.id +
-					(piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
+				url: `${process.env.API_ENDPOINT}/cdn/cache/themes/${themePromise.localfilename}`,
 				mimetype: themePromise.mimetype
 			})
 
@@ -1078,7 +1077,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		nxinstaller: async (_parent, { id, piece_uuids }, context, info) => {
+		nxinstaller: async (_parent, { id }, context, info) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					try {
@@ -1087,7 +1086,7 @@ export default {
 						if (themeHexREGEX.exec(idLower)) {
 							// Theme Download
 							resolve({
-								themes: [await downloadTheme(idLower.replace('t', ''), piece_uuids)]
+								themes: [await downloadTheme(idLower.replace('t', ''), undefined)]
 							})
 						} else if (packHexREGEX.exec(idLower)) {
 							// Pack Download
