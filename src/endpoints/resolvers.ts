@@ -350,6 +350,7 @@ const createNXThemes = (themes) =>
 							filename:
 								`${theme.themeName} by ${info.Author}` +
 								(info.LayoutInfo.length > 0 ? ` using ${info.LayoutInfo}` : '') +
+								(theme.id ? `-${theme.id}` : '') +
 								'.nxtheme',
 							path: `${theme.path}/theme.nxtheme`,
 							mimetype: 'application/nxtheme'
@@ -471,6 +472,7 @@ const prepareNXTheme = (id, piece_uuids) => {
 						// Make NXTheme
 						const themes = [
 							{
+								id: theme_id,
 								path: path,
 								themeName: name,
 								targetName: target,
@@ -1293,7 +1295,11 @@ export default {
 							const zip = new AdmZip()
 							for (const i in themesReturned) {
 								try {
-									await zip.addLocalFile(themesReturned[i].path, null, themesReturned[i].filename)
+									await zip.addLocalFile(
+										themesReturned[i].path,
+										null,
+										`${themesReturned[i].filename}`
+									)
 								} catch (e) {
 									console.error(e)
 									reject(errorName.PACK_CREATE_FAILED)
