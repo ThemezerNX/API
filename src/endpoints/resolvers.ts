@@ -426,6 +426,8 @@ const prepareNXTheme = (id, piece_uuids) => {
 					[id]
 				)
 
+				if (!piece_uuids) piece_uuids = theme_piece_uuids
+
 				try {
 					const cacheEntry = await db.oneOrNone(
 						`
