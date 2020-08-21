@@ -269,7 +269,7 @@ export default {
 			},
 			thumb: {
 				sqlExpr: (table) =>
-					`CONCAT('${process.env.API_ENDPOINT}/cdn/themes/', to_hex(${table}.id), '/images/thumb.jpg')`
+					`CONCAT('${process.env.API_ENDPOINT}/cdn/themes/', to_hex(${table}.id), '/images/original.jpg')`
 			}
 		}
 	},
