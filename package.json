@@ -45,6 +45,7 @@
     "pg-promise": "^10.5.5",
     "python-shell": "^2.0.1",
     "rimraf": "^3.0.2",
+    "sharp": "^0.25.4",
     "tmp": "^0.2.1",
     "uuidv4": "^6.1.0",
     "webhook-discord": "^3.7.4"

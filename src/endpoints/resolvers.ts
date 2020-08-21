@@ -45,6 +45,7 @@ const tmp = require('tmp')
 const rimraf = require('rimraf')
 
 const im = require('imagemagick')
+const sharp = require('sharp')
 
 const YAZ0_FILE = require('is-yaz0-file')
 const JPEG_FILE = require('is-jpeg-file')
@@ -673,7 +674,7 @@ const filterData = (items, info, { page = 1, limit, query, sort, order = 'desc',
 		if (!nsfw && info.fieldName !== 'layoutList') {
 			items = items.filter((item: any): boolean => {
 				if (!queryFields.categories) throw errorName.CANNOT_FILTER_NSFW
-				else return !(Array.isArray(item.categories) && item.categories.includes('NSFW'))
+				else return !item.categories?.includes('NSFW')
 			})
 		}
 
@@ -1963,6 +1964,15 @@ export default {
 
 							// If all jpegs are valid
 							if (themePaths.length === savedFiles.length) {
+								// Create thumb.jpg
+								const thumbPromises = themePaths.map((path) =>
+									sharp(`${path}/original.jpg`)
+										.rotate()
+										.resize(320, 180)
+										.toFile(`${path}/thumb.jpg`)
+								)
+								await Promise.all(thumbPromises)
+
 								// Insert pack into DB if user wants to and can submit as pack
 								if (type === 'pack' && savedFiles.length > 1) {
 									const packData = {
@@ -2032,7 +2042,7 @@ export default {
 										}
 
 										resolve({
-											layout_id: themes[i].layout_id,
+											layout_id: Number(`0x${themes[i].layout_id}`),
 											piece_uuids:
 												themes[i].used_pieces?.length > 0
 													? themes[i].used_pieces.map((p) => p.value.uuid)
@@ -2079,18 +2089,25 @@ export default {
 														(allowedFilesInNXTheme.includes(f) &&
 															f !== 'info.json' &&
 															!(f === 'layout.json' && themes[i].layout_id)) ||
-														f === 'original.jpg'
+														f === 'original.jpg' ||
+														f === 'thumb.jpg'
 												)
 
 												// Move NXTheme contents to cdn
 												const moveAllPromises = filteredFilesInFolder.map((f) => {
-													return moveFile(
-														`${path}/${f}`,
-														`${storagePath}/themes/${insertedThemes[i].hex_id}/${
-															f === 'original.jpg' ? `images/${f}` : f
-														}`
-													)
+													if (f === 'original.jpg' || f === 'thumb.jpg') {
+														return moveFile(
+															`${path}/${f}`,
+															`${storagePath}/themes/${insertedThemes[i].hex_id}/images/${f}`
+														)
+													} else {
+														return moveFile(
+															`${path}/${f}`,
+															`${storagePath}/themes/${insertedThemes[i].hex_id}/${f}`
+														)
+													}
 												})
+
 												await Promise.all(moveAllPromises)
 
 												resolve(true)
@@ -2128,7 +2145,7 @@ export default {
 												}`
 											)
 
-										if (!(themeDatas[0] as any).categories.includes('NSFW')) {
+										if (!(themeDatas[0] as any).categories?.includes('NSFW')) {
 											newPackMessage
 												.setTitle(insertedPack.details.name)
 												.setThumbnail(
@@ -2161,7 +2178,7 @@ export default {
 													)}/${t.details.name.replace(urlNameREGEX, '-')}-${t.hex_id}`
 												)
 
-											if (!t.categories.includes('NSFW')) {
+											if (!t.categories?.includes('NSFW')) {
 												newThemeMessage
 													.setTitle(t.details.name)
 													.setThumbnail(
