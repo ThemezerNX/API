@@ -494,6 +494,7 @@ const prepareNXTheme = (id, piece_uuids) => {
 						name: newName || cacheEntry.name,
 						target: fileNameToThemeTarget(target),
 						preview: `${process.env.API_ENDPOINT}/cdn/themes/${theme_id}/images/original.jpg`,
+						thumbnail: `${process.env.API_ENDPOINT}/cdn/themes/${theme_id}/images/thumb.jpg`,
 						localfilename: `${theme_id +
 							(piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
 						filename: newFilename || cacheEntry.filename,
@@ -546,6 +547,7 @@ const downloadTheme = (id, piece_uuids) => {
 				name: themePromise.name,
 				target: themePromise.target,
 				preview: themePromise.preview,
+				thumbnail: themePromise.thumbnail,
 				filename: themePromise.filename,
 				id: themePromise.id,
 				url: `${process.env.API_ENDPOINT}/cdn/cache/themes/${themePromise.id +
@@ -596,6 +598,7 @@ const downloadPackSeperate = (id) => {
 					pack_name: pack[0].pack_name,
 					target: t.target,
 					preview: t.preview,
+					thumbnail: t.thumbnail,
 					filename: t.filename,
 					id: t.id,
 					url: `${process.env.API_ENDPOINT}/cdn/cache/themes/${t.localfilename}`,

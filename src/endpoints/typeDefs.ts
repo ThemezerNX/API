@@ -194,6 +194,7 @@ export default gql`
 		target: String!
 		url: String!
 		preview: String!
+		thumbnail: String!
 	}
 
 	type NXInstallerResponse {
