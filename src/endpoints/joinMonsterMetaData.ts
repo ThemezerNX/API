@@ -356,9 +356,6 @@ export default {
                 )`
 			},
 			themes: {
-				orderBy: {
-					id: 'ASC'
-				},
 				sqlJoin: (table, themesTable) => `${table}.id = ${themesTable}.pack_id`
 			}
 		}

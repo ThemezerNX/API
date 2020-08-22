@@ -580,7 +580,8 @@ const downloadPackSeperate = (id) => {
 						LEFT JOIN packs "details" ON "pack".id = "details".id
 						LEFT JOIN themes "themes" ON "pack".id = "themes".pack_id
 						WHERE "pack".id = hex_to_int('$1^')
-						ORDER BY "themes".id
+						ORDER BY order_by_array(Array['ResidentMenu', 'Entrance', 'Flaunch', 'Set', 'Psl', 'MyPage', 'Notification'], "themes".target),
+							"themes".id
 					`,
 				[id]
 			)
@@ -1003,7 +1004,10 @@ export default {
 							info,
 							context,
 							(sql) => {
-								return db.any(sql)
+								return db.any(
+									sql +
+										` ORDER BY order_by_array(Array['ResidentMenu', 'Entrance', 'Flaunch', 'Set', 'Psl', 'MyPage', 'Notification'], "themes".target), "themes".id`
+								)
 							},
 							joinMonsterOptions
 						)
