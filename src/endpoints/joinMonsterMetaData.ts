@@ -356,6 +356,8 @@ export default {
                 )`
 			},
 			themes: {
+				// Joinmonster doesn't support a simple custom orderby function. This seems to be the only option for now
+				orderBy: `id" = 1, order_by_array(Array['ResidentMenu', 'Entrance', 'Flaunch', 'Set', 'Psl', 'MyPage', 'Notification'], "themes".target), "themes"."id`,
 				sqlJoin: (table, themesTable) => `${table}.id = ${themesTable}.pack_id`
 			}
 		}

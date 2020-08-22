@@ -1004,10 +1004,8 @@ export default {
 							info,
 							context,
 							(sql) => {
-								return db.any(
-									sql +
-										` ORDER BY order_by_array(Array['ResidentMenu', 'Entrance', 'Flaunch', 'Set', 'Psl', 'MyPage', 'Notification'], "themes".target), "themes".id`
-								)
+								console.log(sql)
+								return db.any(sql)
 							},
 							joinMonsterOptions
 						)
@@ -1063,6 +1061,7 @@ export default {
 						info,
 						context,
 						(sql) => {
+							console.log()
 							return db.any(sql)
 						},
 						joinMonsterOptions
