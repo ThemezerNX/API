@@ -2155,7 +2155,7 @@ export default {
 												}`
 											)
 
-										if (!(themeDatas[0] as any).categories?.includes('NSFW')) {
+											if (!themeDatas.some((t: any) => t.categories?.includes('NSFW'))) {
 											newPackMessage
 												.setTitle(insertedPack.details.name)
 												.setThumbnail(
