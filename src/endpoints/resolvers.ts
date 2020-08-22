@@ -2133,82 +2133,96 @@ export default {
 
 									resolve(true)
 
-									if (type === 'pack') {
-										const newPackMessage = packMessage()
+									setTimeout(() => {
+										// Wait 5 seconds because the image has issues loading if it's been created very recently
+										if (type === 'pack') {
+											const newPackMessage = packMessage()
 
-										newPackMessage
-											.setTitle(insertedPack.details.name)
-											.setAuthor(
-												context.req.user.display_name,
-												avatar(context.req.user.id, context.req.user.discord_user) + '?size=64',
-												`${process.env.WEBSITE_ENDPOINT}/creators/${context.req.user.id}`
-											)
-											.addField(
-												'Themes in this pack:',
-												themeDatas.map((t: any) => t.details.name).join('\n')
-											)
-											.setURL(
-												`${
-													process.env.WEBSITE_ENDPOINT
-												}/packs/${insertedPack.details.name.replace(urlNameREGEX, '-')}-${
-													insertedPack.hex_id
-												}`
-											)
-
-											if (!themeDatas.some((t: any) => t.categories?.includes('NSFW'))) {
 											newPackMessage
 												.setTitle(insertedPack.details.name)
-												.setThumbnail(
-													`${process.env.API_ENDPOINT}/cdn/themes/${
-														(themeDatas[0] as any).hex_id
-													}/images/original.jpg`
-												)
-										} else {
-											newPackMessage.setTitle(`${insertedPack.details.name} (NSFW!)`)
-										}
-
-										if (insertedPack.details.description) {
-											newPackMessage.setDescription(insertedPack.details.description)
-										}
-
-										Hook.send(newPackMessage)
-									} else {
-										insertedThemes.forEach((t: any) => {
-											const newThemeMessage = themeMessage()
-											newThemeMessage
 												.setAuthor(
 													context.req.user.display_name,
 													avatar(context.req.user.id, context.req.user.discord_user) +
 														'?size=64',
 													`${process.env.WEBSITE_ENDPOINT}/creators/${context.req.user.id}`
 												)
+												.addField(
+													'Themes in this pack:',
+													themeDatas.map((t: any) => t.details.name).join('\n')
+												)
 												.setURL(
-													`${process.env.WEBSITE_ENDPOINT}/themes/${fileNameToWebName(
-														t.target
-													)}/${t.details.name.replace(urlNameREGEX, '-')}-${t.hex_id}`
+													`${
+														process.env.WEBSITE_ENDPOINT
+													}/packs/${insertedPack.details.name.replace(urlNameREGEX, '-')}-${
+														insertedPack.hex_id
+													}`
 												)
 
-											if (!t.categories?.includes('NSFW')) {
-												newThemeMessage
-													.setTitle(t.details.name)
+											if (!themeDatas.some((t: any) => t.categories?.includes('NSFW'))) {
+												newPackMessage
+													.setTitle(insertedPack.details.name)
 													.setThumbnail(
-														`${process.env.API_ENDPOINT}/cdn/themes/${t.hex_id}/images/original.jpg`
+														`${process.env.API_ENDPOINT}/cdn/themes/${
+															(themeDatas[0] as any).hex_id
+														}/images/thumb.jpg`
 													)
+												console.log(
+													'Packimage:',
+													`${process.env.API_ENDPOINT}/cdn/themes/${
+														(themeDatas[0] as any).hex_id
+													}/images/thumb.jpg`
+												)
 											} else {
-												newThemeMessage.setTitle(`${t.details.name} (NSFW!)`)
+												newPackMessage.setTitle(`${insertedPack.details.name} (NSFW!)`)
 											}
 
-											if (t.details.description) {
-												newThemeMessage.setDescription(t.details.description)
+											if (insertedPack.details.description) {
+												newPackMessage.setDescription(insertedPack.details.description)
 											}
 
-											Hook.send(newThemeMessage)
-										})
-									}
+											Hook.send(newPackMessage)
+										} else {
+											insertedThemes.forEach((t: any) => {
+												const newThemeMessage = themeMessage()
+												newThemeMessage
+													.setAuthor(
+														context.req.user.display_name,
+														avatar(context.req.user.id, context.req.user.discord_user) +
+															'?size=64',
+														`${process.env.WEBSITE_ENDPOINT}/creators/${context.req.user.id}`
+													)
+													.setURL(
+														`${process.env.WEBSITE_ENDPOINT}/themes/${fileNameToWebName(
+															t.target
+														)}/${t.details.name.replace(urlNameREGEX, '-')}-${t.hex_id}`
+													)
 
-									for (const i in themePaths) {
-										rimraf(themePaths[i], () => {})
-									}
+												if (!t.categories?.includes('NSFW')) {
+													newThemeMessage
+														.setTitle(t.details.name)
+														.setThumbnail(
+															`${process.env.API_ENDPOINT}/cdn/themes/${t.hex_id}/images/thumb.jpg`
+														)
+													console.log(
+														'Themeimage:',
+														`${process.env.API_ENDPOINT}/cdn/themes/${t.hex_id}/images/thumb.jpg`
+													)
+												} else {
+													newThemeMessage.setTitle(`${t.details.name} (NSFW!)`)
+												}
+
+												if (t.details.description) {
+													newThemeMessage.setDescription(t.details.description)
+												}
+
+												Hook.send(newThemeMessage)
+											})
+										}
+
+										for (const i in themePaths) {
+											rimraf(themePaths[i], () => {})
+										}
+									}, 5000)
 								} catch (e) {
 									console.error(e)
 									reject(errorName.DB_SAVE_ERROR)
