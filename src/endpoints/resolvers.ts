@@ -1415,6 +1415,8 @@ export default {
 								return
 							}
 
+							layoutJsonParsed.ID = 'overlaycreator'
+
 							const json = mergeJson(layoutJsonParsed, piecesJson)
 							await writeFile(`${path}/layout_merged.json`, JSON.stringify(json, null, 4))
 
