@@ -2177,13 +2177,13 @@ export default {
 													.setTitle(insertedPack.details.name)
 													.setThumbnail(
 														`${process.env.API_ENDPOINT}/cdn/themes/${
-															(themeDatas[0] as any).hex_id
+															(insertedThemes[0] as any).hex_id
 														}/images/thumb.jpg`
 													)
 												console.log(
 													'Packimage:',
 													`${process.env.API_ENDPOINT}/cdn/themes/${
-														(themeDatas[0] as any).hex_id
+														(insertedThemes[0] as any).hex_id
 													}/images/thumb.jpg`
 												)
 											} else {
