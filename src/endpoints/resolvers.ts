@@ -2057,12 +2057,20 @@ export default {
 											return
 										}
 
+										// Get uuids from extra dropdown entries
+										const splitID = themes[i].layout_id.split('|')
+										let piece_uuids = null
+										if (splitID.length > 1) {
+											// Has piece uuids
+											piece_uuids = splitID[1].split(',')
+										}
+
 										resolve({
-											layout_id: Number(`0x${themes[i].layout_id}`),
+											layout_id: Number(`0x${splitID[0]}`),
 											piece_uuids:
 												themes[i].used_pieces?.length > 0
 													? themes[i].used_pieces.map((p) => p.value.uuid)
-													: null,
+													: piece_uuids || null,
 											target: themes[i].target,
 											last_updated: new Date(),
 											categories: categories.sort(),
