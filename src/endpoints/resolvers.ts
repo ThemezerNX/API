@@ -1856,7 +1856,9 @@ export default {
 													if (layoutID) {
 														const { service, id, piece_uuids } = parseThemeID(layoutID)
 														// Only fetch the layout if it was created by Themezer
+
 														if (service === 'Themezer') {
+															console.log(layoutID, '------', id, piece_uuids)
 															try {
 																dbLayout = await db.one(
 																	`
@@ -1877,7 +1879,7 @@ export default {
 																	[id, piece_uuids]
 																)
 															} catch (e) {
-																console.error
+																console.error(e)
 																reject(errorName.INVALID_ID)
 																return
 															}
@@ -2078,19 +2080,22 @@ export default {
 										}
 
 										// Get uuids from extra dropdown entries
-										const splitID = themes[i].layout_id.split('|')
+										let splitID = null
 										let piece_uuids = null
-										if (splitID.length > 1) {
-											// Has piece uuids
-											piece_uuids = splitID[1].split(',')
+										if (themes[i].layout_id) {
+											splitID = themes[i].layout_id.split('|')
+											if (splitID.length > 1) {
+												// Has piece uuids
+												piece_uuids = splitID[1].split(',')
+											}
 										}
 
 										resolve({
-											layout_id: Number(`0x${splitID[0]}`),
+											layout_id: splitID ? Number(`0x${splitID[0]}`) : null,
 											piece_uuids:
 												themes[i].used_pieces?.length > 0
 													? themes[i].used_pieces.map((p) => p.value.uuid)
-													: piece_uuids || null,
+													: piece_uuids,
 											target: themes[i].target,
 											last_updated: new Date(),
 											categories: categories.sort(),

@@ -110,7 +110,7 @@ export const errorType = {
 		statusCode: 4005
 	},
 	INVALID_ID: {
-		message: 'Invalid Themezer ID',
+		message: 'Invalid Themezer Layout ID',
 		statusCode: 4006
 	},
 	INVALID_TARGET_NAME: {
