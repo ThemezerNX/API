@@ -1858,7 +1858,6 @@ export default {
 														// Only fetch the layout if it was created by Themezer
 
 														if (service === 'Themezer') {
-															console.log(layoutID, '------', id, piece_uuids)
 															try {
 																dbLayout = await db.one(
 																	`
