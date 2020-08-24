@@ -581,7 +581,7 @@ const downloadPackSeperate = (id) => {
 						LEFT JOIN themes "themes" ON "pack".id = "themes".pack_id
 						WHERE "pack".id = hex_to_int('$1^')
 						ORDER BY order_by_array(Array['ResidentMenu', 'Entrance', 'Flaunch', 'Set', 'Psl', 'MyPage', 'Notification'], "themes".target),
-							"themes".id
+							COLLATE "en-US-x-icu" ASC
 					`,
 				[id]
 			)
@@ -1004,7 +1004,6 @@ export default {
 							info,
 							context,
 							(sql) => {
-								console.log(sql)
 								return db.any(sql)
 							},
 							joinMonsterOptions
@@ -1061,7 +1060,6 @@ export default {
 						info,
 						context,
 						(sql) => {
-							console.log()
 							return db.any(sql)
 						},
 						joinMonsterOptions
@@ -2179,12 +2177,6 @@ export default {
 															(insertedThemes[0] as any).hex_id
 														}/images/thumb.jpg`
 													)
-												console.log(
-													'Packimage:',
-													`${process.env.API_ENDPOINT}/cdn/themes/${
-														(insertedThemes[0] as any).hex_id
-													}/images/thumb.jpg`
-												)
 											} else {
 												newPackMessage.setTitle(`${insertedPack.details.name} (NSFW!)`)
 											}
@@ -2216,10 +2208,6 @@ export default {
 														.setThumbnail(
 															`${process.env.API_ENDPOINT}/cdn/themes/${t.hex_id}/images/thumb.jpg`
 														)
-													console.log(
-														'Themeimage:',
-														`${process.env.API_ENDPOINT}/cdn/themes/${t.hex_id}/images/thumb.jpg`
-													)
 												} else {
 													newThemeMessage.setTitle(`${t.details.name} (NSFW!)`)
 												}
