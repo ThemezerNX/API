@@ -151,7 +151,7 @@ const createInfo = (themeName, creatorName, target, layoutDetails) => {
 		LayoutInfo = `${layoutDetails.PatchName} by ${layoutDetails.AuthorName || 'Themezer'}`
 	}
 	return {
-		Version: 12,
+		Version: 14,
 		ThemeName: themeName,
 		Author: creatorName || 'Themezer',
 		Target: target,
