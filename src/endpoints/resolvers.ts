@@ -439,11 +439,25 @@ const prepareNXTheme = (id, piece_uuids) => {
 						[theme_id, piece_uuids || []]
 					)
 
+					let fileNotExists = false
+					if (cacheEntry) {
+						try {
+							await access(
+								`${storagePath}/cache/themes/${theme_id +
+									(piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`,
+								constants.R_OK | constants.W_OK
+							)
+						} catch (e) {
+							fileNotExists = true
+						}
+					}
+
 					let newFilename, newName
 					if (
 						!cacheEntry ||
 						last_updated > cacheEntry.last_built ||
-						layout_last_updated > cacheEntry.last_built
+						layout_last_updated > cacheEntry.last_built ||
+						fileNotExists
 					) {
 						// Rebuild
 
@@ -1280,6 +1294,15 @@ export default {
 								)
 							) {
 								shouldRebuild = true
+							} else {
+								try {
+									await access(
+										`${storagePath}/cache/packs/${pack.id}.zip`,
+										constants.R_OK | constants.W_OK
+									)
+								} catch (e) {
+									shouldRebuild = true
+								}
 							}
 						} else {
 							shouldRebuild = true
