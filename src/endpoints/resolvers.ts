@@ -461,6 +461,13 @@ const prepareNXTheme = (id, piece_uuids) => {
 					) {
 						// Rebuild
 
+						// Symlink all other allowedFilesInNXTheme
+						const filesInFolder = await readdirPromisified(`${storagePath}/themes/${theme_id}`)
+						const linkAllPromises = filesInFolder.map((file) =>
+							link(`${storagePath}/themes/${theme_id}/${file}`, `${path}/${file}`)
+						)
+						await Promise.all(linkAllPromises)
+
 						// Get merged layout json if any
 						if (layout_id) {
 							const layoutJson = await createJson(layout_id, piece_uuids)
@@ -475,13 +482,6 @@ const prepareNXTheme = (id, piece_uuids) => {
 								await writeFile(`${path}/common.json`, commonJson, 'utf8')
 							}
 						}
-
-						// Symlink all other allowedFilesInNXTheme
-						const filesInFolder = await readdirPromisified(`${storagePath}/themes/${theme_id}`)
-						const linkAllPromises = filesInFolder.map((file) =>
-							link(`${storagePath}/themes/${theme_id}/${file}`, `${path}/${file}`)
-						)
-						await Promise.all(linkAllPromises)
 
 						// Make NXTheme
 						const themes = [
