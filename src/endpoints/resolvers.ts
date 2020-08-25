@@ -1047,6 +1047,7 @@ export default {
 								FROM themes
 								WHERE pack_id = packs.id
 									AND 'NSFW' = any(categories)
+								LIMIT 1
 							) IS NULL
 							ORDER BY random()
 							LIMIT $1`
