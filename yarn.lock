@@ -139,9 +139,9 @@
   version "1.0.1"
   resolved "https://github.com/ThemezerNX/Layout-ID-Parser.git#dc0e8fba30ff1b528f597ef3b3f02f140c43617a"
 
-"@tromkom/aurora-strategic-json-merge-patch@https://github.com/ThemezerNX/aurora-strategic-json-merge-patch.git":
+"@tromkom/aurora-strategic-json-merge-patch@https://github.com/ThemezerNX/JSON-Merger.git":
   version "1.0.2"
-  resolved "https://github.com/ThemezerNX/aurora-strategic-json-merge-patch.git#261601e7b65e852c6b69e209bc616b1c37d47d5f"
+  resolved "https://github.com/ThemezerNX/JSON-Merger.git#261601e7b65e852c6b69e209bc616b1c37d47d5f"
 
 "@types/accepts@*", "@types/accepts@^1.3.5":
   version "1.3.5"
