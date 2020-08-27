@@ -1,9 +1,6 @@
 const util = require('util')
 import { graphql } from 'graphql'
 import { pgp, db } from '../db/db'
-const {
-	as: { format }
-} = pgp
 import {
 	fileNameToThemeTarget,
 	themeTargetToFileName,
@@ -36,7 +33,7 @@ const {
 	unlink,
 	readdir,
 	lstat,
-	promises: { mkdir, access, readFile, writeFile, rename },
+	promises: { mkdir, access, readFile, writeFile },
 	constants
 } = require('fs')
 const readdirPromisified = util.promisify(readdir)
@@ -54,12 +51,11 @@ const isYaz0Promisified = util.promisify(YAZ0_FILE.isYaz0)
 const isJpegPromisified = util.promisify(JPEG_FILE.isJpeg)
 const isZipPromisified = util.promisify(ZIP_FILE.isZip)
 const AdmZip = require('adm-zip')
-const extract = require('extract-zip')
 
 const sarcToolPath = `${__dirname}/../../../SARC-Tool`
 const storagePath = `${__dirname}/../../../cdn`
 const urlNameREGEX = /[^a-zA-Z0-9_.]+/gm
-const noSpecialCharsREGEX = /[^a-z\d\-]+/gi
+// const noSpecialCharsREGEX = /[^a-z\d\-]+/gi
 const themeHexREGEX = /^t[0-9a-f]+$/
 const packHexREGEX = /^p[0-9a-f]+$/
 
@@ -102,13 +98,13 @@ function str(column) {
 	}
 }
 
-function int(column) {
-	return {
-		name: column,
-		skip: (c) => !c.exists,
-		init: (c) => +c.value
-	}
-}
+// function int(column) {
+// 	return {
+// 		name: column,
+// 		skip: (c) => !c.exists,
+// 		init: (c) => +c.value
+// 	}
+// }
 
 const themesCS = new pgp.helpers.ColumnSet(
 	[
@@ -164,7 +160,7 @@ const saveFiles = (files) =>
 		({ file, savename, path }) =>
 			new Promise<any>(async (resolve, reject) => {
 				try {
-					let { createReadStream, filename, mimetype } = await file
+					let { createReadStream, filename } = await file
 					const stream = createReadStream()
 
 					// Add file extension if none to prevent errors with matching file and directory names
@@ -229,7 +225,7 @@ const mergeJson = (baseParsed, jsonArray) => {
 }
 
 const createJson = async (id, piece_uuids = [], common?) => {
-	let finalJsonObject = null
+	let finalJsonObject
 	const usedPieces = []
 
 	// If common layout, dont get the pieces
@@ -809,7 +805,7 @@ export default {
 						}
 					})
 				} else {
-					throw new Error(errorName.UNAUTHORIZED)
+					return new Error(errorName.UNAUTHORIZED)
 				}
 			} catch (e) {
 				throw new Error(e)
@@ -879,7 +875,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		randomLayoutIDs: async (_parent, { target, limit = 1 }, context, info) => {
+		randomLayoutIDs: async (_parent, { target, limit = 1 }) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					try {
@@ -957,7 +953,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		randomThemeIDs: async (_parent, { target, limit = 1 }, context, info) => {
+		randomThemeIDs: async (_parent, { target, limit = 1 }) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					try {
@@ -1035,7 +1031,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		randomPackIDs: async (_parent, { limit = 1 }, context, info) => {
+		randomPackIDs: async (_parent, { limit = 1 }) => {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					try {
@@ -1220,7 +1216,7 @@ export default {
 				throw new Error(e)
 			}
 		},
-		downloadTheme: async (_parent, { id, piece_uuids }, context, info) => {
+		downloadTheme: async (_parent, { id, piece_uuids }) => {
 			try {
 				return await downloadTheme(id.replace(/t/i, ''), piece_uuids)
 			} catch (e) {
@@ -1232,7 +1228,7 @@ export default {
 			try {
 				return await new Promise(async (resolve, reject) => {
 					// Get the pack details and theme ids
-					let pack = null
+					let pack
 					try {
 						const { data } = await graphql({
 							schema: info.schema,
@@ -1265,7 +1261,7 @@ export default {
 						})
 						if (data?.pack) {
 							pack = data.pack
-						}
+						} else reject(errorName.PACK_NOT_FOUND)
 					} catch (e) {
 						console.error(e)
 						reject(errorName.PACK_NOT_FOUND)
@@ -1593,7 +1589,7 @@ export default {
 								backup_code: context.req.user.backup_code
 						  }
 				} else {
-					throw errorName.UNAUTHORIZED
+					return new Error(errorName.UNAUTHORIZED)
 				}
 			} catch (e) {
 				console.error(e)
@@ -1634,9 +1630,9 @@ export default {
 							`,
 						[context.req.user.id, context.req.user.discord_user, creator_id, backup_code]
 					)
-					return dbData ? true : false
+					return !!dbData
 				} else {
-					throw errorName.UNAUTHORIZED
+					return new Error(errorName.UNAUTHORIZED)
 				}
 			} catch (e) {
 				console.error(e)
@@ -1747,7 +1743,7 @@ export default {
 						}
 					})
 				} else {
-					throw errorName.UNAUTHORIZED
+					return new Error(errorName.UNAUTHORIZED)
 				}
 			} catch (e) {
 				console.error(e)
@@ -1948,7 +1944,7 @@ export default {
 						})
 					})
 				} else {
-					throw errorName.UNAUTHORIZED
+					return new Error(errorName.UNAUTHORIZED)
 				}
 			} catch (e) {
 				console.error(e)
@@ -2263,7 +2259,7 @@ export default {
 						}
 					})
 				} else {
-					throw errorName.UNAUTHORIZED
+					return new Error(errorName.UNAUTHORIZED)
 				}
 			} catch (e) {
 				console.error(e)
@@ -2277,15 +2273,13 @@ export default {
 			try {
 				const typeLowercase = type.toLowerCase()
 				if (!['creators', 'layouts', 'themes', 'packs'].includes(typeLowercase))
-					throw new Error(errorName.INVALID_FIELD)
+					return new Error(errorName.INVALID_FIELD)
 
 				if (await context.authenticate()) {
-					return await new Promise(async (resolve, reject) => {
-						let dbData = null
-
+					return await new Promise(async (resolve) => {
 						if (value === true) {
 							// Add like
-							dbData = await db.none(
+							await db.none(
 								`
 									UPDATE creators
 										SET liked_${typeLowercase} = array_append(liked_${typeLowercase}, $2)
@@ -2298,7 +2292,7 @@ export default {
 							)
 						} else {
 							// Remove like
-							dbData = await db.none(
+							await db.none(
 								`
 									UPDATE creators
 										SET liked_${typeLowercase} = array_remove(liked_${typeLowercase}, $2)
@@ -2313,7 +2307,7 @@ export default {
 						resolve(true)
 					})
 				} else {
-					throw errorName.UNAUTHORIZED
+					return new Error(errorName.UNAUTHORIZED)
 				}
 			} catch (e) {
 				console.error(e)
@@ -2330,7 +2324,7 @@ export default {
 									DELETE FROM themes CASCADE
 									WHERE ("cascade".creator_id = $1 OR $3)
 										AND "cascade".id = hex_to_int('$2^')
-									RETURNING "cascade".id as id, "cascade".pack_id, (
+									RETURNING to_hex("cascade".id) as id, "cascade".pack_id, (
 										SELECT array_agg(id)
 										FROM themes
 										WHERE pack_id IS NOT NULL
@@ -2339,6 +2333,7 @@ export default {
 								`,
 								[context.req.user.id, id, context.req.user.roles?.includes('admin')]
 							)
+							console.log(`${storagePath}/themes/${dbData.id}`)
 							rimraf(`${storagePath}/themes/${dbData.id}`, () => {})
 
 							// This stuff is for redirecting to the single theme left's page. The pack is removed if there's only one theme left in it.
@@ -2385,7 +2380,7 @@ export default {
 									WHERE (creator_id = $1 OR $3)
 										AND id = hex_to_int('$2^')
 									RETURNING (
-										SELECT array_agg(id)
+										SELECT array_agg(to_hex(id))
 										FROM themes
 										WHERE pack_id = hex_to_int('$2^')
 									) as ids;
