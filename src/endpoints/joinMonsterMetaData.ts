@@ -3,6 +3,25 @@ const {
 	as: { format }
 } = pgp
 
+const list = {
+	orderBy: ({ order = 'desc' }) => {
+		return { id: order }
+	},
+	where: (table, { target, creators }) => {
+		const wheres = []
+
+		if (target) {
+			wheres.push(format(`${table}.target = $1`, [target]))
+		}
+
+		if (creators?.length > 0) {
+			wheres.push(format(`${table}.creator_id = ANY($1)`, [creators]))
+		}
+
+		return wheres.join(' AND ')
+	}
+}
+
 export default {
 	Query: {
 		fields: {
@@ -15,45 +34,11 @@ export default {
 			layout: {
 				where: (table, { id }) => format(`${table}.id = hex_to_int('$1^')`, [id])
 			},
-			layoutList: {
-				orderBy: ({ order = 'desc' }) => {
-					return { id: order }
-				},
-				where: (table, { target, creators }) => {
-					const wheres = []
-
-					if (target) {
-						wheres.push(format(`${table}.target = $1`, [target]))
-					}
-
-					if (creators?.length > 0) {
-						wheres.push(format(`${table}.creator_id = ANY($1)`, [creators]))
-					}
-
-					return wheres.join(' AND ')
-				}
-			},
+			layoutList: list,
 			theme: {
 				where: (table, { id }) => format(`${table}.id = hex_to_int('$1^')`, [id])
 			},
-			themeList: {
-				orderBy: ({ order = 'desc' }) => {
-					return { id: order }
-				},
-				where: (table, { target, creators }) => {
-					const wheres = []
-
-					if (target) {
-						wheres.push(format(`${table}.target = $1`, [target]))
-					}
-
-					if (creators?.length > 0) {
-						wheres.push(format(`${table}.creator_id = ANY($1)`, [creators]))
-					}
-
-					return wheres.join(' AND ')
-				}
-			},
+			themeList: list,
 			pack: {
 				where: (table, { id }) => format(`${table}.id = hex_to_int('$1^')`, [id])
 			},

@@ -31,21 +31,19 @@ const buildCommonContext = (req, additionalContext: {}) => ({
 						res.data.username = cleanString(res.data.username)
 
 						try {
-							const user = await db.oneOrNone(
+							req.user = await db.oneOrNone(
 								`
 									INSERT INTO creators (id, discord_user, joined, backup_code)
-									VALUES ($1, $2, NOW(), md5(random()::varchar)::varchar) 
+									VALUES ($1, $2, NOW(), md5(random()::varchar)::varchar)
 									ON CONFLICT (id)
-									DO
-										UPDATE
+										DO UPDATE
 										SET discord_user = EXCLUDED.discord_user
-									RETURNING *, CASE WHEN custom_username IS NOT NULL THEN custom_username ELSE discord_user ->> 'username' END AS display_name
+									RETURNING *, coalesce(custom_username, discord_user ->> 'username') AS display_name
 								`,
 								[id, res.data]
 							)
 
 							// Then add the user object to the original req object
-							req.user = user
 							resolve(true)
 						} catch (e) {
 							reject(e)

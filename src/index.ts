@@ -5,8 +5,8 @@ const app = express()
 const cors = require('cors')
 const bodyParser = require('body-parser')
 
-const { ApolloServer, gql, SchemaDirectiveVisitor } = require('apollo-server-express')
-const { defaultFieldResolver } = require('graphql')
+const { ApolloServer/*, gql, SchemaDirectiveVisitor*/ } = require('apollo-server-express')
+// const { defaultFieldResolver } = require('graphql')
 import responseCachePlugin from 'apollo-server-plugin-response-cache'
 import resolvers from './endpoints/resolvers'
 import typeDefs from './endpoints/typeDefs'
@@ -30,7 +30,7 @@ const schema = makeExecutableSchema({
 
 joinMonsterAdapt(schema, joinMonsterMetaData)
 
-class AuthDirective extends SchemaDirectiveVisitor {
+/*class AuthDirective extends SchemaDirectiveVisitor {
 	visitObject(type) {
 		this.ensureFieldsWrapped(type)
 		type._requiredAuthRole = this.args.requires
@@ -71,7 +71,7 @@ class AuthDirective extends SchemaDirectiveVisitor {
 			}
 		})
 	}
-}
+}*/
 
 const server = new ApolloServer({
 	uploads: {
@@ -90,9 +90,9 @@ const server = new ApolloServer({
 		})
 	],
 	schema,
-	schemaDirectives: {
+/*	schemaDirectives: {
 		auth: AuthDirective
-	},
+	},*/
 	context: async ({ req }) => buildContext({ req }),
 	introspection: true,
 	playground:
@@ -104,7 +104,7 @@ const server = new ApolloServer({
 			  }
 			: false,
 	formatError: (err, _params) => {
-		let error = null
+		let error: null
 		console.error(err)
 
 		error = getErrorCode(err.message)
