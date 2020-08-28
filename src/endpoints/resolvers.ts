@@ -97,8 +97,8 @@ const avatar = (id, user): string => {
 // https://stackoverflow.com/questions/40697330/skip-update-columns-with-pg-promise
 function str(column) {
     return {
-        name: column,
-        skip: (c) => !c.exists
+        name: column
+        // skip: (c) => !c.exists
     }
 }
 
@@ -340,8 +340,7 @@ const createNXThemes = (themes) =>
                         if (err) {
                             console.error(err)
                             reject(errorName.NXTHEME_CREATE_FAILED)
-                            rimraf(theme.path, () => {
-                            })
+                            rimraf(theme.path, () => {})
                             return
                         }
 
@@ -788,6 +787,7 @@ const filterData = (items, info, {page = 1, limit, query, sort, order = 'desc', 
     }
 }
 
+// noinspection ES6ShorthandObjectProperty
 export default {
     JSON: GraphQLJSON,
     Query: {
@@ -2139,9 +2139,9 @@ export default {
                                 // Insert themes into DB
                                 const query = () => pgp.helpers.insert(themeDatas, themesCS)
                                 try {
-                                    const insertedThemes = await db.any(
+                                    const insertedThemes = await db.many(
                                         query() +
-                                        ` RETURNING id, to_hex(id) as hex_id, details, last_updated, creator_id, target`
+                                        ` RETURNING id, to_hex(id) as hex_id, details, last_updated, creator_id, target, categories`
                                     )
 
                                     const themeMovePromises = themePaths.map((path, i) => {
