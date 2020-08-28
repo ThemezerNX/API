@@ -11,18 +11,23 @@ export default gql`
 		PUBLIC
 		PRIVATE
 	}
+	
+	directive @cacheControl(
+		maxAge: Int
+		scope: CacheControlScope
+	) on FIELD_DEFINITION | OBJECT | INTERFACE
 
-	directive @cacheControl(maxAge: Int, scope: CacheControlScope) on FIELD_DEFINITION | OBJECT | INTERFACE
-
-	directive @auth(requires: Role = ADMIN) on OBJECT | FIELD_DEFINITION
-
+	directive @auth(
+		requires: Role = ADMIN
+	) on OBJECT | FIELD_DEFINITION
+	
 	enum Role {
 		ADMIN
 		REVIEWER
 		USER
 		UNKNOWN
 	}
-
+	
 	type Pagination {
 		page: Int!
 		limit: Int
@@ -30,6 +35,7 @@ export default gql`
 		item_count: Int!
 	}
 
+	"Full UserInfo with extra private info"
 	type PrivateInfo {
 		id: String!
 		display_name: String!
@@ -61,9 +67,13 @@ export default gql`
 		old_ids: [String!]
 	}
 
+	"Userdata as provided by the Discord API. Stored without the id key."
 	type DiscordUser {
+		"Will be null if a custom_username in UserInfo or PrivateInfo is set"
 		username: String
+		"The four-numbers-long discriminator"
 		discriminator: String!
+		"The avatar ID. Used to build the correct url client-side"
 		avatar: String
 		# system: Boolean
 		# locale: String
@@ -76,8 +86,11 @@ export default gql`
 		packs: [Pack!]
 	}
 
+	"A payload with details on the TOS acceptance and the backup code. Requested on every default layout render."
 	type authPayload {
+		"false by default"
 		has_accepted: Boolean!
+		"Returns null if has_accepted is true"
 		backup_code: String
 	}
 
@@ -114,7 +127,9 @@ export default gql`
 	}
 
 	type Layout {
+		"A UUID which should only be used for db queries from the Layout repository"
 		uuid: GUID!
+		"The main identifier"
 		id: String!
 		creator: UserInfo!
 		details: LayoutDetails!
@@ -162,6 +177,7 @@ export default gql`
 	}
 
 	type Theme {
+		"The main identifier"
 		id: String!
 		creator: UserInfo!
 		details: ThemeDetails!
@@ -178,6 +194,7 @@ export default gql`
 	}
 
 	type Pack {
+		"The main identifier"
 		id: String!
 		creator: UserInfo!
 		details: PackDetails!
@@ -189,6 +206,7 @@ export default gql`
 	}
 
 	type NXInstallerThemes {
+		"The main identifier"
 		id: String!
 		name: String
 		target: String!
@@ -255,10 +273,19 @@ export default gql`
 		## General
 		creator(id: String!): UserInfo!
 
+		"An array of ALL categories in the DB. Used listing all already-existing categories when submitting"
 		categories: [String!]
 
 		layout(id: String!): Layout
+		theme(id: String!): Theme
+		pack(id: String!): Pack
+
+
 		randomLayoutIDs(target: String, limit: Int): [String!]! @cacheControl(maxAge: 0)
+		randomThemeIDs(target: String, limit: Int): [String!]! @cacheControl(maxAge: 0)
+		randomPackIDs(limit: Int): [String!]! @cacheControl(maxAge: 0)
+		
+		"Errors return the most up-to-date valid argument values"
 		layoutList(
 			target: String
 			limit: Int
@@ -268,9 +295,7 @@ export default gql`
 			order: String
 			creators: [String!]
 		): [Layout!]
-
-		theme(id: String!): Theme
-		randomThemeIDs(target: String, limit: Int): [String!]! @cacheControl(maxAge: 0)
+		"Errors return the most up-to-date valid argument values"
 		themeList(
 			target: String
 			limit: Int
@@ -282,9 +307,7 @@ export default gql`
 			layouts: [String!]
 			nsfw: Boolean
 		): [Theme!]
-
-		pack(id: String!): Pack
-		randomPackIDs(limit: Int): [String!]! @cacheControl(maxAge: 0)
+		"Errors return the most up-to-date valid argument values"
 		packList(
 			limit: Int
 			page: Int
@@ -299,17 +322,17 @@ export default gql`
 		## Downloading
 		downloadLayout(id: String!, piece_uuids: [GUID!]): JSON! @cacheControl(maxAge: 0)
 		downloadCommonLayout(id: String!): JSON! @cacheControl(maxAge: 0)
-
 		downloadTheme(id: String!, piece_uuids: [GUID!]): FileUrl! @cacheControl(maxAge: 0)
-
 		downloadPack(id: String!): FileUrl! @cacheControl(maxAge: 0)
 
+		"A special query which has data formatted specially for the NXThemes Installer HB application"
 		nxinstaller(id: String!): NXInstallerResponse! @cacheControl(maxAge: 0)
 
 		## Overlay creation tool
 		createOverlayNXThemes(layout: Upload, piece: Upload, common: Upload): [File!] @cacheControl(maxAge: 0)
 		createOverlay(blackImg: Upload!, whiteImg: Upload!): File! @cacheControl(maxAge: 0)
-
+		
+		"The pagination query. A bit of a special one. This can and will only be queryied when a list is queried in the same request"
 		pagination(hash: String!): Pagination
 	}
 
@@ -319,6 +342,7 @@ export default gql`
 
 		restoreAccount(creator_id: String!, backup_code: String!): Boolean!
 
+		"null values are unset"
 		updateProfile(
 			id: String!
 			custom_username: String
@@ -337,6 +361,7 @@ export default gql`
 		## Upvoting
 		setLike(type: String!, id: String!, value: Boolean!): Boolean
 
+		"Returns the url the client should redirect to"
 		deleteTheme(id: String!): String
 		deletePack(id: String!): Boolean
 
