@@ -85,12 +85,14 @@ export default async (_parent, {file}, context, _info) => {
                                 return new Promise(async (resolve, reject) => {
                                     try {
                                         // Read info.json
-                                        const info = JSON.parse((await readFile(`${path}/info.json`).toString()))
+                                        const i = await readFile(`${path}/info.json`)
+                                        const info = JSON.parse(i.toString())
 
                                         // Read layout.json
                                         let layout = null
                                         try {
-                                            layout = JSON.parse((await readFile(`${path}/layout.json`)).toString())
+                                            const l = await readFile(`${path}/layout.json`)
+                                            layout = JSON.parse(l.toString())
                                         } catch (e) {
                                         }
 
