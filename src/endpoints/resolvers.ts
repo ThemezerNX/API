@@ -97,8 +97,8 @@ const avatar = (id, user): string => {
 // https://stackoverflow.com/questions/40697330/skip-update-columns-with-pg-promise
 function str(column) {
     return {
-        name: column
-        // skip: (c) => !c.exists
+        name: column,
+        skip: (c) => !c.exists
     }
 }
 
