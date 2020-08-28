@@ -279,8 +279,7 @@ export default gql`
 		layout(id: String!): Layout
 		theme(id: String!): Theme
 		pack(id: String!): Pack
-
-
+		
 		randomLayoutIDs(target: String, limit: Int): [String!]! @cacheControl(maxAge: 0)
 		randomThemeIDs(target: String, limit: Int): [String!]! @cacheControl(maxAge: 0)
 		randomPackIDs(limit: Int): [String!]! @cacheControl(maxAge: 0)
@@ -339,10 +338,9 @@ export default gql`
 	type Mutation {
 		# Authed
 		updateAuth(accepts: Boolean): authPayload
-
 		restoreAccount(creator_id: String!, backup_code: String!): Boolean!
 
-		"null values are unset"
+		"null/undefined values are treated as unset, not 'keep previous'"
 		updateProfile(
 			id: String!
 			custom_username: String
