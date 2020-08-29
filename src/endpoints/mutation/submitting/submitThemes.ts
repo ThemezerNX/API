@@ -121,7 +121,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                 // TODO: Reject if any of the values is too long, match client limits
 
                                 // Reject if more than 10 categories
-                                if (themes[i].categories.length > 10) {
+                                if (!themes[i].categories || themes[i].categories.length < 1 || themes[i].categories.length > 10) {
                                     reject(errorName.INVALID_CATEGORY_AMOUNT)
                                     return
                                 }

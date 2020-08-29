@@ -126,7 +126,7 @@ export const errorType = {
 		statusCode: 4009
 	},
 	INVALID_CATEGORY_AMOUNT: {
-		message: 'Max 10 categories allowed',
+		message: 'Categories has a min of 1 and max 10.',
 		statusCode: 4010
 	},
 

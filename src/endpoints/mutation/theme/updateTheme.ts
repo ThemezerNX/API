@@ -44,37 +44,39 @@ export default async (
 
         if (mayModerate) {
             return await new Promise(async (resolve, reject) => {
-                tmp.dir({prefix: 'theme'}, async (err, path, _cleanupCallback) => {
+                tmp.dir({prefix: 'theme'}, async (err, path, cleanupCallback) => {
                     try {
-                        // Save the screenshot
-                        const filePromises = saveFiles([{
-                            file: file,
-                            savename: 'original',
-                            path
-                        }])
-                        const savedFiles = await Promise.all(filePromises)
+                        if (file) {
+                            // Save the screenshot
+                            const filePromises = saveFiles([{
+                                file: file,
+                                savename: 'original',
+                                path
+                            }])
+                            const savedFiles = await Promise.all(filePromises)
 
-                        if (!(await isJpegPromisified(`${path}/${savedFiles[0]}`))) {
-                            reject(errorName.INVALID_FILE_TYPE)
+                            if (!(await isJpegPromisified(`${path}/${savedFiles[0]}`))) {
+                                reject(errorName.INVALID_FILE_TYPE)
+                            }
+
+                            // Create thumb.jpg
+                            await sharp(`${path}/${savedFiles[0]}`)
+                                .resize(320, 180)
+                                .toFile(`${path}/thumb.jpg`)
+
+                            // Move to storage
+                            await moveFile(
+                                `${path}/${savedFiles[0]}`,
+                                `${storagePath}/themes/${id}/images/${savedFiles[0]}`
+                            )
+                            await moveFile(
+                                `${path}/thumb.jpg`,
+                                `${storagePath}/themes/${id}/images/thumb.jpg`
+                            )
                         }
 
-                        // Create thumb.jpg
-                        await sharp(`${path}/${savedFiles[0]}`)
-                            .resize(320, 180)
-                            .toFile(`${path}/thumb.jpg`)
-
-                        // Move to storage
-                        await moveFile(
-                            `${path}/${savedFiles[0]}`,
-                            `${storagePath}/themes/${id}/images/${savedFiles[0]}`
-                        )
-                        await moveFile(
-                            `${path}/thumb.jpg`,
-                            `${storagePath}/themes/${id}/images/thumb.jpg`
-                        )
-
-                        // Reject if more than 10 categories
-                        if (categories.length > 10) {
+                        // Reject if invalid category amount
+                        if (!categories || categories.length < 1 || categories.length > 10) {
                             reject(errorName.INVALID_CATEGORY_AMOUNT)
                             return
                         }
