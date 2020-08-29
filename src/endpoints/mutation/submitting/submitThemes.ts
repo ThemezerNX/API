@@ -68,7 +68,6 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                         // Create thumb.jpg
                         const thumbPromises = themePaths.map((path) =>
                             sharp(`${path}/original.jpg`)
-                                .rotate()
                                 .resize(320, 180)
                                 .toFile(`${path}/thumb.jpg`)
                         )

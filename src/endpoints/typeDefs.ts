@@ -277,8 +277,8 @@ export default gql`
 		categories: [String!]
 
 		layout(id: String!): Layout
-		theme(id: String!): Theme
-		pack(id: String!): Pack
+		theme(id: String!): Theme @cacheControl(maxAge: 0)
+		pack(id: String!): Pack @cacheControl(maxAge: 0)
 		
 		randomLayoutIDs(target: String, limit: Int): [String!]! @cacheControl(maxAge: 0)
 		randomThemeIDs(target: String, limit: Int): [String!]! @cacheControl(maxAge: 0)
@@ -361,7 +361,9 @@ export default gql`
 
 		"Returns the url the client should redirect to"
 		deleteTheme(id: String!): String
+		updateTheme(id: String!, file: Upload, name: String!, description: String, version: String!, categories: [String!], nsfw: Boolean): Boolean
 		deletePack(id: String!): Boolean
+		updatePack(id: String!, name: String!, description: String!, version: String!): Boolean
 
 		## Reporting
 		reportURL(url: String!, type: String!, nsfw: Boolean, reason: String): Boolean

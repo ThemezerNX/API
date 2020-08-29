@@ -34,6 +34,8 @@ import reportURL from "./mutation/reportURL";
 import deletePack from "./mutation/pack/deletePack";
 import fs from 'fs'
 import {patch} from '@themezernx/json-merger'
+import updatePack from "./mutation/pack/updatePack";
+import updateTheme from "./mutation/theme/updateTheme";
 
 const link = require('fs-symlink')
 const {
@@ -821,7 +823,9 @@ export default {
         setLike,
 
         deleteTheme,
+        updateTheme,
         deletePack,
+        updatePack,
 
         reportURL
     }
