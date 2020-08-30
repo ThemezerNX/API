@@ -499,6 +499,21 @@ export const prepareNXTheme = (id, piece_uuids) => {
                             `${storagePath}/cache/themes/${theme_id +
                             (piece_uuids?.length > 0 ? `_${piece_uuids.join(',')}` : '')}.nxtheme`
                         )
+
+                        await db.none(
+                            `
+							INSERT INTO themes_cache (id, piece_uuids, filename, name, last_built)
+							VALUES(hex_to_int('$1^'), $2::uuid[], $3, $4, NOW()) 
+							ON CONFLICT (id, piece_uuids) 
+							DO 
+								UPDATE SET 
+									filename = $3,
+									name = $4,
+									last_built = NOW();
+								
+						`,
+                            [theme_id, piece_uuids || [], newFilename || cacheEntry.filename, newName || cacheEntry.name]
+                        )
                     }
 
                     resolve({
@@ -516,23 +531,13 @@ export const prepareNXTheme = (id, piece_uuids) => {
                     })
 
                     // Increase download count by 1 and set cache
-                    db.none(
+                    await db.none(
                             `
 							UPDATE themes
 								SET dl_count = dl_count + 1
 							WHERE id = hex_to_int('$1^');
-	
-							INSERT INTO themes_cache (id, piece_uuids, filename, name, last_built)
-							VALUES(hex_to_int('$1^'), $2::uuid[], $3, $4, NOW()) 
-							ON CONFLICT (id, piece_uuids) 
-							DO 
-								UPDATE SET 
-									filename = $3,
-									name = $4,
-									last_built = NOW();
-								
 						`,
-                        [theme_id, piece_uuids || [], newFilename || cacheEntry.filename, newName || cacheEntry.name]
+                        [theme_id]
                     )
 
                     cleanupCallback()

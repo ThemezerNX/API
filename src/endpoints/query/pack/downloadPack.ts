@@ -112,6 +112,22 @@ export default async (_parent, {id}, context, info) => {
 
                     // Write zip to cache
                     await zip.writeZip(`${storagePath}/cache/packs/${pack.id}.zip`)
+
+                    await db.none(
+                        `
+                        UPDATE packs
+                            SET dl_count = dl_count + 1
+                        WHERE  id = hex_to_int('$1^');
+
+                        INSERT INTO packs_cache (id, last_built)
+                        VALUES(hex_to_int('$1^'), NOW()) 
+                        ON CONFLICT (id) 
+                        DO 
+                            UPDATE SET 
+                                last_built = NOW();
+                    `,
+                        [pack.id]
+                    )
                 }
 
                 resolve({
@@ -121,19 +137,12 @@ export default async (_parent, {id}, context, info) => {
                 })
 
                 // Increase download count by 1
-                db.none(
+                await db.none(
                     `
-									UPDATE packs
-										SET dl_count = dl_count + 1
-									WHERE  id = hex_to_int('$1^');
-	
-									INSERT INTO packs_cache (id, last_built)
-									VALUES(hex_to_int('$1^'), NOW()) 
-									ON CONFLICT (id) 
-									DO 
-										UPDATE SET 
-											last_built = NOW();
-								`,
+                        UPDATE packs
+                            SET dl_count = dl_count + 1
+                        WHERE  id = hex_to_int('$1^');
+                    `,
                     [pack.id]
                 )
             } catch (e) {
