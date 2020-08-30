@@ -55,6 +55,7 @@ export const urlNameREGEX = /[^a-zA-Z0-9_.]+/gm
 // const noSpecialCharsREGEX = /[^a-z\d\-]+/gi
 export const themeHexREGEX = /^t[0-9a-f]+$/
 export const packHexREGEX = /^p[0-9a-f]+$/
+export const invalidFilenameCharsREGEX = /[\\~#*{}\/:<>?|"]/gm
 
 // Allowed files according to https://github.com/exelix11/SwitchThemeInjector/blob/master/SwitchThemesCommon/PatchTemplate.cs#L10-L29
 export const allowedFilesInNXTheme = [
@@ -341,10 +342,10 @@ export const createNXThemes = (themes) =>
                         resolve({
                             name: theme.themeName,
                             filename:
-                                `${theme.themeName} by ${info.Author}` +
+                                (`${theme.themeName} by ${info.Author}` +
                                 (info.LayoutInfo.length > 0 ? ` using ${info.LayoutInfo}` : '') +
                                 (theme.id ? `-${theme.id}` : '') +
-                                '.nxtheme',
+                                '.nxtheme').replace(invalidFilenameCharsREGEX, '_'),
                             path: `${theme.path}/theme.nxtheme`,
                             mimetype: 'application/nxtheme'
                         })

@@ -6,7 +6,7 @@ import AdmZip from 'adm-zip'
 import {graphql} from "graphql";
 import {errorName} from "../../../util/errorTypes";
 import {db} from "../../../db/db";
-import {prepareNXTheme, storagePath} from "../../resolvers";
+import {invalidFilenameCharsREGEX, prepareNXTheme, storagePath} from "../../resolvers";
 
 export default async (_parent, {id}, context, info) => {
     try {
@@ -131,7 +131,7 @@ export default async (_parent, {id}, context, info) => {
                 }
 
                 resolve({
-                    filename: `${pack.details.name} by ${pack.creator.display_name} via Themezer.zip`,
+                    filename: (`${pack.details.name} by ${pack.creator.display_name} via Themezer.zip`).replace(invalidFilenameCharsREGEX, '_'),
                     url: `${process.env.API_ENDPOINT}/cdn/cache/packs/${pack.id}.zip`,
                     mimetype: 'application/zip'
                 })
