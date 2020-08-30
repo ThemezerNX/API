@@ -361,7 +361,7 @@ export default gql`
 
 		"Returns the url the client should redirect to"
 		deleteTheme(id: String!): String
-		updateTheme(id: String!, file: Upload, name: String!, description: String, version: String!, categories: [String!], nsfw: Boolean): Boolean
+		updateTheme(id: String!, file: Upload, name: String!, layout_id: String, used_pieces: [UsedPieceInput!], description: String, version: String!, categories: [String!], nsfw: Boolean): Boolean
 		deletePack(id: String!): Boolean
 		updatePack(id: String!, name: String!, description: String!, version: String!): Boolean
 

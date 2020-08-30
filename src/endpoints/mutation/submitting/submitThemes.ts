@@ -311,7 +311,8 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                 }
 
                                 for (const i in themePaths) {
-                                    rimraf(themePaths[i], () => {})
+                                    rimraf(themePaths[i], () => {
+                                    })
                                 }
                             }, 5000)
                         } catch (e) {
@@ -331,7 +332,8 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
     } catch (e) {
         console.error(e)
         for (const i in themePaths) {
-            rimraf(themePaths[i], () => {})
+            rimraf(themePaths[i], () => {
+            })
         }
         throw new Error(e)
     }

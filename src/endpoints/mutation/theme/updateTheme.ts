@@ -13,7 +13,9 @@ const updateThemeCS = new pgp.helpers.ColumnSet(
     [
         {name: 'details', cast: 'json'},
         {name: 'categories', cast: 'varchar[]'},
-        {name: 'last_updated', cast: 'timestamp without time zone'}
+        {name: 'last_updated', cast: 'timestamp without time zone'},
+        {name: 'piece_uuids', cast: 'uuid[]'},
+        {name: 'layout_id', cast: 'int'},
     ],
     {
         table: 'themes'
@@ -22,7 +24,7 @@ const updateThemeCS = new pgp.helpers.ColumnSet(
 
 export default async (
     _parent,
-    {id, file, name, description, version, categories, nsfw},
+    {id, file, name, layout_id, used_pieces, description, version, categories, nsfw},
     context,
     _info
 ) => {
@@ -44,7 +46,7 @@ export default async (
 
         if (mayModerate) {
             return await new Promise(async (resolve, reject) => {
-                tmp.dir({prefix: 'theme'}, async (err, path, cleanupCallback) => {
+                tmp.dir({prefix: 'theme'}, async (err, path, _cleanupCallback) => {
                     try {
                         if (file) {
                             // Save the screenshot
@@ -91,15 +93,32 @@ export default async (
                             categories.push('NSFW')
                         }
 
+                        // Get uuids from extra dropdown entries
+                        let splitID = null
+                        let piece_uuids = null
+                        if (layout_id) {
+                            splitID = layout_id.split('|')
+                            if (splitID.length > 1) {
+                                // Has piece uuids
+                                piece_uuids = splitID[1].split(',')
+                            }
+                        }
+
                         const updatedTheme = {
                             details: {
                                 name,
                                 description,
                                 version
                             },
+                            layout_id: splitID ? Number(`0x${splitID[0]}`) : null,
+                            piece_uuids: used_pieces?.length > 0
+                                ? used_pieces.map((p) => p.value.uuid)
+                                : piece_uuids,
                             categories,
                             last_updated: new Date()
                         }
+
+                        console.log(updatedTheme)
 
                         const query = () => pgp.helpers.update(updatedTheme, updateThemeCS)
 
@@ -111,18 +130,17 @@ export default async (
                             reject(errorName.DB_SAVE_ERROR)
                             return
                         }
-                    }
-                 catch (e) {
-                                        console.error(e)
-                                        reject(errorName.UNKNOWN)
-                                    }
-                                })
-                            })
-                        } else {
-                            return new Error(errorName.UNAUTHORIZED)
-                        }
                     } catch (e) {
                         console.error(e)
-                        throw new Error(e)
+                        reject(errorName.UNKNOWN)
                     }
-                }
+                })
+            })
+        } else {
+            return new Error(errorName.UNAUTHORIZED)
+        }
+    } catch (e) {
+        console.error(e)
+        throw new Error(e)
+    }
+}
