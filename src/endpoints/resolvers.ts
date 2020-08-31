@@ -680,7 +680,7 @@ export const filterData = (items, info, {page = 1, limit, query, sort, order = '
                     id: info.fieldName.charAt(0) + item.id,
                     name: item.details.name,
                     description: item.details.name,
-                    categories: item.categories ? item.categories.join('|') : ''
+                    categories: item.categories ? item.categories.join(' ') : ''
                 }
             })
 
