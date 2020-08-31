@@ -1,6 +1,6 @@
 import {graphql} from "graphql";
 import {errorName} from "../../util/errorTypes";
-import {downloadPackSeperate, downloadTheme, packHexREGEX, themeHexREGEX} from "../resolvers";
+import {downloadPackSeperate, getTheme, packHexREGEX, themeHexREGEX} from "../resolvers";
 
 export default async (_parent, {id}, context, info) => {
     try {
@@ -11,7 +11,7 @@ export default async (_parent, {id}, context, info) => {
                 if (themeHexREGEX.exec(idLower)) {
                     // Theme Download
                     resolve({
-                        themes: [await downloadTheme(idLower.replace('t', ''), undefined)]
+                        themes: [await getTheme(idLower.replace('t', ''), undefined)]
                     })
                 } else if (packHexREGEX.exec(idLower)) {
                     // Pack Download
@@ -38,7 +38,7 @@ export default async (_parent, {id}, context, info) => {
 								`
                         })
                         if (data?.randomThemeIDs) {
-                            const promises = data.randomThemeIDs.map((id) => downloadTheme(id, undefined))
+                            const promises = data.randomThemeIDs.map((id) => getTheme(id, undefined))
                             resolve({
                                 themes: await Promise.all(promises)
                             })
@@ -70,7 +70,7 @@ export default async (_parent, {id}, context, info) => {
 								`
                         })
                         if (data?.themeList) {
-                            const promises = data.themeList.map((t) => downloadTheme(t.id, undefined))
+                            const promises = data.themeList.map((t) => getTheme(t.id, undefined))
                             resolve({
                                 themes: await Promise.all(promises)
                             })
@@ -110,7 +110,7 @@ export default async (_parent, {id}, context, info) => {
                         })
 
                         if (data?.themeList) {
-                            const promises = data.themeList.map((t) => downloadTheme(t.id, undefined))
+                            const promises = data.themeList.map((t) => getTheme(t.id, undefined))
                             resolve({
                                 themes: await Promise.all(promises)
                             })

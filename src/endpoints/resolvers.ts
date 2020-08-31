@@ -36,6 +36,7 @@ import fs from 'fs'
 import {patch} from '@themezernx/json-merger'
 import updatePack from "./mutation/pack/updatePack";
 import updateTheme from "./mutation/theme/updateTheme";
+import downloadTheme from "./query/theme/downloadTheme";
 
 const link = require('fs-symlink')
 const {
@@ -556,7 +557,7 @@ export const prepareNXTheme = (id, piece_uuids) => {
     })
 }
 
-export const downloadTheme = (id, piece_uuids) => {
+export const getTheme = (id, piece_uuids) => {
     return new Promise(async (resolve, reject) => {
         try {
             const themePromise: any = await prepareNXTheme(id, piece_uuids)
