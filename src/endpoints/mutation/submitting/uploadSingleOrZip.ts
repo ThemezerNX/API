@@ -132,21 +132,23 @@ export default async (_parent, {file}, context, _info) => {
                                                 if (service === 'Themezer') {
                                                     try {
                                                         dbLayout = await db.one(
-                                                            `
-																		SELECT *, (
-																				SELECT array_agg(row_to_json(p)) as used_pieces
-																				FROM (
-																					SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
-																					FROM layouts
-																					WHERE id = hex_to_int('$1^')
-																				) as p
-																				WHERE value ->> 'uuid' = ANY($2::text[])
-																			),
-																			to_hex(id) as id,
-																			CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
-																		FROM layouts
-																		WHERE id = hex_to_int('$1^')
-																	`,
+                                                                `
+                                                                    SELECT *,
+                                                                           (
+                                                                               SELECT array_agg(row_to_json(p)) as used_pieces
+                                                                               FROM (
+                                                                                        SELECT unnest(pieces) ->> 'name'                       as name,
+                                                                                               json_array_elements(unnest(pieces) -> 'values') as value
+                                                                                        FROM layouts
+                                                                                        WHERE id = hex_to_int('$1^')
+                                                                                    ) as p
+                                                                               WHERE value ->> 'uuid' = ANY ($2::text[])
+                                                                           ),
+                                                                           to_hex(id)                                              as id,
+                                                                           CASE WHEN commonlayout IS NULL THEN false ELSE true END AS has_commonlayout
+                                                                    FROM layouts
+                                                                    WHERE id = hex_to_int('$1^')
+                                                            `,
                                                             [id, piece_uuids]
                                                         )
                                                     } catch (e) {

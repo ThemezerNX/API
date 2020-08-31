@@ -92,7 +92,8 @@ export default async (_parent, {layout, piece, common}, _context, _info) => {
                     cleanupCallback()
                 } catch (e) {
                     reject(e)
-                    rimraf(path, () => {})
+                    rimraf(path, () => {
+                    })
                 }
             })
         })

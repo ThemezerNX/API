@@ -5,27 +5,28 @@ const app = express()
 const cors = require('cors')
 const bodyParser = require('body-parser')
 
-const { ApolloServer/*, gql, SchemaDirectiveVisitor*/ } = require('apollo-server-express')
+const {ApolloServer/*, gql, SchemaDirectiveVisitor*/} = require('apollo-server-express')
 // const { defaultFieldResolver } = require('graphql')
 import responseCachePlugin from 'apollo-server-plugin-response-cache'
 import resolvers from './endpoints/resolvers'
 import typeDefs from './endpoints/typeDefs'
-const { makeExecutableSchema } = require('graphql-tools')
+
+const {makeExecutableSchema} = require('graphql-tools')
 
 import joinMonsterAdapt from 'join-monster-graphql-tools-adapter'
 import joinMonsterMetaData from './endpoints/joinMonsterMetaData'
 
-const { errorType } = require('./util/errorTypes')
+const {errorType} = require('./util/errorTypes')
 const getErrorCode = (errorName) => errorType[errorName]
 
 import buildContext from './util/buildContext'
 
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json({ limit: '50mb' }))
+app.use(bodyParser.urlencoded({extended: true}))
+app.use(bodyParser.json({limit: '50mb'}))
 
 const schema = makeExecutableSchema({
-	typeDefs,
-	resolvers
+    typeDefs,
+    resolvers
 })
 
 joinMonsterAdapt(schema, joinMonsterMetaData)
@@ -74,92 +75,92 @@ joinMonsterAdapt(schema, joinMonsterMetaData)
 }*/
 
 const server = new ApolloServer({
-	uploads: {
-		maxFileSize: 25000000, // 25 MB
-		maxFiles: 50
-	},
-	cacheControl:
-		process.env.NODE_ENV === 'development'
-			? false
-			: {
-					defaultMaxAge: 20
-			  },
-	plugins: [
-		responseCachePlugin({
-			sessionId: (context) => context.request.http?.headers.get('token') || null
-		})
-	],
-	schema,
-/*	schemaDirectives: {
-		auth: AuthDirective
-	},*/
-	context: async ({ req }) => buildContext({ req }),
-	introspection: true,
-	playground:
-		process.env.NODE_ENV === 'development'
-			? {
-					settings: {
-						'request.credentials': 'same-origin'
-					}
-			  }
-			: false,
-	formatError: (err, _params) => {
-		let error: null
-		console.error(err)
+    uploads: {
+        maxFileSize: 25000000, // 25 MB
+        maxFiles: 50
+    },
+    cacheControl:
+        process.env.NODE_ENV === 'development'
+            ? false
+            : {
+                defaultMaxAge: 20
+            },
+    plugins: [
+        responseCachePlugin({
+            sessionId: (context) => context.request.http?.headers.get('token') || null
+        })
+    ],
+    schema,
+    /*	schemaDirectives: {
+            auth: AuthDirective
+        },*/
+    context: async ({req}) => buildContext({req}),
+    introspection: true,
+    playground:
+        process.env.NODE_ENV === 'development'
+            ? {
+                settings: {
+                    'request.credentials': 'same-origin'
+                }
+            }
+            : false,
+    formatError: (err, _params) => {
+        let error: null
+        console.error(err)
 
-		error = getErrorCode(err.message)
-		if (error) {
-			return error
-		} else if (err.message.includes('Cannot query field')) {
-			const fieldREGEX = /".*?"/
-			return getErrorCode('INVALID_FIELD')(fieldREGEX.exec(err.message)[0].replace(/"/g, ''), '')
-		}
+        error = getErrorCode(err.message)
+        if (error) {
+            return error
+        } else if (err.message.includes('Cannot query field')) {
+            const fieldREGEX = /".*?"/
+            return getErrorCode('INVALID_FIELD')(fieldREGEX.exec(err.message)[0].replace(/"/g, ''), '')
+        }
 
-		return err
-	},
+        return err
+    },
 
-	formatResponse: (response, requestContext) => {
-		if (response?.data && requestContext?.context?.pagination) {
-			response.data.pagination = requestContext.context.pagination
-		}
+    formatResponse: (response, requestContext) => {
+        if (response?.data && requestContext?.context?.pagination) {
+            response.data.pagination = requestContext.context.pagination
+        }
 
-		if (response?.data?.nxinstaller) {
-			response.data = response?.data?.nxinstaller
-		}
+        if (response?.data?.nxinstaller) {
+            response.data = response?.data?.nxinstaller
+        }
 
-		return response
-	}
+        return response
+    }
 })
 
 if (process.env.NODE_ENV === 'development') {
-	app.use(
-		cors({
-			credentials: false,
-			origin: process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : process.env.WEBSITE_ENDPOINT
-		})
-	)
-	app.use('/cdn', express.static('../cdn'))
+    app.use(
+        cors({
+            credentials: false,
+            origin: process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : process.env.WEBSITE_ENDPOINT
+        })
+    )
+    app.use('/cdn', express.static('../cdn'))
 }
 
-app.get(/\/.+/, function(req, res) {
-	res.send('No frii gaems here')
+app.get(/\/.+/, function (req, res) {
+    res.send('No frii gaems here')
 })
 
 server.applyMiddleware({
-	cors: {
-		credentials: true,
-		origin: process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : process.env.WEBSITE_ENDPOINT
-	},
-	app,
-	path: '/'
+    cors: {
+        credentials: true,
+        origin: process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : process.env.WEBSITE_ENDPOINT
+    },
+    app,
+    path: '/'
 })
 
 const port = process.env.PORT
 const host = process.env.HOST
 
-app.listen({ port, host }, async () => {
-	consola.ready({
-		message: `🚀 Server ready at http://${host}:${port}${server.graphqlPath}`,
-		badge: true
-	})
+app.listen({port, host}, async () => {
+    consola.ready({
+        message: `🚀 Server ready at http://${host}:${port}${server.graphqlPath}`,
+        badge: true
+    })
 })

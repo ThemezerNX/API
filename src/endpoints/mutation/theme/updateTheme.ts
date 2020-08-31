@@ -118,8 +118,6 @@ export default async (
                             last_updated: new Date()
                         }
 
-                        console.log(updatedTheme)
-
                         const query = () => pgp.helpers.update(updatedTheme, updateThemeCS)
 
                         try {

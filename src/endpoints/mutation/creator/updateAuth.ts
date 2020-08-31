@@ -7,12 +7,12 @@ export default async (_parent, {accepts}, context, _info) => {
             let dbData
             if (accepts) {
                 dbData = await db.one(
-                    `
-								UPDATE creators
-									SET has_accepted = true
-								WHERE id = $1
-								RETURNING has_accepted
-							`,
+                        `
+                            UPDATE creators
+                            SET has_accepted = true
+                            WHERE id = $1
+                            RETURNING has_accepted
+                    `,
                     [context.req.user.id]
                 )
             }

@@ -317,7 +317,7 @@ export const createNXThemes = (themes) =>
                     const info = createInfo(
                         theme.themeName,
                         theme.creatorName,
-                        fileNameToThemeTarget(layoutDetails ? layoutDetails.TargetName : theme.targetName),
+                        fileNameToThemeTarget(theme.targetName || layoutDetails?.TargetName),
                         layoutDetails
                     )
 
@@ -335,7 +335,8 @@ export const createNXThemes = (themes) =>
                         if (err) {
                             console.error(err)
                             reject(errorName.NXTHEME_CREATE_FAILED)
-                            rimraf(theme.path, () => {})
+                            rimraf(theme.path, () => {
+                            })
                             return
                         }
 
@@ -344,9 +345,9 @@ export const createNXThemes = (themes) =>
                             name: theme.themeName,
                             filename:
                                 (`${theme.themeName} by ${info.Author}` +
-                                (info.LayoutInfo.length > 0 ? ` using ${info.LayoutInfo}` : '') +
-                                (theme.id ? `-${theme.id}` : '') +
-                                '.nxtheme').replace(invalidFilenameCharsREGEX, '_'),
+                                    (info.LayoutInfo.length > 0 ? ` using ${info.LayoutInfo}` : '') +
+                                    (theme.id ? `-${theme.id}` : '') +
+                                    '.nxtheme').replace(invalidFilenameCharsREGEX, '_'),
                             path: `${theme.path}/theme.nxtheme`,
                             mimetype: 'application/nxtheme'
                         })
@@ -503,7 +504,7 @@ export const prepareNXTheme = (id, piece_uuids) => {
                         )
 
                         await db.none(
-                            `
+                                `
 							INSERT INTO themes_cache (id, piece_uuids, filename, name, last_built)
 							VALUES(hex_to_int('$1^'), $2::uuid[], $3, $4, NOW()) 
 							ON CONFLICT (id, piece_uuids) 

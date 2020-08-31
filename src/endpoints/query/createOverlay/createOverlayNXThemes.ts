@@ -59,7 +59,8 @@ export default async (_parent, {themeName, blackImg, whiteImg}, _context, _info)
                             console.error(err)
                             console.error(stderr)
                             reject(errorName.FILE_READ_ERROR)
-                            rimraf(path, () => {})
+                            rimraf(path, () => {
+                            })
                             cleanupCallback()
                             return
                         } else {

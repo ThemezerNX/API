@@ -9,20 +9,22 @@ export default async (_parent, {id}, context, _info) => {
             if (await context.authenticate()) {
                 try {
                     const dbData = await db.one(
-                        `
-									DELETE FROM packs CASCADE
-									WHERE (creator_id = $1 OR $3)
-										AND id = hex_to_int('$2^')
-									RETURNING (
-										SELECT array_agg(to_hex(id))
-										FROM themes
-										WHERE pack_id = hex_to_int('$2^')
-									) as ids;
-								`,
+                            `
+                                DELETE
+                                FROM packs CASCADE
+                                WHERE (creator_id = $1 OR $3)
+                                  AND id = hex_to_int('$2^')
+                                RETURNING (
+                                    SELECT array_agg(to_hex(id))
+                                    FROM themes
+                                    WHERE pack_id = hex_to_int('$2^')
+                                ) as ids;
+                        `,
                         [context.req.user.id, id, context.req.user.roles?.includes('admin')]
                     )
                     dbData.ids.forEach((id) => {
-                        rimraf(`${storagePath}/themes/${id}`, () => {})
+                        rimraf(`${storagePath}/themes/${id}`, () => {
+                        })
                     })
                     resolve(true)
                 } catch (e) {

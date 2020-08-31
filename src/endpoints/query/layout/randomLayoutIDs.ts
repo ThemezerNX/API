@@ -6,11 +6,11 @@ export default async (_parent, {target, limit = 1}) => {
         return await new Promise(async (resolve, reject) => {
             try {
                 let query = `
-							SELECT to_hex(id) as id
-							FROM layouts
-							WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END
-							ORDER BY random()
-							LIMIT $2`
+                    SELECT to_hex(id) as id
+                    FROM layouts
+                    WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END
+                    ORDER BY random()
+                    LIMIT $2`
 
                 const dbData = await db.many(query, [target, limit])
                 if (dbData.length > 0) {

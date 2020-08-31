@@ -54,11 +54,11 @@ export default async (_parent, {id}, context, info) => {
 
             try {
                 const cacheEntry = await db.oneOrNone(
-                    `
-								SELECT last_built
-								FROM packs_cache
-								WHERE id = hex_to_int('$1^')
-							`,
+                        `
+                            SELECT last_built
+                            FROM packs_cache
+                            WHERE id = hex_to_int('$1^')
+                    `,
                     [pack.id]
                 )
 
@@ -114,18 +114,16 @@ export default async (_parent, {id}, context, info) => {
                     await zip.writeZip(`${storagePath}/cache/packs/${pack.id}.zip`)
 
                     await db.none(
-                        `
-                        UPDATE packs
-                            SET dl_count = dl_count + 1
-                        WHERE  id = hex_to_int('$1^');
+                            `
+                                UPDATE packs
+                                SET dl_count = dl_count + 1
+                                WHERE id = hex_to_int('$1^');
 
-                        INSERT INTO packs_cache (id, last_built)
-                        VALUES(hex_to_int('$1^'), NOW()) 
-                        ON CONFLICT (id) 
-                        DO 
-                            UPDATE SET 
-                                last_built = NOW();
-                    `,
+                                INSERT INTO packs_cache (id, last_built)
+                                VALUES (hex_to_int('$1^'), NOW())
+                                ON CONFLICT (id)
+                                    DO UPDATE SET last_built = NOW();
+                        `,
                         [pack.id]
                     )
                 }
@@ -138,10 +136,10 @@ export default async (_parent, {id}, context, info) => {
 
                 // Increase download count by 1
                 await db.none(
-                    `
-                        UPDATE packs
+                        `
+                            UPDATE packs
                             SET dl_count = dl_count + 1
-                        WHERE  id = hex_to_int('$1^');
+                            WHERE id = hex_to_int('$1^');
                     `,
                     [pack.id]
                 )

@@ -9,11 +9,11 @@ export default async (_parent, {id, piece_uuids}, _context, _info) => {
 
             // Increase download count by 1
             db.none(
-                `
-							UPDATE layouts
-								SET dl_count = dl_count + 1
-							WHERE  id = hex_to_int('$1^')
-						`,
+                    `
+                        UPDATE layouts
+                        SET dl_count = dl_count + 1
+                        WHERE id = hex_to_int('$1^')
+                `,
                 [id]
             )
         })

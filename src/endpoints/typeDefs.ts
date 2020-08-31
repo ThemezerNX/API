@@ -11,7 +11,7 @@ export default gql`
 		PUBLIC
 		PRIVATE
 	}
-	
+
 	directive @cacheControl(
 		maxAge: Int
 		scope: CacheControlScope
@@ -20,14 +20,14 @@ export default gql`
 	directive @auth(
 		requires: Role = ADMIN
 	) on OBJECT | FIELD_DEFINITION
-	
+
 	enum Role {
 		ADMIN
 		REVIEWER
 		USER
 		UNKNOWN
 	}
-	
+
 	type Pagination {
 		page: Int!
 		limit: Int
@@ -279,11 +279,11 @@ export default gql`
 		layout(id: String!): Layout
 		theme(id: String!): Theme @cacheControl(maxAge: 0)
 		pack(id: String!): Pack @cacheControl(maxAge: 0)
-		
+
 		randomLayoutIDs(target: String, limit: Int): [String!]! @cacheControl(maxAge: 0)
 		randomThemeIDs(target: String, limit: Int): [String!]! @cacheControl(maxAge: 0)
 		randomPackIDs(limit: Int): [String!]! @cacheControl(maxAge: 0)
-		
+
 		"Errors return the most up-to-date valid argument values"
 		layoutList(
 			target: String
@@ -330,7 +330,7 @@ export default gql`
 		## Overlay creation tool
 		createOverlayNXThemes(layout: Upload, piece: Upload, common: Upload): [File!] @cacheControl(maxAge: 0)
 		createOverlay(blackImg: Upload!, whiteImg: Upload!): File! @cacheControl(maxAge: 0)
-		
+
 		"The pagination query. A bit of a special one. This can and will only be queryied when a list is queried in the same request"
 		pagination(hash: String!): Pagination
 	}
