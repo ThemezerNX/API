@@ -21,7 +21,7 @@ import list from "./query/list";
 import nxinstaller from "./query/nxinstaller";
 import downloadLayout from "./query/layout/downloadLayout";
 import downloadCommonLayout from "./query/layout/downloadCommonLayout";
-import createOverlay from "./query/createOverlay/createOverlayNXThemes";
+import createOverlay from "./query/createOverlay/createOverlay";
 import createOverlayNXThemes from "./query/createOverlay/createOverlayNXThemes";
 import deleteTheme from "./mutation/theme/deleteTheme";
 import updateAuth from "./mutation/creator/updateAuth";
