@@ -35,14 +35,13 @@ export default async (
         if (context.req.user.roles?.includes('admin')) {
             mayModerate = true
         } else {
-            const pack = await db.oneOrNone(`
+            const theme = await db.oneOrNone(`
                 SELECT id
-                FROM packs
+                FROM themes
                 WHERE creator_id = $1
                   AND id = hex_to_int(\'$2^\')
             `, [context.req.user.id, id])
-            console.log(context.req.user.id, id, pack)
-            if (pack) mayModerate = true
+            if (theme) mayModerate = true
         }
 
         if (mayModerate) {
