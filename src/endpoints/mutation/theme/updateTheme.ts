@@ -41,6 +41,7 @@ export default async (
                 WHERE creator_id = $1
                   AND id = hex_to_int(\'$2^\')
             `, [context.req.user.id, id])
+            console.log(context.req.user.id, id, pack)
             if (pack) mayModerate = true
         }
 
