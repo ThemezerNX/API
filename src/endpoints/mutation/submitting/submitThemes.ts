@@ -248,6 +248,10 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                             `${process.env.WEBSITE_ENDPOINT}/creators/${context.req.user.id}`
                                         )
                                         .addField(
+                                            'Install ID:',
+                                            `P${insertedPack.hex_id}`
+                                        )
+                                        .addField(
                                             'Themes in this pack:',
                                             themeDatas.map((t: any) => t.details.name).join('\n')
                                         )
@@ -290,6 +294,10 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                                 `${process.env.WEBSITE_ENDPOINT}/themes/${fileNameToWebName(
                                                     t.target
                                                 )}/${t.details.name.replace(urlNameREGEX, '-')}-${t.hex_id}`
+                                            )
+                                            .addField(
+                                                'Install ID:',
+                                                `T${t.hex_id}`
                                             )
 
                                         if (!t.categories?.includes('NSFW')) {
