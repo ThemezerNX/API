@@ -249,7 +249,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                         )
                                         .addField(
                                             'Install ID:',
-                                            `P${insertedPack.hex_id}`
+                                            `P${insertedPack.hex_id.toUpperCase()}`
                                         )
                                         .addField(
                                             'Themes in this pack:',
@@ -297,7 +297,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                             )
                                             .addField(
                                                 'Install ID:',
-                                                `T${t.hex_id}`
+                                                `T${t.hex_id.toUpperCase()}`
                                             )
 
                                         if (!t.categories?.includes('NSFW')) {
