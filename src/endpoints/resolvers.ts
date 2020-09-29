@@ -45,7 +45,7 @@ const {
     promises: {access, readdir, readFile, writeFile},
     constants
 } = fs
-const moveFile = require('move-file')
+const moveFile = require('mvdir')
 const tmp = require('tmp')
 const rimraf = require('rimraf')
 

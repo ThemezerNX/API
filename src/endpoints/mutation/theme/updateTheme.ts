@@ -5,7 +5,7 @@ import JPEG_FILE from 'is-jpeg-file'
 import {db, pgp} from "../../../db/db";
 import {errorName} from "../../../util/errorTypes";
 import {saveFiles, storagePath} from "../../resolvers";
-import moveFile from "move-file";
+import moveFile from "mvdir";
 
 const isJpegPromisified = promisify(JPEG_FILE.isJpeg)
 
@@ -29,6 +29,7 @@ export default async (
     _info
 ) => {
     try {
+        console.log({id, file, name, layout_id, used_pieces, description, version, categories, nsfw})
         await context.authenticate()
 
         let mayModerate = false
@@ -65,7 +66,6 @@ export default async (
                             await sharp(`${path}/${savedFiles[0]}`)
                                 .resize(320, 180)
                                 .toFile(`${path}/thumb.jpg`)
-
                             // Move to storage
                             await moveFile(
                                 `${path}/${savedFiles[0]}`,

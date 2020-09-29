@@ -2,7 +2,7 @@ import fs from 'fs'
 import {promisify} from 'util'
 import rimraf from 'rimraf'
 import JPEG_FILE from 'is-jpeg-file'
-import moveFile from 'move-file'
+import moveFile from 'mvdir'
 import sharp from 'sharp'
 import {decrypt} from "../../../util/crypt";
 import {errorName} from "../../../util/errorTypes";
