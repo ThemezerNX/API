@@ -269,7 +269,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                             .setThumbnail(
                                                 `${process.env.API_ENDPOINT}/cdn/themes/${
                                                     (insertedThemes[0] as any).hex_id
-                                                }/images/thumb.jpg`
+                                                }/images/original.jpg`
                                             )
                                     } else {
                                         newPackMessage.setTitle(`${insertedPack.details.name} (NSFW!)`)
@@ -304,7 +304,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                             newThemeMessage
                                                 .setTitle(t.details.name)
                                                 .setThumbnail(
-                                                    `${process.env.API_ENDPOINT}/cdn/themes/${t.hex_id}/images/thumb.jpg`
+                                                    `${process.env.API_ENDPOINT}/cdn/themes/${t.hex_id}/images/original.jpg`
                                                 )
                                         } else {
                                             newThemeMessage.setTitle(`${t.details.name} (NSFW!)`)
