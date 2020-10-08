@@ -51,7 +51,7 @@ export const errorName = {
 export const errorType = {
     UNKNOWN: {
         message: 'Unknown error',
-        statusCode: 0
+        statusCode: 500
     },
     INVALID_FIELD(field, type) {
         return {
@@ -81,7 +81,7 @@ export const errorType = {
     // Creator messages
     CREATOR_NOT_EXIST: {
         message: 'Creator not found',
-        statusCode: 1000
+        statusCode: 404
     },
 
     // Themes
@@ -167,60 +167,60 @@ export const errorType = {
 
     LAYOUT_NOT_FOUND: {
         message: 'The requested layout does not exist',
-        statusCode: 4500
+        statusCode: 404
     },
     THEME_NOT_FOUND: {
         message: 'The requested theme does not exist',
-        statusCode: 4500
+        statusCode: 404
     },
     PACK_NOT_FOUND: {
         message: 'The requested pack does not exist',
-        statusCode: 4500
+        statusCode: 404
     },
 
     // Filter errors
     CANNOT_SEARCH_QUERY: {
         message:
             "The 'id', 'details.name', 'details.description' and if not layouts: 'categories' fields are required when the 'query' argument is used",
-        statusCode: 5000
+        statusCode: 400
     },
     CANNOT_FILTER_NSFW: {
         message: "The 'categories' field is required when the 'nsfw' argument is used",
-        statusCode: 5001
+        statusCode: 400
     },
     CANNOT_FILTER_CREATORS: {
         message: "The 'creator.id' field is required when the 'creators' argument is used",
-        statusCode: 5002
+        statusCode: 400
     },
     CANNOT_FILTER_LAYOUTS: {
         message: "The 'layout.id' field is required when the 'layouts' argument is used",
-        statusCode: 5003
+        statusCode: 400
     },
 
     INVALID_SORT: {
         message: "The sort argument value may only be 'downloads', 'likes', 'updated' or 'id' (default)",
-        statusCode: 5010
+        statusCode: 400
     },
     CANNOT_SORT_BY_DOWNLOADS: {
         message: "The 'dl_count' field is required required when sorting by 'downloads'",
-        statusCode: 5011
+        statusCode: 400
     },
     CANNOT_SORT_BY_LIKES: {
         message: "The 'like_count' field is required required when sorting by 'likes'",
-        statusCode: 5012
+        statusCode: 400
     },
     CANNOT_SORT_BY_UPDATED: {
         message: "The 'last_updated' field is required required when sorting by 'updated' + 'asc'",
-        statusCode: 5013
+        statusCode: 400
     },
     INVALID_ORDER: {
         message: "The order argument value may only be 'asc' or 'desc'",
-        statusCode: 5050
+        statusCode: 400
     },
 
     // DB errors
     DB_SAVE_ERROR: {
         message: 'Failed saving data to DB',
-        statusCode: 10000
+        statusCode: 500
     }
 }

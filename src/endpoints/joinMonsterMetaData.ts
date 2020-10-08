@@ -5,9 +5,9 @@ const {
 } = pgp
 
 const list = {
-    orderBy: ({order = 'desc'}) => {
-        return {id: order}
-    },
+    // orderBy: ({order = 'desc'}) => {
+    //     return {id: order}
+    // },
     where: (table, {target, creators}) => {
         const wheres = []
 
@@ -44,9 +44,9 @@ export default {
                 where: (table, {id}) => format(`${table}.id = hex_to_int('$1^')`, [id])
             },
             packList: {
-                orderBy: ({order = 'desc'}) => {
-                    return {id: order}
-                },
+                // orderBy: ({order = 'desc'}) => {
+                //     return {id: order}
+                // },
                 where: (table, {creators}) => {
                     const wheres = []
 
