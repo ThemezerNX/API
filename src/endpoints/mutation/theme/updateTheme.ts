@@ -16,6 +16,7 @@ const updateThemeCS = new pgp.helpers.ColumnSet(
         {name: 'last_updated', cast: 'timestamp without time zone'},
         {name: 'piece_uuids', cast: 'uuid[]'},
         {name: 'layout_id', cast: 'int'},
+        {name: 'pack_id', cast: 'int'},
     ],
     {
         table: 'themes'
@@ -24,12 +25,11 @@ const updateThemeCS = new pgp.helpers.ColumnSet(
 
 export default async (
     _parent,
-    {id, file, name, layout_id, used_pieces, description, version, categories, nsfw},
+    {id, file, name, layout_id, pack_id, used_pieces, description, version, categories, nsfw},
     context,
     _info
 ) => {
     try {
-        console.log({id, file, name, layout_id, used_pieces, description, version, categories, nsfw})
         await context.authenticate()
 
         let mayModerate = false
@@ -111,6 +111,7 @@ export default async (
                                 version
                             },
                             layout_id: splitID ? Number(`0x${splitID[0]}`) : null,
+                            pack_id: pack_id ? Number(`0x${pack_id}`) : null,
                             piece_uuids: used_pieces?.length > 0
                                 ? used_pieces.map((p) => p.value.uuid)
                                 : piece_uuids,

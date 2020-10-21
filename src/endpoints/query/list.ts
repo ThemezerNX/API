@@ -5,7 +5,6 @@ import {filterData, joinMonsterOptions} from "../resolvers";
 
 export default async (_parent, args, context, info) => {
     try {
-        console.log(args)
         if (args.order && !(args.order.toLowerCase() === 'asc' || args.order.toLowerCase() === 'desc')) {
             throw errorName.INVALID_ORDER
         }
