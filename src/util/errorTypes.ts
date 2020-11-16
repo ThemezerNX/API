@@ -3,6 +3,7 @@ export const errorName = {
     INVALID_FIELD: 'INVALID_FIELD',
 
     UNAUTHORIZED: 'UNAUTHORIZED',
+    SUBMITTING_BLOCKED: 'SUBMITTING_BLOCKED',
     ALREADY_AUTHORIZED: 'ALREADY_AUTHORIZED',
     AUTHORIZATION_ERROR: 'AUTHORIZATION_ERROR',
     NO_CONTENT: 'NO_CONTENT',
@@ -63,6 +64,10 @@ export const errorType = {
     // Status
     UNAUTHORIZED: {
         message: 'Authentication is required',
+        statusCode: 401
+    },
+    SUBMITTING_BLOCKED: {
+        message: "You have been blocked from submitting",
         statusCode: 401
     },
     ALREADY_AUTHORIZED: {

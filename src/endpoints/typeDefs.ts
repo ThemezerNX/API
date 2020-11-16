@@ -65,6 +65,7 @@ export default gql`
 		profile_color: String
 		like_count: Int
 		old_ids: [String!]
+		is_blocked: Boolean!
 	}
 
 	"Userdata as provided by the Discord API. Stored without the id key."
@@ -350,6 +351,7 @@ export default gql`
 			logo_image: Upload
 			clear_banner_image: Boolean
 			clear_logo_image: Boolean
+			is_blocked: Boolean
 		): Boolean
 
 		## Submitting

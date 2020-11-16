@@ -137,7 +137,7 @@
 
 "@themezernx/json-merger@https://github.com/ThemezerNX/JSON-Merger.git":
   version "1.0.2"
-  resolved "https://github.com/ThemezerNX/JSON-Merger.git#3f333387bae2dc3a327e17c4bb0ca8d3ddef8ccb"
+  resolved "https://github.com/ThemezerNX/JSON-Merger.git#d8c536faf6fbf405192eb0fe4dddc76f2a46f65c"
 
 "@themezernx/layout-id-parser@https://github.com/ThemezerNX/Layout-ID-Parser.git":
   version "1.0.1"

@@ -97,6 +97,13 @@ export function str(column) {
     }
 }
 
+export function bool(column) {
+    return {
+        name: column,
+        skip: (c) => !c.exists
+    }
+}
+
 // function int(column) {
 // 	return {
 // 		name: column,
@@ -134,7 +141,14 @@ export const packsCS = new pgp.helpers.ColumnSet(
 )
 
 export const updateCreatorCS = new pgp.helpers.ColumnSet(
-    [str('custom_username'), str('bio'), str('banner_image'), str('logo_image'), str('profile_color')],
+    [
+        str('custom_username'),
+        str('bio'),
+        str('banner_image'),
+        str('logo_image'),
+        str('profile_color'),
+        bool('is_blocked')
+    ],
     {
         table: 'creators'
     }

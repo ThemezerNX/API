@@ -115,7 +115,8 @@ export default {
 					WHERE ${table}.id = ANY(liked_creators)
                 )`
             },
-            old_ids: {sqlColumn: 'old_ids'}
+            old_ids: {sqlColumn: 'old_ids'},
+            is_blocked: {sqlColumn: 'is_blocked'}
         }
     },
     DiscordUser: {

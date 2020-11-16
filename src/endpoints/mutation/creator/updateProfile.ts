@@ -9,13 +9,12 @@ import {saveFiles, storagePath, updateCreatorCS} from "../../resolvers";
 
 export default async (
     _parent,
-    {id, custom_username, bio, profile_color, banner_image, logo_image, clear_banner_image, clear_logo_image},
+    {id, custom_username, bio, profile_color, banner_image, logo_image, clear_banner_image, clear_logo_image, is_blocked},
     context,
     _info
 ) => {
     try {
         await context.authenticate()
-
         if (context.req.user.id === id || context.req.user.roles?.includes('admin')) {
             return await new Promise(async (resolve, reject) => {
                 try {
@@ -23,6 +22,10 @@ export default async (
                         custom_username: custom_username,
                         bio: bio?.replace(/< *script *>.*?< *\/ *script *>/gim, ''), // Remove script tags for cross-site scripting
                         profile_color: profile_color
+                    }
+
+                    if (context.req.user.roles?.includes('admin') && context.req.user.id !== id) {
+                        object.is_blocked = is_blocked
                     }
 
                     const toSavePromises = []
