@@ -304,6 +304,7 @@ export const createJson = async (id, piece_uuids = [], common?) => {
                 id: id + (finalJsonObject.TargetName === 'common.szs' ? '-common' : ''),
                 piece_uuids: usedPieces.map((p) => p.uuid)
             }),
+            HideOnlineBtn: finalJsonObject.HideOnlineBtn,
             Files: finalJsonObject.Files,
             Anims: finalJsonObject.Anims
         }
