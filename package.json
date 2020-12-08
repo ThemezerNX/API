@@ -1,75 +1,79 @@
 {
-  "name": "themezer_api",
-  "version": "1.0.0",
-  "description": "The API for Themezer",
-  "private": false,
-  "license": "GPL-3.0",
-  "scripts": {
-    "lint": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-path .eslintignore .",
-    "lint-fix": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-path .eslintignore . --fix",
-    "deploy": "yarn --production && rimraf dist && tsc",
-    "start": "node ./dist/index.js",
-    "dev": "cross-env NODE_ENV=development nodemon"
-  },
-  "keywords": [],
-  "author": "Migushthe2nd <Migushthe2nd@users.noreply.github.com>",
-  "dependencies": {
-    "@themezernx/json-merger": "https://github.com/ThemezerNX/JSON-Merger.git",
-    "@themezernx/layout-id-parser": "https://github.com/ThemezerNX/Layout-ID-Parser.git",
-    "adm-zip": "^0.4.14",
-    "apollo-server-express": "^2.13.1",
-    "apollo-server-plugin-response-cache": "^0.5.3",
-    "axios": "^0.19.2",
-    "consola": "^2.12.1",
-    "cors": "^2.8.5",
-    "cross-env": "^7.0.2",
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1",
-    "extract-zip": "^2.0.0",
-    "fs-symlink": "^1.2.1",
-    "graphql": "^15.0.0",
-    "graphql-fields": "^2.0.3",
-    "graphql-tag": "^2.10.3",
-    "graphql-tools": "^5.0.0",
-    "graphql-type-json": "^0.3.1",
-    "imagemagick": "^0.1.3",
-    "is-jpeg-file": "https://github.com/Migushthe2nd/is-jpeg-file.git",
-    "is-yaz0-file": "https://github.com/Migushthe2nd/is-yaz0-file.git",
-    "is-zip-file": "^1.0.2",
-    "join-monster": "^2.1.2",
-    "join-monster-graphql-tools-adapter": "^0.1.0",
-    "minisearch": "^2.4.1",
-    "mvdir": "^1.0.17",
-    "node-filter-async": "^2.0.0",
-    "object-hash": "^2.0.3",
-    "pg-promise": "^10.5.5",
-    "python-shell": "^2.0.1",
-    "rimraf": "^3.0.2",
-    "sharp": "^0.25.4",
-    "tmp": "^0.2.1",
-    "uuidv4": "^6.1.0",
-    "webhook-discord": "^3.7.4"
-  },
-  "devDependencies": {
-    "eslint": "^6.1.0",
-    "eslint-config-prettier": "^6.10.0",
-    "eslint-plugin-nuxt": ">=0.4.2",
-    "eslint-plugin-prettier": "^3.1.2",
-    "nodemon": "^2.0.4",
-    "prettier": "^1.19.1"
-  },
-  "nodemonConfig": {
-    "ignore": [
-      "**/*.test.ts",
-      "**/*.spec.ts",
-      ".git",
-      "node_modules"
-    ],
-    "watch": [
-      "src"
-    ],
-    "exec": "tsc && npm start",
-    "ext": "ts"
-  },
-  "repository": "https://github.com/ThemezerNX/API.git"
+    "name": "themezer_api",
+    "version": "1.0.0",
+    "description": "The API for Themezer",
+    "private": false,
+    "license": "GPL-3.0",
+    "scripts": {
+        "lint": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-path .eslintignore .",
+        "lint-fix": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-path .eslintignore . --fix",
+        "deploy": "yarn --production && rimraf dist && tsc",
+        "start": "node ./dist/index.js",
+        "dev": "cross-env NODE_ENV=development nodemon"
+    },
+    "keywords": [],
+    "author": "Migushthe2nd <Migushthe2nd@users.noreply.github.com>",
+    "dependencies": {
+        "@themezernx/json-merger": "https://github.com/ThemezerNX/JSON-Merger.git",
+        "@themezernx/layout-id-parser": "https://github.com/ThemezerNX/Layout-ID-Parser",
+        "adm-zip": "^0.4.14",
+        "apollo-server-express": "^2.13.1",
+        "apollo-server-plugin-response-cache": "^0.5.3",
+        "axios": "^0.19.2",
+        "consola": "^2.12.1",
+        "cors": "^2.8.5",
+        "cross-env": "^7.0.2",
+        "dotenv": "^8.2.0",
+        "express": "^4.17.1",
+        "extract-zip": "^2.0.0",
+        "fs-symlink": "^1.2.1",
+        "graphql": "^15.0.0",
+        "graphql-fields": "^2.0.3",
+        "graphql-tag": "^2.10.3",
+        "graphql-tools": "^5.0.0",
+        "graphql-type-json": "^0.3.1",
+        "imagemagick": "^0.1.3",
+        "is-jpeg-file": "https://github.com/Migushthe2nd/is-jpeg-file.git",
+        "is-yaz0-file": "https://github.com/Migushthe2nd/is-yaz0-file.git",
+        "is-zip-file": "^1.0.2",
+        "join-monster": "^2.1.2",
+        "join-monster-graphql-tools-adapter": "^0.1.0",
+        "minisearch": "^2.4.1",
+        "mvdir": "^1.0.17",
+        "node-filter-async": "^2.0.0",
+        "object-hash": "^2.0.3",
+        "pg-promise": "^10.5.5",
+        "python-shell": "^2.0.1",
+        "rimraf": "^3.0.2",
+        "sharp": "^0.25.4",
+        "tmp": "^0.2.1",
+        "uuidv4": "^6.1.0",
+        "webhook-discord": "^3.7.4"
+    },
+    "resolutions": {
+        "**/**/fs-capacitor": "^6.2.0",
+        "**/graphql-upload": "^11.0.0"
+    },
+    "devDependencies": {
+        "eslint": "^6.1.0",
+        "eslint-config-prettier": "^6.10.0",
+        "eslint-plugin-nuxt": ">=0.4.2",
+        "eslint-plugin-prettier": "^3.1.2",
+        "nodemon": "^2.0.4",
+        "prettier": "^1.19.1"
+    },
+    "nodemonConfig": {
+        "ignore": [
+            "**/*.test.ts",
+            "**/*.spec.ts",
+            ".git",
+            "node_modules"
+        ],
+        "watch": [
+            "src"
+        ],
+        "exec": "tsc && npm start",
+        "ext": "ts"
+    },
+    "repository": "https://github.com/ThemezerNX/API.git"
 }

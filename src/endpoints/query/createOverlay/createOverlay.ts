@@ -1,9 +1,9 @@
 const {
-    promises: {readFile}
-} = require('fs')
-import tmp from 'tmp'
-import im from 'imagemagick'
-import rimraf from 'rimraf'
+    promises: {readFile},
+} = require('fs');
+import tmp from 'tmp';
+import im from 'imagemagick';
+import rimraf from 'rimraf';
 import {errorName} from "../../../util/errorTypes";
 import {saveFiles} from "../../resolvers";
 
@@ -12,15 +12,15 @@ export default async (_parent, {themeName, blackImg, whiteImg}, _context, _info)
         return await new Promise((resolve, reject) => {
             tmp.dir({unsafeCleanup: true}, async (err, path, cleanupCallback) => {
                 if (err) {
-                    reject(err)
-                    return
+                    reject(err);
+                    return;
                 }
 
                 const filePromises = saveFiles([
                     {file: blackImg, path},
-                    {file: whiteImg, path}
-                ])
-                const files = await Promise.all(filePromises)
+                    {file: whiteImg, path},
+                ]);
+                const files = await Promise.all(filePromises);
 
                 im.convert(
                     [
@@ -52,29 +52,29 @@ export default async (_parent, {themeName, blackImg, whiteImg}, _context, _info)
                         '-compose',
                         'Copy_Opacity',
                         '-composite',
-                        `${path}/overlay.png`
+                        `${path}/overlay.png`,
                     ],
                     async function (err, _stdout, stderr) {
                         if (err || stderr) {
-                            console.error(err || stderr)
-                            reject(errorName.FILE_READ_ERROR)
+                            console.error(err || stderr);
+                            reject(errorName.FILE_READ_ERROR);
                             rimraf(path, () => {
-                            })
-                            cleanupCallback()
-                            return
+                            });
+                            cleanupCallback();
+                            return;
                         } else {
                             resolve({
                                 filename: themeName ? `${themeName}_overlay.png` : `overlay.png`,
                                 data: await readFile(`${path}/overlay.png`, 'base64'),
-                                mimetype: 'image/png'
-                            })
+                                mimetype: 'image/png',
+                            });
                         }
-                    }
-                )
-            })
-        })
+                    },
+                );
+            });
+        });
     } catch (e) {
-        console.error(e)
-        throw new Error(e)
+        console.error(e);
+        throw new Error(e);
     }
 }

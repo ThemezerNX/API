@@ -1,104 +1,104 @@
 export const webNameToFileNameNoExtension = (s) => {
     switch (s) {
         case 'homemenu':
-            return 'ResidentMenu'
+            return 'ResidentMenu';
         case 'lockscreen':
-            return 'Entrance'
+            return 'Entrance';
         case 'userpage':
-            return 'MyPage'
+            return 'MyPage';
         case 'allapps':
-            return 'Flaunch'
+            return 'Flaunch';
         case 'settings':
-            return 'Set'
+            return 'Set';
         case 'news':
-            return 'Notification'
+            return 'Notification';
         case 'playerselect':
-            return 'Psl'
+            return 'Psl';
 
         default:
-            return null
+            return null;
     }
-}
+};
 
 export const fileNameToThemeTarget = (s) => {
     switch (s) {
         case 'ResidentMenu.szs':
         case 'ResidentMenu':
-            return 'home'
+            return 'home';
         case 'Entrance.szs':
         case 'Entrance':
-            return 'lock'
+            return 'lock';
         case 'MyPage.szs':
         case 'MyPage':
-            return 'user'
+            return 'user';
         case 'Flaunch.szs':
         case 'Flaunch':
-            return 'apps'
+            return 'apps';
         case 'Set.szs':
         case 'Set':
-            return 'set'
+            return 'set';
         case 'Notification.szs':
         case 'Notification':
-            return 'news'
+            return 'news';
         case 'Psl.szs':
         case 'Psl':
-            return 'psl'
+            return 'psl';
 
         default:
-            return null
+            return null;
     }
-}
+};
 
 export const fileNameToWebName = (s) => {
     switch (s) {
         case 'ResidentMenu.szs':
         case 'ResidentMenu':
-            return 'homemenu'
+            return 'homemenu';
         case 'Entrance.szs':
         case 'Entrance':
-            return 'lockscreen'
+            return 'lockscreen';
         case 'MyPage.szs':
         case 'MyPage':
-            return 'userpage'
+            return 'userpage';
         case 'Flaunch.szs':
         case 'Flaunch':
-            return 'allapps'
+            return 'allapps';
         case 'Set.szs':
         case 'Set':
-            return 'settings'
+            return 'settings';
         case 'Notification.szs':
         case 'Notification':
-            return 'news'
+            return 'news';
         case 'Psl.szs':
         case 'Psl':
-            return 'playerselect'
+            return 'playerselect';
 
         default:
-            return null
+            return null;
     }
-}
+};
 
 export const themeTargetToFileName = (s) => {
     switch (s) {
         case 'home':
-            return 'ResidentMenu'
+            return 'ResidentMenu';
         case 'lock':
-            return 'Entrance'
+            return 'Entrance';
         case 'user':
-            return 'MyPage'
+            return 'MyPage';
         case 'apps':
-            return 'Flaunch'
+            return 'Flaunch';
         case 'set':
-            return 'Set'
+            return 'Set';
         case 'news':
-            return 'Notification'
+            return 'Notification';
         case 'psl':
-            return 'Psl'
+            return 'Psl';
 
         default:
-            return null
+            return null;
     }
-}
+};
 
 export const validFileName = (s) => {
     switch (s) {
@@ -109,12 +109,12 @@ export const validFileName = (s) => {
         case 'Set':
         case 'Notification':
         case 'Psl':
-            return true
+            return true;
 
         default:
-            return false
+            return false;
     }
-}
+};
 
 export const validThemeTarget = (s) => {
     switch (s) {
@@ -125,9 +125,9 @@ export const validThemeTarget = (s) => {
         case 'set':
         case 'news':
         case 'psl':
-            return true
+            return true;
 
         default:
-            return false
+            return false;
     }
-}
+};

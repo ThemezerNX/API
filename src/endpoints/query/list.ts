@@ -1,12 +1,12 @@
 import joinMonster from "join-monster";
 import {db} from "../../db/db";
-import {errorName} from '../../util/errorTypes'
+import {errorName} from '../../util/errorTypes';
 import {filterData, joinMonsterOptions} from "../resolvers";
 
 export default async (_parent, args, context, info) => {
     try {
         if (args.order && !(args.order.toLowerCase() === 'asc' || args.order.toLowerCase() === 'desc')) {
-            throw errorName.INVALID_ORDER
+            throw errorName.INVALID_ORDER;
         }
 
         return await new Promise(async (resolve, reject) => {
@@ -14,21 +14,21 @@ export default async (_parent, args, context, info) => {
                 info,
                 context,
                 (sql) => {
-                    return db.any(sql)
+                    return db.any(sql);
                 },
-                joinMonsterOptions
-            )
+                joinMonsterOptions,
+            );
 
             try {
-                const filtered = filterData(dbData, info, args)
-                context.pagination = filtered.pagination
-                resolve(filtered.items)
+                const filtered = filterData(dbData, info, args);
+                context.pagination = filtered.pagination;
+                resolve(filtered.items);
             } catch (e) {
-                reject(e)
+                reject(e);
             }
-        })
+        });
     } catch (e) {
-        console.error(e)
-        throw new Error(e)
+        console.error(e);
+        throw new Error(e);
     }
 }

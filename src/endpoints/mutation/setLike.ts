@@ -3,9 +3,9 @@ import {db} from "../../db/db";
 
 export default async (_parent, {type, id, value}, context, _info) => {
     try {
-        const typeLowercase = type.toLowerCase()
+        const typeLowercase = type.toLowerCase();
         if (!['creators', 'layouts', 'themes', 'packs'].includes(typeLowercase))
-            return new Error(errorName.INVALID_FIELD)
+            return new Error(errorName.INVALID_FIELD);
 
         if (await context.authenticate()) {
             return await new Promise(async (resolve) => {
@@ -22,8 +22,8 @@ export default async (_parent, {type, id, value}, context, _info) => {
                             typeLowercase === 'creators' ? '$2' : "hex_to_int('$2^')"
                         } = ANY(liked_${typeLowercase}))
 								`,
-                        [context.req.user.id, id]
-                    )
+                        [context.req.user.id, id],
+                    );
                 } else {
                     // Remove like
                     await db.none(
@@ -34,17 +34,17 @@ export default async (_parent, {type, id, value}, context, _info) => {
 										AND liked_${typeLowercase} IS NOT NULL
 										AND ${typeLowercase === 'creators' ? '$2' : "hex_to_int('$2^')"} = ANY(liked_${typeLowercase})
 								`,
-                        [context.req.user.id, id]
-                    )
+                        [context.req.user.id, id],
+                    );
                 }
 
-                resolve(true)
-            })
+                resolve(true);
+            });
         } else {
-            return new Error(errorName.UNAUTHORIZED)
+            return new Error(errorName.UNAUTHORIZED);
         }
     } catch (e) {
-        console.error(e)
-        throw new Error(e)
+        console.error(e);
+        throw new Error(e);
     }
 }

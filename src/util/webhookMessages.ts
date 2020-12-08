@@ -1,11 +1,11 @@
-import webhook from 'webhook-discord'
+import webhook from 'webhook-discord';
 
 export const packMessage = () =>
     new webhook.MessageBuilder()
         .setName('Packs')
         .setText('New Pack submission!')
         .setColor('#b40a86')
-        .setTime()
+        .setTime();
 
 // .setTitle(name)
 // .setDescription(description)
@@ -19,7 +19,7 @@ export const themeMessage = () =>
         .setName('Themes')
         .setText('New Theme submission!')
         .setColor('#0ab379')
-        .setTime()
+        .setTime();
 
 // .setTitle(name)
 // .setDescription(description)
@@ -32,4 +32,4 @@ export const reportMessage = () =>
         .setName('Reports')
         .setText('New report')
         .setColor('#C62828')
-        .setTime()
+        .setTime();

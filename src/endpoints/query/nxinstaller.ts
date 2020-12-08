@@ -6,28 +6,29 @@ export default async (_parent, {id}, context, info) => {
     try {
         return await new Promise(async (resolve, reject) => {
             try {
-                const idLower = id.toLowerCase()
+                const idLower = id.toLowerCase();
                 // Use rexhex :verycool:
                 if (themeHexREGEX.exec(idLower)) {
                     // Theme Download
+
                     resolve({
-                        themes: [await getTheme(idLower.replace('t', ''), undefined)]
-                    })
+                        themes: [await getTheme(idLower.replace('t', ''), undefined)],
+                    });
                 } else if (packHexREGEX.exec(idLower)) {
                     // Pack Download
 
-                    const themes = await downloadPackSeperate(idLower.replace('p', ''))
+                    const themes = await downloadPackSeperate(idLower.replace('p', ''));
                     // hacky but idc cuz it saves an extra call and allows the function response to remain the same basically
                     resolve({
                         groupname: themes[0].pack_name,
-                        themes
-                    })
+                        themes,
+                    });
                 } else if (idLower === '__special_random') {
                     try {
                         const {data} = await graphql({
                             schema: info.schema,
                             variableValues: {
-                                limit: 3
+                                limit: 3,
                             },
                             contextValue: context,
                             rootValue: info.rootValue,
@@ -35,24 +36,24 @@ export default async (_parent, {id}, context, info) => {
 									query randomThemeIDs($limit: Int!) {
 										randomThemeIDs(limit: $limit)
 									}
-								`
-                        })
+								`,
+                        });
                         if (data?.randomThemeIDs) {
-                            const promises = data.randomThemeIDs.map((id) => getTheme(id, undefined))
+                            const promises = data.randomThemeIDs.map((id) => getTheme(id, undefined));
                             resolve({
-                                themes: await Promise.all(promises)
-                            })
-                        } else reject(errorName.UNKNOWN)
+                                themes: await Promise.all(promises),
+                            });
+                        } else reject(errorName.UNKNOWN);
                     } catch (e) {
-                        console.error(e)
-                        reject(e)
+                        console.error(e);
+                        reject(e);
                     }
                 } else if (idLower === '__special_recent') {
                     try {
                         const {data} = await graphql({
                             schema: info.schema,
                             variableValues: {
-                                limit: 12
+                                limit: 12,
                             },
                             contextValue: context,
                             rootValue: info.rootValue,
@@ -67,17 +68,17 @@ export default async (_parent, {id}, context, info) => {
 											categories
 										}
 									}
-								`
-                        })
+								`,
+                        });
                         if (data?.themeList) {
-                            const promises = data.themeList.map((t) => getTheme(t.id, undefined))
+                            const promises = data.themeList.map((t) => getTheme(t.id, undefined));
                             resolve({
-                                themes: await Promise.all(promises)
-                            })
-                        } else reject(errorName.UNKNOWN)
+                                themes: await Promise.all(promises),
+                            });
+                        } else reject(errorName.UNKNOWN);
                     } catch (e) {
-                        console.error(e)
-                        reject(e)
+                        console.error(e);
+                        reject(e);
                     }
                 } else {
                     try {
@@ -85,7 +86,7 @@ export default async (_parent, {id}, context, info) => {
                             schema: info.schema,
                             variableValues: {
                                 limit: 12,
-                                query: idLower
+                                query: idLower,
                             },
                             contextValue: context,
                             rootValue: info.rootValue,
@@ -106,27 +107,27 @@ export default async (_parent, {id}, context, info) => {
 											categories
 										}
 									}
-								`
-                        })
+								`,
+                        });
 
                         if (data?.themeList) {
-                            const promises = data.themeList.map((t) => getTheme(t.id, undefined))
+                            const promises = data.themeList.map((t) => getTheme(t.id, undefined));
                             resolve({
-                                themes: await Promise.all(promises)
-                            })
-                        } else reject(errorName.UNKNOWN)
+                                themes: await Promise.all(promises),
+                            });
+                        } else reject(errorName.UNKNOWN);
                     } catch (e) {
-                        console.error(e)
-                        reject(e)
+                        console.error(e);
+                        reject(e);
                     }
                 }
             } catch (e) {
-                console.error(e)
-                reject(e)
+                console.error(e);
+                reject(e);
             }
-        })
+        });
     } catch (e) {
-        console.error(e)
-        throw new Error(e)
+        console.error(e);
+        throw new Error(e);
     }
 }

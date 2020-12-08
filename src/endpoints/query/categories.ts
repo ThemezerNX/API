@@ -7,11 +7,11 @@ export default async (_parent, _args, _context, _info) => {
                            SELECT DISTINCT UNNEST(categories)
                            FROM themes
                        ) as categories
-        `)
+        `);
 
-        return categoriesDB.categories
+        return categoriesDB.categories;
     } catch (e) {
-        console.error(e)
-        throw new Error(e)
+        console.error(e);
+        throw new Error(e);
     }
 }

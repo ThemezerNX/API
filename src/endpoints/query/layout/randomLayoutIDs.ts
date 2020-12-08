@@ -10,20 +10,20 @@ export default async (_parent, {target, limit = 1}) => {
                     FROM layouts
                     WHERE CASE WHEN $1 IS NOT NULL THEN target = $1 ELSE true END
                     ORDER BY random()
-                    LIMIT $2`
+                    LIMIT $2`;
 
-                const dbData = await db.many(query, [target, limit])
+                const dbData = await db.many(query, [target, limit]);
                 if (dbData.length > 0) {
-                    resolve(dbData.map((r) => r.id))
+                    resolve(dbData.map((r) => r.id));
                 } else {
-                    reject(errorName.NO_CONTENT)
+                    reject(errorName.NO_CONTENT);
                 }
             } catch (e) {
-                console.error(e)
-                reject(errorName.NO_CONTENT)
+                console.error(e);
+                reject(errorName.NO_CONTENT);
             }
-        })
+        });
     } catch (e) {
-        throw new Error(e)
+        throw new Error(e);
     }
 }

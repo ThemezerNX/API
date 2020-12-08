@@ -1,24 +1,24 @@
 import {db} from "../../../db/db";
-import {createJson} from "../../resolvers";
+import Layout from "../../../filetypes/Layout";
 
 export default async (_parent, {id, piece_uuids}, _context, _info) => {
     try {
-        return await new Promise(async (resolve, _reject) => {
-            const json = await createJson(id, piece_uuids)
-            resolve(json)
+        const layout = new Layout();
+        await layout.loadId(id, piece_uuids);
 
-            // Increase download count by 1
-            db.none(
-                    `
-                        UPDATE layouts
-                        SET dl_count = dl_count + 1
-                        WHERE id = hex_to_int('$1^')
-                `,
-                [id]
-            )
-        })
+        // Increase download count by 1
+        await db.none(
+            `
+                UPDATE layouts
+                SET dl_count = dl_count + 1
+                WHERE id = hex_to_int('$1^')
+            `,
+            [id],
+        );
+
+        return layout.toJSON();
     } catch (e) {
-        console.error(e)
-        throw new Error(e)
+        console.error(e);
+        throw new Error(e);
     }
 }

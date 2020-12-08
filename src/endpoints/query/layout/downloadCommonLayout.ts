@@ -1,13 +1,12 @@
-import {createJson} from "../../resolvers";
+import Layout from "../../../filetypes/Layout";
 
 export default async (_parent, {id}, _context, _info) => {
     try {
-        return await new Promise(async (resolve, _reject) => {
-            const json = await createJson(id, null, true)
-            resolve(json)
-        })
+        const layout = new Layout(true);
+        await layout.loadId(id);
+        return layout.toJSON();
     } catch (e) {
-        console.error(e)
-        throw new Error(e)
+        console.error(e);
+        throw new Error(e);
     }
 }

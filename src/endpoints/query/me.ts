@@ -11,21 +11,21 @@ export default async (_parent, _args, context, info) => {
                     info,
                     context,
                     (sql) => {
-                        return db.any(sql)
+                        return db.any(sql);
                     },
-                    joinMonsterOptions
-                )
+                    joinMonsterOptions,
+                );
 
                 if (dbData) {
-                    resolve(dbData)
+                    resolve(dbData);
                 } else {
-                    reject(errorName.UNKNOWN)
+                    reject(errorName.UNKNOWN);
                 }
-            })
+            });
         } else {
-            return new Error(errorName.UNAUTHORIZED)
+            return new Error(errorName.UNAUTHORIZED);
         }
     } catch (e) {
-        throw new Error(e)
+        throw new Error(e);
     }
 }

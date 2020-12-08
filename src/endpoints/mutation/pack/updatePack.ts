@@ -4,33 +4,33 @@ import {errorName} from "../../../util/errorTypes";
 const updatePackCS = new pgp.helpers.ColumnSet(
     [
         {name: 'details', cast: 'json'},
-        {name: 'last_updated', cast: 'timestamp without time zone'}
+        {name: 'last_updated', cast: 'timestamp without time zone'},
     ],
     {
-        table: 'packs'
-    }
-)
+        table: 'packs',
+    },
+);
 
 export default async (
     _parent,
     {id, name, description, version},
     context,
-    _info
+    _info,
 ) => {
     try {
-        await context.authenticate()
+        await context.authenticate();
 
-        let mayModerate = false
+        let mayModerate = false;
         if (context.req.user.roles?.includes('admin')) {
-            mayModerate = true
+            mayModerate = true;
         } else {
             const pack = await db.oneOrNone(`
                 SELECT id
                 FROM packs
                 WHERE creator_id = $1
                   AND id = hex_to_int(\'$2^\')
-            `, [context.req.user.id, id])
-            if (pack) mayModerate = true
+            `, [context.req.user.id, id]);
+            if (pack) mayModerate = true;
         }
 
         if (mayModerate) {
@@ -41,31 +41,31 @@ export default async (
                             name,
                             description,
                             color: null,
-                            version
+                            version,
                         },
-                        last_updated: new Date()
-                    }
+                        last_updated: new Date(),
+                    };
 
-                    const query = () => pgp.helpers.update(updatedPack, updatePackCS)
+                    const query = () => pgp.helpers.update(updatedPack, updatePackCS);
 
                     try {
-                        await db.none(query() + ` WHERE id = hex_to_int('$1^')`, [id])
-                        resolve(true)
+                        await db.none(query() + ` WHERE id = hex_to_int('$1^')`, [id]);
+                        resolve(true);
                     } catch (e) {
-                        console.error(e)
-                        reject(errorName.DB_SAVE_ERROR)
-                        return
+                        console.error(e);
+                        reject(errorName.DB_SAVE_ERROR);
+                        return;
                     }
                 } catch (e) {
-                    console.error(e)
-                    reject(errorName.UNKNOWN)
+                    console.error(e);
+                    reject(errorName.UNKNOWN);
                 }
-            })
+            });
         } else {
-            return new Error(errorName.UNAUTHORIZED)
+            return new Error(errorName.UNAUTHORIZED);
         }
     } catch (e) {
-        console.error(e)
-        throw new Error(e)
+        console.error(e);
+        throw new Error(e);
     }
 }

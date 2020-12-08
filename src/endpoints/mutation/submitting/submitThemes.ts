@@ -1,68 +1,69 @@
-import fs from 'fs'
-import {promisify} from 'util'
-import rimraf from 'rimraf'
-import JPEG_FILE from 'is-jpeg-file'
-import moveFile from 'mvdir'
-import sharp from 'sharp'
+import fs from 'fs';
+import {promisify} from 'util';
+import rimraf from 'rimraf';
+import JPEG_FILE from 'is-jpeg-file';
+import moveFile from 'mvdir';
+import sharp from 'sharp';
 import {decrypt} from "../../../util/crypt";
 import {errorName} from "../../../util/errorTypes";
 import {db, pgp} from "../../../db/db";
 import {fileNameToWebName, validFileName} from "../../../util/targetParser";
 import {packMessage, themeMessage} from "../../../util/webhookMessages";
-import {allowedFilesInNXTheme, avatar, packsCS, saveFiles, storagePath, themesCS, urlNameREGEX} from "../../resolvers";
+import {avatar, packsCS, saveFiles, storagePath, themesCS, urlNameREGEX} from "../../resolvers";
 import webhook from "webhook-discord";
+import {allowedFilesInNXTheme} from "../../../filetypes/Theme";
 
 const {
     lstat,
-    promises: {readdir}
-} = fs
-const isJpegPromisified = promisify(JPEG_FILE.isJpeg)
-const Hook = new webhook.Webhook(process.env.WEBHOOK_URL)
+    promises: {readdir},
+} = fs;
+const isJpegPromisified = promisify(JPEG_FILE.isJpeg);
+const Hook = new webhook.Webhook(process.env.WEBHOOK_URL);
 
 export default async (_parent, {files, themes, details, type}, context, _info) => {
-    let themePaths = []
+    let themePaths = [];
     try {
         if (await context.authenticate()) {
             if (!context.req.user.is_blocked) {
                 return await new Promise(async (resolve, reject) => {
-                    let insertedPack = null
+                    let insertedPack = null;
 
                     // Create array of screenshots to save
                     const toSave = files.map((f, i) => {
                         return new Promise((resolve, reject) => {
-                            const path = decrypt(themes[i].tmp)
+                            const path = decrypt(themes[i].tmp);
                             lstat(path, (err) => {
                                 if (err) {
-                                    reject(errorName.INVALID_TMP)
-                                    return
+                                    reject(errorName.INVALID_TMP);
+                                    return;
                                 }
 
                                 resolve({
                                     file: f,
                                     savename: 'original',
-                                    path: path
-                                })
-                            })
-                        })
-                    })
-                    const resolvedDecryptions = await Promise.all(toSave)
+                                    path: path,
+                                });
+                            });
+                        });
+                    });
+                    const resolvedDecryptions = await Promise.all(toSave);
 
                     // Save the screenshots
-                    const filePromises = saveFiles(resolvedDecryptions)
-                    const savedFiles = await Promise.all(filePromises)
+                    const filePromises = saveFiles(resolvedDecryptions);
+                    const savedFiles = await Promise.all(filePromises);
 
                     // If every theme has a screenshot
                     if (savedFiles.length === themes.length) {
                         const promises = savedFiles.map((file, i) => {
                             return new Promise(async (resolve) => {
-                                const path = decrypt(themes[i].tmp)
+                                const path = decrypt(themes[i].tmp);
                                 // If a valid jpeg
                                 if (await isJpegPromisified(`${path}/${file}`)) {
-                                    resolve(path)
+                                    resolve(path);
                                 }
-                            })
-                        })
-                        themePaths = await Promise.all(promises)
+                            });
+                        });
+                        themePaths = await Promise.all(promises);
 
                         // If all jpegs are valid
                         if (themePaths.length === savedFiles.length) {
@@ -70,9 +71,9 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                             const thumbPromises = themePaths.map((path) =>
                                 sharp(`${path}/original.jpg`)
                                     .resize(320, 180)
-                                    .toFile(`${path}/thumb.jpg`)
-                            )
-                            await Promise.all(thumbPromises)
+                                    .toFile(`${path}/thumb.jpg`),
+                            );
+                            await Promise.all(thumbPromises);
 
                             // Insert pack into DB if user wants to and can submit as pack
                             if (type === 'pack' && savedFiles.length > 1) {
@@ -83,73 +84,73 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                         name: details.name.trim(),
                                         description: details.description.trim(),
                                         color: details.color,
-                                        version: details.version ? details.version.trim() : '1.0'
-                                    }
-                                }
+                                        version: details.version ? details.version.trim() : '1.0',
+                                    },
+                                };
 
-                                const query = () => pgp.helpers.insert([packData], packsCS)
+                                const query = () => pgp.helpers.insert([packData], packsCS);
                                 try {
                                     insertedPack = await db.one(
                                         query() +
-                                        ` RETURNING id, to_hex(id) as hex_id, details, last_updated, creator_id`
-                                    )
+                                        ` RETURNING id, to_hex(id) as hex_id, details, last_updated, creator_id`,
+                                    );
                                 } catch (e) {
-                                    console.error(e)
-                                    reject(errorName.DB_SAVE_ERROR)
-                                    return
+                                    console.error(e);
+                                    reject(errorName.DB_SAVE_ERROR);
+                                    return;
                                 }
                             }
 
                             // Save NXTheme contents
                             const themeDataPromises = themePaths.map((path, i) => {
                                 return new Promise(async (resolve, reject) => {
-                                    let bgType = null
+                                    let bgType = null;
 
                                     try {
                                         // Read dir contents
-                                        const filesInFolder = await readdir(path)
+                                        const filesInFolder = await readdir(path);
 
                                         if (filesInFolder.includes('image.jpg')) {
-                                            bgType = 'jpg'
+                                            bgType = 'jpg';
                                         } else if (filesInFolder.includes('image.dds')) {
-                                            bgType = 'dds'
+                                            bgType = 'dds';
                                         }
                                     } catch (e) {
-                                        console.error(e)
-                                        return
+                                        console.error(e);
+                                        return;
                                     }
 
                                     // TODO: Reject if any of the values is too long, match client limits
 
                                     // Reject if more than 10 categories
                                     if (!themes[i].categories || themes[i].categories.length < 1 || themes[i].categories.length > 10) {
-                                        reject(errorName.INVALID_CATEGORY_AMOUNT)
-                                        return
+                                        reject(errorName.INVALID_CATEGORY_AMOUNT);
+                                        return;
                                     }
 
                                     // Process each category
                                     const categories = themes[i].categories.map((c) =>
-                                        c.trim().replace(/(^\w)|(\s\w)/g, (match) => match.toUpperCase())
-                                    )
+                                        c.trim().replace(/(^\w)|(\s\w)/g, (match) => match.toUpperCase()),
+                                    );
 
                                     // Add NSFW as category
                                     if (themes[i].nsfw) {
-                                        categories.push('NSFW')
+                                        categories.push('NSFW');
                                     }
 
                                     if (!validFileName(themes[i].target)) {
-                                        reject(errorName.INVALID_TARGET_NAME)
-                                        return
+                                        reject(errorName.INVALID_TARGET_NAME);
+                                        return;
                                     }
 
                                     // Get uuids from extra dropdown entries
-                                    let splitID = null
-                                    let piece_uuids = null
+                                    let splitID = null;
+                                    let piece_uuids = null;
                                     if (themes[i].layout_id) {
-                                        splitID = themes[i].layout_id.split('|')
+                                        splitID = themes[i].layout_id.split('|');
                                         if (splitID.length > 1) {
                                             // Has piece uuids
-                                            piece_uuids = splitID[1].split(',')
+                                            piece_uuids = splitID[1].split(',');
                                         }
                                     }
 
@@ -174,27 +175,27 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                                 ? details.version.trim()
                                                 : themes[i].version
                                                     ? themes[i].version.trim()
-                                                    : '1.0'
+                                                    : '1.0',
                                         },
-                                        bg_type: bgType
-                                    })
-                                })
-                            })
-                            const themeDatas = await Promise.all(themeDataPromises)
+                                        bg_type: bgType,
+                                    });
+                                });
+                            });
+                            const themeDatas = await Promise.all(themeDataPromises);
 
                             // Insert themes into DB
-                            const query = () => pgp.helpers.insert(themeDatas, themesCS)
+                            const query = () => pgp.helpers.insert(themeDatas, themesCS);
                             try {
                                 const insertedThemes = await db.many(
                                     query() +
-                                    ` RETURNING id, to_hex(id) as hex_id, details, last_updated, creator_id, target, categories`
-                                )
+                                    ` RETURNING id, to_hex(id) as hex_id, details, last_updated, creator_id, target, categories`,
+                                );
 
                                 const themeMovePromises = themePaths.map((path, i) => {
                                     return new Promise(async (resolve, reject) => {
                                         try {
                                             // Read dir contents
-                                            const filesInFolder = await readdir(path)
+                                            const filesInFolder = await readdir(path);
                                             // Filter allowed files, 'screenshot.jpg', not 'info.json', and not 'layout.json' if the layout is in the DB
                                             const filteredFilesInFolder = filesInFolder.filter(
                                                 (f) =>
@@ -202,43 +203,43 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                                         f !== 'info.json' &&
                                                         !(f === 'layout.json' && themes[i].layout_id)) ||
                                                     f === 'original.jpg' ||
-                                                    f === 'thumb.jpg'
-                                            )
+                                                    f === 'thumb.jpg',
+                                            );
 
                                             // Move NXTheme contents to cdn
                                             const moveAllPromises = filteredFilesInFolder.map((f) => {
                                                 if (f === 'original.jpg' || f === 'thumb.jpg') {
                                                     return moveFile(
                                                         `${path}/${f}`,
-                                                        `${storagePath}/themes/${insertedThemes[i].hex_id}/images/${f}`
-                                                    )
+                                                        `${storagePath}/themes/${insertedThemes[i].hex_id}/images/${f}`,
+                                                    );
                                                 } else {
                                                     return moveFile(
                                                         `${path}/${f}`,
-                                                        `${storagePath}/themes/${insertedThemes[i].hex_id}/${f}`
-                                                    )
+                                                        `${storagePath}/themes/${insertedThemes[i].hex_id}/${f}`,
+                                                    );
                                                 }
-                                            })
+                                            });
 
-                                            await Promise.all(moveAllPromises)
+                                            await Promise.all(moveAllPromises);
 
-                                            resolve(true)
+                                            resolve(true);
                                         } catch (e) {
-                                            console.error(e)
-                                            reject(errorName.FILE_SAVE_ERROR)
-                                            return
+                                            console.error(e);
+                                            reject(errorName.FILE_SAVE_ERROR);
+                                            return;
                                         }
-                                    })
-                                })
+                                    });
+                                });
 
-                                await Promise.all(themeMovePromises)
+                                await Promise.all(themeMovePromises);
 
-                                resolve(true)
+                                resolve(true);
 
                                 setTimeout(() => {
                                     // Wait 5 seconds because the image has issues loading if it's been created very recently
                                     if (type === 'pack') {
-                                        const newPackMessage = packMessage()
+                                        const newPackMessage = packMessage();
 
                                         newPackMessage
                                             .setTitle(insertedPack.details.name)
@@ -246,23 +247,23 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                                 context.req.user.display_name,
                                                 avatar(context.req.user.id, context.req.user.discord_user) +
                                                 '?size=64',
-                                                `${process.env.WEBSITE_ENDPOINT}/creators/${context.req.user.id}`
+                                                `${process.env.WEBSITE_ENDPOINT}/creators/${context.req.user.id}`,
                                             )
                                             .addField(
                                                 'Install ID:',
-                                                `P${insertedPack.hex_id.toUpperCase()}`
+                                                `P${insertedPack.hex_id.toUpperCase()}`,
                                             )
                                             .addField(
                                                 'Themes in this pack:',
-                                                themeDatas.map((t: any) => t.details.name).join('\n')
+                                                themeDatas.map((t: any) => t.details.name).join('\n'),
                                             )
                                             .setURL(
                                                 `${
                                                     process.env.WEBSITE_ENDPOINT
                                                 }/packs/${insertedPack.details.name.replace(urlNameREGEX, '-')}-${
                                                     insertedPack.hex_id
-                                                }`
-                                            )
+                                                }`,
+                                            );
 
                                         if (!themeDatas.some((t: any) => t.categories?.includes('NSFW'))) {
                                             newPackMessage
@@ -270,83 +271,83 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                                 .setThumbnail(
                                                     `${process.env.API_ENDPOINT}/cdn/themes/${
                                                         (insertedThemes[0] as any).hex_id
-                                                    }/images/original.jpg`
-                                                )
+                                                    }/images/original.jpg`,
+                                                );
                                         } else {
-                                            newPackMessage.setTitle(`${insertedPack.details.name} (NSFW!)`)
+                                            newPackMessage.setTitle(`${insertedPack.details.name} (NSFW!)`);
                                         }
 
                                         if (insertedPack.details.description) {
-                                            newPackMessage.setDescription(insertedPack.details.description)
+                                            newPackMessage.setDescription(insertedPack.details.description);
                                         }
 
-                                        Hook.send(newPackMessage)
+                                        Hook.send(newPackMessage);
                                     } else {
                                         insertedThemes.forEach((t: any) => {
-                                            const newThemeMessage = themeMessage()
+                                            const newThemeMessage = themeMessage();
                                             newThemeMessage
                                                 .setAuthor(
                                                     context.req.user.display_name,
                                                     avatar(context.req.user.id, context.req.user.discord_user) +
                                                     '?size=64',
-                                                    `${process.env.WEBSITE_ENDPOINT}/creators/${context.req.user.id}`
+                                                    `${process.env.WEBSITE_ENDPOINT}/creators/${context.req.user.id}`,
                                                 )
                                                 .setURL(
                                                     `${process.env.WEBSITE_ENDPOINT}/themes/${fileNameToWebName(
-                                                        t.target
-                                                    )}/${t.details.name.replace(urlNameREGEX, '-')}-${t.hex_id}`
+                                                        t.target,
+                                                    )}/${t.details.name.replace(urlNameREGEX, '-')}-${t.hex_id}`,
                                                 )
                                                 .addField(
                                                     'Install ID:',
-                                                    `T${t.hex_id.toUpperCase()}`
-                                                )
+                                                    `T${t.hex_id.toUpperCase()}`,
+                                                );
 
                                             if (!t.categories?.includes('NSFW')) {
                                                 newThemeMessage
                                                     .setTitle(t.details.name)
                                                     .setThumbnail(
-                                                        `${process.env.API_ENDPOINT}/cdn/themes/${t.hex_id}/images/original.jpg`
-                                                    )
+                                                        `${process.env.API_ENDPOINT}/cdn/themes/${t.hex_id}/images/original.jpg`,
+                                                    );
                                             } else {
-                                                newThemeMessage.setTitle(`${t.details.name} (NSFW!)`)
+                                                newThemeMessage.setTitle(`${t.details.name} (NSFW!)`);
                                             }
 
                                             if (t.details.description) {
-                                                newThemeMessage.setDescription(t.details.description)
+                                                newThemeMessage.setDescription(t.details.description);
                                             }
 
-                                            Hook.send(newThemeMessage)
-                                        })
+                                            Hook.send(newThemeMessage);
+                                        });
                                     }
 
                                     for (const i in themePaths) {
                                         rimraf(themePaths[i], () => {
-                                        })
+                                        });
                                     }
-                                }, 5000)
+                                }, 5000);
                             } catch (e) {
-                                console.error(e)
-                                reject(errorName.DB_SAVE_ERROR)
+                                console.error(e);
+                                reject(errorName.DB_SAVE_ERROR);
                             }
                         } else {
-                            reject(errorName.INVALID_FILE_TYPE)
+                            reject(errorName.INVALID_FILE_TYPE);
                         }
                     } else {
-                        reject(errorName.FILE_SAVE_ERROR)
+                        reject(errorName.FILE_SAVE_ERROR);
                     }
-                })
+                });
             } else {
-                return new Error(errorName.SUBMITTING_BLOCKED)
+                return new Error(errorName.SUBMITTING_BLOCKED);
             }
         } else {
-            return new Error(errorName.UNAUTHORIZED)
+            return new Error(errorName.UNAUTHORIZED);
         }
     } catch (e) {
-        console.error(e)
+        console.error(e);
         for (const i in themePaths) {
             rimraf(themePaths[i], () => {
-            })
+            });
         }
-        throw new Error(e)
+        throw new Error(e);
     }
 }
