@@ -27,7 +27,7 @@ export default class CacheableTheme extends Theme {
     }
 
     loadId = (hexId, pieceUUIDs?) => {
-        return new Promise<any>(async (resolve, reject) => {
+        return new Promise<any>(async (resolve, reject) => 
             try {
                 // Get the theme details
                 const {

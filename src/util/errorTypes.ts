@@ -1,5 +1,6 @@
 export const errorName = {
     UNKNOWN: 'UNKNOWN',
+    SUBMISSIONS_DISABLED: 'SUBMISSIONS_DISABLED',
     INVALID_FIELD: 'INVALID_FIELD',
 
     UNAUTHORIZED: 'UNAUTHORIZED',
@@ -53,6 +54,10 @@ export const errorName = {
 export const errorType = {
     UNKNOWN: {
         message: 'Unknown error',
+        statusCode: 500,
+    },
+    SUBMISSIONS_DISABLED: {
+        message: 'Due to issues submissions are temporarily disabled',
         statusCode: 500,
     },
     INVALID_FIELD(field, type) {

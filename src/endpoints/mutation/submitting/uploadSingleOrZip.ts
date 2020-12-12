@@ -20,6 +20,7 @@ const isZipPromisified = promisify(ZIP_FILE.isZip);
 
 export default async (_parent, {file}, context, _info) => {
     try {
+        throw errorName.SUBMISSIONS_DISABLED;
         if (await context.authenticate()) {
             if (!context.req.user.is_blocked) {
                 return await new Promise((resolve, reject) => {
