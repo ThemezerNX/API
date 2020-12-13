@@ -27,7 +27,7 @@ export default class CacheableTheme extends Theme {
     }
 
     loadId = (hexId, pieceUUIDs?) => {
-        return new Promise<any>(async (resolve, reject) => 
+        return new Promise<any>(async (resolve, reject) => {
             try {
                 // Get the theme details
                 const {
@@ -76,8 +76,10 @@ export default class CacheableTheme extends Theme {
                     this.layout = new Layout();
                     await this.layout.loadId(layout_id, this.pieceUUIDs);
 
-                    this.commonLayout = new Layout(true);
-                    await this.commonLayout.loadId(layout_id);
+                    if (this.target == 'ResidentMenu') {
+                        this.commonLayout = new Layout(true);
+                        await this.commonLayout.loadId(layout_id);
+                    }
                 }
                 try {
                     await this.updateCache();

@@ -20,7 +20,7 @@ const isZipPromisified = promisify(ZIP_FILE.isZip);
 
 export default async (_parent, {file}, context, _info) => {
     try {
-        throw errorName.SUBMISSIONS_DISABLED;
+        // throw errorName.SUBMISSIONS_DISABLED;
         if (await context.authenticate()) {
             if (!context.req.user.is_blocked) {
                 return await new Promise((resolve, reject) => {
@@ -177,7 +177,6 @@ export default async (_parent, {file}, context, _info) => {
                                                 if (dbLayout) {
                                                     used_pieces = dbLayout.used_pieces;
                                                     delete dbLayout.used_pieces;
-
                                                     if (layout && target !== dbLayout.target) {
                                                         reject(errorName.TARGETS_DONT_MATCH);
                                                         return;
@@ -186,7 +185,7 @@ export default async (_parent, {file}, context, _info) => {
 
                                                 resolve({
                                                     info: info,
-                                                    tmp: encrypt(path),
+                                                    tmp: encrypt(thm.getContentsPath),
                                                     layout: dbLayout,
                                                     used_pieces: used_pieces,
                                                     target: target,
