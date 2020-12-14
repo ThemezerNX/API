@@ -9,6 +9,7 @@ import {storagePath} from "../endpoints/resolvers";
 const link = require('fs-symlink');
 const moveFile = require('mvdir');
 const tmp = require('tmp');
+const defaultThemes = ['1a', '19', '18', '17', '16', '15', '14'];
 
 const {
     promises: {access, readdir},
@@ -33,6 +34,7 @@ export default class CacheableTheme extends Theme {
                 const {
                     theme_id,
                     layout_id,
+                    has_common,
                     name,
                     target,
                     creator_name,
@@ -41,19 +43,20 @@ export default class CacheableTheme extends Theme {
                     layout_last_updated,
                 } = await db.one(
                     `
-                        SELECT to_hex(theme.id)         as theme_id,
-                               to_hex(theme.layout_id)  as layout_id,
-                               theme.details ->> 'name' as name,
+                        SELECT to_hex(theme.id)                as theme_id,
+                               to_hex(theme.layout_id)         as layout_id,
+                               layout.commonlayout IS NOT NULL as has_common,
+                               theme.details ->> 'name'        as name,
                                theme.target,
-                               piece_uuids              as theme_piece_uuids,
+                               piece_uuids                     as theme_piece_uuids,
                                theme.last_updated,
-                               layout.last_updated      as layout_last_updated,
+                               layout.last_updated             as layout_last_updated,
                                (
                                    SELECT coalesce(custom_username, discord_user ->> 'username')
                                    FROM creators
                                    WHERE id = theme.creator_id
                                    LIMIT 1
-                               )                        as creator_name
+                               )                               as creator_name
                         FROM themes theme
                                  LEFT JOIN layouts layout
                                            ON theme.layout_id = layout.id
@@ -72,11 +75,11 @@ export default class CacheableTheme extends Theme {
                 this.author = creator_name;
                 this.lastUpdated = last_updated;
                 this.layoutLastUpdated = layout_last_updated;
-                if (!!layout_id) {
+                if (!!layout_id && !defaultThemes.includes(layout_id.toLowerCase())) {
                     this.layout = new Layout();
                     await this.layout.loadId(layout_id, this.pieceUUIDs);
 
-                    if (this.target == 'ResidentMenu') {
+                    if (has_common && this.target == 'ResidentMenu') {
                         this.commonLayout = new Layout(true);
                         await this.commonLayout.loadId(layout_id);
                     }
