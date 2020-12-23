@@ -73,7 +73,7 @@ export const errorType = {
         statusCode: 401,
     },
     SUBMITTING_BLOCKED: {
-        message: "You have been blocked from submitting",
+        message: "You have been blocked from submitting. Join the Discord to appeal.",
         statusCode: 401,
     },
     ALREADY_AUTHORIZED: {
