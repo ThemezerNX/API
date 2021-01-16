@@ -140,7 +140,7 @@ export default class Theme {
                     return;
                 }
 
-                const theme = await this.saveTo(path);
+                const theme = await this.saveTo(this.contentsPath || path);
 
                 resolve({
                     data: await readFile(theme.path, 'base64'),
