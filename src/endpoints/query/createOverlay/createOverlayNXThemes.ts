@@ -49,9 +49,9 @@ export default async (_parent, {layout, piece, common}, _context, _info) => {
                     // Symlink the files to the two dirs
                     const linkPromises = [
                         link(`${path}/layout.json`, `${path}/black/layout.json`),
-                        link(`${__dirname}/../../images/BLACK.dds`, `${path}/black/image.dds`),
+                        link(`${__dirname}/../../../../images/BLACK.dds`, `${path}/black/image.dds`),
                         link(`${path}/layout.json`, `${path}/white/layout.json`),
-                        link(`${__dirname}/../../images/WHITE.dds`, `${path}/white/image.dds`),
+                        link(`${__dirname}/../../../../images/WHITE.dds`, `${path}/white/image.dds`),
                     ];
                     if (!!common) {
                         linkPromises.push(link(`${path}/${files[2]}`, `${path}/black/common.json`));
