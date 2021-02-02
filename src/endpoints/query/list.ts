@@ -1,11 +1,11 @@
-import joinMonster from "join-monster";
+import joinMonster from 'join-monster'
 import {db} from "../../db/db";
-import {errorName} from '../../util/errorTypes';
+import {errorName} from "../../util/errorTypes";
 import {filterData, joinMonsterOptions} from "../resolvers";
 
 export default async (_parent, args, context, info) => {
     try {
-        if (args.order && !(args.order.toLowerCase() === 'asc' || args.order.toLowerCase() === 'desc')) {
+        if (args.order && !(args.order.toLowerCase() === "asc" || args.order.toLowerCase() === "desc")) {
             throw errorName.INVALID_ORDER;
         }
 

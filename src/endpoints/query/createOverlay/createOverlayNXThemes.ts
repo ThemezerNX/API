@@ -1,15 +1,15 @@
 import Theme from "../../../filetypes/Theme";
-import rimraf from 'rimraf';
-import tmp from 'tmp';
+import rimraf from "rimraf";
+import tmp from "tmp";
 import {errorName} from "../../../util/errorTypes";
 import {saveFiles} from "../../resolvers";
 import Layout from "../../../filetypes/Layout";
 
-const link = require('fs-symlink');
+const link = require("fs-symlink");
 
 const {
     promises: {readFile},
-} = require('fs');
+} = require("fs");
 
 export default async (_parent, {layout, piece, common}, _context, _info) => {
     try {
@@ -37,11 +37,11 @@ export default async (_parent, {layout, piece, common}, _context, _info) => {
                     const layout1 = new Layout();
                     await layout1.readFile(`${path}/${files[0]}`);
                     if (!!piece) {
-                        layout1.addPiece(await readFile(`${path}/${files[1]}`, 'utf8'));
+                        layout1.addPiece(await readFile(`${path}/${files[1]}`, "utf8"));
                     }
                     await layout1.saveTo(path);
 
-                    if (layout1.getTarget === 'common.szs') {
+                    if (layout1.getTarget === "common.szs") {
                         reject(errorName.NO_COMMON_ALLOWED);
                         return;
                     }
@@ -63,11 +63,11 @@ export default async (_parent, {layout, piece, common}, _context, _info) => {
                     const themes = [
                         {
                             path: `${path}/black`,
-                            name: 'Black background',
+                            name: "Black background",
                         },
                         {
                             path: `${path}/white`,
-                            name: 'White background',
+                            name: "White background",
                         },
                     ];
                     const savePromises = themes.map(async (theme) => {

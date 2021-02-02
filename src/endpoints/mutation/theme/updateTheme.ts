@@ -1,7 +1,7 @@
 import {promisify} from "util";
-import tmp from 'tmp';
-import sharp from 'sharp';
-import JPEG_FILE from 'is-jpeg-file';
+import tmp from "tmp";
+import sharp from "sharp";
+import JPEG_FILE from "is-jpeg-file";
 import {db, pgp} from "../../../db/db";
 import {errorName} from "../../../util/errorTypes";
 import {saveFiles, storagePath} from "../../resolvers";
@@ -11,15 +11,15 @@ const isJpegPromisified = promisify(JPEG_FILE.isJpeg);
 
 const updateThemeCS = new pgp.helpers.ColumnSet(
     [
-        {name: 'details', cast: 'json'},
-        {name: 'categories', cast: 'varchar[]'},
-        {name: 'last_updated', cast: 'timestamp without time zone'},
-        {name: 'piece_uuids', cast: 'uuid[]'},
-        {name: 'layout_id', cast: 'int'},
-        {name: 'pack_id', cast: 'int'},
+        {name: "details", cast: "json"},
+        {name: "categories", cast: "varchar[]"},
+        {name: "last_updated", cast: "timestamp without time zone"},
+        {name: "piece_uuids", cast: "uuid[]"},
+        {name: "layout_id", cast: "int"},
+        {name: "pack_id", cast: "int"},
     ],
     {
-        table: 'themes',
+        table: "themes",
     },
 );
 
@@ -33,7 +33,7 @@ export default async (
         await context.authenticate();
 
         let mayModerate = false;
-        if (context.req.user.roles?.includes('admin')) {
+        if (context.req.user.roles?.includes("admin")) {
             mayModerate = true;
         } else {
             const theme = await db.oneOrNone(`
@@ -47,13 +47,13 @@ export default async (
 
         if (mayModerate) {
             return await new Promise(async (resolve, reject) => {
-                tmp.dir({prefix: 'theme'}, async (err, path, _cleanupCallback) => {
+                tmp.dir({prefix: "theme"}, async (err, path, _cleanupCallback) => {
                     try {
                         if (file) {
                             // Save the screenshot
                             const filePromises = saveFiles([{
                                 file: file,
-                                savename: 'original',
+                                savename: "original",
                                 path,
                             }]);
                             const savedFiles = await Promise.all(filePromises);
@@ -90,17 +90,17 @@ export default async (
 
                         // Add NSFW as category
                         if (nsfw) {
-                            categories.push('NSFW');
+                            categories.push("NSFW");
                         }
 
                         // Get uuids from extra dropdown entries
                         let splitID = null;
                         let piece_uuids = null;
                         if (layout_id) {
-                            splitID = layout_id.split('|');
+                            splitID = layout_id.split("|");
                             if (splitID.length > 1) {
                                 // Has piece uuids
-                                piece_uuids = splitID[1].split(',');
+                                piece_uuids = splitID[1].split(",");
                             }
                         }
 

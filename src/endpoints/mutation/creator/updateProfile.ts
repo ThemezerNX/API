@@ -1,11 +1,13 @@
 const {
     promises: {mkdir},
-} = require('fs');
-import {uuid} from "uuidv4";
-import rimraf from 'rimraf';
+} = require("fs");
+const {uuid} = require("uuidv4");
+const rimraf = require("rimraf");
 import {db, pgp} from "../../../db/db";
 import {errorName} from "../../../util/errorTypes";
 import {saveFiles, storagePath, updateCreatorCS} from "../../resolvers";
+import {JSDOM} from "jsdom";
+import DOMPurify from "dompurify";
 
 export default async (
     _parent,
@@ -25,16 +27,24 @@ export default async (
 ) => {
     try {
         await context.authenticate();
-        if (context.req.user.id === id || context.req.user.roles?.includes('admin')) {
+        if (context.req.user.id === id || context.req.user.roles?.includes("admin")) {
             return await new Promise(async (resolve, reject) => {
                 try {
+                    // We sanitize the bio DOM contents if it is defined
+                    if (bio) {
+                        const {window} = new JSDOM("");
+                        const domPurify = DOMPurify(window);
+
+                        bio = domPurify.sanitize(bio);
+                    }
+
                     let object: any = {
-                        custom_username: custom_username,
-                        bio: bio?.replace(/< *script *>.*?< *\/ *script *>/gim, ''), // Remove script tags for cross-site scripting
-                        profile_color: profile_color,
+                        custom_username,
+                        bio,
+                        profile_color,
                     };
 
-                    if (context.req.user.roles?.includes('admin') && context.req.user.id !== id) {
+                    if (context.req.user.roles?.includes("admin") && context.req.user.id !== id) {
                         object.is_blocked = is_blocked;
                     }
 
@@ -42,10 +52,10 @@ export default async (
                     const bannerPath = `${storagePath}/creators/${id}/banner`;
                     if (!clear_banner_image && !!banner_image) {
                         toSavePromises.push(
-                            new Promise(async (resolve, reject) => {
+                            new Promise<void>(async (resolve, reject) => {
                                 try {
                                     await mkdir(bannerPath, {recursive: true});
-                                    rimraf(bannerPath + '/*', async () => {
+                                    rimraf(bannerPath + "/*", async () => {
                                         try {
                                             const files = await Promise.all(
                                                 saveFiles([
@@ -77,10 +87,10 @@ export default async (
                     const logoPath = `${storagePath}/creators/${id}/logo`;
                     if (!clear_logo_image && !!logo_image) {
                         toSavePromises.push(
-                            new Promise(async (resolve, reject) => {
+                            new Promise<void>(async (resolve, reject) => {
                                 try {
                                     await mkdir(logoPath, {recursive: true});
-                                    rimraf(logoPath + '/*', async () => {
+                                    rimraf(logoPath + "/*", async () => {
                                         try {
                                             const files = await Promise.all(
                                                 saveFiles([

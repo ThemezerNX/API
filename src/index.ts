@@ -1,26 +1,26 @@
-require('dotenv').config();
-const consola = require('consola');
-const express = require('express');
+require("dotenv").config();
+const consola = require("consola");
+const express = require("express");
 const app = express();
-const cors = require('cors');
-const bodyParser = require('body-parser');
+const cors = require("cors");
+const bodyParser = require("body-parser");
 
-const {ApolloServer/*, gql, SchemaDirectiveVisitor*/} = require('apollo-server-express');
+const {ApolloServer/*, gql, SchemaDirectiveVisitor*/} = require("apollo-server-express");
 // const { defaultFieldResolver } = require('graphql')
-import responseCachePlugin from 'apollo-server-plugin-response-cache';
-import resolvers from './endpoints/resolvers';
-import typeDefs from './endpoints/typeDefs';
-import joinMonsterAdapt from 'join-monster-graphql-tools-adapter';
-import joinMonsterMetaData from './endpoints/joinMonsterMetaData';
-import buildContext from './util/buildContext';
+import responseCachePlugin from "apollo-server-plugin-response-cache";
+import resolvers from "./endpoints/resolvers";
+import typeDefs from "./endpoints/typeDefs";
+import joinMonsterAdapt from "join-monster-graphql-tools-adapter";
+import joinMonsterMetaData from "./endpoints/joinMonsterMetaData";
+import buildContext from "./util/buildContext";
 
-const {makeExecutableSchema} = require('graphql-tools');
+const {makeExecutableSchema} = require("graphql-tools");
 
-const {errorType} = require('./util/errorTypes');
+const {errorType} = require("./util/errorTypes");
 const getErrorCode = (errorName) => errorType[errorName];
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.json({limit: "50mb"}));
 
 const schema = makeExecutableSchema({
     typeDefs,
@@ -78,14 +78,14 @@ const server = new ApolloServer({
         maxFiles: 50,
     },
     cacheControl:
-        process.env.NODE_ENV === 'development'
+        process.env.NODE_ENV === "development"
             ? false
             : {
                 defaultMaxAge: 20,
             },
     plugins: [
         responseCachePlugin({
-            sessionId: (context) => context.request.http?.headers.get('token') || null,
+            sessionId: (context) => context.request.http?.headers.get("token") || null,
         }),
     ],
     schema,
@@ -95,10 +95,10 @@ const server = new ApolloServer({
     context: async ({req}) => buildContext({req}),
     introspection: true,
     playground:
-        process.env.NODE_ENV === 'development'
+        process.env.NODE_ENV === "development"
             ? {
                 settings: {
-                    'request.credentials': 'same-origin',
+                    "request.credentials": "same-origin",
                 },
             }
             : false,
@@ -109,9 +109,9 @@ const server = new ApolloServer({
         error = getErrorCode(err.message);
         if (error) {
             return error;
-        } else if (err.message.includes('Cannot query field')) {
+        } else if (err.message.includes("Cannot query field")) {
             const fieldREGEX = /".*?"/;
-            return getErrorCode('INVALID_FIELD')(fieldREGEX.exec(err.message)[0].replace(/"/g, ''), '');
+            return getErrorCode("INVALID_FIELD")(fieldREGEX.exec(err.message)[0].replace(/"/g, ""), "");
         }
 
         return err;
@@ -130,27 +130,27 @@ const server = new ApolloServer({
     },
 });
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
     app.use(
         cors({
             credentials: false,
-            origin: process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : process.env.WEBSITE_ENDPOINT,
+            origin: process.env.NODE_ENV === "development" ? "http://localhost:4000" : process.env.WEBSITE_ENDPOINT,
         }),
     );
-    app.use('/cdn', express.static('../cdn'));
+    app.use("/cdn", express.static("../cdn"));
 }
 
 app.get(/\/.+/, function (req, res) {
-    res.send('No frii gaems here');
+    res.send("No frii gaems here");
 });
 
 server.applyMiddleware({
     cors: {
         credentials: true,
-        origin: process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : process.env.WEBSITE_ENDPOINT,
+        origin: process.env.NODE_ENV === "development" ? "http://localhost:4000" : process.env.WEBSITE_ENDPOINT,
     },
     app,
-    path: '/',
+    path: "/",
 });
 
 const port = process.env.PORT;

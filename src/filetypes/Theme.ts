@@ -1,40 +1,41 @@
 import fs from "fs";
 import Layout from "./Layout";
-import {PythonShell} from "python-shell";
 import {errorName} from "../util/errorTypes";
 import {fileNameToThemeTarget, fileNameToWebName} from "../util/targetParser";
+
+const {PythonShell} = require("python-shell");
 
 export const sarcToolPath = `${__dirname}/../../../SARC-Tool`;
 export const invalidFilenameCharsREGEX = /[\\~#*{}\/:<>?|"]/gm;
 
 // Allowed files according to https://github.com/exelix11/SwitchThemeInjector/blob/master/SwitchThemesCommon/PatchTemplate.cs#L10-L29
 export const allowedFilesInNXTheme = [
-    'info.json',
-    'image.dds',
-    'image.jpg',
-    'layout.json',
-    'common.json',
-    'album.dds',
-    'album.png',
-    'news.dds',
-    'news.png',
-    'shop.dds',
-    'shop.png',
-    'controller.dds',
-    'controller.png',
-    'settings.dds',
-    'settings.png',
-    'power.dds',
-    'power.png',
-    'lock.dds',
-    'lock.png',
+    "info.json",
+    "image.dds",
+    "image.jpg",
+    "layout.json",
+    "common.json",
+    "album.dds",
+    "album.png",
+    "news.dds",
+    "news.png",
+    "shop.dds",
+    "shop.png",
+    "controller.dds",
+    "controller.png",
+    "settings.dds",
+    "settings.png",
+    "power.dds",
+    "power.png",
+    "lock.dds",
+    "lock.png",
 ];
 
 const {
     promises: {readdir, readFile, writeFile},
 } = fs;
-const tmp = require('tmp');
-const rimraf = require('rimraf');
+const tmp = require("tmp");
+const rimraf = require("rimraf");
 
 export default class Theme {
     protected name;
@@ -48,7 +49,7 @@ export default class Theme {
 
     constructor(name?, author?) {
         this.name = name;
-        this.author = author || 'Themezer';
+        this.author = author || "Themezer";
     }
 
     get getName() {
@@ -85,31 +86,31 @@ export default class Theme {
             ThemeName: this.name,
             Author: this.author,
             Target: fileNameToThemeTarget(this.target),
-            LayoutInfo: !!this.layout ? `${this.layout.getName} by ${this.layout.getAuthor}` : '',
+            LayoutInfo: !!this.layout ? `${this.layout.getName} by ${this.layout.getAuthor}` : "",
         };
     };
 
     saveTo = (folderPath: string) => {
         return new Promise<any>(async (resolve, reject) => {
             if (!!this.layout) {
-                await writeFile(`${folderPath}/layout.json`, this.layout.toJSON(), 'utf8');
+                await writeFile(`${folderPath}/layout.json`, this.layout.toJSON(), "utf8");
             }
 
             if (!!this.commonLayout) {
-                await writeFile(`${folderPath}/common.json`, this.commonLayout.toJSON(), 'utf8');
+                await writeFile(`${folderPath}/common.json`, this.commonLayout.toJSON(), "utf8");
             }
 
             const info = this.getInfo();
-            await writeFile(`${folderPath}/info.json`, JSON.stringify(info), 'utf8');
+            await writeFile(`${folderPath}/info.json`, JSON.stringify(info), "utf8");
 
             // Run SARC-Tool main.py on the specified folder
             const options = {
-                pythonPath: 'python3.8',
+                pythonPath: "python3.8",
                 scriptPath: sarcToolPath,
                 // Compression 0, to reduce stress on CPU
-                args: ['-little', '-compress', '0', '-o', `${folderPath}/theme.nxtheme`, folderPath],
+                args: ["-little", "-compress", "0", "-o", `${folderPath}/theme.nxtheme`, folderPath],
             };
-            PythonShell.run('main.py', options, async (err) => {
+            PythonShell.run("main.py", options, async (err) => {
                 if (err) {
                     console.error(err);
                     reject(errorName.NXTHEME_CREATE_FAILED);
@@ -122,11 +123,11 @@ export default class Theme {
                     filename:
                         (`${this.name} by ${this.author}` +
                             ` (${fileNameToWebName(this.target)})` +
-                            (info.LayoutInfo.length > 0 ? `; ${info.LayoutInfo}` : '') +
-                            (this.id ? `-${this.id}` : '') +
-                            '.nxtheme').replace(invalidFilenameCharsREGEX, '_'),
+                            (info.LayoutInfo.length > 0 ? `; ${info.LayoutInfo}` : "") +
+                            (this.id ? `-${this.id}` : "") +
+                            ".nxtheme").replace(invalidFilenameCharsREGEX, "_"),
                     path: `${folderPath}/theme.nxtheme`,
-                    mimetype: 'application/nxtheme',
+                    mimetype: "application/nxtheme",
                 });
             });
         });
@@ -143,7 +144,7 @@ export default class Theme {
                 const theme = await this.saveTo(this.contentsPath || path);
 
                 resolve({
-                    data: await readFile(theme.path, 'base64'),
+                    data: await readFile(theme.path, "base64"),
                     ...theme,
                 });
             });
@@ -152,13 +153,13 @@ export default class Theme {
 
     loadFile = async (filePath): Promise<any> => {
         const options = {
-            pythonPath: 'python3.8',
+            pythonPath: "python3.8",
             scriptPath: sarcToolPath,
             args: [filePath],
         };
         return new Promise<any>((resolve, reject) => {
             try {
-                PythonShell.run('main.py', options, async (err) => {
+                PythonShell.run("main.py", options, async (err) => {
                     if (err) {
                         console.error(err);
                         reject(errorName.NXTHEME_UNPACK_FAILED);
@@ -166,7 +167,7 @@ export default class Theme {
                     }
 
                     // Return extracted dir path
-                    const unpackPath = filePath.replace(/\.[^\/.]+$/, '');
+                    const unpackPath = filePath.replace(/\.[^\/.]+$/, "");
                     await this.loadFolder(unpackPath, false);
                     resolve(this);
                 });
@@ -180,14 +181,14 @@ export default class Theme {
         this.contentsPath = path;
         const filesInFolder = await readdir(path);
 
-        if (!this.layout && filesInFolder.includes('layout.json')) {
+        if (!this.layout && filesInFolder.includes("layout.json")) {
             this.layout = new Layout();
             await this.layout.readFile(`${path}/layout.json`, loadFromDB);
             // Preferably set the target to the target from the database, else use the layout target
             this.target = this.target || this.layout.getTarget;
         }
 
-        if (!this.commonLayout && filesInFolder.includes('common.json')) {
+        if (!this.commonLayout && filesInFolder.includes("common.json")) {
             this.commonLayout = new Layout();
             await this.commonLayout.readFile(`${path}/common.json`, loadFromDB);
         }

@@ -1,17 +1,18 @@
-import fs from 'fs';
-import {promisify} from 'util';
-import rimraf from 'rimraf';
-import JPEG_FILE from 'is-jpeg-file';
-import moveFile from 'mvdir';
-import sharp from 'sharp';
+import fs from "fs";
+import {promisify} from "util";
+import moveFile from "mvdir";
 import {decrypt} from "../../../util/crypt";
 import {errorName} from "../../../util/errorTypes";
 import {db, pgp} from "../../../db/db";
 import {fileNameToWebName, validFileName} from "../../../util/targetParser";
 import {packMessage, themeMessage} from "../../../util/webhookMessages";
 import {avatar, packsCS, saveFiles, storagePath, themesCS, urlNameREGEX} from "../../resolvers";
-import webhook from "webhook-discord";
 import {allowedFilesInNXTheme} from "../../../filetypes/Theme";
+
+const webhook = require("webhook-discord");
+const rimraf = require("rimraf");
+const JPEG_FILE = require("is-jpeg-file");
+const sharp = require("sharp");
 
 const {
     lstat,
@@ -40,7 +41,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
 
                                 resolve({
                                     file: f,
-                                    savename: 'original',
+                                    savename: "original",
                                     path: path,
                                 });
                             });
@@ -76,7 +77,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                             await Promise.all(thumbPromises);
 
                             // Insert pack into DB if user wants to and can submit as pack
-                            if (type === 'pack' && savedFiles.length > 1) {
+                            if (type === "pack" && savedFiles.length > 1) {
                                 const packData = {
                                     last_updated: new Date(),
                                     creator_id: context.req.user.id,
@@ -84,7 +85,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                         name: details.name.trim(),
                                         description: details.description.trim(),
                                         color: details.color,
-                                        version: details.version ? details.version.trim() : '1.0',
+                                        version: details.version ? details.version.trim() : "1.0",
                                     },
                                 };
 
@@ -110,10 +111,10 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                         // Read dir contents
                                         const filesInFolder = await readdir(path);
 
-                                        if (filesInFolder.includes('image.jpg')) {
-                                            bgType = 'jpg';
-                                        } else if (filesInFolder.includes('image.dds')) {
-                                            bgType = 'dds';
+                                        if (filesInFolder.includes("image.jpg")) {
+                                            bgType = "jpg";
+                                        } else if (filesInFolder.includes("image.dds")) {
+                                            bgType = "dds";
                                         }
                                     } catch (e) {
                                         console.error(e);
@@ -135,7 +136,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
 
                                     // Add NSFW as category
                                     if (themes[i].nsfw) {
-                                        categories.push('NSFW');
+                                        categories.push("NSFW");
                                     }
 
                                     if (!validFileName(themes[i].target)) {
@@ -147,10 +148,10 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                     let splitID = null;
                                     let piece_uuids = null;
                                     if (themes[i].layout_id) {
-                                        splitID = themes[i].layout_id.split('|');
+                                        splitID = themes[i].layout_id.split("|");
                                         if (splitID.length > 1) {
                                             // Has piece uuids
-                                            piece_uuids = splitID[1].split(',');
+                                            piece_uuids = splitID[1].split(",");
                                         }
                                     }
 
@@ -175,7 +176,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                                 ? details.version.trim()
                                                 : themes[i].version
                                                     ? themes[i].version.trim()
-                                                    : '1.0',
+                                                    : "1.0",
                                         },
                                         bg_type: bgType,
                                     });
@@ -200,15 +201,15 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                             const filteredFilesInFolder = filesInFolder.filter(
                                                 (f) =>
                                                     (allowedFilesInNXTheme.includes(f) &&
-                                                        f !== 'info.json' &&
-                                                        !(f === 'layout.json' && themes[i].layout_id)) ||
-                                                    f === 'original.jpg' ||
-                                                    f === 'thumb.jpg',
+                                                        f !== "info.json" &&
+                                                        !(f === "layout.json" && themes[i].layout_id)) ||
+                                                    f === "original.jpg" ||
+                                                    f === "thumb.jpg",
                                             );
 
                                             // Move NXTheme contents to cdn
                                             const moveAllPromises = filteredFilesInFolder.map((f) => {
-                                                if (f === 'original.jpg' || f === 'thumb.jpg') {
+                                                if (f === "original.jpg" || f === "thumb.jpg") {
                                                     return moveFile(
                                                         `${path}/${f}`,
                                                         `${storagePath}/themes/${insertedThemes[i].hex_id}/images/${f}`,
@@ -238,7 +239,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
 
                                 setTimeout(() => {
                                     // Wait 5 seconds because the image has issues loading if it's been created very recently
-                                    if (type === 'pack') {
+                                    if (type === "pack") {
                                         const newPackMessage = packMessage();
 
                                         newPackMessage
@@ -246,26 +247,26 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                             .setAuthor(
                                                 context.req.user.display_name,
                                                 avatar(context.req.user.id, context.req.user.discord_user) +
-                                                '?size=64',
+                                                "?size=64",
                                                 `${process.env.WEBSITE_ENDPOINT}/creators/${context.req.user.id}`,
                                             )
                                             .addField(
-                                                'Install ID:',
+                                                "Install ID:",
                                                 `P${insertedPack.hex_id.toUpperCase()}`,
                                             )
                                             .addField(
-                                                'Themes in this pack:',
-                                                themeDatas.map((t: any) => t.details.name).join('\n'),
+                                                "Themes in this pack:",
+                                                themeDatas.map((t: any) => t.details.name).join("\n"),
                                             )
                                             .setURL(
                                                 `${
                                                     process.env.WEBSITE_ENDPOINT
-                                                }/packs/${insertedPack.details.name.replace(urlNameREGEX, '-')}-${
+                                                }/packs/${insertedPack.details.name.replace(urlNameREGEX, "-")}-${
                                                     insertedPack.hex_id
                                                 }`,
                                             );
 
-                                        if (!themeDatas.some((t: any) => t.categories?.includes('NSFW'))) {
+                                        if (!themeDatas.some((t: any) => t.categories?.includes("NSFW"))) {
                                             newPackMessage
                                                 .setTitle(insertedPack.details.name)
                                                 .setThumbnail(
@@ -289,20 +290,20 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                                 .setAuthor(
                                                     context.req.user.display_name,
                                                     avatar(context.req.user.id, context.req.user.discord_user) +
-                                                    '?size=64',
+                                                    "?size=64",
                                                     `${process.env.WEBSITE_ENDPOINT}/creators/${context.req.user.id}`,
                                                 )
                                                 .setURL(
                                                     `${process.env.WEBSITE_ENDPOINT}/themes/${fileNameToWebName(
                                                         t.target,
-                                                    )}/${t.details.name.replace(urlNameREGEX, '-')}-${t.hex_id}`,
+                                                    )}/${t.details.name.replace(urlNameREGEX, "-")}-${t.hex_id}`,
                                                 )
                                                 .addField(
-                                                    'Install ID:',
+                                                    "Install ID:",
                                                     `T${t.hex_id.toUpperCase()}`,
                                                 );
 
-                                            if (!t.categories?.includes('NSFW')) {
+                                            if (!t.categories?.includes("NSFW")) {
                                                 newThemeMessage
                                                     .setTitle(t.details.name)
                                                     .setThumbnail(

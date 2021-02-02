@@ -12,18 +12,18 @@ export default async (_parent, {id}, context, info) => {
                     // Theme Download
 
                     resolve({
-                        themes: [await getTheme(idLower.replace('t', ''), undefined)],
+                        themes: [await getTheme(idLower.replace("t", ""), undefined)],
                     });
                 } else if (packHexREGEX.exec(idLower)) {
                     // Pack Download
 
-                    const themes = await downloadPackSeperate(idLower.replace('p', ''));
+                    const themes = await downloadPackSeperate(idLower.replace("p", ""));
                     // hacky but idc cuz it saves an extra call and allows the function response to remain the same basically
                     resolve({
                         groupname: themes[0].pack_name,
                         themes,
                     });
-                } else if (idLower === '__special_random') {
+                } else if (idLower === "__special_random") {
                     try {
                         const {data} = await graphql({
                             schema: info.schema,
@@ -48,7 +48,7 @@ export default async (_parent, {id}, context, info) => {
                         console.error(e);
                         reject(e);
                     }
-                } else if (idLower === '__special_recent') {
+                } else if (idLower === "__special_recent") {
                     try {
                         const {data} = await graphql({
                             schema: info.schema,

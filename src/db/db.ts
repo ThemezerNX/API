@@ -1,4 +1,4 @@
-const pgPromise = require('pg-promise');
+const pgPromise = require("pg-promise");
 
 const config = {
     host: process.env.POSTGRES_HOST,

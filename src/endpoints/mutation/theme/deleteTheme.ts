@@ -2,7 +2,7 @@ import {db} from "../../../db/db";
 import {fileNameToWebName} from "../../../util/targetParser";
 import {errorName} from "../../../util/errorTypes";
 import {storagePath} from "../../resolvers";
-import rimraf from 'rimraf';
+import rimraf from "rimraf";
 
 export default async (_parent, {id}, context, _info) => {
     try {
@@ -22,7 +22,7 @@ export default async (_parent, {id}, context, _info) => {
                                   AND pack_id = "cascade".pack_id
                             ) as ids;
                         `,
-                        [context.req.user.id, id, context.req.user.roles?.includes('admin')],
+                        [context.req.user.id, id, context.req.user.roles?.includes("admin")],
                     );
                     rimraf(`${storagePath}/themes/${dbData.id}`, () => {
                     });

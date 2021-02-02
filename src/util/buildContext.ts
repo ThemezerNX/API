@@ -1,11 +1,11 @@
-import axios from 'axios';
-import {db} from '../db/db';
+import axios from "axios";
+import {db} from "../db/db";
 
-const discordApiBase = 'https://discord.com/api';
+const discordApiBase = "https://discord.com/api";
 
 function cleanString(input) {
-    var output = '';
-    for (var i = 0; i < input.length; i++) {
+    let output = "";
+    for (let i = 0; i < input.length; i++) {
         if (input.charCodeAt(i) <= 127) {
             output += input.charAt(i);
         }
@@ -19,7 +19,7 @@ const buildCommonContext = (req, additionalContext: {}) => ({
         if (token) {
             return new Promise((resolve, reject) => {
                 axios({
-                    url: discordApiBase + '/users/@me',
+                    url: discordApiBase + "/users/@me",
                     headers: {
                         Authorization: token,
                     },

@@ -5,9 +5,9 @@ import CacheableTheme from "./CacheableTheme";
 import {invalidFilenameCharsREGEX, storagePath} from "../endpoints/resolvers";
 import fs from "fs";
 
-import AdmZip from 'adm-zip';
+import AdmZip from "adm-zip";
 
-const tmp = require('tmp');
+const tmp = require("tmp");
 const {
     promises: {access},
     constants,
@@ -68,9 +68,9 @@ export default class CacheablePack extends Pack {
                 resolve({
                     filename: (`${this.name} by ${this.author} via Themezer.zip`).replace(
                         invalidFilenameCharsREGEX,
-                        '_'),
+                        "_"),
                     url: `${process.env.API_ENDPOINT}/cdn/cache/packs/${this.id}.zip`,
-                    mimetype: 'application/zip',
+                    mimetype: "application/zip",
                 });
 
             } catch (e) {

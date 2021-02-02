@@ -1,11 +1,11 @@
-import {pgp} from '../db/db';
+import {pgp} from "../db/db";
 
 const {
     as: {format},
 } = pgp;
 
 const list = {
-    orderBy: ({order = 'desc'}) => {
+    orderBy: ({order = "desc"}) => {
         return {id: order};
     },
     where: (table, {target, creators}) => {
@@ -19,7 +19,7 @@ const list = {
             wheres.push(format(`${table}.creator_id = ANY($1)`, [creators]));
         }
 
-        return wheres.join(' AND ');
+        return wheres.join(" AND ");
     },
 };
 
@@ -44,7 +44,7 @@ export default {
                 where: (table, {id}) => format(`${table}.id = hex_to_int('$1^')`, [id]),
             },
             packList: {
-                orderBy: ({order = 'desc'}) => {
+                orderBy: ({order = "desc"}) => {
                     return {id: order};
                 },
                 where: (table, {creators}) => {
@@ -54,29 +54,29 @@ export default {
                         wheres.push(format(`${table}.creator_id = ANY($1)`, [creators]));
                     }
 
-                    return wheres.join(' AND ');
+                    return wheres.join(" AND ");
                 },
             },
         },
     },
     PrivateInfo: {
-        sqlTable: 'creators',
-        uniqueKey: 'id',
+        sqlTable: "creators",
+        uniqueKey: "id",
         fields: {
             display_name: {
                 sqlExpr: (table) =>
                     `CASE WHEN ${table}.custom_username IS NOT NULL THEN ${table}.custom_username ELSE ${table}.discord_user ->> 'username' END`,
             },
-            custom_username: {sqlColumn: 'custom_username'},
+            custom_username: {sqlColumn: "custom_username"},
             discord_user: {
                 sqlJoin: (table, detailsTable) => `${table}.id = ${detailsTable}.id`,
             },
-            bio: {sqlColumn: 'bio'},
-            joined: {sqlColumn: 'joined'},
-            roles: {sqlColumn: 'roles'},
-            banner_image: {sqlColumn: 'banner_image'},
-            logo_image: {sqlColumn: 'logo_image'},
-            profile_color: {sqlColumn: 'profile_color'},
+            bio: {sqlColumn: "bio"},
+            joined: {sqlColumn: "joined"},
+            roles: {sqlColumn: "roles"},
+            banner_image: {sqlColumn: "banner_image"},
+            logo_image: {sqlColumn: "logo_image"},
+            profile_color: {sqlColumn: "profile_color"},
             liked: {
                 sqlJoin: (table, creatorsTable) => `${table}.id = ${creatorsTable}.id`,
             },
@@ -87,27 +87,27 @@ export default {
 					WHERE ${table}.id = ANY(liked_creators)
                 )`,
             },
-            old_ids: {sqlColumn: 'old_ids'},
+            old_ids: {sqlColumn: "old_ids"},
         },
     },
     UserInfo: {
-        sqlTable: 'creators',
-        uniqueKey: 'id',
+        sqlTable: "creators",
+        uniqueKey: "id",
         fields: {
             display_name: {
                 sqlExpr: (table) =>
                     `CASE WHEN ${table}.custom_username IS NOT NULL THEN ${table}.custom_username ELSE ${table}.discord_user ->> 'username' END`,
             },
-            custom_username: {sqlColumn: 'custom_username'},
+            custom_username: {sqlColumn: "custom_username"},
             discord_user: {
                 sqlJoin: (table, detailsTable) => `${table}.id = ${detailsTable}.id`,
             },
-            bio: {sqlColumn: 'bio'},
-            joined: {sqlColumn: 'joined'},
-            roles: {sqlColumn: 'roles'},
-            banner_image: {sqlColumn: 'banner_image'},
-            logo_image: {sqlColumn: 'logo_image'},
-            profile_color: {sqlColumn: 'profile_color'},
+            bio: {sqlColumn: "bio"},
+            joined: {sqlColumn: "joined"},
+            roles: {sqlColumn: "roles"},
+            banner_image: {sqlColumn: "banner_image"},
+            logo_image: {sqlColumn: "logo_image"},
+            profile_color: {sqlColumn: "profile_color"},
             like_count: {
                 sqlExpr: (table) => `(
                     SELECT COUNT(*)
@@ -115,13 +115,13 @@ export default {
 					WHERE ${table}.id = ANY(liked_creators)
                 )`,
             },
-            old_ids: {sqlColumn: 'old_ids'},
-            is_blocked: {sqlColumn: 'is_blocked'},
+            old_ids: {sqlColumn: "old_ids"},
+            is_blocked: {sqlColumn: "is_blocked"},
         },
     },
     DiscordUser: {
-        sqlTable: 'creators',
-        uniqueKey: 'id',
+        sqlTable: "creators",
+        uniqueKey: "id",
         fields: {
             username: {
                 sqlExpr: (table) =>
@@ -142,8 +142,8 @@ export default {
         },
     },
     MyLikes: {
-        sqlTable: 'creators',
-        uniqueKey: 'id',
+        sqlTable: "creators",
+        uniqueKey: "id",
         fields: {
             creators: {
                 sqlJoin: (table, creatorsTable) => `${creatorsTable}.id = ANY(${table}.liked_creators)`,
@@ -160,8 +160,8 @@ export default {
         },
     },
     LayoutDetails: {
-        sqlTable: 'layouts',
-        uniqueKey: 'id',
+        sqlTable: "layouts",
+        uniqueKey: "id",
         fields: {
             name: {
                 sqlExpr: (table) => `${table}.details ->> 'name'`,
@@ -178,8 +178,8 @@ export default {
         },
     },
     ThemeDetails: {
-        sqlTable: 'themes',
-        uniqueKey: 'id',
+        sqlTable: "themes",
+        uniqueKey: "id",
         fields: {
             name: {
                 sqlExpr: (table) => `${table}.details ->> 'name'`,
@@ -193,8 +193,8 @@ export default {
         },
     },
     PackDetails: {
-        sqlTable: 'packs',
-        uniqueKey: 'id',
+        sqlTable: "packs",
+        uniqueKey: "id",
         fields: {
             name: {
                 sqlExpr: (table) => `${table}.details ->> 'name'`,
@@ -208,10 +208,10 @@ export default {
         },
     },
     Layout: {
-        sqlTable: 'layouts',
-        uniqueKey: 'id',
+        sqlTable: "layouts",
+        uniqueKey: "id",
         fields: {
-            uuid: {sqlColumn: 'uuid'},
+            uuid: {sqlColumn: "uuid"},
             id: {
                 sqlExpr: (table) => `to_hex(${table}.id)`,
             },
@@ -222,21 +222,21 @@ export default {
             details: {
                 sqlJoin: (table, detailsTable) => `${table}.id = ${detailsTable}.id`,
             },
-            baselayout: {sqlColumn: 'baselayout'},
-            target: {sqlColumn: 'target'},
-            last_updated: {sqlColumn: 'last_updated'},
+            baselayout: {sqlColumn: "baselayout"},
+            target: {sqlColumn: "target"},
+            last_updated: {sqlColumn: "last_updated"},
             has_pieces: {
                 sqlExpr: (table) => `CASE WHEN (cardinality(${table}.pieces) > 0) THEN true ELSE false END`,
             },
             pieces: {
-                sqlColumn: 'pieces',
+                sqlColumn: "pieces",
                 jmIgnoreTable: true,
             },
             has_commonlayout: {
                 sqlExpr: (table) => `CASE WHEN ${table}.commonlayout IS NULL THEN false ELSE true END`,
             },
-            commonlayout: {sqlColumn: 'commonlayout'},
-            dl_count: {sqlColumn: 'dl_count'},
+            commonlayout: {sqlColumn: "commonlayout"},
+            dl_count: {sqlColumn: "dl_count"},
             like_count: {
                 sqlExpr: (table) => `(
                     SELECT COUNT(*)
@@ -247,8 +247,8 @@ export default {
         },
     },
     PreviewTypes: {
-        sqlTable: 'themes',
-        uniqueKey: 'id',
+        sqlTable: "themes",
+        uniqueKey: "id",
         fields: {
             original: {
                 sqlExpr: (table) =>
@@ -261,8 +261,8 @@ export default {
         },
     },
     Theme: {
-        sqlTable: 'themes',
-        uniqueKey: 'id',
+        sqlTable: "themes",
+        uniqueKey: "id",
         fields: {
             id: {
                 sqlExpr: (table) => `to_hex(${table}.id)`,
@@ -279,8 +279,8 @@ export default {
             pack: {
                 sqlJoin: (table, packsTable) => `${table}.pack_id = ${packsTable}.id`,
             },
-            target: {sqlColumn: 'target'},
-            last_updated: {sqlColumn: 'last_updated'},
+            target: {sqlColumn: "target"},
+            last_updated: {sqlColumn: "last_updated"},
             pieces: {
                 jmIgnoreTable: true,
                 sqlExpr: (table) => `(
@@ -293,8 +293,8 @@ export default {
                     WHERE value ->> 'uuid' = ANY(${table}.piece_uuids::text[])
                 )`,
             },
-            categories: {sqlColumn: 'categories'},
-            dl_count: {sqlColumn: 'dl_count'},
+            categories: {sqlColumn: "categories"},
+            dl_count: {sqlColumn: "dl_count"},
             like_count: {
                 sqlExpr: (table) => `(
                     SELECT COUNT(*)
@@ -302,15 +302,15 @@ export default {
 					WHERE ${table}.id = ANY(liked_themes)
                 )`,
             },
-            bg_type: {sqlColumn: 'bg_type'},
+            bg_type: {sqlColumn: "bg_type"},
             preview: {
                 sqlJoin: (table, previewTable) => `${table}.id = ${previewTable}.id`,
             },
         },
     },
     Pack: {
-        sqlTable: 'packs',
-        uniqueKey: 'id',
+        sqlTable: "packs",
+        uniqueKey: "id",
         fields: {
             id: {
                 sqlExpr: (table) => `to_hex(${table}.id)`,
@@ -321,7 +321,7 @@ export default {
             details: {
                 sqlJoin: (table, detailsTable) => `${table}.id = ${detailsTable}.id`,
             },
-            last_updated: {sqlColumn: 'last_updated'},
+            last_updated: {sqlColumn: "last_updated"},
             categories: {
                 sqlExpr: (table) => `(
                     SELECT array_agg(c) as categories
@@ -334,7 +334,7 @@ export default {
                 )
                 `,
             },
-            dl_count: {sqlColumn: 'dl_count'},
+            dl_count: {sqlColumn: "dl_count"},
             like_count: {
                 sqlExpr: (table) => `(
                     SELECT COUNT(*)

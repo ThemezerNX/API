@@ -1,12 +1,10 @@
 import downloadPack from "./query/pack/downloadPack";
-import {db, pgp} from '../db/db';
-import graphqlFields from 'graphql-fields';
-import MiniSearch from 'minisearch';
-import {errorName} from '../util/errorTypes';
-import GraphQLJSON from 'graphql-type-json';
+import {db, pgp} from "../db/db";
+import {errorName} from "../util/errorTypes";
+import GraphQLJSON from "graphql-type-json";
 
-import me from './query/me';
-import creator from './query/creator';
+import me from "./query/me";
+import creator from "./query/creator";
 import categories from "./query/categories";
 import layout from "./query/layout/layout";
 import randomLayoutIDs from "./query/layout/randomLayoutIDs";
@@ -29,19 +27,22 @@ import setLike from "./mutation/setLike";
 import restoreAccount from "./mutation/creator/restoreAccount";
 import reportURL from "./mutation/reportURL";
 import deletePack from "./mutation/pack/deletePack";
-import fs from 'fs';
+import fs from "fs";
 import updatePack from "./mutation/pack/updatePack";
 import updateTheme from "./mutation/theme/updateTheme";
 import downloadTheme from "./query/theme/downloadTheme";
 import CacheableTheme from "../filetypes/CacheableTheme";
 import CacheablePack from "../filetypes/CacheablePack";
 
+const graphqlFields = require("graphql-fields");
+const MiniSearch = require("minisearch");
+
 const {
     createWriteStream,
     unlink,
 } = fs;
 
-export const joinMonsterOptions: any = {dialect: 'pg'};
+export const joinMonsterOptions: any = {dialect: "pg"};
 export const storagePath = `${__dirname}/../../../cdn`;
 
 export const urlNameREGEX = /[^a-zA-Z0-9_.]+/gm;
@@ -88,43 +89,43 @@ export function bool(column) {
 
 export const themesCS = new pgp.helpers.ColumnSet(
     [
-        {name: 'layout_id', cast: 'int'},
-        {name: 'piece_uuids', cast: 'uuid[]'},
-        'target',
-        {name: 'last_updated', cast: 'timestamp without time zone'},
-        {name: 'categories', cast: 'varchar[]'},
-        {name: 'pack_id', cast: 'int'},
-        {name: 'creator_id', cast: 'varchar'},
-        {name: 'details', cast: 'json'},
-        {name: 'bg_type', cast: 'varchar (3)'},
+        {name: "layout_id", cast: "int"},
+        {name: "piece_uuids", cast: "uuid[]"},
+        "target",
+        {name: "last_updated", cast: "timestamp without time zone"},
+        {name: "categories", cast: "varchar[]"},
+        {name: "pack_id", cast: "int"},
+        {name: "creator_id", cast: "varchar"},
+        {name: "details", cast: "json"},
+        {name: "bg_type", cast: "varchar (3)"},
     ],
     {
-        table: 'themes',
+        table: "themes",
     },
 );
 
 export const packsCS = new pgp.helpers.ColumnSet(
     [
-        {name: 'last_updated', cast: 'timestamp without time zone'},
-        {name: 'creator_id', cast: 'varchar'},
-        {name: 'details', cast: 'json'},
+        {name: "last_updated", cast: "timestamp without time zone"},
+        {name: "creator_id", cast: "varchar"},
+        {name: "details", cast: "json"},
     ],
     {
-        table: 'packs',
+        table: "packs",
     },
 );
 
 export const updateCreatorCS = new pgp.helpers.ColumnSet(
     [
-        str('custom_username'),
-        str('bio'),
-        str('banner_image'),
-        str('logo_image'),
-        str('profile_color'),
-        bool('is_blocked'),
+        str("custom_username"),
+        str("bio"),
+        str("banner_image"),
+        str("logo_image"),
+        str("profile_color"),
+        bool("is_blocked"),
     ],
     {
-        table: 'creators',
+        table: "creators",
     },
 );
 
@@ -146,14 +147,14 @@ export const saveFiles = (files) =>
 
                     const writeStream = createWriteStream(`${path}/${filename}`);
 
-                    writeStream.on('finish', () => {
+                    writeStream.on("finish", () => {
                         resolve(`${filename}`);
                     });
 
-                    writeStream.on('error', (error) => {
+                    writeStream.on("error", (error) => {
                         unlink(path, () => {
                             // If the uploaded file's size is too big return specific error
-                            if (error.message.includes('exceeds') && error.message.includes('size limit')) {
+                            if (error.message.includes("exceeds") && error.message.includes("size limit")) {
                                 reject(errorName.FILE_TOO_BIG);
                             } else {
                                 console.error(error);
@@ -162,7 +163,7 @@ export const saveFiles = (files) =>
                         });
                     });
 
-                    stream.on('error', (error) => writeStream.destroy(error));
+                    stream.on("error", (error) => writeStream.destroy(error));
 
                     stream.pipe(writeStream);
                 } catch (e) {
@@ -237,7 +238,7 @@ export const downloadPackSeperate = (id) => {
     });
 };
 
-export const filterData = (items, info, {page = 1, limit, query, sort, order = 'desc', layouts, nsfw = false}) => {
+export const filterData = (items, info, {page = 1, limit, query, sort, order = "desc", layouts, nsfw = false}) => {
     const queryFields = graphqlFields(info);
 
     if (items?.length > 0) {
@@ -247,15 +248,15 @@ export const filterData = (items, info, {page = 1, limit, query, sort, order = '
                     !!queryFields.id &&
                     !!queryFields.details?.name &&
                     !!queryFields.details?.description &&
-                    !!(info.fieldName !== 'layoutList' ? queryFields.categories : true)
+                    !!(info.fieldName !== "layoutList" ? queryFields.categories : true)
                 )
             ) {
                 throw errorName.CANNOT_SEARCH_QUERY;
             }
 
             const miniSearch = new MiniSearch({
-                fields: ['id', 'name', 'description', 'categories'],
-                storeFields: ['id'],
+                fields: ["id", "name", "description", "categories"],
+                storeFields: ["id"],
                 searchOptions: {
                     // boost: { name: 2 },
                     fuzzy: 0.1,
@@ -267,7 +268,7 @@ export const filterData = (items, info, {page = 1, limit, query, sort, order = '
                     id: info.fieldName.charAt(0) + item.id,
                     name: item.details.name,
                     description: item.details.name,
-                    categories: item.categories ? item.categories.join(' ') : '',
+                    categories: item.categories ? item.categories.join(" ") : "",
                 };
             });
 
@@ -280,16 +281,16 @@ export const filterData = (items, info, {page = 1, limit, query, sort, order = '
             items = items.filter((item: any) => resultIDs.includes(info.fieldName.charAt(0) + item.id));
         }
 
-        if (!nsfw && info.fieldName !== 'layoutList') {
+        if (!nsfw && info.fieldName !== "layoutList") {
             if (!queryFields.categories) throw errorName.CANNOT_FILTER_NSFW;
 
             items = items.filter((item: any): boolean => {
-                return !item.categories?.includes('NSFW');
+                return !item.categories?.includes("NSFW");
             });
         }
 
         if (layouts?.length > 0) {
-            if (info.fieldName === 'packList' ? !queryFields.themes.layout?.id : !queryFields.layout?.id)
+            if (info.fieldName === "packList" ? !queryFields.themes.layout?.id : !queryFields.layout?.id)
                 throw errorName.CANNOT_FILTER_LAYOUTS;
 
             items = items.filter((item: any): boolean => {
@@ -308,33 +309,33 @@ export const filterData = (items, info, {page = 1, limit, query, sort, order = '
         if (sort) {
             const sortOptions = [
                 {
-                    id: 'downloads',
-                    key: 'dl_count',
+                    id: "downloads",
+                    key: "dl_count",
                 },
                 {
-                    id: 'likes',
-                    key: 'like_count',
+                    id: "likes",
+                    key: "like_count",
                 },
                 {
-                    id: 'updated',
-                    key: 'last_updated',
+                    id: "updated",
+                    key: "last_updated",
                 },
                 {
-                    id: 'id',
-                    key: 'id',
+                    id: "id",
+                    key: "id",
                 },
             ];
 
             const sortOption = sortOptions.find((o: any) => o.id === sort);
             if (!sortOption) throw errorName.INVALID_SORT;
 
-            if (sortOption.id === 'downloads' && !queryFields.dl_count) throw errorName.CANNOT_SORT_BY_DOWNLOADS;
-            if (sortOption.id === 'likes' && !queryFields.like_count) throw errorName.CANNOT_SORT_BY_LIKES;
-            if (sortOption.id === 'updated' && order.toLowerCase() === 'asc' && !queryFields.last_updated)
+            if (sortOption.id === "downloads" && !queryFields.dl_count) throw errorName.CANNOT_SORT_BY_DOWNLOADS;
+            if (sortOption.id === "likes" && !queryFields.like_count) throw errorName.CANNOT_SORT_BY_LIKES;
+            if (sortOption.id === "updated" && order.toLowerCase() === "asc" && !queryFields.last_updated)
                 throw errorName.CANNOT_SORT_BY_UPDATED;
 
             items = items.sort((a: any, b: any) => {
-                if (order.toLowerCase() === 'asc') {
+                if (order.toLowerCase() === "asc") {
                     return a[sortOption.key] - b[sortOption.key];
                 } else {
                     return b[sortOption.key] - a[sortOption.key];

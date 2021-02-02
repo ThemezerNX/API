@@ -6,10 +6,10 @@ import {fileNameToThemeTarget} from "../util/targetParser";
 import Layout from "./Layout";
 import {storagePath} from "../endpoints/resolvers";
 
-const link = require('fs-symlink');
-const moveFile = require('mvdir');
-const tmp = require('tmp');
-const defaultThemes = ['1a', '19', '18', '17', '16', '15', '14'];
+const link = require("fs-symlink");
+const moveFile = require("mvdir");
+const tmp = require("tmp");
+const defaultThemes = ["1a", "19", "18", "17", "16", "15", "14"];
 
 const {
     promises: {access, readdir},
@@ -79,7 +79,7 @@ export default class CacheableTheme extends Theme {
                     this.layout = new Layout();
                     await this.layout.loadId(layout_id, this.pieceUUIDs);
 
-                    if (has_common && this.target == 'ResidentMenu') {
+                    if (has_common && this.target == "ResidentMenu") {
                         this.commonLayout = new Layout(true);
                         await this.commonLayout.loadId(layout_id);
                     }
@@ -102,10 +102,10 @@ export default class CacheableTheme extends Theme {
                     preview: `${process.env.API_ENDPOINT}/cdn/themes/${this.id}/images/original.jpg`,
                     thumbnail: `${process.env.API_ENDPOINT}/cdn/themes/${this.id}/images/thumb.jpg`,
                     localfilename: `${this.id +
-                    (this.pieceUUIDs?.length > 0 ? `_${this.pieceUUIDs.join(',')}` : '')}.nxtheme`,
+                    (this.pieceUUIDs?.length > 0 ? `_${this.pieceUUIDs.join(",")}` : "")}.nxtheme`,
                     path: `${storagePath}/cache/themes/${this.id +
-                    (this.pieceUUIDs?.length > 0 ? `_${this.pieceUUIDs.join(',')}` : '')}.nxtheme`,
-                    mimetype: 'application/nxtheme',
+                    (this.pieceUUIDs?.length > 0 ? `_${this.pieceUUIDs.join(",")}` : "")}.nxtheme`,
+                    mimetype: "application/nxtheme",
                 });
             } catch (e) {
                 console.error(e);
@@ -115,7 +115,7 @@ export default class CacheableTheme extends Theme {
     };
 
     updateCache = async () => {
-        return new Promise<any>(async (resolve, reject) => {
+        return new Promise<void>(async (resolve, reject) => {
             tmp.dir({unsafeCleanup: true}, async (err, path, cleanupCallback) => {
                 if (err) {
                     reject(err);
@@ -142,7 +142,7 @@ export default class CacheableTheme extends Theme {
                         try {
                             await access(
                                 `${storagePath}/cache/themes/${this.id +
-                                (this.pieceUUIDs?.length > 0 ? `_${this.pieceUUIDs.join(',')}` : '')}.nxtheme`,
+                                (this.pieceUUIDs?.length > 0 ? `_${this.pieceUUIDs.join(",")}` : "")}.nxtheme`,
                                 constants.R_OK | constants.W_OK,
                             );
                         } catch (e) {
@@ -174,7 +174,7 @@ export default class CacheableTheme extends Theme {
                         await moveFile(
                             savedTheme.path,
                             `${storagePath}/cache/themes/${this.id +
-                            (this.pieceUUIDs.length > 0 ? `_${this.pieceUUIDs.join(',')}` : '')}.nxtheme`,
+                            (this.pieceUUIDs.length > 0 ? `_${this.pieceUUIDs.join(",")}` : "")}.nxtheme`,
                         );
 
                         await db.none(

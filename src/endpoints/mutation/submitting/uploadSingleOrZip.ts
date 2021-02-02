@@ -1,17 +1,17 @@
 import filterAsync from "node-filter-async";
-import fs from 'fs';
+import fs from "fs";
 import {errorName} from "../../../util/errorTypes";
 import {getDefaultLayoutID, parseThemeID} from "@themezernx/layout-id-parser/index";
 import {db} from "../../../db/db";
 import {themeTargetToFileName, validThemeTarget} from "../../../util/targetParser";
 import {encrypt} from "../../../util/crypt";
 import {saveFiles} from "../../resolvers";
-import rimraf from 'rimraf';
-import {promisify} from 'util';
-import tmp from 'tmp';
-import AdmZip from 'adm-zip';
-import YAZ0_FILE from 'is-yaz0-file';
-import ZIP_FILE from 'is-zip-file';
+import rimraf from "rimraf";
+import {promisify} from "util";
+import tmp from "tmp";
+import AdmZip from "adm-zip";
+import YAZ0_FILE from "is-yaz0-file";
+import ZIP_FILE from "is-zip-file";
 import Theme from "../../../filetypes/Theme";
 
 const {promises: {readdir, readFile, access}, constants} = fs;
@@ -24,7 +24,7 @@ export default async (_parent, {file}, context, _info) => {
         if (await context.authenticate()) {
             if (!context.req.user.is_blocked) {
                 return await new Promise((resolve, reject) => {
-                    tmp.dir({prefix: 'theme'}, async (err, path, _cleanupCallback) => {
+                    tmp.dir({prefix: "theme"}, async (err, path, _cleanupCallback) => {
                         try {
                             if (err) {
                                 reject(err);
@@ -134,7 +134,7 @@ export default async (_parent, {file}, context, _info) => {
                                                     const {service, id, piece_uuids} = parseThemeID(layoutID);
                                                     // Only fetch the layout if it was created by Themezer
 
-                                                    if (service === 'Themezer') {
+                                                    if (service === "Themezer") {
                                                         try {
                                                             dbLayout = await db.one(
                                                                 `

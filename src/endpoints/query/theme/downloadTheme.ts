@@ -13,7 +13,7 @@ export default async (_parent, {id, piece_uuids}) => {
             [id],
         );
 
-        return await getTheme(id.replace(/t/i, ''), piece_uuids);
+        return await getTheme(id.replace(/t/i, ""), piece_uuids);
     } catch (e) {
         console.error(e);
         throw new Error(e);

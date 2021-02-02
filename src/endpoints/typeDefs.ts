@@ -1,4 +1,4 @@
-const gql = require('graphql-tag');
+const gql = require("graphql-tag");
 
 export default gql`
 	scalar Upload

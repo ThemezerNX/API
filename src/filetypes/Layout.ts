@@ -6,7 +6,7 @@ import {isHex} from "../endpoints/resolvers";
 
 const {
     promises: {writeFile},
-} = require('fs');
+} = require("fs");
 
 export default class Layout {
     private name: string;
@@ -52,7 +52,7 @@ export default class Layout {
     };
 
     saveTo = (folderPath: string) => {
-        return writeFile(`${folderPath}/${this.isCommon ? 'common' : 'layout'}.json`, this.toJSON());
+        return writeFile(`${folderPath}/${this.isCommon ? "common" : "layout"}.json`, this.toJSON());
     };
 
     loadId = async (id, pieceUUIDs?) => {
@@ -125,7 +125,7 @@ export default class Layout {
                 [this.id],
             );
 
-            this.layout = new InjectorLayout(undefined, undefined, 'common');
+            this.layout = new InjectorLayout(undefined, undefined, "common");
             if (dbData.commonlayout) {
                 this.layout.readJSON(dbData.commonlayout);
             }
@@ -134,8 +134,8 @@ export default class Layout {
 
     toJSON = (): string => {
         const id = this.id ? stringifyThemeID({
-            service: 'Themezer',
-            id: this.id + (this.isCommon ? '-common' : ''),
+            service: "Themezer",
+            id: this.id + (this.isCommon ? "-common" : ""),
             piece_uuids: this.pieces.map((p) => p.uuid),
         }) : null;
         !this.isCommon && this.layout.applyPieces(this.pieces);
@@ -152,15 +152,15 @@ export default class Layout {
         this.name = injectorLayout.getName;
         this.author = injectorLayout.getAuthor;
         this.target = injectorLayout.getTarget;
-        this.isCommon = injectorLayout.getTarget === 'common.szs';
+        this.isCommon = injectorLayout.getTarget === "common.szs";
 
         // If the layout has an ID, this can be not the case for example using a layout taken from the DB
         if (!!injectorLayout.getId && findInDB) {
             const {service, id, piece_uuids} = parseThemeID(injectorLayout.getId);
             this.service = service;
             if (id && isHex(id)) {
-                this.isCommon = this.isCommon || id.endsWith('-common');
-                if (service === 'Themezer' && !this.isCommon) {
+                this.isCommon = this.isCommon || id.endsWith("-common");
+                if (service === "Themezer" && !this.isCommon) {
                     await this.loadId(id, piece_uuids);
                 } else {
                     this.id = id;

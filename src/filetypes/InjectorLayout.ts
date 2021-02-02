@@ -1,5 +1,6 @@
 import fs from "fs";
-import {patch} from '@themezernx/json-merger';
+
+const {patch} = require("@themezernx/json-merger");
 
 const {
     promises: {readFile},
@@ -17,7 +18,7 @@ export default class InjectorLayout {
     constructor(name?, author?, target?, id?, hideOnlineBtn?, files?, anims?) {
         this.name = name;
         this.author = author;
-        this.target = target ? (target + '.szs') : undefined;
+        this.target = target ? (target + ".szs") : undefined;
         this.id = id;
         this.hideOnlineBtn = hideOnlineBtn;
         this.files = files;
@@ -53,7 +54,7 @@ export default class InjectorLayout {
     }
 
     readFile = async (file) => {
-        const obj = await readFile(file, 'utf8');
+        const obj = await readFile(file, "utf8");
         this.readJSON(obj);
     };
 
@@ -87,19 +88,19 @@ export default class InjectorLayout {
             // Merge files patches
             if (Array.isArray(this.files)) {
                 this.files = patch(this.files, JSON.parse(shifted.json).Files, [
-                    'FileName',
-                    'PaneName',
-                    'PropName',
-                    'GroupName',
-                    'name',
-                    'MaterialName',
-                    'unknown',
+                    "FileName",
+                    "PaneName",
+                    "PropName",
+                    "GroupName",
+                    "name",
+                    "MaterialName",
+                    "unknown",
                 ]);
             }
 
             // Merge animation files patches
             if (Array.isArray(this.anims)) {
-                this.anims = patch(this.anims, JSON.parse(shifted.json).Anims, ['FileName']);
+                this.anims = patch(this.anims, JSON.parse(shifted.json).Anims, ["FileName"]);
             }
         }
     };

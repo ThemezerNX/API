@@ -3,11 +3,11 @@ import {errorName} from "../../../util/errorTypes";
 
 const updatePackCS = new pgp.helpers.ColumnSet(
     [
-        {name: 'details', cast: 'json'},
-        {name: 'last_updated', cast: 'timestamp without time zone'},
+        {name: "details", cast: "json"},
+        {name: "last_updated", cast: "timestamp without time zone"},
     ],
     {
-        table: 'packs',
+        table: "packs",
     },
 );
 
@@ -21,7 +21,7 @@ export default async (
         await context.authenticate();
 
         let mayModerate = false;
-        if (context.req.user.roles?.includes('admin')) {
+        if (context.req.user.roles?.includes("admin")) {
             mayModerate = true;
         } else {
             const pack = await db.oneOrNone(`

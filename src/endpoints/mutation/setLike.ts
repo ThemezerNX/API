@@ -4,7 +4,7 @@ import {db} from "../../db/db";
 export default async (_parent, {type, id, value}, context, _info) => {
     try {
         const typeLowercase = type.toLowerCase();
-        if (!['creators', 'layouts', 'themes', 'packs'].includes(typeLowercase))
+        if (!["creators", "layouts", "themes", "packs"].includes(typeLowercase))
             return new Error(errorName.INVALID_FIELD);
 
         if (await context.authenticate()) {
@@ -15,11 +15,11 @@ export default async (_parent, {type, id, value}, context, _info) => {
                         `
 									UPDATE creators
 										SET liked_${typeLowercase} = array_append(liked_${typeLowercase}, ${
-                            typeLowercase === 'creators' ? '$2' : "hex_to_int('$2^')"
+                            typeLowercase === "creators" ? "$2" : "hex_to_int('$2^')"
                         })
 									WHERE id = $1
 										AND (liked_${typeLowercase} IS NULL OR NOT ${
-                            typeLowercase === 'creators' ? '$2' : "hex_to_int('$2^')"
+                            typeLowercase === "creators" ? "$2" : "hex_to_int('$2^')"
                         } = ANY(liked_${typeLowercase}))
 								`,
                         [context.req.user.id, id],
@@ -29,10 +29,10 @@ export default async (_parent, {type, id, value}, context, _info) => {
                     await db.none(
                         `
 									UPDATE creators
-										SET liked_${typeLowercase} = array_remove(liked_${typeLowercase}, ${typeLowercase === 'creators' ? '$2' : "hex_to_int('$2^')"})
+										SET liked_${typeLowercase} = array_remove(liked_${typeLowercase}, ${typeLowercase === "creators" ? "$2" : "hex_to_int('$2^')"})
 									WHERE id = $1
 										AND liked_${typeLowercase} IS NOT NULL
-										AND ${typeLowercase === 'creators' ? '$2' : "hex_to_int('$2^')"} = ANY(liked_${typeLowercase})
+										AND ${typeLowercase === "creators" ? "$2" : "hex_to_int('$2^')"} = ANY(liked_${typeLowercase})
 								`,
                         [context.req.user.id, id],
                     );
