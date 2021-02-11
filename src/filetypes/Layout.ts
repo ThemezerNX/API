@@ -3,6 +3,7 @@ import {db} from "../db/db";
 import {parseThemeID, stringifyThemeID} from "@themezernx/layout-id-parser/index";
 import {errorName} from "../util/errorTypes";
 import {isHex} from "../endpoints/resolvers";
+import {uuid} from "uuidv4";
 
 const {
     promises: {writeFile},
@@ -133,11 +134,11 @@ export default class Layout {
     };
 
     toJSON = (): string => {
-        const id = this.id ? stringifyThemeID({
+        const id = stringifyThemeID({
             service: "Themezer",
-            id: this.id + (this.isCommon ? "-common" : ""),
+            id: this.id ? (this.id + (this.isCommon ? "-common" : "")) : (uuid() + "-temp"),
             piece_uuids: this.pieces.map((p) => p.uuid),
-        }) : null;
+        });
         !this.isCommon && this.layout.applyPieces(this.pieces);
         return this.layout.toJSON(id);
     };
