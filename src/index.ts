@@ -134,10 +134,16 @@ if (process.env.NODE_ENV === "development") {
     app.use(
         cors({
             credentials: false,
-            origin: process.env.NODE_ENV === "development" ? "http://localhost:4000" : process.env.WEBSITE_ENDPOINT,
+            origin: process.env.NODE_ENV === "development" ? process.env.WEBSITE_ENDPOINT : null,
         }),
     );
     app.use("/cdn", express.static("../cdn"));
+} else {
+    app.use(
+        cors({
+            credentials: true,
+        }),
+    );
 }
 
 app.get(/\/.+/, function (req, res) {
@@ -145,10 +151,6 @@ app.get(/\/.+/, function (req, res) {
 });
 
 server.applyMiddleware({
-    cors: {
-        credentials: true,
-        origin: process.env.NODE_ENV === "development" ? "http://localhost:4000" : process.env.WEBSITE_ENDPOINT,
-    },
     app,
     path: "/",
 });
