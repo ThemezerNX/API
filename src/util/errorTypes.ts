@@ -16,6 +16,7 @@ export const errorName = {
     FILE_TOO_BIG: "FILE_TOO_BIG",
     MAX_50_NXTHEMES: "MAX_50_NXTHEMES",
     INVALID_FILE_TYPE: "INVALID_FILE_TYPE",
+    INVALID_SCREENSHOT_DIMENSIONS: "INVALID_SCREENSHOT_DIMENSIONS",
     INVALID_TMP: "INVALID_TMP",
     INVALID_ID: "INVALID_ID",
     INVALID_TARGET_NAME: "INVALID_TARGET_NAME",
@@ -116,6 +117,10 @@ export const errorType = {
         message: "Invalid file type detected",
         statusCode: 4004,
     },
+    INVALID_SCREENSHOT_DIMENSIONS: {
+        message: "Screenshots have to be 1280x720",
+        statusCode: 4011,
+    },
     INVALID_TMP: {
         message: "Invalid tmp argument",
         statusCode: 4005,
@@ -125,7 +130,7 @@ export const errorType = {
         statusCode: 4006,
     },
     INVALID_TARGET_NAME: {
-        message: "Invalid target name. What have you done?",
+        message: "Invalid target name. Try recreating the theme",
         statusCode: 4007,
     },
     TARGETS_DONT_MATCH: {

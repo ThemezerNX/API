@@ -12,6 +12,7 @@ import {allowedFilesInNXTheme} from "../../../filetypes/Theme";
 const webhook = require("webhook-discord");
 const rimraf = require("rimraf");
 const JPEG_FILE = require("is-jpeg-file");
+const sizeOf = require("image-size");
 const sharp = require("sharp");
 
 const {
@@ -59,8 +60,16 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                             return new Promise(async (resolve) => {
                                 const path = decrypt(themes[i].tmp);
                                 // If a valid jpeg
-                                if (await isJpegPromisified(`${path}/${file}`)) {
-                                    resolve(path);
+                                const imagePath = `${path}/${file}`;
+                                if (await isJpegPromisified(imagePath)) {
+                                    sizeOf(imagePath, function (err, dimensions) {
+                                        if (err) reject(err);
+                                        else if (dimensions.width === 1280 && dimensions.height === 720) {
+                                            resolve(path);
+                                        } else {
+                                            reject(errorName.INVALID_SCREENSHOT_DIMENSIONS)
+                                        }
+                                    });
                                 }
                             });
                         });
