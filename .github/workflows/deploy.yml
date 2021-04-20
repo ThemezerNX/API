@@ -18,7 +18,9 @@ jobs:
           password: ${{ secrets.SSHPASSWORD }}
           script: |
             cd /home/themezer/API
+            pm2 stop /home/themezer/ecosystem.config.js --only API
             git reset --hard
             git pull
+            yarn
             yarn run deploy
             pm2 reload /home/themezer/ecosystem.config.js --only API
