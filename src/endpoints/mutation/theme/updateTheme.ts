@@ -29,117 +29,112 @@ export default async (
     context,
     _info,
 ) => {
-    try {
-        await context.authenticate();
+    await context.authenticate();
 
-        let mayModerate = false;
-        if (context.req.user.roles?.includes("admin")) {
-            mayModerate = true;
-        } else {
-            const theme = await db.oneOrNone(`
-                SELECT id
-                FROM themes
-                WHERE creator_id = $1
-                  AND id = hex_to_int(\'$2^\')
-            `, [context.req.user.id, id]);
-            if (theme) mayModerate = true;
-        }
+    let mayModerate = false;
+    if (context.req.user.roles?.includes("admin")) {
+        mayModerate = true;
+    } else {
+        const theme = await db.oneOrNone(`
+            SELECT id
+            FROM themes
+            WHERE creator_id = $1
+              AND id = hex_to_int(\'$2^\')
+        `, [context.req.user.id, id]);
+        if (theme) mayModerate = true;
+    }
 
-        if (mayModerate) {
-            return await new Promise(async (resolve, reject) => {
-                tmp.dir({prefix: "theme"}, async (err, path, _cleanupCallback) => {
-                    try {
-                        if (file) {
-                            // Save the screenshot
-                            const filePromises = saveFiles([{
-                                file: file,
-                                savename: "original",
-                                path,
-                            }]);
-                            const savedFiles = await Promise.all(filePromises);
+    if (mayModerate) {
+        return await new Promise(async (resolve, reject) => {
+            tmp.dir({prefix: "theme"}, async (err, path, _cleanupCallback) => {
+                try {
+                    if (file) {
+                        // Save the screenshot
+                        const filePromises = saveFiles([{
+                            file: file,
+                            savename: "original",
+                            path,
+                        }]);
+                        const savedFiles = await Promise.all(filePromises);
 
-                            if (!(await isJpegPromisified(`${path}/${savedFiles[0]}`))) {
-                                reject(errorName.INVALID_FILE_TYPE);
-                            }
-
-                            // Create thumb.jpg
-                            await sharp(`${path}/${savedFiles[0]}`)
-                                .resize(320, 180)
-                                .toFile(`${path}/thumb.jpg`);
-                            // Move to storage
-                            await moveFile(
-                                `${path}/${savedFiles[0]}`,
-                                `${storagePath}/themes/${id}/images/${savedFiles[0]}`,
-                            );
-                            await moveFile(
-                                `${path}/thumb.jpg`,
-                                `${storagePath}/themes/${id}/images/thumb.jpg`,
-                            );
+                        if (!(await isJpegPromisified(`${path}/${savedFiles[0]}`))) {
+                            reject(errorName.INVALID_FILE_TYPE);
                         }
 
-                        // Reject if invalid category amount
-                        if (!categories || categories.length < 1 || categories.length > 10) {
-                            reject(errorName.INVALID_CATEGORY_AMOUNT);
-                            return;
-                        }
-
-                        // Process each category
-                        categories = categories.map((c) =>
-                            c.trim().replace(/(^\w)|(\s\w)/g, (match) => match.toUpperCase()),
+                        // Create thumb.jpg
+                        await sharp(`${path}/${savedFiles[0]}`)
+                            .resize(320, 180)
+                            .toFile(`${path}/thumb.jpg`);
+                        // Move to storage
+                        await moveFile(
+                            `${path}/${savedFiles[0]}`,
+                            `${storagePath}/themes/${id}/images/${savedFiles[0]}`,
                         );
+                        await moveFile(
+                            `${path}/thumb.jpg`,
+                            `${storagePath}/themes/${id}/images/thumb.jpg`,
+                        );
+                    }
 
-                        // Add NSFW as category
-                        if (nsfw) {
-                            categories.push("NSFW");
+                    // Reject if invalid category amount
+                    if (!categories || categories.length < 1 || categories.length > 10) {
+                        reject(errorName.INVALID_CATEGORY_AMOUNT);
+                        return;
+                    }
+
+                    // Process each category
+                    categories = categories.map((c) =>
+                        c.trim().replace(/(^\w)|(\s\w)/g, (match) => match.toUpperCase()),
+                    );
+
+                    // Add NSFW as category
+                    if (nsfw) {
+                        categories.push("NSFW");
+                    }
+
+                    // Get uuids from extra dropdown entries
+                    let splitID = null;
+                    let piece_uuids = null;
+                    if (layout_id) {
+                        splitID = layout_id.split("|");
+                        if (splitID.length > 1) {
+                            // Has piece uuids
+                            piece_uuids = splitID[1].split(",");
                         }
+                    }
 
-                        // Get uuids from extra dropdown entries
-                        let splitID = null;
-                        let piece_uuids = null;
-                        if (layout_id) {
-                            splitID = layout_id.split("|");
-                            if (splitID.length > 1) {
-                                // Has piece uuids
-                                piece_uuids = splitID[1].split(",");
-                            }
-                        }
+                    const updatedTheme = {
+                        details: {
+                            name,
+                            description,
+                            version,
+                        },
+                        layout_id: splitID ? Number(`0x${splitID[0]}`) : null,
+                        pack_id: pack_id ? Number(`0x${pack_id}`) : null,
+                        piece_uuids: used_pieces?.length > 0
+                            ? used_pieces.map((p) => p.value.uuid)
+                            : piece_uuids,
+                        categories,
+                        last_updated: new Date(),
+                    };
 
-                        const updatedTheme = {
-                            details: {
-                                name,
-                                description,
-                                version,
-                            },
-                            layout_id: splitID ? Number(`0x${splitID[0]}`) : null,
-                            pack_id: pack_id ? Number(`0x${pack_id}`) : null,
-                            piece_uuids: used_pieces?.length > 0
-                                ? used_pieces.map((p) => p.value.uuid)
-                                : piece_uuids,
-                            categories,
-                            last_updated: new Date(),
-                        };
+                    const query = () => pgp.helpers.update(updatedTheme, updateThemeCS);
 
-                        const query = () => pgp.helpers.update(updatedTheme, updateThemeCS);
-
-                        try {
-                            await db.none(query() + ` WHERE id = hex_to_int('$1^')`, [id]);
-                            resolve(true);
-                        } catch (e) {
-                            console.error(e);
-                            reject(errorName.DB_SAVE_ERROR);
-                            return;
-                        }
+                    try {
+                        await db.none(query() + ` WHERE id = hex_to_int('$1^')`, [id]);
+                        resolve(true);
                     } catch (e) {
                         console.error(e);
-                        reject(errorName.UNKNOWN);
+                        reject(errorName.DB_SAVE_ERROR);
+                        return;
                     }
-                });
+                } catch (e) {
+                    console.error(e);
+                    reject(errorName.UNKNOWN);
+                }
             });
-        } else {
-            return new Error(errorName.UNAUTHORIZED);
-        }
-    } catch (e) {
-        console.error(e);
-        throw new Error(e);
+        });
+    } else {
+        throw new Error(errorName.UNAUTHORIZED);
     }
 }

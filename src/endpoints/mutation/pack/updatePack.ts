@@ -17,55 +17,50 @@ export default async (
     context,
     _info,
 ) => {
-    try {
-        await context.authenticate();
+    await context.authenticate();
 
-        let mayModerate = false;
-        if (context.req.user.roles?.includes("admin")) {
-            mayModerate = true;
-        } else {
-            const pack = await db.oneOrNone(`
-                SELECT id
-                FROM packs
-                WHERE creator_id = $1
-                  AND id = hex_to_int(\'$2^\')
-            `, [context.req.user.id, id]);
-            if (pack) mayModerate = true;
-        }
+    let mayModerate = false;
+    if (context.req.user.roles?.includes("admin")) {
+        mayModerate = true;
+    } else {
+        const pack = await db.oneOrNone(`
+            SELECT id
+            FROM packs
+            WHERE creator_id = $1
+              AND id = hex_to_int(\'$2^\')
+        `, [context.req.user.id, id]);
+        if (pack) mayModerate = true;
+    }
 
-        if (mayModerate) {
-            return await new Promise(async (resolve, reject) => {
+    if (mayModerate) {
+        return await new Promise(async (resolve, reject) => {
+            try {
+                const updatedPack = {
+                    details: {
+                        name,
+                        description,
+                        color: null,
+                        version,
+                    },
+                    last_updated: new Date(),
+                };
+
+                const query = () => pgp.helpers.update(updatedPack, updatePackCS);
+
                 try {
-                    const updatedPack = {
-                        details: {
-                            name,
-                            description,
-                            color: null,
-                            version,
-                        },
-                        last_updated: new Date(),
-                    };
-
-                    const query = () => pgp.helpers.update(updatedPack, updatePackCS);
-
-                    try {
-                        await db.none(query() + ` WHERE id = hex_to_int('$1^')`, [id]);
-                        resolve(true);
-                    } catch (e) {
-                        console.error(e);
-                        reject(errorName.DB_SAVE_ERROR);
-                        return;
-                    }
+                    await db.none(query() + ` WHERE id = hex_to_int('$1^')`, [id]);
+                    resolve(true);
                 } catch (e) {
                     console.error(e);
-                    reject(errorName.UNKNOWN);
+                    reject(errorName.DB_SAVE_ERROR);
+                    return;
                 }
-            });
-        } else {
-            return new Error(errorName.UNAUTHORIZED);
-        }
-    } catch (e) {
-        console.error(e);
-        throw new Error(e);
+            } catch (e) {
+                console.error(e);
+                reject(errorName.UNKNOWN);
+            }
+        });
+    } else {
+        throw new Error(errorName.UNAUTHORIZED);
     }
 }

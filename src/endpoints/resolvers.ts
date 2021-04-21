@@ -152,108 +152,94 @@ export const saveFiles = (files) =>
     files.map(
         ({file, savename, path}) =>
             new Promise<any>(async (resolve, reject) => {
-                try {
-                    let {createReadStream, filename} = await file.promise;
-                    const stream = createReadStream();
+                let {createReadStream, filename} = await file.promise;
+                const stream = createReadStream();
 
-                    // Add file extension if none to prevent errors with matching file and directory names
-                    const FILE_EXTENSION_REGEX = /\.[^\/.]+$/;
-                    if (!FILE_EXTENSION_REGEX.test(filename)) {
-                        filename = `${savename || filename}.file`;
-                    } else if (savename) {
-                        filename = savename + FILE_EXTENSION_REGEX.exec(filename);
-                    }
-
-                    const writeStream = createWriteStream(`${path}/${filename}`);
-
-                    writeStream.on("finish", () => {
-                        resolve(`${filename}`);
-                    });
-
-                    writeStream.on("error", (error) => {
-                        unlink(path, () => {
-                            // If the uploaded file's size is too big return specific error
-                            if (error.message.includes("exceeds") && error.message.includes("size limit")) {
-                                reject(errorName.FILE_TOO_BIG);
-                            } else {
-                                console.error(error);
-                                reject(errorName.FILE_SAVE_ERROR);
-                            }
-                        });
-                    });
-
-                    stream.on("error", (error) => writeStream.destroy(error));
-
-                    stream.pipe(writeStream);
-                } catch (e) {
-                    reject(e);
+                // Add file extension if none to prevent errors with matching file and directory names
+                const FILE_EXTENSION_REGEX = /\.[^\/.]+$/;
+                if (!FILE_EXTENSION_REGEX.test(filename)) {
+                    filename = `${savename || filename}.file`;
+                } else if (savename) {
+                    filename = savename + FILE_EXTENSION_REGEX.exec(filename);
                 }
+
+                const writeStream = createWriteStream(`${path}/${filename}`);
+
+                writeStream.on("finish", () => {
+                    resolve(`${filename}`);
+                });
+
+                writeStream.on("error", (error) => {
+                    unlink(path, () => {
+                        // If the uploaded file's size is too big return specific error
+                        if (error.message.includes("exceeds") && error.message.includes("size limit")) {
+                            reject(errorName.FILE_TOO_BIG);
+                        } else {
+                            console.error(error);
+                            reject(errorName.FILE_SAVE_ERROR);
+                        }
+                    });
+                });
+
+                stream.on("error", (error) => writeStream.destroy(error));
+
+                stream.pipe(writeStream);
             }),
     );
 
 export const getTheme = (id, piece_uuids) => {
     return new Promise(async (resolve, reject) => {
-        try {
-            const theme = new CacheableTheme();
-            const resolved = await theme.loadId(id, piece_uuids);
+        const theme = new CacheableTheme();
+        const resolved = await theme.loadId(id, piece_uuids);
 
-            resolve({
-                ...resolved,
-                url: `${process.env.API_ENDPOINT}/cdn/cache/themes/${resolved.localfilename}`,
-            });
+        resolve({
+            ...resolved,
+            url: `${process.env.API_ENDPOINT}/cdn/cache/themes/${resolved.localfilename}`,
+        });
 
-            // Increase download count by 1
-            await db.none(
-                `
-                    UPDATE themes
-                    SET dl_count = dl_count + 1
-                    WHERE id = hex_to_int('$1^');
-                `,
-                [id],
-            );
-        } catch (e) {
-            console.error(e);
-            reject(e);
-        }
+        // Increase download count by 1
+        await db.none(
+            `
+                UPDATE themes
+                SET dl_count = dl_count + 1
+                WHERE id = hex_to_int('$1^');
+            `,
+            [id],
+        );
     });
 };
 
 export const downloadPackSeperate = (id) => {
     return new Promise(async (resolve, reject) => {
-        try {
-            const pack = new CacheablePack();
-            await pack.loadId(id);
+        const pack = new CacheablePack();
+        await pack.loadId(id);
 
-            // Map the NXThemes
-            const shouldResolve = pack.getThemes.map((t) => {
-                return {
-                    name: t.name,
-                    pack_name: pack.getName,
-                    target: t.target,
-                    preview: t.preview,
-                    thumbnail: t.thumbnail,
-                    filename: t.filename,
-                    id: t.id,
-                    url: `${process.env.API_ENDPOINT}/cdn/cache/themes/${t.localfilename}`,
-                    mimetype: t.mimetype,
-                };
-            });
+        // Map the NXThemes
+        const shouldResolve = pack.getThemes.map((t) => {
+            return {
+                name: t.name,
+                pack_name: pack.getName,
+                target: t.target,
+                preview: t.preview,
+                thumbnail: t.thumbnail,
+                filename: t.filename,
+                id: t.id,
+                url: `${process.env.API_ENDPOINT}/cdn/cache/themes/${t.localfilename}`,
+                mimetype: t.mimetype,
+            };
+        });
 
-            resolve(shouldResolve);
+        resolve(shouldResolve);
 
-            // Increase download count by 1
-            await db.none(
-                `
-                    UPDATE packs
-                    SET dl_count = dl_count + 1
-                    WHERE id = hex_to_int('$1^');
-                `,
-                [id],
-            );
-        } catch (e) {
-            console.error(e);
-            reject(e);
-        }
+        // Increase download count by 1
+        await db.none(
+            `
+                UPDATE packs
+                SET dl_count = dl_count + 1
+                WHERE id = hex_to_int('$1^');
+            `,
+            [id],
+        );
     });
 };
 

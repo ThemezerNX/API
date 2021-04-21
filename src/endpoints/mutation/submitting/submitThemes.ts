@@ -347,17 +347,16 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                     }
                 });
             } else {
-                return new Error(errorName.SUBMITTING_BLOCKED);
+                throw new Error(errorName.SUBMITTING_BLOCKED);
             }
         } else {
-            return new Error(errorName.UNAUTHORIZED);
+            throw new Error(errorName.UNAUTHORIZED);
         }
     } catch (e) {
-        console.error(e);
         for (const i in themePaths) {
             rimraf(themePaths[i], () => {
             });
         }
-        throw new Error(e);
+        throw e;
     }
 }

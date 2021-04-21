@@ -8,5 +8,11 @@ const config = {
     password: process.env.POSTGRES_PASSWORD,
 };
 
-export const pgp = pgPromise({capSQL: true});
+
+export const pgp = pgPromise({
+    capSQL: true,
+    query(e) {
+        console.log(e.query);
+    },
+});
 export const db = pgp(config);
