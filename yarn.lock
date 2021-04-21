@@ -2962,6 +2962,11 @@ pg-protocol@^1.4.0:
   resolved "https://registry.yarnpkg.com/pg-protocol/-/pg-protocol-1.4.0.tgz#43a71a92f6fe3ac559952555aa3335c8cb4908be"
   integrity sha512-El+aXWcwG/8wuFICMQjM5ZSAm6OWiJicFdNYo+VY3QP+8vI4SvLIWVe51PppTzMhikUJR+PsyIFKqfdXPz/yxA==
 
+pg-tsquery@^8.2.0:
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/pg-tsquery/-/pg-tsquery-8.2.0.tgz#e83a0e807c68cfe0b855a7bf367d8c8481bf1313"
+  integrity sha512-ye1GMhdWoQ+HLkJNgKuhh7UP2mWK+lYsIiR1NmHGxjE6659ellSux+doqBrbjKQvj+ZhBxyJ8wyER2++8730mQ==
+
 pg-types@^2.1.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/pg-types/-/pg-types-2.2.0.tgz#2d0250d636454f7cfa3b6ae0382fdfa8063254a3"

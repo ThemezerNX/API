@@ -129,6 +129,25 @@ export const updateCreatorCS = new pgp.helpers.ColumnSet(
     },
 );
 
+export const sortOptions = [
+    {
+        id: "downloads",
+        column: "dl_count",
+    },
+    {
+        id: "likes",
+        column: "like_count",
+    },
+    {
+        id: "updated",
+        column: "last_updated",
+    },
+    {
+        id: "id",
+        column: "id",
+    },
+];
+
 export const saveFiles = (files) =>
     files.map(
         ({file, savename, path}) =>
@@ -238,111 +257,8 @@ export const downloadPackSeperate = (id) => {
     });
 };
 
-export const filterData = (items, info, {page = 1, limit, query, sort, order = "desc", layouts, nsfw = false}) => {
-    const queryFields = graphqlFields(info);
-
+export const paginateData = (items, info, {page = 1, limit}) => {
     if (items?.length > 0) {
-        if (query) {
-            if (
-                !(
-                    !!queryFields.id &&
-                    !!queryFields.details?.name &&
-                    !!queryFields.details?.description &&
-                    !!(info.fieldName !== "layoutList" ? queryFields.categories : true)
-                )
-            ) {
-                throw errorName.CANNOT_SEARCH_QUERY;
-            }
-
-            const miniSearch = new MiniSearch({
-                fields: ["id", "name", "description", "categories"],
-                storeFields: ["id"],
-                searchOptions: {
-                    // boost: { name: 2 },
-                    fuzzy: 0.1,
-                },
-            });
-
-            const itms = items.map((item: any) => {
-                return {
-                    id: info.fieldName.charAt(0) + item.id,
-                    name: item.details.name,
-                    description: item.details.name,
-                    categories: item.categories ? item.categories.join(" ") : "",
-                };
-            });
-
-            miniSearch.addAll(itms);
-            const rs = miniSearch.search(query, {
-                prefix: true,
-            });
-            const resultIDs = rs.map((r: any) => r.id);
-
-            items = items.filter((item: any) => resultIDs.includes(info.fieldName.charAt(0) + item.id));
-        }
-
-        if (!nsfw && info.fieldName !== "layoutList") {
-            if (!queryFields.categories) throw errorName.CANNOT_FILTER_NSFW;
-
-            items = items.filter((item: any): boolean => {
-                return !item.categories?.includes("NSFW");
-            });
-        }
-
-        if (layouts?.length > 0) {
-            if (info.fieldName === "packList" ? !queryFields.themes.layout?.id : !queryFields.layout?.id)
-                throw errorName.CANNOT_FILTER_LAYOUTS;
-
-            items = items.filter((item: any): boolean => {
-                return layouts.some((id: string) => {
-                    if (item.themes) {
-                        // Pack
-                        return item.themes.some((t: any) => t.layout?.id === id);
-                    } else if (item.layout) {
-                        // Theme
-                        return item.layout.id === id;
-                    } else return false;
-                });
-            });
-        }
-
-        if (sort) {
-            const sortOptions = [
-                {
-                    id: "downloads",
-                    key: "dl_count",
-                },
-                {
-                    id: "likes",
-                    key: "like_count",
-                },
-                {
-                    id: "updated",
-                    key: "last_updated",
-                },
-                {
-                    id: "id",
-                    key: "id",
-                },
-            ];
-
-            const sortOption = sortOptions.find((o: any) => o.id === sort);
-            if (!sortOption) throw errorName.INVALID_SORT;
-
-            if (sortOption.id === "downloads" && !queryFields.dl_count) throw errorName.CANNOT_SORT_BY_DOWNLOADS;
-            if (sortOption.id === "likes" && !queryFields.like_count) throw errorName.CANNOT_SORT_BY_LIKES;
-            if (sortOption.id === "updated" && order.toLowerCase() === "asc" && !queryFields.last_updated)
-                throw errorName.CANNOT_SORT_BY_UPDATED;
-
-            items = items.sort((a: any, b: any) => {
-                if (order.toLowerCase() === "asc") {
-                    return a[sortOption.key] - b[sortOption.key];
-                } else {
-                    return b[sortOption.key] - a[sortOption.key];
-                }
-            });
-        }
-
         const item_count = items.length;
 
         let page_count = 1;

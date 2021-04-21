@@ -1,26 +1,27 @@
 import {pgp} from "../db/db";
+import {sortOptions} from "./resolvers";
+
+const tsquery = require("pg-tsquery")({negated: /\s[!-]$/});
 
 const {
     as: {format},
 } = pgp;
 
-const list = {
-    orderBy: ({order = "desc"}) => {
-        return {id: order};
-    },
-    where: (table, {target, creators}) => {
-        const wheres = [];
+const packCategories = (table) => {
+    return `(
+        SELECT array_agg(c) as categories
+        FROM (
+            SELECT DISTINCT UNNEST(categories)
+            FROM themes
+            WHERE pack_id = ${table}.id
+            ORDER BY 1 ASC
+        ) as t(c)
+    )`;
+};
 
-        if (target) {
-            wheres.push(format(`${table}.target = $1`, [target]));
-        }
-
-        if (creators?.length > 0) {
-            wheres.push(format(`${table}.creator_id = ANY($1)`, [creators]));
-        }
-
-        return wheres.join(" AND ");
-    },
+const getSortColumn = (by) => {
+    const sortOption = sortOptions.find((o: any) => o.id === by);
+    return sortOption.column;
 };
 
 export default {
@@ -35,23 +36,128 @@ export default {
             layout: {
                 where: (table, {id}) => format(`${table}.id = hex_to_int('$1^')`, [id]),
             },
-            layoutList: list,
+            layoutList: {
+                orderBy: ({sort = "id", order = "DESC"}) => {
+                    return {
+                        [getSortColumn(sort)]: order,
+                    };
+                },
+                where: (table, {target, creators, query}) => {
+                    const wheres = [];
+
+                    if (target) {
+                        wheres.push(format(`${table}.target = $1`, [target]));
+                    }
+
+                    if (creators?.length > 0) {
+                        wheres.push(format(`${table}.creator_id = ANY($1)`, [creators]));
+                    }
+
+                    if (query?.length > 0) {
+                        wheres.push(format(`
+                        (
+                              TO_TSVECTOR('english', ${table}.details ->> 'name') ||
+                              TO_TSVECTOR('english', (CASE
+                                                          WHEN ${table}.details ->> 'description' IS NULL THEN ''
+                                                          ELSE ${table}.details ->> 'description' END)) ||
+                              TO_TSVECTOR(TO_HEX(${table}.id))
+                        ) @@ TO_TSQUERY($1)
+                        `, [tsquery(query + "*")]));
+                    }
+
+                    return wheres.join(" AND ");
+                },
+            },
             theme: {
                 where: (table, {id}) => format(`${table}.id = hex_to_int('$1^')`, [id]),
             },
-            themeList: list,
+            themeList: {
+                orderBy: ({sort = "id", order = "DESC"}) => {
+                    return {
+                        [getSortColumn(sort)]: order,
+                    };
+                },
+                where: (table, {target, creators, nsfw, layouts, query}) => {
+                    const wheres = [];
+
+                    if (target) {
+                        wheres.push(format(`${table}.target = $1`, [target]));
+                    }
+
+                    if (creators?.length > 0) {
+                        wheres.push(format(`${table}.creator_id = ANY($1)`, [creators]));
+                    }
+
+                    if (!nsfw) {
+                        wheres.push(`NOT 'NSFW' = ANY(${table}.categories)`);
+                    }
+
+                    if (layouts?.length > 0) {
+                        wheres.push(format(`to_hex(${table}.layout_id) = ANY($1)`, [layouts]));
+                    }
+
+
+                    if (query?.length > 0) {
+                        wheres.push(format(`
+                        (
+                              TO_TSVECTOR('english', ${table}.details ->> 'name') ||
+                              TO_TSVECTOR('english', (CASE
+                                                          WHEN ${table}.details ->> 'description' IS NULL THEN ''
+                                                          ELSE ${table}.details ->> 'description' END)) ||
+                              TO_TSVECTOR('t' || TO_HEX(${table}.id)) ||
+                              TO_TSVECTOR('english', ARRAY_TO_STRING(${table}.categories, ' '::TEXT))
+                        ) @@ TO_TSQUERY($1)
+                        `, [tsquery(query + "*")]));
+                    }
+
+                    return wheres.join(" AND ");
+                },
+            },
             pack: {
                 where: (table, {id}) => format(`${table}.id = hex_to_int('$1^')`, [id]),
             },
             packList: {
-                orderBy: ({order = "desc"}) => {
-                    return {id: order};
+                orderBy: ({sort = "id", order = "DESC"}) => {
+                    return {
+                        [getSortColumn(sort)]: order,
+                    };
                 },
-                where: (table, {creators}) => {
+                where: (table, {creators, nsfw, layouts, query}) => {
                     const wheres = [];
 
                     if (creators?.length > 0) {
                         wheres.push(format(`${table}.creator_id = ANY($1)`, [creators]));
+                    }
+
+                    if (!nsfw) {
+                        wheres.push(`NOT 'NSFW' = ANY(ARRAY(${packCategories(table)}))`);
+                    }
+
+                    if (layouts?.length > 0) {
+                        wheres.push(format(`
+                            hexes_to_ints($1) && ARRAY(
+                                SELECT ARRAY_AGG(l)
+                                FROM (
+                                         SELECT layout_id
+                                         FROM themes
+                                         WHERE pack_id = ${table}.id
+                                     ) AS t(l)
+                            )`,
+                            [layouts],
+                        ));
+                    }
+
+                    if (query?.length > 0) {
+                        wheres.push(format(`
+                        (
+                              TO_TSVECTOR('english', ${table}.details ->> 'name') ||
+                              TO_TSVECTOR('english', (CASE
+                                                          WHEN ${table}.details ->> 'description' IS NULL THEN ''
+                                                          ELSE ${table}.details ->> 'description' END)) ||
+                              TO_TSVECTOR('p' || TO_HEX(${table}.id)) ||
+                              TO_TSVECTOR('english', ARRAY_TO_STRING(${packCategories(table)}, ' '::TEXT))
+                        ) @@ TO_TSQUERY($1)
+                        `, [tsquery(query + "*")]));
                     }
 
                     return wheres.join(" AND ");
@@ -323,16 +429,7 @@ export default {
             },
             last_updated: {sqlColumn: "last_updated"},
             categories: {
-                sqlExpr: (table) => `(
-                    SELECT array_agg(c) as categories
-                    FROM (
-                        SELECT DISTINCT UNNEST(categories)
-                        FROM themes
-						WHERE pack_id = ${table}.id
-						ORDER BY "unnest" ASC
-                    ) as t(c)
-                )
-                `,
+                sqlExpr: (table) => packCategories(table),
             },
             dl_count: {sqlColumn: "dl_count"},
             like_count: {

@@ -1,12 +1,18 @@
-import joinMonster from 'join-monster'
+import joinMonster from "join-monster";
 import {db} from "../../db/db";
 import {errorName} from "../../util/errorTypes";
-import {filterData, joinMonsterOptions} from "../resolvers";
+import {paginateData, joinMonsterOptions, sortOptions} from "../resolvers";
 
 export default async (_parent, args, context, info) => {
     try {
         if (args.order && !(args.order.toLowerCase() === "asc" || args.order.toLowerCase() === "desc")) {
             throw errorName.INVALID_ORDER;
+        }
+
+        // If an unknown sort value is specified, throw an error
+        const sortOption = sortOptions.find((o) => o.id === args.sort);
+        if (args.sort && !sortOption) {
+            throw errorName.INVALID_SORT;
         }
 
         return await new Promise(async (resolve, reject) => {
@@ -20,7 +26,7 @@ export default async (_parent, args, context, info) => {
             );
 
             try {
-                const filtered = filterData(dbData, info, args);
+                const filtered = paginateData(dbData, info, args);
                 context.pagination = filtered.pagination;
                 resolve(filtered.items);
             } catch (e) {
