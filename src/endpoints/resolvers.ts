@@ -133,7 +133,7 @@ export const sortOptions = [
     },
     {
         id: "likes",
-        column: "like_count",
+        column: `id" = 1, "like_count`, // hacky way because joinmonster is limited
     },
     {
         id: "updated",
@@ -185,7 +185,7 @@ export const saveFiles = (files) =>
     );
 
 export const getTheme = (id, piece_uuids) => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve) => {
         const theme = new CacheableTheme();
         const resolved = await theme.loadId(id, piece_uuids);
 
@@ -207,7 +207,7 @@ export const getTheme = (id, piece_uuids) => {
 };
 
 export const downloadPackSeperate = (id) => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve) => {
         const pack = new CacheablePack();
         await pack.loadId(id);
 
