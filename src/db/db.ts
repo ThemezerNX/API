@@ -10,9 +10,6 @@ const config = {
 
 
 export const pgp = pgPromise({
-    capSQL: true,
-    query(e) {
-        console.log(e.query);
-    },
+    capSQL: true
 });
 export const db = pgp(config);
