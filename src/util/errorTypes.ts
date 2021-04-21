@@ -199,43 +199,13 @@ export const errorType = {
     },
 
     // Filter errors
-    CANNOT_SEARCH_QUERY: {
-        message:
-            "The 'id', 'details.name', 'details.description' and if not layouts: 'categories' fields are required when the 'query' argument is used",
-        statusCode: 400,
-    },
-    CANNOT_FILTER_NSFW: {
-        message: "The 'categories' field is required when the 'nsfw' argument is used",
-        statusCode: 400,
-    },
-    CANNOT_FILTER_CREATORS: {
-        message: "The 'creator.id' field is required when the 'creators' argument is used",
-        statusCode: 400,
-    },
-    CANNOT_FILTER_LAYOUTS: {
-        message: "The 'layout.id' field is required when the 'layouts' argument is used",
-        statusCode: 400,
-    },
-
     INVALID_SORT: {
         message: "The sort argument value may only be 'downloads', 'likes', 'updated' or 'id' (default)",
         statusCode: 400,
     },
-    CANNOT_SORT_BY_DOWNLOADS: {
-        message: "The 'dl_count' field is required required when sorting by 'downloads'",
-        statusCode: 400,
-    },
-    CANNOT_SORT_BY_LIKES: {
-        message: "The 'like_count' field is required required when sorting by 'likes'",
-        statusCode: 400,
-    },
-    CANNOT_SORT_BY_UPDATED: {
-        message: "The 'last_updated' field is required required when sorting by 'updated' + 'asc'",
-        statusCode: 400,
-    },
     INVALID_ORDER: {
         message: "The order argument value may only be 'asc' or 'desc'",
-        statusCode: 400,
+        statusCode: 401,
     },
 
     // DB errors

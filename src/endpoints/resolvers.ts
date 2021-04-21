@@ -34,9 +34,6 @@ import downloadTheme from "./query/theme/downloadTheme";
 import CacheableTheme from "../filetypes/CacheableTheme";
 import CacheablePack from "../filetypes/CacheablePack";
 
-const graphqlFields = require("graphql-fields");
-const MiniSearch = require("minisearch");
-
 const {
     createWriteStream,
     unlink,
