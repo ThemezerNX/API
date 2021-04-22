@@ -33,15 +33,8 @@ export default async (_parent, args, context, info) => {
             info,
             context,
             async (sql) => {
-                const paginatedSql = `
-                        WITH paginate AS (
-                            ${sql}
-                        )
-                        SELECT *
-                        FROM paginate
-                        RIGHT JOIN (SELECT count(DISTINCT paginate.int_id)::INT FROM paginate) c(item_count) ON true;
-                    `
-                    .replace("SELECT", `SELECT "${info.fieldName}".id as "int_id",`)
+                const paginatedSql = sql
+                    .replace("SELECT", `SELECT "$total"::INT as item_count,`)
                     .replace("LIMIT 1 OFFSET 0", `LIMIT ${limit} OFFSET ${offset}`);
 
                 const data = await db.any(paginatedSql);
