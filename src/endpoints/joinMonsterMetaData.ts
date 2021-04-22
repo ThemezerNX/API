@@ -67,6 +67,7 @@ export default {
 
                     return wheres.join(" AND ");
                 },
+                limit: 1, // is later replaced
             },
             theme: {
                 where: (table, {id}) => format(`${table}.id = hex_to_int('$1^')`, [id]),
@@ -112,6 +113,7 @@ export default {
 
                     return wheres.join(" AND ");
                 },
+                limit: 1, // is later replaced
             },
             pack: {
                 where: (table, {id}) => format(`${table}.id = hex_to_int('$1^')`, [id]),
@@ -162,6 +164,7 @@ export default {
 
                     return wheres.join(" AND ");
                 },
+                limit: 1, // is later replaced
             },
         },
     },
@@ -265,6 +268,20 @@ export default {
             },
         },
     },
+    PreviewTypes: {
+        sqlTable: "themes",
+        uniqueKey: "id",
+        fields: {
+            original: {
+                sqlExpr: (table) =>
+                    `CONCAT('${process.env.API_ENDPOINT}/cdn/themes/', to_hex(${table}.id), '/images/original.jpg')`,
+            },
+            thumb: {
+                sqlExpr: (table) =>
+                    `CONCAT('${process.env.API_ENDPOINT}/cdn/themes/', to_hex(${table}.id), '/images/thumb.jpg')`,
+            },
+        },
+    },
     LayoutDetails: {
         sqlTable: "layouts",
         uniqueKey: "id",
@@ -349,20 +366,6 @@ export default {
 					FROM creators
 					WHERE ${table}.id = ANY(liked_layouts)
                 )`,
-            },
-        },
-    },
-    PreviewTypes: {
-        sqlTable: "themes",
-        uniqueKey: "id",
-        fields: {
-            original: {
-                sqlExpr: (table) =>
-                    `CONCAT('${process.env.API_ENDPOINT}/cdn/themes/', to_hex(${table}.id), '/images/original.jpg')`,
-            },
-            thumb: {
-                sqlExpr: (table) =>
-                    `CONCAT('${process.env.API_ENDPOINT}/cdn/themes/', to_hex(${table}.id), '/images/thumb.jpg')`,
             },
         },
     },

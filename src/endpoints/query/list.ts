@@ -1,17 +1,14 @@
 import joinMonster from "join-monster";
-import {db, pgp} from "../../db/db";
+import {db} from "../../db/db";
 import {errorName} from "../../util/errorTypes";
 import {joinMonsterOptions, sortOptions} from "../resolvers";
 
 const graphqlFields = require("graphql-fields");
-const {
-    as: {format},
-} = pgp;
 
 const defaultLimit = 20;
 
 export default async (_parent, args, context, info) => {
-    if (args.order && !(args.order.toLowerCase() === "asc" || args.order.toLowerCase() === "desc")) {
+    if (args.order && (args.order.length === 0 || !(args.order.toLowerCase() === "asc" || args.order.toLowerCase() === "desc"))) {
         throw new Error(errorName.INVALID_ORDER);
     }
 
@@ -36,18 +33,16 @@ export default async (_parent, args, context, info) => {
             info,
             context,
             async (sql) => {
-                const paginatedSql = format(`
-                    WITH paginate AS (
-                        ${sql}
-                    )
-                    SELECT *
-                    FROM (
-                             TABLE paginate
-                                 OFFSET $1
-                                 LIMIT $2
-                         ) sub
-                             RIGHT JOIN (SELECT count(*)::INT FROM paginate) c(item_count) ON true;
-                `, [offset, limit]);
+                const paginatedSql = `
+                        WITH paginate AS (
+                            ${sql}
+                        )
+                        SELECT *
+                        FROM paginate
+                        RIGHT JOIN (SELECT count(DISTINCT paginate.int_id)::INT FROM paginate) c(item_count) ON true;
+                    `
+                    .replace("SELECT", `SELECT "${info.fieldName}".id as "int_id",`)
+                    .replace("LIMIT 1 OFFSET 0", `LIMIT ${limit} OFFSET ${offset}`);
 
                 const data = await db.any(paginatedSql);
                 item_count = data[0]?.item_count || 0;

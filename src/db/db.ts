@@ -14,6 +14,7 @@ const options = {
 };
 if (process.env.NODE_ENV === "development") {
     options.query = (e) => {
+        console.log("-----------------------------");
         console.log(e.query);
     };
 }
