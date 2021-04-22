@@ -240,6 +240,41 @@ export const downloadPackSeperate = (id) => {
     });
 };
 
+export const paginateData = (items, info, {page = 1, limit}) => {
+    if (items?.length > 0) {
+        const item_count = items.length;
+
+        let page_count = 1;
+        if (limit) {
+            page_count = Math.ceil(item_count / limit);
+        }
+
+        const start = (page - 1) * limit;
+        const end = start + limit;
+
+        return {
+            items: limit ? items.slice(start, end) : items,
+            pagination: {
+                page: page || 1,
+                limit,
+                page_count,
+                item_count,
+            },
+        };
+    } else {
+        return {
+            items: [],
+            pagination: {
+                page,
+                limit,
+                page_count: 0,
+                item_count: 0,
+            },
+        };
+    }
+};
+
+// noinspection ES6ShorthandObjectProperty
 export default {
     JSON: GraphQLJSON,
     Query: {
