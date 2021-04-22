@@ -1,14 +1,9 @@
 import joinMonster from "join-monster";
-import {db, pgp} from "../../db/db";
+import {db} from "../../db/db";
 import {errorName} from "../../util/errorTypes";
-import {joinMonsterOptions, sortOptions} from "../resolvers";
+import {joinMonsterOptions, paginateData, sortOptions} from "../resolvers";
 
 const graphqlFields = require("graphql-fields");
-const {
-    as: {format},
-} = pgp;
-
-const defaultLimit = 20;
 
 export default async (_parent, args, context, info) => {
     if (args.order && !(args.order.toLowerCase() === "asc" || args.order.toLowerCase() === "desc")) {
@@ -27,44 +22,19 @@ export default async (_parent, args, context, info) => {
     }
 
     return await new Promise(async (resolve, reject) => {
-        const limit = args?.limit >= 0 ? args.limit : defaultLimit;
-        const page = args?.page > 0 ? args.page : 1;
-        const offset = limit * (page - 1);
-        let item_count;
-
-        const dbData = await joinMonster(
+        let dbData = await joinMonster(
             info,
             context,
-            async (sql) => {
-                const paginatedSql = format(`
-                    WITH paginate AS (
-                        ${sql}
-                    )
-                    SELECT *
-                    FROM (
-                             TABLE paginate
-                                 OFFSET $1
-                                 LIMIT $2
-                         ) sub
-                             RIGHT JOIN (SELECT count(*)::INT FROM paginate) c(item_count) ON true;
-                `, [offset, limit]);
-
-                const data = await db.any(paginatedSql);
-                item_count = data[0]?.item_count || 0;
-                return data;
+            (sql) => {
+                return db.any(sql);
             },
             joinMonsterOptions,
         );
 
         try {
-            context.pagination = {
-                page,
-                limit,
-                page_count: Math.ceil(item_count / limit),
-                item_count,
-            };
-
-            resolve(dbData || []);
+            const filtered = paginateData(dbData, info, args);
+            context.pagination = filtered.pagination;
+            resolve(filtered.items);
         } catch (e) {
             reject(e);
         }
