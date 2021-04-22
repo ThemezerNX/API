@@ -30,7 +30,6 @@
         "extract-zip": "^2.0.0",
         "fs-symlink": "^1.2.1",
         "graphql": "^15.0.0",
-        "graphql-fields": "^2.0.3",
         "graphql-tag": "^2.10.3",
         "graphql-tools": "^5.0.0",
         "graphql-type-json": "^0.3.1",

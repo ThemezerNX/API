@@ -133,7 +133,7 @@ export const sortOptions = [
     },
     {
         id: "likes",
-        column: `id" = 1, "like_count`, // hacky way because joinmonster is limited
+        column: "like_count",
     },
     {
         id: "updated",

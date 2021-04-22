@@ -19,8 +19,18 @@ const packCategories = (table) => {
     )`;
 };
 
-const getSortColumn = (by) => {
+const getSortColumn = (by, order, fieldName) => {
     const sortOption = sortOptions.find((o: any) => o.id === by);
+
+    // Because JoinMonster is limited, this is the only way to properly sort by likes
+    if (sortOption.column === "like_count") {
+        return `id" = 1, (
+            SELECT COUNT(*)
+            FROM creators
+            WHERE "${fieldName}".id = ANY(liked_${fieldName.replace("List", "") + "s"})
+        ) ${order} --`;
+    }
+
     return sortOption.column;
 };
 
@@ -37,9 +47,9 @@ export default {
                 where: (table, {id}) => format(`${table}.id = hex_to_int('$1^')`, [id]),
             },
             layoutList: {
-                orderBy: ({sort = "id", order = "DESC"}) => {
+                orderBy: ({sort = "id", order = "DESC"}, {fieldName}) => {
                     return {
-                        [getSortColumn(sort)]: order,
+                        [getSortColumn(sort, order, fieldName)]: order,
                     };
                 },
                 where: (table, {target, creators, query}) => {
@@ -73,9 +83,9 @@ export default {
                 where: (table, {id}) => format(`${table}.id = hex_to_int('$1^')`, [id]),
             },
             themeList: {
-                orderBy: ({sort = "id", order = "DESC"}) => {
+                orderBy: ({sort = "id", order = "DESC"}, {fieldName}) => {
                     return {
-                        [getSortColumn(sort)]: order,
+                        [getSortColumn(sort, order, fieldName)]: order,
                     };
                 },
                 where: (table, {target, creators, nsfw, layouts, query}) => {
@@ -119,9 +129,9 @@ export default {
                 where: (table, {id}) => format(`${table}.id = hex_to_int('$1^')`, [id]),
             },
             packList: {
-                orderBy: ({sort = "id", order = "DESC"}) => {
+                orderBy: ({sort = "id", order = "DESC"}, {fieldName}) => {
                     return {
-                        [getSortColumn(sort)]: order,
+                        [getSortColumn(sort, order, fieldName)]: order,
                     };
                 },
                 where: (table, {creators, nsfw, layouts, query}) => {

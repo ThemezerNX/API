@@ -40,7 +40,6 @@ export const errorName = {
     PACK_NOT_FOUND: "PACK_NOT_FOUND",
 
     INVALID_SORT: "INVALID_SORT",
-    CANNOT_SORT_BY_LIKES: "CANNOT_SORT_BY_LIKES",
     INVALID_ORDER: "INVALID_ORDER",
 
     DB_SAVE_ERROR: "DB_SAVE_ERROR",
@@ -195,10 +194,6 @@ export const errorType = {
     // Filter errors
     INVALID_SORT: {
         message: "The sort argument value may only be 'downloads', 'likes', 'updated' or 'id' (default)",
-        statusCode: 400,
-    },
-    CANNOT_SORT_BY_LIKES: {
-        message: "The 'like_count' field is required required when sorting by 'likes'",
         statusCode: 400,
     },
     INVALID_ORDER: {
