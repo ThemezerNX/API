@@ -1,9 +1,14 @@
 import joinMonster from "join-monster";
-import {db} from "../../db/db";
+import {db, pgp} from "../../db/db";
 import {errorName} from "../../util/errorTypes";
-import {joinMonsterOptions, paginateData, sortOptions} from "../resolvers";
+import {joinMonsterOptions, sortOptions} from "../resolvers";
 
 const graphqlFields = require("graphql-fields");
+const {
+    as: {format},
+} = pgp;
+
+const defaultLimit = 20;
 
 export default async (_parent, args, context, info) => {
     if (args.order && !(args.order.toLowerCase() === "asc" || args.order.toLowerCase() === "desc")) {
@@ -22,19 +27,44 @@ export default async (_parent, args, context, info) => {
     }
 
     return await new Promise(async (resolve, reject) => {
-        let dbData = await joinMonster(
+        const limit = args?.limit >= 0 ? args.limit : defaultLimit;
+        const page = args?.page > 0 ? args.page : 1;
+        const offset = limit * (page - 1);
+        let item_count;
+
+        const dbData = await joinMonster(
             info,
             context,
-            (sql) => {
-                return db.any(sql);
+            async (sql) => {
+                const paginatedSql = format(`
+                    WITH paginate AS (
+                        ${sql}
+                    )
+                    SELECT *
+                    FROM (
+                             TABLE paginate
+                                 OFFSET $1
+                                 LIMIT $2
+                         ) sub
+                             RIGHT JOIN (SELECT count(*)::INT FROM paginate) c(item_count) ON true;
+                `, [offset, limit]);
+
+                const data = await db.any(paginatedSql);
+                item_count = data[0]?.item_count || 0;
+                return data;
             },
             joinMonsterOptions,
         );
 
         try {
-            const filtered = paginateData(dbData, info, args);
-            context.pagination = filtered.pagination;
-            resolve(filtered.items);
+            context.pagination = {
+                page,
+                limit,
+                page_count: Math.ceil(item_count / limit),
+                item_count,
+            };
+
+            resolve(dbData || []);
         } catch (e) {
             reject(e);
         }
