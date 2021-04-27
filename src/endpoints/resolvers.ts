@@ -170,10 +170,10 @@ export const saveFiles = (files) =>
                     unlink(path, () => {
                         // If the uploaded file's size is too big return specific error
                         if (error.message.includes("exceeds") && error.message.includes("size limit")) {
-                            reject(errorName.FILE_TOO_BIG);
+                            reject(new Error(errorName.FILE_TOO_BIG));
                         } else {
                             console.error(error);
-                            reject(errorName.FILE_SAVE_ERROR);
+                            reject(new Error(errorName.FILE_SAVE_ERROR));
                         }
                     });
                 });
@@ -185,24 +185,28 @@ export const saveFiles = (files) =>
     );
 
 export const getTheme = (id, piece_uuids) => {
-    return new Promise(async (resolve) => {
-        const theme = new CacheableTheme();
-        const resolved = await theme.loadId(id, piece_uuids);
+    return new Promise(async (resolve, reject) => {
+        try {
+            const theme = new CacheableTheme();
+            const resolved = await theme.loadId(id, piece_uuids);
 
-        resolve({
-            ...resolved,
-            url: `${process.env.API_ENDPOINT}/cdn/cache/themes/${resolved.localfilename}`,
-        });
+            resolve({
+                ...resolved,
+                url: `${process.env.API_ENDPOINT}/cdn/cache/themes/${resolved.localfilename}`,
+            });
 
-        // Increase download count by 1
-        await db.none(
-            `
-                UPDATE themes
-                SET dl_count = dl_count + 1
-                WHERE id = hex_to_int('$1^');
-            `,
-            [id],
-        );
+            // Increase download count by 1
+            await db.none(
+                `
+                    UPDATE themes
+                    SET dl_count = dl_count + 1
+                    WHERE id = hex_to_int('$1^');
+                `,
+                [id],
+            );
+        } catch (e) {
+            reject(e);
+        }
     });
 };
 

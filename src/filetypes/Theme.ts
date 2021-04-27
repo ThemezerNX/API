@@ -113,7 +113,7 @@ export default class Theme {
             PythonShell.run("main.py", options, async (err) => {
                 if (err) {
                     console.error(err);
-                    reject(errorName.NXTHEME_CREATE_FAILED);
+                    reject(new Error(errorName.NXTHEME_CREATE_FAILED));
                     rimraf(folderPath, () => {
                     });
                     return;
@@ -137,7 +137,8 @@ export default class Theme {
         return new Promise(((resolve, reject) => {
             tmp.dir({unsafeCleanup: true}, async (err, path, _cleanupCallback) => {
                 if (err) {
-                    reject(err);
+                    console.error(err);
+                    reject(new Error(errorName.FILE_SAVE_ERROR));
                     return;
                 }
 
@@ -162,7 +163,7 @@ export default class Theme {
                 PythonShell.run("main.py", options, async (err) => {
                     if (err) {
                         console.error(err);
-                        reject(errorName.NXTHEME_UNPACK_FAILED);
+                        reject(new Error(errorName.NXTHEME_UNPACK_FAILED));
                         return;
                     }
 

@@ -17,7 +17,7 @@ export default async (_parent, _args, context, info) => {
         if (dbData) {
             resolve(dbData);
         } else {
-            reject(errorName.CREATOR_NOT_EXIST);
+            reject(new Error(errorName.CREATOR_NOT_EXIST));
         }
     });
 }

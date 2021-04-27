@@ -21,11 +21,11 @@ export default async (_parent, {limit = 1}) => {
             if (dbData.length > 0) {
                 resolve(dbData.map((r) => r.id));
             } else {
-                reject(errorName.NO_CONTENT);
+                reject(new Error(errorName.NO_CONTENT));
             }
         } catch (e) {
             console.error(e);
-            reject(errorName.NO_CONTENT);
+            reject(new Error(errorName.NO_CONTENT));
         }
     });
 }

@@ -56,7 +56,7 @@ export default async (_parent, {themeName, blackImg, whiteImg}, _context, _info)
                 async function (err, _stdout, stderr) {
                     if (err || stderr) {
                         console.error(err || stderr);
-                        reject(errorName.FILE_READ_ERROR);
+                        reject(new Error(errorName.FILE_READ_ERROR));
                         rimraf(path, () => {
                         });
                         cleanupCallback();

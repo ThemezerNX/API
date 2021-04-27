@@ -49,7 +49,7 @@ export default async (_parent, {id}, context, _info) => {
                 } else resolve(null);
             } catch (e) {
                 console.error(e);
-                reject(errorName.THEME_NOT_FOUND);
+                reject(new Error(errorName.THEME_NOT_FOUND));
             }
         } else {
             throw new Error(errorName.UNAUTHORIZED);

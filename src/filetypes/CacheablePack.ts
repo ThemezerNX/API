@@ -75,7 +75,7 @@ export default class CacheablePack extends Pack {
 
             } catch (e) {
                 console.error(e);
-                reject(errorName.PACK_NOT_FOUND);
+                reject(new Error(errorName.PACK_NOT_FOUND));
                 return;
             }
         });
@@ -85,7 +85,8 @@ export default class CacheablePack extends Pack {
         return new Promise((resolve, reject) => {
             tmp.dir({unsafeCleanup: true}, async (err, _path, _cleanupCallback) => {
                 if (err) {
-                    reject(err);
+                    console.error(err);
+                    reject(new Error(errorName.FILE_SAVE_ERROR));
                     return;
                 }
 
@@ -140,7 +141,7 @@ export default class CacheablePack extends Pack {
                                 );
                             } catch (e) {
                                 console.error(e);
-                                reject(errorName.PACK_CREATE_FAILED);
+                                reject(new Error(errorName.PACK_CREATE_FAILED));
                                 return;
                             }
                         }
@@ -158,10 +159,10 @@ export default class CacheablePack extends Pack {
                             [this.id],
                         );
                     }
-                    resolve();
+                    resolve(true);
                 } catch (e) {
                     console.error(e);
-                    reject(errorName.PACK_CREATE_FAILED);
+                    reject(new Error(errorName.PACK_CREATE_FAILED));
                 }
             });
         });

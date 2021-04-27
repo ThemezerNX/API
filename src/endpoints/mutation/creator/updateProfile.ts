@@ -126,12 +126,12 @@ export default async (
                     resolve(true);
                 } catch (e) {
                     console.error(e);
-                    reject(errorName.DB_SAVE_ERROR);
+                    reject(new Error(errorName.DB_SAVE_ERROR));
                     return;
                 }
             } catch (e) {
                 console.error(e);
-                reject(errorName.UNKNOWN);
+                reject(new Error(errorName.UNKNOWN));
             }
         });
     } else {

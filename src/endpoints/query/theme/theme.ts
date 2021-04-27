@@ -18,11 +18,11 @@ export default async (_parent, _args, context, info) => {
             if (dbData) {
                 resolve(dbData);
             } else {
-                reject(errorName.THEME_NOT_FOUND);
+                reject(new Error(errorName.THEME_NOT_FOUND));
             }
         } catch (e) {
             console.error(e);
-            reject(errorName.THEME_NOT_FOUND);
+            reject(new Error(errorName.THEME_NOT_FOUND));
         }
     });
 }

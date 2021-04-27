@@ -56,24 +56,24 @@ export default async (_parent, {file}, context, _info) => {
                                         return `${path}/${files[0]}_extracted/${file}`;
                                     });
                                 } catch (e) {
-                                    reject(errorName.ZIP_READ_ERROR);
+                                    reject(new Error(errorName.ZIP_READ_ERROR));
                                     rimraf(path, () => {
                                     });
                                 }
                             } catch (e) {
-                                reject(errorName.FILE_READ_ERROR);
+                                reject(new Error(errorName.FILE_READ_ERROR));
                                 rimraf(path, () => {
                                 });
                             }
                         } else {
-                            reject(errorName.INVALID_FILE_TYPE);
+                            reject(new Error(errorName.INVALID_FILE_TYPE));
                             rimraf(path, () => {
                             });
                             return;
                         }
 
                         if (NXThemePaths.length > 50) {
-                            reject(errorName.MAX_50_NXTHEMES);
+                            reject(new Error(errorName.MAX_50_NXTHEMES));
                             return;
                         }
 
@@ -156,7 +156,7 @@ export default async (_parent, {file}, context, _info) => {
                                                         );
                                                     } catch (e) {
                                                         console.error(e);
-                                                        reject(errorName.INVALID_ID);
+                                                        reject(new Error(errorName.INVALID_ID));
                                                         return;
                                                     }
                                                 }
@@ -166,7 +166,7 @@ export default async (_parent, {file}, context, _info) => {
                                             if (validThemeTarget(info.Target)) {
                                                 target = themeTargetToFileName(info.Target);
                                             } else {
-                                                reject(errorName.INVALID_TARGET_NAME);
+                                                reject(new Error(errorName.INVALID_TARGET_NAME));
                                                 return;
                                             }
 
@@ -176,7 +176,7 @@ export default async (_parent, {file}, context, _info) => {
                                                 used_pieces = dbLayout.used_pieces;
                                                 delete dbLayout.used_pieces;
                                                 if (layout && target !== dbLayout.target) {
-                                                    reject(errorName.TARGETS_DONT_MATCH);
+                                                    reject(new Error(errorName.TARGETS_DONT_MATCH));
                                                     return;
                                                 }
                                             }
@@ -189,13 +189,13 @@ export default async (_parent, {file}, context, _info) => {
                                                 target: target,
                                             });
                                         } else {
-                                            reject(errorName.INVALID_NXTHEME_CONTENTS);
+                                            reject(new Error(errorName.INVALID_NXTHEME_CONTENTS));
                                             rimraf(path, () => {
                                             });
                                         }
                                     } catch (e) {
                                         console.error(e);
-                                        reject(errorName.INVALID_NXTHEME_CONTENTS);
+                                        reject(new Error(errorName.INVALID_NXTHEME_CONTENTS));
                                         rimraf(path, () => {
                                         });
                                     }
@@ -208,16 +208,16 @@ export default async (_parent, {file}, context, _info) => {
                             if (detectedThemes?.length > 0) {
                                 resolve(detectedThemes);
                             } else if (detectedThemes?.length === 0) {
-                                reject(errorName.NO_VALID_NXTHEMES);
+                                reject(new Error(errorName.NO_VALID_NXTHEMES));
                                 rimraf(path, () => {
                                 });
                             } else {
-                                reject(errorName.FILE_READ_ERROR);
+                                reject(new Error(errorName.FILE_READ_ERROR));
                                 rimraf(path, () => {
                                 });
                             }
                         } else {
-                            reject(errorName.NO_NXTHEMES_IN_ZIP);
+                            reject(new Error(errorName.NO_NXTHEMES_IN_ZIP));
                             rimraf(path, () => {
                             });
                         }

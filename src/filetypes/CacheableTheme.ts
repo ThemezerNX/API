@@ -109,7 +109,7 @@ export default class CacheableTheme extends Theme {
                 });
             } catch (e) {
                 console.error(e);
-                reject(errorName.THEME_NOT_FOUND);
+                reject(new Error(errorName.THEME_NOT_FOUND));
             }
         });
     };
@@ -118,7 +118,8 @@ export default class CacheableTheme extends Theme {
         return new Promise<void>(async (resolve, reject) => {
             tmp.dir({unsafeCleanup: true}, async (err, path, cleanupCallback) => {
                 if (err) {
-                    reject(err);
+                    console.error(err);
+                    reject(new Error(errorName.FILE_SAVE_ERROR));
                     return;
                 }
 
@@ -194,7 +195,7 @@ export default class CacheableTheme extends Theme {
                     cleanupCallback();
                 } catch (e) {
                     console.error(e);
-                    reject(errorName.NXTHEME_CREATE_FAILED);
+                    reject(new Error(errorName.NXTHEME_CREATE_FAILED));
                 }
             });
         });

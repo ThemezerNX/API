@@ -36,7 +36,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                             const path = decrypt(themes[i].tmp);
                             lstat(path, (err) => {
                                 if (err) {
-                                    reject(errorName.INVALID_TMP);
+                                    reject(new Error(errorName.INVALID_TMP));
                                     return;
                                 }
 
@@ -67,7 +67,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                         else if (dimensions.width === 1280 && dimensions.height === 720) {
                                             resolve(path);
                                         } else {
-                                            reject(errorName.INVALID_SCREENSHOT_DIMENSIONS)
+                                            reject(new Error(errorName.INVALID_SCREENSHOT_DIMENSIONS));
                                         }
                                     });
                                 }
@@ -106,7 +106,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                     );
                                 } catch (e) {
                                     console.error(e);
-                                    reject(errorName.DB_SAVE_ERROR);
+                                    reject(new Error(errorName.DB_SAVE_ERROR));
                                     return;
                                 }
                             }
@@ -134,7 +134,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
 
                                     // Reject if more than 10 categories
                                     if (!themes[i].categories || themes[i].categories.length < 1 || themes[i].categories.length > 10) {
-                                        reject(errorName.INVALID_CATEGORY_AMOUNT);
+                                        reject(new Error(errorName.INVALID_CATEGORY_AMOUNT));
                                         return;
                                     }
 
@@ -149,7 +149,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                     }
 
                                     if (!validFileName(themes[i].target)) {
-                                        reject(errorName.INVALID_TARGET_NAME);
+                                        reject(new Error(errorName.INVALID_TARGET_NAME));
                                         return;
                                     }
 
@@ -236,7 +236,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                             resolve(true);
                                         } catch (e) {
                                             console.error(e);
-                                            reject(errorName.FILE_SAVE_ERROR);
+                                            reject(new Error(errorName.FILE_SAVE_ERROR));
                                             return;
                                         }
                                     });
@@ -337,13 +337,13 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                 }, 5000);
                             } catch (e) {
                                 console.error(e);
-                                reject(errorName.DB_SAVE_ERROR);
+                                reject(new Error(errorName.DB_SAVE_ERROR));
                             }
                         } else {
-                            reject(errorName.INVALID_FILE_TYPE);
+                            reject(new Error(errorName.INVALID_FILE_TYPE));
                         }
                     } else {
-                        reject(errorName.FILE_SAVE_ERROR);
+                        reject(new Error(errorName.FILE_SAVE_ERROR));
                     }
                 });
             } else {

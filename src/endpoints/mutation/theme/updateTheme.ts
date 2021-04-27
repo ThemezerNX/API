@@ -58,7 +58,7 @@ export default async (
                         const savedFiles = await Promise.all(filePromises);
 
                         if (!(await isJpegPromisified(`${path}/${savedFiles[0]}`))) {
-                            reject(errorName.INVALID_FILE_TYPE);
+                            reject(new Error(errorName.INVALID_FILE_TYPE));
                         }
 
                         // Create thumb.jpg
@@ -78,7 +78,7 @@ export default async (
 
                     // Reject if invalid category amount
                     if (!categories || categories.length < 1 || categories.length > 10) {
-                        reject(errorName.INVALID_CATEGORY_AMOUNT);
+                        reject(new Error(errorName.INVALID_CATEGORY_AMOUNT));
                         return;
                     }
 
@@ -125,12 +125,12 @@ export default async (
                         resolve(true);
                     } catch (e) {
                         console.error(e);
-                        reject(errorName.DB_SAVE_ERROR);
+                        reject(new Error(errorName.DB_SAVE_ERROR));
                         return;
                     }
                 } catch (e) {
                     console.error(e);
-                    reject(errorName.UNKNOWN);
+                    reject(new Error(errorName.UNKNOWN));
                 }
             });
         });

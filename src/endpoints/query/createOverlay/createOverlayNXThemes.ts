@@ -15,7 +15,8 @@ export default async (_parent, {layout, piece, common}, _context, _info) => {
     return await new Promise((resolve, reject) => {
         tmp.dir({unsafeCleanup: true}, async (err, path, cleanupCallback) => {
             if (err) {
-                reject(err);
+                console.error(err);
+                reject(new Error(errorName.FILE_SAVE_ERROR));
                 return;
             }
 
@@ -41,7 +42,7 @@ export default async (_parent, {layout, piece, common}, _context, _info) => {
                 await layout1.saveTo(path);
 
                 if (layout1.getTarget === "common.szs") {
-                    reject(errorName.NO_COMMON_ALLOWED);
+                    reject(new Error(errorName.NO_COMMON_ALLOWED));
                     return;
                 }
 

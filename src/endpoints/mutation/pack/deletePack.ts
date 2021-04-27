@@ -28,10 +28,10 @@ export default async (_parent, {id}, context, _info) => {
                 resolve(true);
             } catch (e) {
                 console.error(e);
-                reject(errorName.PACK_NOT_FOUND);
+                reject(new Error(errorName.PACK_NOT_FOUND));
             }
         } else {
-            reject(errorName.UNAUTHORIZED);
+            reject(new Error(errorName.UNAUTHORIZED));
         }
     });
 }

@@ -30,10 +30,10 @@ export default async (_parent, {url, type, nsfw, reason}, context, _info) => {
                 resolve(true);
             } catch (e) {
                 console.error(e);
-                reject(errorName.UNKNOWN);
+                reject(new Error(errorName.UNKNOWN));
             }
         } else {
-            reject(errorName.UNAUTHORIZED);
+            reject(new Error(errorName.UNAUTHORIZED));
         }
     });
 }

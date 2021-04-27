@@ -18,7 +18,7 @@ export default async (_parent, _args, context, info) => {
             if (dbData) {
                 resolve(dbData);
             } else {
-                reject(errorName.UNKNOWN);
+                reject(new Error(errorName.UNKNOWN));
             }
         });
     } else {

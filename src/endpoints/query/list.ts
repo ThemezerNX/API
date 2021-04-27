@@ -38,17 +38,13 @@ export default async (_parent, args, context, info) => {
             joinMonsterOptions,
         );
 
-        try {
-            context.pagination = {
-                page,
-                limit,
-                page_count: Math.ceil(item_count / limit),
-                item_count,
-            };
+        context.pagination = {
+            page,
+            limit,
+            page_count: Math.ceil(item_count / limit),
+            item_count,
+        };
 
-            resolve(dbData || []);
-        } catch (e) {
-            reject(e);
-        }
+        resolve(dbData || []);
     });
 }
