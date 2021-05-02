@@ -285,7 +285,7 @@ export default gql`
         randomThemeIDs(target: String, limit: Int): [String!]! @cacheControl(maxAge: 0)
         randomPackIDs(limit: Int): [String!]! @cacheControl(maxAge: 0)
 
-        "Errors return the most up-to-date valid argument values"
+        "Errors return the most up-to-date valid argument values. Limit 0 disables the limit."
         layoutList(
             target: String
             limit: Int
@@ -295,7 +295,7 @@ export default gql`
             order: String
             creators: [String!]
         ): [Layout!]
-        "Errors return the most up-to-date valid argument values"
+        "Errors return the most up-to-date valid argument values. Limit 0 disables the limit."
         themeList(
             target: String
             limit: Int
@@ -307,7 +307,7 @@ export default gql`
             layouts: [String!]
             nsfw: Boolean
         ): [Theme!]
-        "Errors return the most up-to-date valid argument values"
+        "Errors return the most up-to-date valid argument values. Limit 0 disables the limit."
         packList(
             limit: Int
             page: Int

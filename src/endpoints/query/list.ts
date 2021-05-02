@@ -17,8 +17,8 @@ export default async (_parent, args, context, info) => {
         throw new Error(errorName.INVALID_SORT);
     }
 
-    return await new Promise(async (resolve, reject) => {
-        const limit = args?.limit >= 0 ? args.limit : defaultLimit;
+    return await new Promise(async (resolve) => {
+        const limit = args?.limit < 0 ? defaultLimit : args.limit;
         const page = args?.page > 0 ? args.page : 1;
         const offset = limit * (page - 1);
         let item_count;
@@ -27,9 +27,12 @@ export default async (_parent, args, context, info) => {
             info,
             context,
             async (sql) => {
-                const paginatedSql = sql
-                    .replace("SELECT", `SELECT "$total"::INT as item_count,`)
-                    .replace("LIMIT 1 OFFSET 0", `LIMIT ${limit} OFFSET ${offset}`);
+                let paginatedSql = sql
+                    .replace("SELECT", `SELECT "$total"::INT as item_count,`);
+
+                if (limit > 0) {
+                    paginatedSql = paginatedSql.replace("LIMIT 1 OFFSET 0", `LIMIT ${limit} OFFSET ${offset}`);
+                }
 
                 const data = await db.any(paginatedSql);
                 item_count = data[0]?.item_count || 0;
