@@ -135,8 +135,8 @@ export default class Layout {
 
     toJSON = (): string => {
         const id = stringifyThemeID({
-            service: "Themezer",
-            id: this.id ? (this.id + (this.isCommon ? "-common" : "")) : (uuid() + "-temp"),
+            service: this.id ? "Themezer" : "Themezer_Custom",
+            id: this.id ? (this.id + (this.isCommon ? "-common" : "")) : uuid(),
             piece_uuids: this.pieces.map((p) => p.uuid),
         });
         !this.isCommon && this.layout.applyPieces(this.pieces);
