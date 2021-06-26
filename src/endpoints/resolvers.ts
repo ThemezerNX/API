@@ -238,8 +238,12 @@ export const downloadPackSeperate = (id) => {
                 UPDATE packs
                 SET dl_count = dl_count + 1
                 WHERE id = hex_to_int('$1^');
+
+                UPDATE themes
+                SET dl_count = dl_count + 1
+                WHERE pack_id = hex_to_int('$1^');
             `,
-            [id],
+            [id, id],
         );
     });
 };
