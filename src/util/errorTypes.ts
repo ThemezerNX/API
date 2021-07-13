@@ -110,6 +110,9 @@ export const errorType = {
         statusCode: 4006,
     },
     INVALID_TARGET_NAME: {
+        i18nParams: {
+            param1: "targetName",
+        },
         statusCode: 4007,
     },
     TARGETS_DONT_MATCH: {
@@ -120,6 +123,7 @@ export const errorType = {
     },
     INVALID_CATEGORY_AMOUNT: {
         i18nParams: {
+            param1: "categories",
             min: 1,
             max: 10,
         },
