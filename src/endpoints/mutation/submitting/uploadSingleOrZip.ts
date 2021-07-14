@@ -1,7 +1,7 @@
 import filterAsync from "node-filter-async";
 import fs from "fs";
 import {errorName} from "../../../util/errorTypes";
-import {getDefaultLayoutID, parseThemeID} from "@themezernx/layout-id-parser/index";
+import {getDefaultID, parseID} from "@themezernx/layout-id-parser/dist/index";
 import {db} from "../../../db/db";
 import {themeTargetToFileName, validThemeTarget} from "../../../util/targetParser";
 import {encrypt} from "../../../util/crypt";
@@ -124,12 +124,12 @@ export default async (_parent, {file}, context, _info) => {
                                             let layoutID = layout?.ID;
 
                                             if (!layout) {
-                                                layoutID = getDefaultLayoutID(info.Target);
+                                                layoutID = getDefaultID(info.Target);
                                             }
 
                                             let dbLayout = null;
                                             if (layoutID) {
-                                                const {service, id, piece_uuids} = parseThemeID(layoutID);
+                                                const {service, id, piece_uuids} = parseID(layoutID);
                                                 // Only fetch the layout if it was created by Themezer
 
                                                 if (service === "Themezer") {

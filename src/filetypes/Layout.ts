@@ -1,6 +1,6 @@
 import InjectorLayout from "./InjectorLayout";
 import {db} from "../db/db";
-import {parseThemeID, stringifyThemeID} from "@themezernx/layout-id-parser/index";
+import {parseID, stringifyID} from "@themezernx/layout-id-parser/dist/index";
 import {errorName} from "../util/errorTypes";
 import {isHex} from "../endpoints/resolvers";
 import {uuid} from "uuidv4";
@@ -134,7 +134,7 @@ export default class Layout {
     };
 
     toJSON = (): string => {
-        const id = stringifyThemeID({
+        const id = stringifyID({
             service: this.id ? "Themezer" : "Themezer_Custom",
             id: this.id ? (this.id + (this.isCommon ? "-common" : "")) : uuid(),
             piece_uuids: this.pieces.map((p) => p.uuid),
@@ -157,7 +157,7 @@ export default class Layout {
 
         // If the layout has an ID, this can be not the case for example using a layout taken from the DB
         if (!!injectorLayout.getId && findInDB) {
-            const {service, id, piece_uuids} = parseThemeID(injectorLayout.getId);
+            const {service, id, piece_uuids} = parseID(injectorLayout.getId);
             this.service = service;
             if (id && isHex(id)) {
                 this.isCommon = this.isCommon || id.endsWith("-common");

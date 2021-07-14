@@ -155,9 +155,10 @@
   version "1.0.2"
   resolved "https://github.com/ThemezerNX/JSON-Merger.git#d8c536faf6fbf405192eb0fe4dddc76f2a46f65c"
 
-"@themezernx/layout-id-parser@https://github.com/ThemezerNX/Layout-ID-Parser":
-  version "1.0.1"
-  resolved "https://github.com/ThemezerNX/Layout-ID-Parser#0b88c9b0d95832ce8f150f30c5c52d1dcbdf9742"
+"@themezernx/layout-id-parser@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@themezernx/layout-id-parser/-/layout-id-parser-1.0.4.tgz#5c965b4ebbffd9a86f61c9c54811ca62cddd0e62"
+  integrity sha512-urf2+73A8V8Z6qWlldb2j41EvLa85U747b4aougy1oHcm4CJhu3cXu4NJdWOOpTU5P/tWCWO35EXgXri5R6iZA==
 
 "@types/accepts@*", "@types/accepts@^1.3.5":
   version "1.3.5"
