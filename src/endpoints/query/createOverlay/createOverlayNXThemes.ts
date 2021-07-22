@@ -4,6 +4,7 @@ import tmp from "tmp";
 import {errorName} from "../../../util/errorTypes";
 import {saveFiles} from "../../resolvers";
 import Layout from "../../../filetypes/Layout";
+import {validLayoutTargetName} from "../../../util/targetParser";
 
 const link = require("fs-symlink");
 
@@ -41,8 +42,8 @@ export default async (_parent, {layout, piece, common}, _context, _info) => {
                 }
                 await layout1.saveTo(path);
 
-                if (layout1.getTarget === "common.szs") {
-                    reject(new Error(errorName.NO_COMMON_ALLOWED));
+                if (!validLayoutTargetName(layout1.getTarget)) {
+                    reject(new Error(errorName.INVALID_TARGET_NAME));
                     return;
                 }
 

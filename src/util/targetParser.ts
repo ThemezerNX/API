@@ -100,6 +100,22 @@ export const themeTargetToFileName = (s) => {
     }
 };
 
+export const validLayoutTargetName = (s) => {
+    switch (s) {
+        case "ResidentMenu.szs":
+        case "Entrance.szs":
+        case "MyPage.szs":
+        case "Flaunch.szs":
+        case "Set.szs":
+        case "Notification.szs":
+        case "Psl.szs":
+            return true;
+
+        default:
+            return false;
+    }
+};
+
 export const validFileName = (s) => {
     switch (s) {
         case "ResidentMenu":
