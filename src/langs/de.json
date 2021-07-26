@@ -16,6 +16,7 @@
     "INVALID_TMP": "Ung\u00fcltiges tmp Argument",
     "INVALID_ID": "Ung\u00fcltige Themezer Layout-ID",
     "INVALID_TARGET_NAME": "\"{param1}\" ung\u00fcltig. Versuchen Sie, das Thema neu zu erstellen",
+    "INVALID_TARGET_NAME_CHECK_LAYOUT": "'{param1}' invalid. Check the layout file",
     "TARGETS_DONT_MATCH": "Das Ziel des Designs und das erkannte Layout stimmen nicht \u00fcberein",
     "NO_COMMON_ALLOWED": "Ein gemeinsames Layout ist in dieser NXTheme Datei nicht erlaubt",
     "INVALID_CATEGORY_AMOUNT": "Das Feld \"{param1}\" hat einen Mindestwert von {min} und einen H\u00f6chstwert von {max}.",

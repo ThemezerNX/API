@@ -20,6 +20,7 @@ export const errorName = {
     INVALID_TMP: "INVALID_TMP",
     INVALID_ID: "INVALID_ID",
     INVALID_TARGET_NAME: "INVALID_TARGET_NAME",
+    INVALID_TARGET_NAME_CHECK_LAYOUT: "INVALID_TARGET_NAME_CHECK_LAYOUT",
     TARGETS_DONT_MATCH: "TARGETS_DONT_MATCH",
     NO_COMMON_ALLOWED: "NO_COMMON_ALLOWED",
     INVALID_CATEGORY_AMOUNT: "INVALID_CATEGORY_AMOUNT",
@@ -110,6 +111,12 @@ export const errorType = {
         statusCode: 4006,
     },
     INVALID_TARGET_NAME: {
+        i18nParams: {
+            param1: "targetName",
+        },
+        statusCode: 4007,
+    },
+    INVALID_TARGET_NAME_CHECK_LAYOUT: {
         i18nParams: {
             param1: "targetName",
         },

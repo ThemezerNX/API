@@ -16,6 +16,7 @@
     "INVALID_TMP": "Ongeldig tmp-argument",
     "INVALID_ID": "Ongeldig Themezer lay-out-ID",
     "INVALID_TARGET_NAME": "'{param1}' ongeldig. Probeer het thema opnieuw te maken",
+    "INVALID_TARGET_NAME_CHECK_LAYOUT": "'{param1}' ongeldig. Controleer het layout bestand",
     "TARGETS_DONT_MATCH": "Het doel van het thema en de gedetecteerde lay-out komen niet overeen",
     "NO_COMMON_ALLOWED": "Een algemene lay-out is niet toegestaan in dit NXTheme-bestand",
     "INVALID_CATEGORY_AMOUNT": "'{param1}' veld heeft een minimum van {min} en een maximum van {max}.",

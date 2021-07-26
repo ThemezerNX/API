@@ -16,6 +16,7 @@
     "INVALID_TMP": "Nieprawid\u0142owy argument tmp",
     "INVALID_ID": "Nieprawid\u0142owe ID uk\u0142adu Themezer",
     "INVALID_TARGET_NAME": "'{param1}' nieprawid\u0142owy. Spr\u00f3buj odtworzy\u0107 motyw",
+    "INVALID_TARGET_NAME_CHECK_LAYOUT": "'{param1}' invalid. Check the layout file",
     "TARGETS_DONT_MATCH": "Motyw i wykryty uk\u0142ad nie pasuj\u0105 do siebie",
     "NO_COMMON_ALLOWED": "Uk\u0142ad generalny nie jest dozwolony w tym pliku NXTheme.",
     "INVALID_CATEGORY_AMOUNT": "Pole '{param1}' ma warto\u015b\u0107 min r\u00f3wn\u0105 {min} i max r\u00f3wn\u0105 {max}.",

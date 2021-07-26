@@ -16,6 +16,7 @@
     "INVALID_TMP": "Argument tmp invalide",
     "INVALID_ID": "Identifiant de mise en page Themezer introuvable",
     "INVALID_TARGET_NAME": "\"{param1}\" n'est pas valide. Essayez de recr\u00e9er le th\u00e8me",
+    "INVALID_TARGET_NAME_CHECK_LAYOUT": "\"{param1}\" est invalide. Veuillez v\u00e9rifier le fichier de mise en page",
     "TARGETS_DONT_MATCH": "La destination et la disposition du th\u00e8me d\u00e9tect\u00e9e ne correspondent pas.",
     "NO_COMMON_ALLOWED": "Une mise en page commune n'est pas autoris\u00e9e dans ce fichier NXTheme.",
     "INVALID_CATEGORY_AMOUNT": "Le champ \"{param1}\" a un minimum de {min} et un maximum de {max}.",
