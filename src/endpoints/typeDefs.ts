@@ -97,26 +97,22 @@ export default gql`
 
     interface Details {
         name: String!
-        version: String!
     }
 
     type LayoutDetails implements Details {
         name: String!
         description: String!
         color: HexColorCode
-        version: String!
     }
 
     type ThemeDetails implements Details {
         name: String!
         description: String
-        version: String!
     }
 
     type PackDetails implements Details {
         name: String!
         description: String!
-        version: String!
     }
 
     input DetailsInput {
@@ -124,7 +120,6 @@ export default gql`
         description: String
         color: HexColorCode
         categories: [String!]
-        version: String
     }
 
     type Layout {
@@ -261,7 +256,6 @@ export default gql`
         target: String!
         description: String
         color: String
-        version: String
         categories: [String!]
         nsfw: Boolean
     }
@@ -363,9 +357,9 @@ export default gql`
 
         "Returns the url the client should redirect to"
         deleteTheme(id: String!): String
-        updateTheme(id: String!, file: Upload, name: String!, layout_id: String, pack_id: String, used_pieces: [UsedPieceInput!], description: String, version: String!, categories: [String!], nsfw: Boolean): Boolean
+        updateTheme(id: String!, file: Upload, name: String!, layout_id: String, pack_id: String, used_pieces: [UsedPieceInput!], description: String, categories: [String!], nsfw: Boolean): Boolean
         deletePack(id: String!): Boolean
-        updatePack(id: String!, name: String!, description: String!, version: String!): Boolean
+        updatePack(id: String!, name: String!, description: String!): Boolean
 
         ## Reporting
         reportURL(url: String!, type: String!, nsfw: Boolean, reason: String): Boolean

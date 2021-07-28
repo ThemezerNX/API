@@ -94,7 +94,6 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                         name: details.name.trim(),
                                         description: details.description.trim(),
                                         color: details.color,
-                                        version: details.version ? details.version.trim() : "1.0",
                                     },
                                 };
 
@@ -181,11 +180,6 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                                 ? themes[i].description.trim()
                                                 : null,
                                             color: themes[i].color,
-                                            version: details.version
-                                                ? details.version.trim()
-                                                : themes[i].version
-                                                    ? themes[i].version.trim()
-                                                    : "1.0",
                                         },
                                         bg_type: bgType,
                                     });

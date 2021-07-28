@@ -305,9 +305,6 @@ export default {
             color: {
                 sqlExpr: (table) => `${table}.details ->> 'color'`,
             },
-            version: {
-                sqlExpr: (table) => `${table}.details ->> 'version'`,
-            },
         },
     },
     ThemeDetails: {
@@ -320,9 +317,6 @@ export default {
             description: {
                 sqlExpr: (table) => `${table}.details ->> 'description'`,
             },
-            version: {
-                sqlExpr: (table) => `${table}.details ->> 'version'`,
-            },
         },
     },
     PackDetails: {
@@ -334,9 +328,6 @@ export default {
             },
             description: {
                 sqlExpr: (table) => `${table}.details ->> 'description'`,
-            },
-            version: {
-                sqlExpr: (table) => `${table}.details ->> 'version'`,
             },
         },
     },

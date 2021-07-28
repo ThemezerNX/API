@@ -25,7 +25,7 @@ const updateThemeCS = new pgp.helpers.ColumnSet(
 
 export default async (
     _parent,
-    {id, file, name, layout_id, pack_id, used_pieces, description, version, categories, nsfw},
+    {id, file, name, layout_id, pack_id, used_pieces, description, categories, nsfw},
     context,
     _info,
 ) => {
@@ -107,7 +107,6 @@ export default async (
                         details: {
                             name,
                             description,
-                            version,
                         },
                         layout_id: splitID ? Number(`0x${splitID[0]}`) : null,
                         pack_id: pack_id ? Number(`0x${pack_id}`) : null,

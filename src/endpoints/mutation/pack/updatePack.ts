@@ -13,7 +13,7 @@ const updatePackCS = new pgp.helpers.ColumnSet(
 
 export default async (
     _parent,
-    {id, name, description, version},
+    {id, name, description},
     context,
     _info,
 ) => {
@@ -40,7 +40,6 @@ export default async (
                         name,
                         description,
                         color: null,
-                        version,
                     },
                     last_updated: new Date(),
                 };
