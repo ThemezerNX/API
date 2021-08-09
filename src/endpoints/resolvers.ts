@@ -1,5 +1,5 @@
 import downloadPack from "./query/pack/downloadPack";
-import {db, pgp} from "../db/db";
+import {db, pgp} from "../util/db";
 import {errorName} from "../util/errorTypes";
 import GraphQLJSON from "graphql-type-json";
 

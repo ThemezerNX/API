@@ -1,4 +1,4 @@
-import {pgp} from "../db/db";
+import {pgp} from "../util/db";
 import {sortOptions} from "./resolvers";
 
 const tsquery = require("pg-tsquery")({negated: /\s[!-]$/});

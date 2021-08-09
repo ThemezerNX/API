@@ -3,7 +3,7 @@ const {
 } = require("fs");
 const {uuid} = require("uuidv4");
 const rimraf = require("rimraf");
-import {db, pgp} from "../../../db/db";
+import {db, pgp} from "../../../util/db";
 import {errorName} from "../../../util/errorTypes";
 import {saveFiles, storagePath, updateCreatorCS} from "../../resolvers";
 import {JSDOM} from "jsdom";

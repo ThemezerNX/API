@@ -1,5 +1,5 @@
 import {errorName} from "../../util/errorTypes";
-import {db} from "../../db/db";
+import {db} from "../../util/db";
 
 export default async (_parent, {type, id, value}, context, _info) => {
     const typeLowercase = type.toLowerCase();

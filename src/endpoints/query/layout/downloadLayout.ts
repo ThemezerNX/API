@@ -1,4 +1,4 @@
-import {db} from "../../../db/db";
+import {db} from "../../../util/db";
 import Layout from "../../../filetypes/Layout";
 
 export default async (_parent, {id, piece_uuids}, _context, _info) => {

@@ -2,7 +2,7 @@ import filterAsync from "node-filter-async";
 import fs from "fs";
 import {errorName} from "../../../util/errorTypes";
 import {getDefaultID, parseID} from "@themezernx/layout-id-parser/dist/index";
-import {db} from "../../../db/db";
+import {db} from "../../../util/db";
 import {themeTargetToFileName, validThemeTarget} from "../../../util/targetParser";
 import {encrypt} from "../../../util/crypt";
 import {saveFiles} from "../../resolvers";

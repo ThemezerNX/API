@@ -1,4 +1,4 @@
-import {db} from "../../../db/db";
+import {db} from "../../../util/db";
 import {errorName} from "../../../util/errorTypes";
 
 export default async (_parent, {creator_id, backup_code}, context, _info) => {

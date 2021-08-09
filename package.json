@@ -1,18 +1,15 @@
 {
     "name": "themezer_api",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "description": "The API for Themezer",
     "private": false,
-    "license": "GPL-3.0",
     "scripts": {
-        "lint": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-path .eslintignore .",
-        "lint-fix": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-path .eslintignore . --fix",
         "deploy": "rimraf dist && tsc",
         "start": "node ./dist/index.js",
         "dev": "cross-env NODE_ENV=development nodemon"
     },
     "keywords": [],
-    "author": "Migushthe2nd <Migushthe2nd@users.noreply.github.com>",
+    "author": "Migushthe2nd",
     "dependencies": {
         "@themezernx/json-merger": "https://github.com/ThemezerNX/JSON-Merger.git",
         "@themezernx/layout-id-parser": "^1.0.4",
@@ -23,6 +20,7 @@
         "consola": "^2.12.1",
         "cors": "^2.8.5",
         "cross-env": "^7.0.2",
+        "discord.js": "^13.0.1",
         "dompurify": "^2.2.6",
         "dotenv": "^8.2.0",
         "eslint": "^7.20.0",
@@ -51,8 +49,7 @@
         "rimraf": "^3.0.2",
         "sharp": "^0.25.4",
         "tmp": "^0.2.1",
-        "uuidv4": "^6.1.0",
-        "webhook-discord": "^3.7.4"
+        "uuidv4": "^6.1.0"
     },
     "resolutions": {
         "**/**/fs-capacitor": "^6.2.0",

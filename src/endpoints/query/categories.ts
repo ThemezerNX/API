@@ -1,4 +1,4 @@
-import {db} from "../../db/db";
+import {db} from "../../util/db";
 
 export default async (_parent, _args, _context, _info) => {
     const categoriesDB = await db.one(`

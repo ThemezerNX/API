@@ -1,5 +1,6 @@
 import axios from "axios";
-import {db} from "../db/db";
+import {db} from "./db";
+import {errorName} from "./errorTypes";
 
 const discordApiBase = "https://discord.com/api";
 
@@ -13,7 +14,7 @@ function cleanString(input) {
     return output;
 }
 
-const buildCommonContext = (req, additionalContext: {}) => ({
+const buildCommonContext = (req, additionalContext = {}) => ({
     authenticate: () => {
         const token = req.headers.token;
         if (token) {
@@ -53,7 +54,9 @@ const buildCommonContext = (req, additionalContext: {}) => ({
                         resolve(false);
                     });
             });
-        } else return false;
+        }
+
+        Error(errorName.UNAUTHORIZED)
     },
     req,
     ...additionalContext,

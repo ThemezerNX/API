@@ -1,4 +1,4 @@
-import {db} from "../../../db/db";
+import {db} from "../../../util/db";
 import {fileNameToWebName} from "../../../util/targetParser";
 import {errorName} from "../../../util/errorTypes";
 import {storagePath} from "../../resolvers";

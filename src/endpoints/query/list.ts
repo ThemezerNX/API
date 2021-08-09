@@ -1,5 +1,5 @@
 import joinMonster from "join-monster";
-import {db} from "../../db/db";
+import {db} from "../../util/db";
 import {errorName} from "../../util/errorTypes";
 import {joinMonsterOptions, sortOptions} from "../resolvers";
 

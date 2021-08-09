@@ -1,5 +1,5 @@
 import CacheablePack from "../../../filetypes/CacheablePack";
-import {db} from "../../../db/db";
+import {db} from "../../../util/db";
 
 export default async (_parent, {id}, _context, _info) => {
     // Get the pack details and theme ids

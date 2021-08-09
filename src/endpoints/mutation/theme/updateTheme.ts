@@ -2,7 +2,7 @@ import {promisify} from "util";
 import tmp from "tmp";
 import sharp from "sharp";
 import JPEG_FILE from "is-jpeg-file";
-import {db, pgp} from "../../../db/db";
+import {db, pgp} from "../../../util/db";
 import {errorName} from "../../../util/errorTypes";
 import {saveFiles, storagePath} from "../../resolvers";
 import moveFile from "mvdir";

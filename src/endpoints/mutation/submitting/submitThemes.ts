@@ -3,7 +3,7 @@ import {promisify} from "util";
 import moveFile from "mvdir";
 import {decrypt} from "../../../util/crypt";
 import {errorName} from "../../../util/errorTypes";
-import {db, pgp} from "../../../db/db";
+import {db, pgp} from "../../../util/db";
 import {fileNameToWebName, validFileName} from "../../../util/targetParser";
 import {packMessage, themeMessage} from "../../../util/webhookMessages";
 import {avatar, packsCS, saveFiles, storagePath, themesCS, urlNameREGEX} from "../../resolvers";

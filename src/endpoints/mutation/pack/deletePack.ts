@@ -1,4 +1,4 @@
-import {db} from "../../../db/db";
+import {db} from "../../../util/db";
 import {errorName} from "../../../util/errorTypes";
 import {storagePath} from "../../resolvers";
 import rimraf from "rimraf";
