@@ -1,5 +1,6 @@
 -- CREATE DATABASE themezer;
 -- CREATE SCHEMA IF NOT EXISTS themezer;
+DROP SCHEMA dev CASCADE;
 CREATE SCHEMA IF NOT EXISTS dev;
 
 ---------------------------------------------------------------------------------------
@@ -10,11 +11,11 @@ CREATE TABLE users
 (
     counter          SERIAL,
     id               VARCHAR GENERATED ALWAYS AS (
-                         LPAD(('x' || SUBSTR(MD5(counter::VARCHAR), 1, 16))::BIT(63)::BIGINT::VARCHAR, 19, '0')
+                         lpad(('x' || substr(md5(counter::VARCHAR), 1, 16))::BIT(63)::BIGINT::VARCHAR, 19, '0')
                          ) STORED,
-    joined_timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
-    has_accepted     bool      NOT NULL DEFAULT FALSE,
-    is_blocked       bool      NOT NULL DEFAULT FALSE,
+    joined_timestamp TIMESTAMP NOT NULL DEFAULT now(),
+    has_accepted     BOOL      NOT NULL DEFAULT FALSE,
+    is_blocked       BOOL      NOT NULL DEFAULT FALSE,
     is_admin         BOOLEAN   NOT NULL DEFAULT FALSE,
     roles            VARCHAR[] NOT NULL DEFAULT '{}',
 
@@ -26,10 +27,11 @@ CREATE TABLE user_preferences
     user_id     CHAR(19),
     username    VARCHAR,
     bio         VARCHAR,
-    avatar_hash CHAR(32),
-    banner_hash CHAR(32),
+    avatar_file BYTEA,
+    banner_file BYTEA,
     color       CHAR(6),
     show_nsfw   BOOLEAN,
+    random_uuid UUID UNIQUE NOT NULL,
 
     PRIMARY KEY (user_id),
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -49,15 +51,16 @@ CREATE TABLE users_discord
 CREATE TABLE packs
 (
     counter           SERIAL,
-    id                VARCHAR GENERATED ALWAYS AS (TO_HEX(counter)) STORED,
-    user_id           CHAR(19)  NOT NULL,
-    name              VARCHAR   NOT NULL,
+    id                VARCHAR GENERATED ALWAYS AS (to_hex(counter)) STORED,
+    user_id           CHAR(19)    NOT NULL,
+    name              VARCHAR     NOT NULL,
     description       VARCHAR,
-    added_timestamp   TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
-    dl_count          BIGINT    NOT NULL DEFAULT 0,
-    is_nsfw           bool      NOT NULL DEFAULT FALSE,
-    tsv               tsvector,
+    added_timestamp   TIMESTAMP   NOT NULL DEFAULT now(),
+    updated_timestamp TIMESTAMP   NOT NULL DEFAULT now(),
+    dl_count          BIGINT      NOT NULL DEFAULT 0,
+    is_nsfw           BOOL        NOT NULL DEFAULT FALSE,
+    tsv               TSVECTOR,
+    random_uuid       UUID UNIQUE NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -65,7 +68,7 @@ CREATE TABLE packs
 
 CREATE TABLE targets
 (
-    id   INT UNIQUE NOT NULL,
+    id   INT UNIQUE     NOT NULL,
     name VARCHAR UNIQUE NOT NULL,
 
     PRIMARY KEY (id)
@@ -74,20 +77,21 @@ CREATE TABLE targets
 CREATE TABLE layouts
 (
     counter            SERIAL,
-    id                 VARCHAR GENERATED ALWAYS AS (TO_HEX(counter)) STORED,
-    uuid               uuid UNIQUE NOT NULL,
+    id                 VARCHAR GENERATED ALWAYS AS (to_hex(counter)) STORED,
+    uuid               UUID UNIQUE NOT NULL,
     user_id            CHAR(19)    NOT NULL,
     name               VARCHAR     NOT NULL,
     description        VARCHAR     NOT NULL,
-    added_timestamp    TIMESTAMP   NOT NULL DEFAULT NOW(),
-    updated_timestamp  TIMESTAMP   NOT NULL DEFAULT NOW(),
+    added_timestamp    TIMESTAMP   NOT NULL DEFAULT now(),
+    updated_timestamp  TIMESTAMP   NOT NULL DEFAULT now(),
     target_id          INT         NOT NULL,
     dl_count           BIGINT      NOT NULL DEFAULT 0,
     color              CHAR(6),
     layout_json        VARCHAR,
     common_layout_json VARCHAR,
-    image_hash         CHAR(32)    NOT NULL,
-    tsv                tsvector,
+    image_file         BYTEA       NOT NULL,
+    tsv                TSVECTOR,
+    random_uuid        UUID UNIQUE NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users (id) ON UPDATE CASCADE,
@@ -107,11 +111,11 @@ CREATE TABLE layout_options
 
 CREATE TABLE layout_option_values
 (
-    option_id   INT,
+    option_id  INT,
     value_name VARCHAR,
-    uuid        uuid UNIQUE NOT NULL,
-    json        VARCHAR     NOT NULL,
-    image_hash  CHAR(32)    NOT NULL,
+    uuid       UUID UNIQUE NOT NULL,
+    json       VARCHAR     NOT NULL,
+    image_file BYTEA       NOT NULL,
 
     PRIMARY KEY (option_id, value_name),
     FOREIGN KEY (option_id) REFERENCES layout_options (id) ON DELETE CASCADE
@@ -119,29 +123,58 @@ CREATE TABLE layout_option_values
 
 CREATE TABLE themes
 (
-    counter                   SERIAL,
-    id                        VARCHAR GENERATED ALWAYS AS (TO_HEX(counter)) STORED,
-    user_id                   CHAR(19)  NOT NULL,
-    pack_id                   VARCHAR,
-    name                      VARCHAR   NOT NULL,
-    description               VARCHAR,
-    added_timestamp           TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_timestamp         TIMESTAMP NOT NULL DEFAULT NOW(),
-    target_id                 INT       NOT NULL,
-    dl_count                  BIGINT    NOT NULL DEFAULT 0,
-    is_nsfw                   bool      NOT NULL DEFAULT FALSE,
-    layout_id                 VARCHAR,
-    custom_layout_json        VARCHAR,
-    custom_common_layout_json VARCHAR,
-    image_hash                CHAR(32)  NOT NULL,
-    tsv                       tsvector,
-    tsv_tags                  tsvector,
+    counter           SERIAL,
+    id                VARCHAR GENERATED ALWAYS AS (to_hex(counter)) STORED,
+    user_id           CHAR(19)    NOT NULL,
+    pack_id           VARCHAR,
+    name              VARCHAR     NOT NULL,
+    description       VARCHAR,
+    added_timestamp   TIMESTAMP   NOT NULL DEFAULT now(),
+    updated_timestamp TIMESTAMP   NOT NULL DEFAULT now(),
+    target_id         INT         NOT NULL,
+    dl_count          BIGINT      NOT NULL DEFAULT 0,
+    is_nsfw           BOOL        NOT NULL DEFAULT FALSE,
+    layout_id         VARCHAR,
+    tsv               TSVECTOR,
+    tsv_tags          TSVECTOR,
+    random_uuid       UUID UNIQUE NOT NULL,
+
 
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (target_id) REFERENCES targets (id) ON UPDATE CASCADE,
     FOREIGN KEY (layout_id) REFERENCES layouts (id),
     FOREIGN KEY (pack_id) REFERENCES packs (id) ON DELETE CASCADE
+);
+
+CREATE TABLE theme_contents
+(
+    theme_id                  VARCHAR,
+    custom_layout_json        VARCHAR,
+    custom_common_layout_json VARCHAR,
+    image_file                BYTEA,
+    album_icon_file           BYTEA,
+    news_icon_file            BYTEA,
+    shop_icon_file            BYTEA,
+    controller_icon_file      BYTEA,
+    settings_icon_file        BYTEA,
+    power_icon_file           BYTEA,
+
+    PRIMARY KEY (theme_id),
+    FOREIGN KEY (theme_id) REFERENCES themes (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE theme_previews
+(
+    theme_id               VARCHAR,
+    image_720_file         BYTEA NOT NULL,
+    image_360_file         BYTEA NOT NULL,
+    image_240_file         BYTEA NOT NULL,
+    image_180_file         BYTEA NOT NULL,
+    image_placeholder_file BYTEA NOT NULL,
+
+    PRIMARY KEY (theme_id),
+    FOREIGN KEY (theme_id) REFERENCES themes (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE tags
@@ -173,7 +206,7 @@ CREATE TABLE download_clients
 CREATE TABLE pack_downloads
 (
     pack_id            VARCHAR,
-    timestamp          TIMESTAMP NOT NULL DEFAULT NOW(),
+    timestamp          TIMESTAMP NOT NULL DEFAULT now(),
     user_id            CHAR(19),
     download_client_id INT,
 
@@ -186,33 +219,33 @@ CREATE TABLE pack_downloads
 CREATE TABLE theme_downloads
 (
     theme_id           VARCHAR,
-    timestamp          TIMESTAMP NOT NULL DEFAULT NOW(),
+    timestamp          TIMESTAMP NOT NULL DEFAULT now(),
     user_id            CHAR(19),
     download_client_id INT,
 
     PRIMARY KEY (theme_id),
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (theme_id) REFERENCES themes (id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (download_client_id) REFERENCES download_clients (id)
 );
 
 CREATE TABLE layout_downloads
 (
     layout_id          VARCHAR,
-    timestamp          TIMESTAMP NOT NULL DEFAULT NOW(),
+    timestamp          TIMESTAMP NOT NULL DEFAULT now(),
     user_id            CHAR(19),
     download_client_id INT,
 
     PRIMARY KEY (layout_id),
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (layout_id) REFERENCES layouts (id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (download_client_id) REFERENCES download_clients (id)
 );
 
 CREATE TABLE creator_likes
 (
     creator_id CHAR(19),
-    timestamp  TIMESTAMP NOT NULL DEFAULT NOW(),
+    timestamp  TIMESTAMP NOT NULL DEFAULT now(),
     user_id    CHAR(19)  NOT NULL,
 
     PRIMARY KEY (creator_id),
@@ -223,7 +256,7 @@ CREATE TABLE creator_likes
 CREATE TABLE layout_likes
 (
     layout_id VARCHAR,
-    timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
+    timestamp TIMESTAMP NOT NULL DEFAULT now(),
     user_id   CHAR(19)  NOT NULL,
 
     PRIMARY KEY (layout_id),
@@ -234,7 +267,7 @@ CREATE TABLE layout_likes
 CREATE TABLE pack_likes
 (
     pack_id   VARCHAR,
-    timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
+    timestamp TIMESTAMP NOT NULL DEFAULT now(),
     user_id   CHAR(19)  NOT NULL,
 
     PRIMARY KEY (pack_id),
@@ -245,7 +278,7 @@ CREATE TABLE pack_likes
 CREATE TABLE theme_likes
 (
     theme_id  VARCHAR,
-    timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
+    timestamp TIMESTAMP NOT NULL DEFAULT now(),
     user_id   CHAR(19)  NOT NULL,
 
     PRIMARY KEY (theme_id),
@@ -256,8 +289,8 @@ CREATE TABLE theme_likes
 CREATE TABLE pack_cache
 (
     pack_id   VARCHAR,
-    timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
-    file_hash CHAR(32)  NOT NULL,
+    timestamp TIMESTAMP NOT NULL DEFAULT now(),
+    file      BYTEA     NOT NULL,
     file_name VARCHAR   NOT NULL,
 
     PRIMARY KEY (pack_id),
@@ -267,8 +300,8 @@ CREATE TABLE pack_cache
 CREATE TABLE theme_cache
 (
     theme_id  VARCHAR,
-    timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
-    file_hash CHAR(32)  NOT NULL,
+    timestamp TIMESTAMP NOT NULL DEFAULT now(),
+    file      BYTEA     NOT NULL,
     file_name VARCHAR   NOT NULL,
 
     PRIMARY KEY (theme_id),
@@ -308,18 +341,18 @@ $$
 BEGIN
     RETURN (
         SELECT ((reltuples / (CASE WHEN relpages = 0 THEN 1 ELSE relpages END))
-            * (PG_RELATION_SIZE(table_name) / CURRENT_SETTING('block_size')::INT)
+            * (pg_relation_size(table_name) / current_setting('block_size')::INT)
                    )::INT
         FROM pg_class
-        WHERE oid = table_name::regclass
+        WHERE oid = table_name::REGCLASS
     );
 END;
 $$ LANGUAGE plpgsql;
 COMMENT ON FUNCTION count_approximate IS 'Returns an approximate row count for a table. Often not more than 10% off';
 
 -- Aggregate tsvector rows
-CREATE AGGREGATE tsvector_agg (tsvector) (
-    STYPE = pg_catalog.tsvector,
+CREATE AGGREGATE tsvector_agg (TSVECTOR) (
+    STYPE = pg_catalog.TSVECTOR,
     SFUNC = pg_catalog.tsvector_concat,
     INITCOND = ''
     );
@@ -329,7 +362,7 @@ CREATE OR REPLACE FUNCTION is_pack_nsfw(pack_id VARCHAR) RETURNS BOOLEAN AS
 $$
 BEGIN
     RETURN (
-        SELECT COUNT(*) > 0
+        SELECT count(*) > 0
         FROM packs p,
              themes t
         WHERE t.pack_id = p.id
@@ -344,7 +377,7 @@ CREATE OR REPLACE FUNCTION theme_tags(theme_id VARCHAR) RETURNS VARCHAR[] AS
 $$
 BEGIN
     RETURN (
-        SELECT ARRAY_AGG(tags.name)
+        SELECT array_agg(tags.name)
         FROM themes t,
              theme_tags tt,
              tags
@@ -375,9 +408,9 @@ CREATE FUNCTION pack_and_theme_tsv_trigger() RETURNS TRIGGER AS
 $$
 BEGIN
     new.tsv :=
-                    SETWEIGHT(TO_TSVECTOR('pg_catalog.english', COALESCE(new.name, '')), 'A') ||
-                    SETWEIGHT(TO_TSVECTOR('pg_catalog.english', COALESCE(new.description, '')), 'C') ||
-                    TO_TSVECTOR('pg_catalog.english', COALESCE(CASE WHEN new.is_nsfw THEN 'NSFW' END, ''));
+                    setweight(to_tsvector('pg_catalog.english', coalesce(new.name, '')), 'A') ||
+                    setweight(to_tsvector('pg_catalog.english', coalesce(new.description, '')), 'C') ||
+                    to_tsvector('pg_catalog.english', coalesce(CASE WHEN new.is_nsfw THEN 'NSFW' END, ''));
     RETURN new;
 END
 $$ LANGUAGE plpgsql;
@@ -387,8 +420,8 @@ CREATE FUNCTION layout_tsv_trigger() RETURNS TRIGGER AS
 $$
 BEGIN
     new.tsv :=
-                SETWEIGHT(TO_TSVECTOR('pg_catalog.english', COALESCE(new.name, '')), 'A') ||
-                SETWEIGHT(TO_TSVECTOR('pg_catalog.english', COALESCE(new.description, '')), 'C');
+                setweight(to_tsvector('pg_catalog.english', coalesce(new.name, '')), 'A') ||
+                setweight(to_tsvector('pg_catalog.english', coalesce(new.description, '')), 'C');
     RETURN new;
 END
 $$ LANGUAGE plpgsql;
@@ -400,7 +433,7 @@ $$
 BEGIN
     UPDATE themes
     SET tsv_tags =
-            SETWEIGHT(TO_TSVECTOR('pg_catalog.english', ARRAY_TO_STRING(theme_tags(new.theme_id), ' ')), 'B')
+            setweight(to_tsvector('pg_catalog.english', array_to_string(theme_tags(new.theme_id), ' ')), 'B')
     WHERE id = new.theme_id;
 END
 $$ LANGUAGE plpgsql;
@@ -569,7 +602,7 @@ DECLARE
     one_left BOOLEAN;
 BEGIN
     -- check if now there is only one item left in the pack
-    SELECT COUNT(*) = 1
+    SELECT count(*) = 1
     INTO one_left
     FROM themes
     WHERE id = new.pack_id;

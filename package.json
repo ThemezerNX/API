@@ -45,6 +45,7 @@
         "object-hash": "^2.0.3",
         "pg-promise": "^10.5.5",
         "pg-tsquery": "^8.2.0",
+        "postgres-bytea": "^3.0.0",
         "python-shell": "^2.0.1",
         "rimraf": "^3.0.2",
         "sharp": "^0.25.4",

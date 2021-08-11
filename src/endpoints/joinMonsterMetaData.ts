@@ -7,33 +7,6 @@ const {
     as: {format},
 } = pgp;
 
-const packCategories = (table) => {
-    return `(
-        SELECT array_agg(c) as categories
-        FROM (
-            SELECT DISTINCT UNNEST(categories)
-            FROM themes
-            WHERE pack_id = ${table}.id
-            ORDER BY 1 ASC
-        ) as t(c)
-    )`;
-};
-
-const getSortColumn = (by, order, fieldName) => {
-    const sortOption = sortOptions.find((o: any) => o.id === by);
-
-    // Because JoinMonster is limited, this is the only way to properly sort by likes
-    if (sortOption.column === "like_count") {
-        return `id" = 1, (
-            SELECT COUNT(*)
-            FROM creators
-            WHERE "${fieldName}".id = ANY(liked_${fieldName.replace("List", "") + "s"})
-        ) ${order} --`;
-    }
-
-    return sortOption.column;
-};
-
 export default {
     Query: {
         fields: {
