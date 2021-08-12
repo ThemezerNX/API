@@ -25,6 +25,7 @@ CREATE TABLE users
 CREATE TABLE user_preferences
 (
     user_id     CHAR(19),
+    email       VARCHAR UNIQUE,
     username    VARCHAR,
     bio         VARCHAR,
     avatar_file BYTEA,
@@ -87,8 +88,8 @@ CREATE TABLE layouts
     target_id          INT         NOT NULL,
     dl_count           BIGINT      NOT NULL DEFAULT 0,
     color              CHAR(6),
-    layout_json        VARCHAR,
-    common_layout_json VARCHAR,
+    layout_json        JSON,
+    common_layout_json JSON,
     image_file         BYTEA       NOT NULL,
     tsv                TSVECTOR,
     random_uuid        UUID UNIQUE NOT NULL,
@@ -147,11 +148,31 @@ CREATE TABLE themes
     FOREIGN KEY (pack_id) REFERENCES packs (id) ON DELETE CASCADE
 );
 
-CREATE TABLE theme_contents
+CREATE TABLE hbthemes
+(
+    counter           SERIAL,
+    id                VARCHAR GENERATED ALWAYS AS (to_hex(counter)) STORED,
+    user_id           CHAR(19)    NOT NULL,
+    name              VARCHAR     NOT NULL,
+    description       VARCHAR,
+    added_timestamp   TIMESTAMP   NOT NULL DEFAULT now(),
+    updated_timestamp TIMESTAMP   NOT NULL DEFAULT now(),
+    dl_count          BIGINT      NOT NULL DEFAULT 0,
+    is_nsfw           BOOL        NOT NULL DEFAULT FALSE,
+    theme_cfg         VARCHAR     NOT NULL,
+    tsv               TSVECTOR,
+    tsv_tags          TSVECTOR,
+    random_uuid       UUID UNIQUE NOT NULL,
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
+);
+
+CREATE TABLE theme_assets
 (
     theme_id                  VARCHAR,
-    custom_layout_json        VARCHAR,
-    custom_common_layout_json VARCHAR,
+    custom_layout_json        JSON,
+    custom_common_layout_json JSON,
     image_file                BYTEA,
     album_icon_file           BYTEA,
     news_icon_file            BYTEA,
@@ -175,6 +196,43 @@ CREATE TABLE theme_previews
 
     PRIMARY KEY (theme_id),
     FOREIGN KEY (theme_id) REFERENCES themes (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+CREATE TABLE hbtheme_assets
+(
+    hbtheme_id            VARCHAR,
+    battery_icon_file     BYTEA,
+    charging_icon_file    BYTEA,
+    folder_icon_file      BYTEA,
+    invalid_icon_file     BYTEA,
+    theme_icon_dark       BYTEA,
+    theme_icon_light      BYTEA,
+    airplaine_icon_file   BYTEA,
+    wifi_none_icon_file   BYTEA,
+    wifi1_icon_file       BYTEA,
+    wifi2_icon_file       BYTEA,
+    wifi3_icon_file       BYTEA,
+    eth_icon_file         BYTEA,
+    background_image_file BYTEA,
+
+
+    PRIMARY KEY (hbtheme_id),
+    FOREIGN KEY (hbtheme_id) REFERENCES hbthemes (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE hbtheme_previews
+(
+    hbtheme_id             VARCHAR,
+    image_720_file         BYTEA NOT NULL,
+    image_360_file         BYTEA NOT NULL,
+    image_240_file         BYTEA NOT NULL,
+    image_180_file         BYTEA NOT NULL,
+    image_placeholder_file BYTEA NOT NULL,
+
+    PRIMARY KEY (hbtheme_id),
+    FOREIGN KEY (hbtheme_id) REFERENCES hbthemes (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE tags
@@ -286,6 +344,17 @@ CREATE TABLE theme_likes
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE hbtheme_likes
+(
+    hbtheme_id VARCHAR,
+    timestamp  TIMESTAMP NOT NULL DEFAULT now(),
+    user_id    CHAR(19)  NOT NULL,
+
+    PRIMARY KEY (hbtheme_id),
+    FOREIGN KEY (hbtheme_id) REFERENCES hbthemes (id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 CREATE TABLE pack_cache
 (
     pack_id   VARCHAR,
@@ -306,6 +375,17 @@ CREATE TABLE theme_cache
 
     PRIMARY KEY (theme_id),
     FOREIGN KEY (theme_id) REFERENCES themes (id) ON DELETE CASCADE
+);
+
+CREATE TABLE hbtheme_cache
+(
+    hbtheme_id VARCHAR,
+    timestamp  TIMESTAMP NOT NULL DEFAULT now(),
+    file       BYTEA     NOT NULL,
+    file_name  VARCHAR   NOT NULL,
+
+    PRIMARY KEY (hbtheme_id),
+    FOREIGN KEY (hbtheme_id) REFERENCES hbthemes (id) ON DELETE CASCADE
 );
 
 ---------------------------------------------------------------------------------------

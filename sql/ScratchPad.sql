@@ -88,3 +88,5 @@ SELECT is_test('1')
 
 ALTER TABLE layout_options
     ADD COLUMN "order" INT NOT NULL
+
+select to_hex(32234)
