@@ -13,26 +13,34 @@ CREATE TABLE users
     id               VARCHAR GENERATED ALWAYS AS (
                          lpad(('x' || substr(md5(counter::VARCHAR), 1, 16))::BIT(63)::BIGINT::VARCHAR, 19, '0')
                          ) STORED,
-    joined_timestamp TIMESTAMP NOT NULL DEFAULT now(),
-    has_accepted     BOOL      NOT NULL DEFAULT FALSE,
-    is_blocked       BOOL      NOT NULL DEFAULT FALSE,
-    is_admin         BOOLEAN   NOT NULL DEFAULT FALSE,
-    roles            VARCHAR[] NOT NULL DEFAULT '{}',
+    joined_timestamp TIMESTAMP   NOT NULL DEFAULT now(),
+    has_accepted     BOOL        NOT NULL DEFAULT FALSE,
+    is_admin         BOOLEAN     NOT NULL DEFAULT FALSE,
+    is_blocked       BOOL        NOT NULL DEFAULT FALSE,
+    roles            VARCHAR[]   NOT NULL DEFAULT '{}',
+    email            VARCHAR UNIQUE,
+    username         VARCHAR(32) NOT NULL,
 
     PRIMARY KEY (id)
 );
 
-CREATE TABLE user_preferences
+CREATE TABLE user_profiles
 (
     user_id     CHAR(19),
-    email       VARCHAR UNIQUE,
-    username    VARCHAR,
-    bio         VARCHAR,
-    avatar_file BYTEA,
-    banner_file BYTEA,
+    bio         VARCHAR(10000),
+    avatar_file BYTEA,                -- TODO
+    banner_file BYTEA,                -- TODO
     color       CHAR(6),
-    show_nsfw   BOOLEAN,
-    random_uuid UUID UNIQUE NOT NULL,
+    random_uuid UUID UNIQUE NOT NULL, -- TODO
+
+    PRIMARY KEY (user_id),
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE user_preferences
+(
+    user_id   CHAR(19),
+    show_nsfw BOOLEAN,
 
     PRIMARY KEY (user_id),
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -53,15 +61,15 @@ CREATE TABLE packs
 (
     counter           SERIAL,
     id                VARCHAR GENERATED ALWAYS AS (to_hex(counter)) STORED,
-    user_id           CHAR(19)    NOT NULL,
-    name              VARCHAR     NOT NULL,
-    description       VARCHAR,
-    added_timestamp   TIMESTAMP   NOT NULL DEFAULT now(),
-    updated_timestamp TIMESTAMP   NOT NULL DEFAULT now(),
-    dl_count          BIGINT      NOT NULL DEFAULT 0,
-    is_nsfw           BOOL        NOT NULL DEFAULT FALSE,
+    user_id           CHAR(19)     NOT NULL,
+    name              VARCHAR(100) NOT NULL,
+    description       VARCHAR(1000),
+    added_timestamp   TIMESTAMP    NOT NULL DEFAULT now(),
+    updated_timestamp TIMESTAMP    NOT NULL DEFAULT now(),
+    dl_count          BIGINT       NOT NULL DEFAULT 0,
+    is_nsfw           BOOL         NOT NULL DEFAULT FALSE,
     tsv               TSVECTOR,
-    random_uuid       UUID UNIQUE NOT NULL,
+    random_uuid       UUID UNIQUE  NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -79,20 +87,20 @@ CREATE TABLE layouts
 (
     counter            SERIAL,
     id                 VARCHAR GENERATED ALWAYS AS (to_hex(counter)) STORED,
-    uuid               UUID UNIQUE NOT NULL,
-    user_id            CHAR(19)    NOT NULL,
-    name               VARCHAR     NOT NULL,
-    description        VARCHAR     NOT NULL,
-    added_timestamp    TIMESTAMP   NOT NULL DEFAULT now(),
-    updated_timestamp  TIMESTAMP   NOT NULL DEFAULT now(),
-    target_id          INT         NOT NULL,
-    dl_count           BIGINT      NOT NULL DEFAULT 0,
+    uuid               UUID UNIQUE   NOT NULL,
+    user_id            CHAR(19)      NOT NULL,
+    name               VARCHAR(100)  NOT NULL,
+    description        VARCHAR(1000),
+    added_timestamp    TIMESTAMP     NOT NULL DEFAULT now(),
+    updated_timestamp  TIMESTAMP     NOT NULL DEFAULT now(),
+    target_id          INT           NOT NULL,
+    dl_count           BIGINT        NOT NULL DEFAULT 0,
     color              CHAR(6),
     layout_json        JSON,
     common_layout_json JSON,
-    image_file         BYTEA       NOT NULL,
+    image_file         BYTEA         NOT NULL,
     tsv                TSVECTOR,
-    random_uuid        UUID UNIQUE NOT NULL,
+    random_uuid        UUID UNIQUE   NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users (id) ON UPDATE CASCADE,
@@ -126,19 +134,19 @@ CREATE TABLE themes
 (
     counter           SERIAL,
     id                VARCHAR GENERATED ALWAYS AS (to_hex(counter)) STORED,
-    user_id           CHAR(19)    NOT NULL,
+    user_id           CHAR(19)     NOT NULL,
     pack_id           VARCHAR,
-    name              VARCHAR     NOT NULL,
-    description       VARCHAR,
-    added_timestamp   TIMESTAMP   NOT NULL DEFAULT now(),
-    updated_timestamp TIMESTAMP   NOT NULL DEFAULT now(),
-    target_id         INT         NOT NULL,
-    dl_count          BIGINT      NOT NULL DEFAULT 0,
-    is_nsfw           BOOL        NOT NULL DEFAULT FALSE,
+    name              VARCHAR(100) NOT NULL,
+    description       VARCHAR(1000),
+    added_timestamp   TIMESTAMP    NOT NULL DEFAULT now(),
+    updated_timestamp TIMESTAMP    NOT NULL DEFAULT now(),
+    target_id         INT          NOT NULL,
+    dl_count          BIGINT       NOT NULL DEFAULT 0,
+    is_nsfw           BOOL         NOT NULL DEFAULT FALSE,
     layout_id         VARCHAR,
     tsv               TSVECTOR,
     tsv_tags          TSVECTOR,
-    random_uuid       UUID UNIQUE NOT NULL,
+    random_uuid       UUID UNIQUE  NOT NULL,
 
 
     PRIMARY KEY (id),

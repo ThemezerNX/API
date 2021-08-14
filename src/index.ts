@@ -1,22 +1,17 @@
 import * as dotenv from "dotenv";
+import "reflect-metadata";
 import {ApolloServer} from "apollo-server-express";
-import {buildSchema, Query, Resolver} from "type-graphql";
+import {buildSchema} from "type-graphql";
 import * as express from "express";
 import * as fs from "fs";
 import * as path from "path";
 import {I18n} from "i18n";
+import {createConnection} from "typeorm";
+import resolvers from "./resolvers";
 
 dotenv.config();
 
-@Resolver()
-class TestResolver {
-    @Query(() => String)
-    async hello() {
-        return "HELLO";
-    }
-}
-
-const locales = fs.readdirSync(path.resolve(__dirname, "langs")).map((file) => {
+const locales = fs.readdirSync(path.resolve(__dirname, "lang")).map((file) => {
     // isos: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
     return path.basename(file, ".json");
 });
@@ -24,7 +19,7 @@ const locales = fs.readdirSync(path.resolve(__dirname, "langs")).map((file) => {
 const i18n = new I18n();
 i18n.configure({
     locales,
-    directory: path.join(__dirname, "langs"),
+    directory: path.join(__dirname, "lang"),
     defaultLocale: "en",
     retryInDefaultLocale: true,
     mustacheConfig: {
@@ -34,11 +29,22 @@ i18n.configure({
 });
 
 const main = async () => {
-    const schema = await buildSchema({
-        resolvers: [TestResolver],
-    });
+    await createConnection();
 
-    const apolloServer = new ApolloServer({schema});
+    const schema = await buildSchema({resolvers});
+
+    const apolloServer = new ApolloServer({
+        schema,
+        uploads: {
+            maxFileSize: 25000000, // 25 MB
+            maxFiles: 50,
+        },
+        introspection: true,
+        playground:
+            process.env.NODE_ENV === "development"
+                ? {settings: {"request.credentials": "same-origin"}}
+                : false,
+    });
 
     const app = express();
     app.use(express.urlencoded({extended: true}) as express.RequestHandler);
@@ -49,12 +55,12 @@ const main = async () => {
         res.send("No frii gaems here");
     });
 
-    apolloServer.applyMiddleware({app, path: "/"});
-
     const port = process.env.PORT;
     const host = process.env.HOST;
+    const path = "/";
+    apolloServer.applyMiddleware({app, path});
     app.listen({port, host}, () => {
-        console.log(`🚀 Server ready at http://${host}:${port}${server.graphqlPath}`);
+        console.log(`🚀 Server ready at http://${host}:${port}${path}`);
     });
 
 };

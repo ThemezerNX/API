@@ -6,7 +6,7 @@
     "private": false,
     "scripts": {
         "deploy": "rimraf dist && tsc",
-        "start": "node ./dist/index.js",
+        "start": "ts-node src/index --type-check",
         "dev": "cross-env NODE_ENV=development nodemon"
     },
     "keywords": [],
@@ -32,7 +32,8 @@
         "pg-tsquery": "^8.2.0",
         "postgres-bytea": "^3.0.0",
         "reflect-metadata": "^0.1.13",
-        "type-graphql": "^1.1.1"
+        "type-graphql": "^1.1.1",
+        "typeorm": "^0.2.37"
     },
     "resolutions": {
         "**/**/fs-capacitor": "^6.2.0",
@@ -40,6 +41,7 @@
     },
     "devDependencies": {
         "@types/node": "^16.6.1",
+        "kill-port": "^1.6.1",
         "nodemon": "^2.0.12",
         "ts-node": "^10.2.0",
         "typescript": "^4.3.5"
@@ -54,7 +56,12 @@
         "watch": [
             "src"
         ],
-        "exec": "tsc && npm start",
-        "ext": "ts"
+        "ext": "js,ts,tsx,json",
+        "exec": "yarn start",
+        "events": {
+            "restart": "kill-port 3000",
+            "crash": "kill-port 3000"
+        },
+        "delay": 1500
     }
 }
