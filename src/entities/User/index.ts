@@ -1,9 +1,10 @@
-import {BaseEntity, Column, CreateDateColumn, Entity, Generated, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {BaseEntity, Column, CreateDateColumn, Entity, Generated, JoinColumn, PrimaryColumn} from "typeorm";
 import {Field, ID, ObjectType} from "type-graphql";
 import {UserPreferences} from "./Preferences";
 import {UserConnections} from "./Connections";
 import {UserProfile} from "./Profile";
 import {IsEmail} from "class-validator";
+import {EmailAddress} from "graphql-scalars/mocks";
 
 
 @ObjectType()
@@ -23,7 +24,7 @@ export class User extends BaseEntity {
     })
     id: string;
 
-    @Field()
+    @Field(() => EmailAddress)
     @IsEmail()
     @Column({unique: true})
     email: string;

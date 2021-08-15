@@ -49,7 +49,7 @@ export class Item extends BaseEntity {
     updatedTimestamp: Date;
 
     @Field()
-    @Column("int")
+    @Column("int", {nullable: false, default: 0})
     dlCount: number;
 
     @Column("tsvector")

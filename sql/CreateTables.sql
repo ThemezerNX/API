@@ -85,22 +85,22 @@ CREATE TABLE targets
 
 CREATE TABLE layouts
 (
-    counter            SERIAL,
-    id                 VARCHAR GENERATED ALWAYS AS (to_hex(counter)) STORED,
-    uuid               UUID UNIQUE   NOT NULL,
-    user_id            CHAR(19)      NOT NULL,
-    name               VARCHAR(100)  NOT NULL,
-    description        VARCHAR(1000),
-    added_timestamp    TIMESTAMP     NOT NULL DEFAULT now(),
-    updated_timestamp  TIMESTAMP     NOT NULL DEFAULT now(),
-    target_id          INT           NOT NULL,
-    dl_count           BIGINT        NOT NULL DEFAULT 0,
-    color              CHAR(6),
-    layout_json        JSON,
-    common_layout_json JSON,
-    image_file         BYTEA         NOT NULL,
-    tsv                TSVECTOR,
-    random_uuid        UUID UNIQUE   NOT NULL,
+    counter           SERIAL,
+    id                VARCHAR GENERATED ALWAYS AS (to_hex(counter)) STORED,
+    uuid              UUID UNIQUE  NOT NULL,
+    user_id           CHAR(19)     NOT NULL,
+    name              VARCHAR(100) NOT NULL,
+    description       VARCHAR(1000),
+    added_timestamp   TIMESTAMP    NOT NULL DEFAULT now(),
+    updated_timestamp TIMESTAMP    NOT NULL DEFAULT now(),
+    target_id         INT          NOT NULL,
+    dl_count          BIGINT       NOT NULL DEFAULT 0,
+    color             CHAR(6),
+    json              JSONB,
+    common_json       JSONB,
+    overlay_file      BYTEA        NOT NULL, -- TODO
+    tsv               TSVECTOR,
+    random_uuid       UUID UNIQUE  NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users (id) ON UPDATE CASCADE,
@@ -123,7 +123,7 @@ CREATE TABLE layout_option_values
     option_id  INT,
     value_name VARCHAR,
     uuid       UUID UNIQUE NOT NULL,
-    json       VARCHAR     NOT NULL,
+    json       JSONB       NOT NULL,
     image_file BYTEA       NOT NULL,
 
     PRIMARY KEY (option_id, value_name),
@@ -173,14 +173,14 @@ CREATE TABLE hbthemes
     random_uuid       UUID UNIQUE NOT NULL,
 
     PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE theme_assets
 (
     theme_id                  VARCHAR,
-    custom_layout_json        JSON,
-    custom_common_layout_json JSON,
+    custom_layout_json        JSONB,
+    custom_common_layout_json JSONB,
     image_file                BYTEA,
     album_icon_file           BYTEA,
     news_icon_file            BYTEA,

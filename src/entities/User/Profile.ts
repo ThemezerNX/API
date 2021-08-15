@@ -2,6 +2,7 @@ import {Column, Entity, Generated, JoinColumn, OneToOne} from "typeorm";
 import {Field, ObjectType} from "type-graphql";
 import {IsHexColor} from "class-validator";
 import {User} from "./index";
+import {HexColorCode} from "graphql-scalars/mocks";
 
 
 @ObjectType()
@@ -28,7 +29,7 @@ export class UserProfile {
     @Field(() => [String])
     bannerUrl: string;
 
-    @Field()
+    @Field(() => HexColorCode)
     @IsHexColor()
     @Column("char", {length: 6})
     color: string;
