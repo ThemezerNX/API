@@ -6,5 +6,4 @@ export enum Target {
     PSL = "Psl",
     MYPAGE = "MyPage",
     NOTIFICATION = "Notification",
-    HBMENU = "HBMenu",
 }

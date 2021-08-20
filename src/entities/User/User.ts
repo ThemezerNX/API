@@ -1,8 +1,8 @@
 import {BaseEntity, Column, CreateDateColumn, Entity, Generated, JoinColumn, PrimaryColumn} from "typeorm";
 import {Field, ID, ObjectType} from "type-graphql";
-import {UserPreferences} from "./Preferences";
-import {UserConnections} from "./Connections";
-import {UserProfile} from "./Profile";
+import {UserPreferences} from "./UserPreferences";
+import {UserConnections} from "./UserConnections";
+import {UserProfile} from "./UserProfile";
 import {IsEmail} from "class-validator";
 import {EmailAddress} from "graphql-scalars/mocks";
 

@@ -1,8 +1,9 @@
-import {Column, Entity} from "typeorm";
+import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
 import {Field, ObjectType} from "type-graphql";
 import {Item} from "../Item";
 import {Target} from "../Target";
 import {HexColorCode, JSON, URL, UUID} from "graphql-scalars/mocks";
+import {User} from "../User/User";
 
 
 @ObjectType()
@@ -12,6 +13,11 @@ export class Layout extends Item {
     @Field(() => UUID)
     @Column("uuid", {unique: true, nullable: false})
     uuid: string;
+
+    @Field()
+    @JoinColumn()
+    @ManyToOne(() => User, {onDelete: "SET NULL"})
+    creator: User;
 
     @Field(() => Target)
     @Column({

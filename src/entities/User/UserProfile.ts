@@ -1,7 +1,7 @@
 import {Column, Entity, Generated, JoinColumn, OneToOne} from "typeorm";
 import {Field, ObjectType} from "type-graphql";
 import {IsHexColor} from "class-validator";
-import {User} from "./index";
+import {User} from "./User";
 import {HexColorCode} from "graphql-scalars/mocks";
 
 

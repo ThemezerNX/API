@@ -9,7 +9,7 @@ import {
     UpdateDateColumn,
 } from "typeorm";
 import {Field, ID} from "type-graphql";
-import {User} from "./User";
+import {User} from "./User/User";
 
 
 export class Item extends BaseEntity {
@@ -19,8 +19,7 @@ export class Item extends BaseEntity {
     counter: number;
 
     @Field(() => ID)
-    @PrimaryColumn({
-        type: "varchar",
+    @PrimaryColumn("varchar", {
         generatedType: "STORED",
         update: false,
         asExpression: "to_hex(counter)",
@@ -29,7 +28,7 @@ export class Item extends BaseEntity {
 
     @Field()
     @JoinColumn()
-    @ManyToOne(() => User)
+    @ManyToOne(() => User, {onDelete: "CASCADE"})
     creator: User;
 
     @Field()
@@ -51,8 +50,5 @@ export class Item extends BaseEntity {
     @Field()
     @Column("int", {nullable: false, default: 0})
     dlCount: number;
-
-    @Column("tsvector")
-    tsv: any;
 
 }

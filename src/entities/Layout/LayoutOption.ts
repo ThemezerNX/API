@@ -1,4 +1,4 @@
-import {Column, Entity} from "typeorm";
+import {BaseEntity, Column, Entity} from "typeorm";
 import {Field, ObjectType} from "type-graphql";
 import {Item} from "../Item";
 import {Target} from "../Target";
@@ -7,7 +7,7 @@ import {HexColorCode, JSON, URL, UUID} from "graphql-scalars/mocks";
 
 @ObjectType()
 @Entity()
-export class LayoutOptions extends Item {
+export class LayoutOptions extends BaseEntity {
 
     @Field(() => UUID)
     @Column("uuid", {unique: true, nullable: false})
