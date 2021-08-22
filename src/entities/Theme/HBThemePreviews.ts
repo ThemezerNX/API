@@ -5,7 +5,7 @@ import {Theme} from "./Theme";
 
 @ObjectType()
 @Entity()
-export class ThemePreviews {
+export class HBThemePreviews {
 
     @OneToOne(() => Theme, {primary: true, onDelete: "CASCADE", cascade: true})
     @JoinColumn({name: "themeId"})

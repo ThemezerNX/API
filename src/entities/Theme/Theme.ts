@@ -6,15 +6,12 @@ import {UUID} from "graphql-scalars/mocks";
 import {Pack} from "../Pack/Pack";
 import {Layout} from "../Layout/Layout";
 import {ThemeTag} from "./ThemeTag";
+import {ThemePreviews} from "./ThemePreviews";
 
 
 @ObjectType()
 @Entity()
 export class Theme extends Item {
-
-    @Field(() => UUID)
-    @Column("uuid", {unique: true, nullable: false})
-    uuid: string;
 
     @Field()
     @JoinColumn()
@@ -44,8 +41,12 @@ export class Theme extends Item {
     @ManyToMany(() => ThemeTag, {onDelete: "CASCADE"})
     tags: ThemeTag[];
 
+    @Field(() => ThemePreviews)
+    @JoinColumn()
     previews: ThemePreviews
 
+    @Field(() => ThemeAssets)
+    @JoinColumn()
     assets: ThemeAssets
 
 }

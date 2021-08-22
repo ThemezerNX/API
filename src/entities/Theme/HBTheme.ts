@@ -6,29 +6,18 @@ import {UUID} from "graphql-scalars/mocks";
 import {Pack} from "../Pack/Pack";
 import {Layout} from "../Layout/Layout";
 import {ThemeTag} from "./ThemeTag";
+import {ThemePreviews} from "./ThemePreviews";
+import {HBThemePreviews} from "./HBThemePreviews";
 
 
 @ObjectType()
 @Entity()
-export class Theme extends Item {
-
-    @Field(() => UUID)
-    @Column("uuid", {unique: true, nullable: false})
-    uuid: string;
+export class HBTheme extends Item {
 
     @Field()
     @JoinColumn()
     @ManyToOne(() => Pack, {onDelete: "CASCADE"})
     pack: Pack;
-
-    @Field(() => Target)
-    @Column({
-        type: "enum",
-        enum: Target,
-        nullable: false,
-        onUpdate: "CASCADE",
-    })
-    target: Target;
 
     @Field()
     @Column()
@@ -36,12 +25,20 @@ export class Theme extends Item {
 
     @Field()
     @JoinColumn()
-    @ManyToOne(() => Layout, {onDelete: "RESTRICT"})
-    layout: Layout;
+    @ManyToOne(() => HBLayout, {onDelete: "RESTRICT"})
+    layout: HBLayout;
 
     @Field(() => [ThemeTag])
     @JoinColumn()
     @ManyToMany(() => ThemeTag, {onDelete: "CASCADE"})
     tags: ThemeTag[];
+
+    @Field(() => HBThemePreviews)
+    @JoinColumn()
+    previews: HBThemePreviews
+
+    @Field(() => HBThemeAssets)
+    @JoinColumn()
+    assets: HBThemeAssets
 
 }
