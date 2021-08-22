@@ -188,6 +188,7 @@ CREATE TABLE theme_assets
     controller_icon_file      BYTEA,
     settings_icon_file        BYTEA,
     power_icon_file           BYTEA,
+    home_icon_file            BYTEA,
 
     PRIMARY KEY (theme_id),
     FOREIGN KEY (theme_id) REFERENCES themes (id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -215,8 +216,8 @@ CREATE TABLE hbtheme_assets
     charging_icon_file    BYTEA,
     folder_icon_file      BYTEA,
     invalid_icon_file     BYTEA,
-    theme_icon_dark       BYTEA,
-    theme_icon_light      BYTEA,
+    theme_icon_dark_file  BYTEA,
+    theme_icon_light_file BYTEA,
     airplaine_icon_file   BYTEA,
     wifi_none_icon_file   BYTEA,
     wifi1_icon_file       BYTEA,

@@ -1,60 +1,62 @@
-import {Column, Entity, Generated, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {BeforeUpdate, Column, Entity, Generated, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {Field, ObjectType} from "type-graphql";
-import {URL} from "graphql-scalars/mocks";
-import {Theme} from "./Theme";
+import {HBTheme} from "./HBTheme";
+import {v4 as uuid} from "uuid";
+import {URLResolver} from "graphql-scalars";
 
 @ObjectType()
 @Entity()
 export class HBThemePreviews {
 
-    @OneToOne(() => Theme, {primary: true, onDelete: "CASCADE", cascade: true})
-    @JoinColumn({name: "themeId"})
-    theme: Theme;
+    @OneToOne(() => HBTheme, {onDelete: "CASCADE", cascade: true})
+    @JoinColumn({name: "hbThemeId"})
+    hbTheme: HBTheme;
 
     @PrimaryColumn()
-    themeId: string;
+    hbThemeId: string;
 
     @Generated("uuid")
-    uuid: string;
+    randomUuid: string;
 
-    @Column("bytea", {nullable: false})
+    @Column("bytea")
     image720File: any;
-
-    @Field(() => URL)
-    get image720(): string {
-        return `//cdn.themezer.net/themes/${this.themeId}/${this.uuid}/720`;
-    }
-
-    @Column("bytea", {nullable: false})
+    @Column("bytea")
     image360File: any;
-
-    @Field(() => URL)
-    get image360(): string {
-        return `//cdn.themezer.net/themes/${this.themeId}/${this.uuid}/360`;
-    }
-
-    @Column("bytea", {nullable: false})
+    @Column("bytea")
     image240File: any;
-
-    @Field(() => URL)
-    get image240(): string {
-        return `//cdn.themezer.net/themes/${this.themeId}/${this.uuid}/240`;
-    }
-
-    @Column("bytea", {nullable: false})
+    @Column("bytea")
     image180File: any;
-
-    @Field(() => URL)
-    get image180(): string {
-        return `//cdn.themezer.net/themes/${this.themeId}/${this.uuid}/180`;
-    }
-
-    @Column("bytea", {nullable: false})
+    @Column("bytea")
     imagePlaceholderFile: any;
 
-    @Field(() => URL)
+    @Field(() => URLResolver, {description: "WebP image, 1280x720"})
+    get image720(): string {
+        return `//cdn.themezer.net/hbthemes/${this.hbThemeId}/${this.randomUuid}/previews/720`;
+    }
+
+    @Field(() => URLResolver, {description: "WebP image, 640x360"})
+    get image360(): string {
+        return `//cdn.themezer.net/hbthemes/${this.hbThemeId}/${this.randomUuid}/previews/360`;
+    }
+
+    @Field(() => URLResolver, {description: "WebP image, 426x240"})
+    get image240(): string {
+        return `//cdn.themezer.net/hbthemes/${this.hbThemeId}/${this.randomUuid}/previews/240`;
+    }
+
+    @Field(() => URLResolver, {description: "WebP image, 320x180"})
+    get image180(): string {
+        return `//cdn.themezer.net/hbthemes/${this.hbThemeId}/${this.randomUuid}/previews/180`;
+    }
+
+    @Field(() => URLResolver, {description: "WebP image, 80x45"})
     get imagePlaceholder(): string {
-        return `//cdn.themezer.net/themes/${this.themeId}/${this.uuid}/placeholder`;
+        return `//cdn.themezer.net/hbthemes/${this.hbThemeId}/${this.randomUuid}/previews/placeholder`;
+    }
+
+    @BeforeUpdate()
+    randomizeUuid() {
+        this.randomUuid = uuid();
     }
 
 }

@@ -1,4 +1,4 @@
-import {BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn} from "typeorm";
+import {BaseEntity, Column, Entity, JoinColumn, OneToOne} from "typeorm";
 import {Field, ObjectType} from "type-graphql";
 import {User} from "./User";
 
@@ -12,15 +12,15 @@ export class DiscordConnection extends BaseEntity {
     user: User;
 
     @Field()
-    @Column({nullable: false})
+    @Column()
     username: string;
 
     @Field()
-    @Column("int", {nullable: false})
+    @Column("int")
     discriminator: number;
 
     @Field()
-    @Column({nullable: false})
+    @Column()
     avatarHash: string;
 
 }

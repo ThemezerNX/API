@@ -4,7 +4,7 @@ import {UserPreferences} from "./UserPreferences";
 import {UserConnections} from "./UserConnections";
 import {UserProfile} from "./UserProfile";
 import {IsEmail} from "class-validator";
-import {EmailAddress} from "graphql-scalars/mocks";
+import {EmailAddressResolver} from "graphql-scalars";
 
 
 @ObjectType()
@@ -24,33 +24,33 @@ export class User extends BaseEntity {
     })
     id: string;
 
-    @Field(() => EmailAddress)
+    @Field(() => EmailAddressResolver)
     @IsEmail()
-    @Column({unique: true})
-    email: string;
+    @Column({unique: true, nullable: true})
+    email?: string;
 
     @Field()
-    @Column({length: 32, nullable: false})
+    @Column({length: 32})
     username: string;
 
     @Field()
-    @CreateDateColumn({type: "timestamp", nullable: false})
+    @CreateDateColumn({type: "timestamp"})
     joinedTimestamp: Date;
 
     @Field()
-    @Column({nullable: false, default: false})
+    @Column({default: false})
     hasAccepted: boolean;
 
     @Field()
-    @Column({nullable: false, default: false})
+    @Column({default: false})
     isAdmin: boolean;
 
     @Field()
-    @Column({nullable: false, default: false})
+    @Column({default: false})
     isBlocked: boolean;
 
     @Field(() => [String])
-    @Column("varchar", {array: true, nullable: false, default: []})
+    @Column("varchar", {array: true, default: []})
     roles: string[];
 
     @Field(() => UserProfile)

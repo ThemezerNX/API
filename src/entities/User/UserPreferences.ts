@@ -1,4 +1,4 @@
-import {Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {Column, Entity, JoinColumn, OneToOne} from "typeorm";
 import {Field, ObjectType} from "type-graphql";
 import {User} from "./User";
 
@@ -12,7 +12,7 @@ export class UserPreferences {
     user: User;
 
     @Field()
-    @Column()
+    @Column({default: false})
     showNSFW: boolean;
 
 }

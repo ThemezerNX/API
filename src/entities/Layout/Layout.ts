@@ -2,16 +2,17 @@ import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
 import {Field, ObjectType} from "type-graphql";
 import {Item} from "../Item";
 import {Target} from "../Target";
-import {HexColorCode, JSON, URL, UUID} from "graphql-scalars/mocks";
+import {HexColorCodeResolver, UUIDResolver} from "graphql-scalars";
 import {User} from "../User/User";
+import {LayoutOption} from "./LayoutOption";
 
 
 @ObjectType()
 @Entity()
 export class Layout extends Item {
 
-    @Field(() => UUID)
-    @Column("uuid", {unique: true, nullable: false})
+    @Field(() => UUIDResolver)
+    @Column("uuid", {unique: true})
     uuid: string;
 
     @Field()
@@ -23,26 +24,23 @@ export class Layout extends Item {
     @Column({
         type: "enum",
         enum: Target,
-        nullable: false,
     })
     target: Target;
 
-    @Field(() => HexColorCode)
-    @Column("char", {length: 6})
-    color: string;
+    @Field(() => HexColorCodeResolver)
+    @Column("char", {length: 6, nullable: true})
+    color?: string;
 
     @Field(() => JSON)
-    @Column("jsonb")
-    json: string;
+    @Column("jsonb", {nullable: true})
+    json?: string;
 
     @Field(() => JSON)
-    @Column("jsonb")
-    commonJson: string;
+    @Column("jsonb", {nullable: true})
+    commonJson?: string;
 
-    @Field(() => URL)
-    overlayUrl: string;
-
-    @Column("bytea", {nullable: false})
-    overlayFile: string;
+    @Field(() => [LayoutOption])
+    @JoinColumn()
+    options: LayoutOption[];
 
 }

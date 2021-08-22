@@ -10,7 +10,7 @@ export class ThemeTag extends BaseEntity {
     id: number;
 
     @Field()
-    @Column({nullable: false, update: true, length: 100})
+    @Column({update: true, length: 100})
     name: string;
 
 }

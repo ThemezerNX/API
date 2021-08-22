@@ -32,23 +32,23 @@ export class Item extends BaseEntity {
     creator: User;
 
     @Field()
-    @Column({nullable: false, length: 100})
+    @Column({length: 100})
     name: string;
 
     @Field()
-    @Column({length: 1000})
+    @Column({nullable: true, length: 1000})
     description: string;
 
     @Field()
-    @CreateDateColumn({type: "timestamp", nullable: false})
+    @CreateDateColumn({type: "timestamp"})
     addedTimestamp: Date;
 
     @Field()
-    @UpdateDateColumn({type: "timestamp", nullable: false})
+    @UpdateDateColumn({type: "timestamp"})
     updatedTimestamp: Date;
 
     @Field()
-    @Column("int", {nullable: false, default: 0})
+    @Column("int", {default: 0})
     dlCount: number;
 
 }

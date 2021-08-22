@@ -9,7 +9,7 @@ export default gql`
     scalar URL
     scalar EmailAddress
     scalar NonEmptyString
-    
+
     enum Target {
         ResidentMenu
         Entrance
@@ -62,7 +62,7 @@ export default gql`
         roles: [String!]!
         preferences: UserPreferences!
     }
-    
+
     type UserPreferences {
         email: EmailAddress
         username: String!
@@ -75,24 +75,24 @@ export default gql`
     }
 
     type DiscordUser {
-        id: ID!    
+        id: ID!
         username: String!
         discriminator: Int!
         "A small resolution profile picture"
         avatarUrl: URL!
     }
-    
+
     type Pack {
         id: ID!
         user: User
     }
-    
+
     type Query {
-        
+
     }
-    
+
     type Mutation {
-        
+
     }
 
     schema {

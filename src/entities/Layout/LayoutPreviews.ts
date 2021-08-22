@@ -1,19 +1,19 @@
 import {BeforeUpdate, Column, Entity, Generated, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {Field, ObjectType} from "type-graphql";
-import {Theme} from "./Theme";
+import {Layout} from "./Layout";
 import {v4 as uuid} from "uuid";
 import {URLResolver} from "graphql-scalars";
 
 @ObjectType()
 @Entity()
-export class ThemePreviews {
+export class LayoutPreviews {
 
-    @OneToOne(() => Theme, {onDelete: "CASCADE", cascade: true})
-    @JoinColumn({name: "themeId"})
-    theme: Theme;
+    @OneToOne(() => Layout, {onDelete: "CASCADE", cascade: true})
+    @JoinColumn({name: "layoutId"})
+    layout: Layout;
 
     @PrimaryColumn()
-    themeId: string;
+    layoutId: string;
 
     @Generated("uuid")
     randomUuid: string;
@@ -31,27 +31,27 @@ export class ThemePreviews {
 
     @Field(() => URLResolver, {description: "WebP image, 1280x720"})
     get image720(): string {
-        return `//cdn.themezer.net/themes/${this.themeId}/${this.randomUuid}/previews/720`;
+        return `//cdn.themezer.net/layouts/${this.layoutId}/${this.randomUuid}/previews/720`;
     }
 
     @Field(() => URLResolver, {description: "WebP image, 640x360"})
     get image360(): string {
-        return `//cdn.themezer.net/themes/${this.themeId}/${this.randomUuid}/previews/360`;
+        return `//cdn.themezer.net/layouts/${this.layoutId}/${this.randomUuid}/previews/360`;
     }
 
-    @Field(() => URLResolver, {description: "JPG image, 426x240"})
+    @Field(() => URLResolver, {description: "WebP image, 426x240"})
     get image240(): string {
-        return `//cdn.themezer.net/themes/${this.themeId}/${this.randomUuid}/previews/240`;
+        return `//cdn.themezer.net/layouts/${this.layoutId}/${this.randomUuid}/previews/240`;
     }
 
     @Field(() => URLResolver, {description: "WebP image, 320x180"})
     get image180(): string {
-        return `//cdn.themezer.net/themes/${this.themeId}/${this.randomUuid}/previews/180`;
+        return `//cdn.themezer.net/layouts/${this.layoutId}/${this.randomUuid}/previews/180`;
     }
 
     @Field(() => URLResolver, {description: "WebP image, 80x45"})
     get imagePlaceholder(): string {
-        return `//cdn.themezer.net/themes/${this.themeId}/${this.randomUuid}/previews/placeholder`;
+        return `//cdn.themezer.net/layouts/${this.layoutId}/${this.randomUuid}/previews/placeholder`;
     }
 
     @BeforeUpdate()

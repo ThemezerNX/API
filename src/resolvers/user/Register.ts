@@ -1,5 +1,4 @@
-import {Arg, Mutation, Query, Resolver} from "type-graphql";
-import {User} from "../../entities/User/User";
+import {Resolver} from "type-graphql";
 
 
 @Resolver()
