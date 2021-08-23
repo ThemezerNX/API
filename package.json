@@ -61,8 +61,8 @@
         "ext": "js,ts,tsx,json",
         "exec": "yarn start",
         "events": {
-            "restart": "kill-port 3000",
-            "crash": "kill-port 3000"
+            "restart": "kill-port 4100",
+            "crash": "kill-port 4100"
         },
         "delay": 1500
     }
