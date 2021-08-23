@@ -19,21 +19,21 @@ export class UserProfile {
 
     @Field()
     @Column({length: 10000, nullable: true})
-    bio: string;
+    bio?: string;
 
     @Field(() => HexColorCodeResolver)
     @IsHexColor()
     @Column("char", {length: 6, nullable: true})
-    color: string;
+    color?: string;
 
     @Column("uuid", {unique: true})
     @Generated("uuid")
     randomUuid: string;
 
     @Column("bytea", {nullable: true})
-    avatarFile: string;
+    avatarFile?: string;
     @Column("bytea", {nullable: true})
-    bannerFile: string;
+    bannerFile?: string;
 
     @Field(() => URLResolver, {description: "WebP image"})
     get avatar(): string {

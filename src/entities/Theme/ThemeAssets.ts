@@ -27,21 +27,21 @@ export class ThemeAssets {
     customCommonLayoutJson?: JSON;
 
     @Column("bytea", {nullable: true})
-    imageFile: any;
+    imageFile?: any;
     @Column("bytea", {nullable: true})
-    albumIconFile: any;
+    albumIconFile?: any;
     @Column("bytea", {nullable: true})
-    newsIconFile: any;
+    newsIconFile?: any;
     @Column("bytea", {nullable: true})
-    shopIconFile: any;
+    shopIconFile?: any;
     @Column("bytea", {nullable: true})
-    controllerIconFile: any;
+    controllerIconFile?: any;
     @Column("bytea", {nullable: true})
-    settingsIconFile: any;
+    settingsIconFile?: any;
     @Column("bytea", {nullable: true})
-    powerIconFile: any;
+    powerIconFile?: any;
     @Column("bytea", {nullable: true})
-    homeIconFile: any;
+    homeIconFile?: any;
 
     @Field(() => URLResolver, {nullable: true})
     get image(): string {

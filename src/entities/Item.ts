@@ -37,7 +37,7 @@ export class Item extends BaseEntity {
 
     @Field()
     @Column({nullable: true, length: 1000})
-    description: string;
+    description?: string;
 
     @Field()
     @CreateDateColumn({type: "timestamp"})
