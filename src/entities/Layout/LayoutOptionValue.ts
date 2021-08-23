@@ -10,7 +10,7 @@ import {LayoutOptionValuePreviews} from "./LayoutOptionValuePreviews";
 @Entity()
 export class LayoutOptionValue extends BaseEntity {
 
-    @ManyToOne(() => LayoutOption, {primary: true, onDelete: "CASCADE", cascade: true})
+    @ManyToOne(() => LayoutOption, {onDelete: "CASCADE", cascade: true})
     @JoinColumn()
     layoutOption: LayoutOption;
 

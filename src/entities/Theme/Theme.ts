@@ -1,4 +1,4 @@
-import {Column, Entity, JoinColumn, ManyToMany, ManyToOne} from "typeorm";
+import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne} from "typeorm";
 import {Field, ObjectType} from "type-graphql";
 import {Item} from "../Item";
 import {Target} from "../Target";
@@ -36,8 +36,8 @@ export class Theme extends Item {
     layout?: Layout;
 
     @Field(() => [ThemeTag])
-    @JoinColumn()
     @ManyToMany(() => ThemeTag, {onDelete: "CASCADE", cascade: true})
+    @JoinTable()
     tags: ThemeTag[];
 
     @Field(() => ThemePreviews)

@@ -15,4 +15,12 @@ export class UserPreferences {
     @Column({default: false})
     showNSFW: boolean;
 
+    @Field()
+    @Column({default: true})
+    popularEmails: boolean;
+
+    @Field()
+    @Column({default: true})
+    promotionEmails: boolean;
+
 }

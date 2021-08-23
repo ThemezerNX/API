@@ -1,4 +1,4 @@
-import {BaseEntity, Entity, JoinColumn, ManyToOne} from "typeorm";
+import {BaseEntity, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
 import {Field, ObjectType} from "type-graphql";
 import {Layout} from "./Layout";
 import {LayoutOptionValue} from "./LayoutOptionValue";
@@ -8,7 +8,10 @@ import {LayoutOptionValue} from "./LayoutOptionValue";
 @Entity()
 export class LayoutOption extends BaseEntity {
 
-    @ManyToOne(() => Layout, {primary: true, onDelete: "CASCADE", cascade: true})
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @ManyToOne(() => Layout, {onDelete: "CASCADE", cascade: true})
     @JoinColumn()
     layout: Layout;
 
