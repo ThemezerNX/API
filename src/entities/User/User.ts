@@ -1,4 +1,4 @@
-import {BaseEntity, Column, CreateDateColumn, Entity, Generated, JoinColumn, PrimaryColumn} from "typeorm";
+import {BaseEntity, Column, CreateDateColumn, Entity, Generated, OneToOne, PrimaryColumn} from "typeorm";
 import {Field, ID, ObjectType} from "type-graphql";
 import {UserPreferences} from "./UserPreferences";
 import {UserConnections} from "./UserConnections";
@@ -24,7 +24,7 @@ export class User extends BaseEntity {
     })
     id: string;
 
-    @Field(() => EmailAddressResolver)
+    @Field(() => EmailAddressResolver, {nullable: true})
     @IsEmail()
     @Column({unique: true, nullable: true})
     email?: string;
@@ -54,15 +54,15 @@ export class User extends BaseEntity {
     roles: string[];
 
     @Field(() => UserProfile)
-    @JoinColumn()
+    @OneToOne(() => UserProfile, profile => profile.user, {cascade: true, eager: true})
     profile: UserProfile;
 
     @Field(() => UserPreferences)
-    @JoinColumn()
+    @OneToOne(() => UserPreferences, preferences => preferences.user, {cascade: true, eager: true})
     preferences: UserPreferences;
 
     @Field(() => UserConnections)
-    @JoinColumn()
+    @OneToOne(() => UserConnections, connections => connections.user, {cascade: true, eager: true})
     connections: UserConnections;
 
 }

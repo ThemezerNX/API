@@ -1,4 +1,4 @@
-import {BeforeUpdate, Column, Entity, Generated, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {BeforeUpdate, Column, Entity, Generated, JoinColumn, OneToOne} from "typeorm";
 import {Field, ObjectType} from "type-graphql";
 import {IsHexColor} from "class-validator";
 import {User} from "./User";
@@ -10,18 +10,15 @@ import {v4 as uuid} from "uuid";
 @Entity()
 export class UserProfile {
 
-    @OneToOne(() => User, {primary: true, onDelete: "CASCADE", cascade: true})
-    @JoinColumn({name: "userId"})
+    @OneToOne(() => User, user => user.profile, {primary: true, onDelete: "CASCADE"})
+    @JoinColumn()
     user: User;
 
-    @PrimaryColumn()
-    userId: string;
-
-    @Field()
+    @Field({nullable: true})
     @Column({length: 10000, nullable: true})
     bio?: string;
 
-    @Field(() => HexColorCodeResolver)
+    @Field(() => HexColorCodeResolver, {nullable: true})
     @IsHexColor()
     @Column("char", {length: 6, nullable: true})
     color?: string;
@@ -35,14 +32,14 @@ export class UserProfile {
     @Column("bytea", {nullable: true})
     bannerFile?: string;
 
-    @Field(() => URLResolver, {description: "WebP image"})
+    @Field(() => URLResolver, {description: "WebP image", nullable: true})
     get avatar(): string {
-        return this.avatarFile ? `//cdn.themezer.net/creators/${this.userId}/${this.randomUuid}/avatar` : null;
+        return this.avatarFile ? `//cdn.themezer.net/creators/${this.user.id}/${this.randomUuid}/avatar` : null;
     }
 
-    @Field(() => URLResolver, {description: "WebP image"})
+    @Field(() => URLResolver, {description: "WebP image", nullable: true})
     get banner(): string {
-        return this.bannerFile ? `//cdn.themezer.net/creators/${this.userId}/${this.randomUuid}/banner` : null;
+        return this.bannerFile ? `//cdn.themezer.net/creators/${this.user.id}/${this.randomUuid}/banner` : null;
     }
 
     @BeforeUpdate()

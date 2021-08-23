@@ -1,15 +1,17 @@
-import {BaseEntity, Column, Entity, JoinColumn, OneToOne} from "typeorm";
+import {Column, Entity, JoinColumn, OneToOne} from "typeorm";
 import {Field, ObjectType} from "type-graphql";
-import {User} from "./User";
+import {UserConnections} from "./UserConnections";
 
 
 @ObjectType()
 @Entity()
-export class DiscordConnection extends BaseEntity {
+export class DiscordConnection {
 
-    @OneToOne(() => User, {primary: true, onDelete: "CASCADE", cascade: true})
+    @OneToOne(() => UserConnections,
+        connections => connections.discord,
+        {primary: true, onDelete: "CASCADE"})
     @JoinColumn()
-    user: User;
+    userConnections: UserConnections;
 
     @Field()
     @Column()

@@ -7,7 +7,7 @@ import {User} from "./User";
 @Entity()
 export class UserPreferences {
 
-    @OneToOne(() => User, {primary: true, onDelete: "CASCADE", cascade: true})
+    @OneToOne(() => User, user => user.preferences, {primary: true, onDelete: "CASCADE"})
     @JoinColumn()
     user: User;
 

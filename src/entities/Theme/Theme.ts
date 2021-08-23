@@ -15,7 +15,7 @@ export class Theme extends Item {
 
     @Field(() => Pack)
     @JoinColumn()
-    @ManyToOne(() => Pack, {onDelete: "CASCADE"})
+    @ManyToOne(() => Pack, {onDelete: "CASCADE", eager: true})
     pack?: Pack;
 
     @Field(() => Target)

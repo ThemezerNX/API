@@ -18,12 +18,12 @@ export class ThemeAssets {
     @Generated("uuid")
     randomUuid: string;
 
+    @Field(() => JSON, { nullable: true })
     @Column("jsonb", {nullable: true})
-    @Field(() => JSON)
     customLayoutJson?: JSON;
 
+    @Field(() => JSON, { nullable: true })
     @Column("jsonb", {nullable: true})
-    @Field(() => JSON)
     customCommonLayoutJson?: JSON;
 
     @Column("bytea", {nullable: true})

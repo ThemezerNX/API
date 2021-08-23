@@ -27,15 +27,15 @@ export class Layout extends Item {
     })
     target: Target;
 
-    @Field(() => HexColorCodeResolver)
+    @Field(() => HexColorCodeResolver, { nullable: true })
     @Column("char", {length: 6, nullable: true})
     color?: string;
 
-    @Field(() => JSON)
+    @Field(() => JSON, { nullable: true })
     @Column("jsonb", {nullable: true})
     json?: string;
 
-    @Field(() => JSON)
+    @Field(() => JSON, { nullable: true })
     @Column("jsonb", {nullable: true})
     commonJson?: string;
 

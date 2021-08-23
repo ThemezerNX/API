@@ -35,7 +35,7 @@ export class Item extends BaseEntity {
     @Column({length: 100})
     name: string;
 
-    @Field()
+    @Field({ nullable: true })
     @Column({nullable: true, length: 1000})
     description?: string;
 
