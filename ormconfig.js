@@ -7,6 +7,6 @@ module.exports = {
     password: process.env.POSTGRES_PASSWORD,
     schema: process.env.POSTGRES_SCHEMA,
     logging: process.env.NODE_ENV === "development",
-    synchronize: true,
+    synchronize: process.env.NODE_ENV === "development" && true,
     entities: ["./src/entities/**/*.ts"],
 };

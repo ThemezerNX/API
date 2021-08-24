@@ -41,11 +41,9 @@ export class Theme extends Item {
     tags: ThemeTag[];
 
     @Field(() => ThemePreviews)
-    @JoinColumn()
     previews: ThemePreviews;
 
     @Field(() => ThemeAssets)
-    @JoinColumn()
     assets: ThemeAssets;
 
 }

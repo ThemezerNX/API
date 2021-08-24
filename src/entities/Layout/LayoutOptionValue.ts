@@ -1,7 +1,7 @@
 import {BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn} from "typeorm";
 import {Field, ObjectType} from "type-graphql";
 import {Target} from "../Target";
-import {UUIDResolver} from "graphql-scalars";
+import {JSONResolver, UUIDResolver} from "graphql-scalars";
 import {LayoutOption} from "./LayoutOption";
 import {LayoutOptionValuePreviews} from "./LayoutOptionValuePreviews";
 
@@ -25,7 +25,7 @@ export class LayoutOptionValue extends BaseEntity {
     })
     target: Target;
 
-    @Field(() => JSON)
+    @Field(() => JSONResolver)
     @Column("jsonb")
     json: string;
 

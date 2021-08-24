@@ -2,7 +2,7 @@ import {BeforeUpdate, Column, Entity, Generated, JoinColumn, OneToOne, PrimaryCo
 import {Field, ObjectType} from "type-graphql";
 import {Theme} from "./Theme";
 import {v4 as uuid} from "uuid";
-import {URLResolver} from "graphql-scalars";
+import {JSONResolver, URLResolver} from "graphql-scalars";
 
 @ObjectType()
 @Entity()
@@ -18,11 +18,11 @@ export class ThemeAssets {
     @Generated("uuid")
     randomUuid: string;
 
-    @Field(() => JSON, { nullable: true })
+    @Field(() => JSONResolver, { nullable: true })
     @Column("jsonb", {nullable: true})
     customLayoutJson?: JSON;
 
-    @Field(() => JSON, { nullable: true })
+    @Field(() => JSONResolver, { nullable: true })
     @Column("jsonb", {nullable: true})
     customCommonLayoutJson?: JSON;
 

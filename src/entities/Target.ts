@@ -1,3 +1,5 @@
+import {registerEnumType} from "type-graphql";
+
 export enum Target {
     RESIDENTMENU = "ResidentMenu",
     ENTRANCE = "Entrance",
@@ -7,3 +9,7 @@ export enum Target {
     MYPAGE = "MyPage",
     NOTIFICATION = "Notification",
 }
+
+registerEnumType(Target, {
+    name: "Target"
+});

@@ -26,11 +26,9 @@ export class HBTheme extends Item {
     tags: ThemeTag[];
 
     @Field(() => HBThemePreviews)
-    @JoinColumn()
     previews: HBThemePreviews;
 
     @Field(() => HBThemeAssets)
-    @JoinColumn()
     assets: HBThemeAssets;
 
 }
