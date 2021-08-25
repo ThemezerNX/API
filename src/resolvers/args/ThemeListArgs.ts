@@ -1,8 +1,8 @@
-import {Field, InputType} from "type-graphql";
-import {Target} from "../../entities/Target";
-import {FilterOrder, FilterSort} from "../../entities/SortOrder";
+import {ArgsType, Field, InputType} from "type-graphql";
+import {Target} from "../../../../API-rewrite-rewrite/api/src/api/Target";
+import {FilterOrder, FilterSort} from "../../../../API-rewrite-rewrite/api/src/api/SortOrder";
 
-@InputType()
+@ArgsType()
 export class ThemeListArgs {
 
     @Field({nullable: true})
