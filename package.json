@@ -1,75 +1,80 @@
 {
-    "name": "themezer_api",
+    "name": "themezer-api",
     "version": "2.0.0",
-    "description": "The API for Themezer",
+    "description": "The API for the Themezer service, which serves a GraphQL and a Rest File API.",
+    "author": "Migushthe2nd",
     "repository": "https://github.com/ThemezerNX/API.git",
     "private": false,
+    "license": "GPL-3.0-or-later",
     "scripts": {
-        "deploy": "rimraf dist && tsc",
-        "start": "ts-node src/index --type-check",
-        "dev": "cross-env NODE_ENV=development nodemon"
+        "prebuild": "rimraf dist",
+        "build": "nest build",
+        "start": "nest start",
+        "start:dev": "nest start --watch",
+        "start:debug": "nest start --debug --watch",
+        "start:prod": "node dist/main",
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "test:cov": "jest --coverage",
+        "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+        "test:e2e": "jest --config ./test/jest-e2e.json"
     },
-    "keywords": [],
-    "author": "Migushthe2nd",
     "dependencies": {
-        "@nestjs/common": "^8.0.6",
-        "@nestjs/core": "^8.0.6",
+        "@apollo/federation": "^0.29.0",
+        "@nestjs/common": "^8.0.0",
+        "@nestjs/config": "^1.0.1",
+        "@nestjs/core": "^8.0.0",
         "@nestjs/graphql": "^8.0.2",
+        "@nestjs/platform-express": "^8.0.0",
         "@nestjs/typeorm": "^8.0.2",
-        "@types/express": "^4.17.13",
-        "apollo-server-express": "^2.13.1",
-        "apollo-server-plugin-response-cache": "^0.5.3",
+        "apollo-server-express": "^2",
+        "apollo-server-plugin-response-cache": "^3.1.1",
         "class-validator": "^0.13.1",
-        "cors": "^2.8.5",
-        "cross-env": "^7.0.2",
-        "discord.js": "^13.0.1",
-        "dompurify": "^2.2.6",
-        "dotenv": "^8.2.0",
-        "express": "^4.17.1",
+        "discord.js": "^13.1.0",
+        "dotenv": "^10.0.0",
         "graphql": "^15.5.1",
         "graphql-scalars": "^1.10.0",
-        "i18n": "^0.13.3",
-        "join-monster": "^2.1.2",
-        "join-monster-graphql-tools-adapter": "^0.1.0",
-        "node-filter-async": "^2.0.0",
+        "nestjs-i18n": "^8.1.4",
         "perch-query-builder": "^1.3.0",
-        "pg-promise": "^10.5.5",
-        "pg-tsquery": "^8.2.0",
+        "pg-promise": "^10.11.0",
         "postgres-bytea": "^3.0.0",
         "reflect-metadata": "^0.1.13",
-        "rxjs": "^7.3.0",
-        "type-graphql": "^1.1.1",
-        "typeorm": "^0.2.37",
-        "uuid": "^8.3.2"
-    },
-    "resolutions": {
-        "**/**/fs-capacitor": "^6.2.0",
-        "**/graphql-upload": "^11.0.0"
+        "rimraf": "^3.0.2",
+        "rxjs": "^7.2.0",
+        "typeorm": "^0.2.37"
     },
     "devDependencies": {
-        "@types/node": "^16.6.1",
+        "@nestjs/cli": "^8.0.0",
+        "@nestjs/schematics": "^8.0.0",
+        "@nestjs/testing": "^8.0.0",
+        "@types/express": "^4.17.13",
+        "@types/jest": "^27.0.1",
+        "@types/node": "^16.0.0",
+        "@types/supertest": "^2.0.11",
         "@types/uuid": "^8.3.1",
-        "kill-port": "^1.6.1",
-        "nodemon": "^2.0.12",
-        "ts-node": "^10.2.0",
+        "jest": "^27.0.6",
+        "supertest": "^6.1.3",
+        "ts-jest": "^27.0.3",
+        "ts-loader": "^9.2.3",
+        "ts-node": "^10.0.0",
+        "tsconfig-paths": "^3.10.1",
         "typescript": "^4.3.5"
     },
-    "nodemonConfig": {
-        "ignore": [
-            "**/*.test.ts",
-            "**/*.spec.ts",
-            ".git",
-            "node_modules"
+    "jest": {
+        "moduleFileExtensions": [
+            "js",
+            "json",
+            "ts"
         ],
-        "watch": [
-            "src"
-        ],
-        "ext": "js,ts,tsx,json",
-        "exec": "yarn start",
-        "events": {
-            "restart": "kill-port 4100",
-            "crash": "kill-port 4100"
+        "rootDir": "src",
+        "testRegex": ".*\\.spec\\.ts$",
+        "transform": {
+            "^.+\\.(t|j)s$": "ts-jest"
         },
-        "delay": 500
+        "collectCoverageFrom": [
+            "**/*.(t|j)s"
+        ],
+        "coverageDirectory": "../coverage",
+        "testEnvironment": "node"
     }
 }
