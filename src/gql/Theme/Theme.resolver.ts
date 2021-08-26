@@ -1,12 +1,10 @@
 import {Injectable} from "@nestjs/common";
-import {Args, ArgsType, Context, Field, Info, Query, Resolver} from "@nestjs/graphql";
+import {ArgsType, Field, Resolver} from "@nestjs/graphql";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
-import {GraphQLResolveInfo} from "graphql";
 import {Target} from "../common/enums/Target";
 import {FilterOrder, FilterSort} from "../common/enums/SortOrder";
 import {ThemeEntity} from "./Theme.entity";
-import {ThemeModel} from "./Theme.model";
 
 @Injectable()
 @Resolver()

@@ -4,7 +4,7 @@ import {DiscordConnectionModel} from "./DiscordConnection.model";
 @ObjectType()
 export class UserConnectionsModel {
 
-    @Field(() => DiscordConnectionModel)
+    @Field(() => DiscordConnectionModel, {nullable: true})
     discord?: DiscordConnectionModel;
 
 }

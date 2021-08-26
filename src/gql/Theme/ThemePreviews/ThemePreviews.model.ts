@@ -1,17 +1,19 @@
-import {ObjectType} from "@nestjs/graphql";
+import {Field, ObjectType} from "@nestjs/graphql";
 import {PreviewsModelInterface} from "../../common/interfaces/Previews.model.interface";
+import {URLResolver} from "graphql-scalars";
 
 @ObjectType({implements: [PreviewsModelInterface]})
 export class ThemePreviewsModel extends PreviewsModelInterface {
 
-    image720: string;
+    image720Url: string;
 
-    image360: string;
+    image360Url: string;
 
-    image240: string;
+    @Field(() => URLResolver, {description: "JPG image, 426x240"})
+    image240Url: string;
 
-    image180: string;
+    image180Url: string;
 
-    imagePlaceholder: string;
+    imagePlaceholderUrl: string;
 
 }

@@ -2,6 +2,7 @@ import {createUnionType, Field, ObjectType} from "@nestjs/graphql";
 import {ItemModelInterface} from "../common/interfaces/Item.model.interface";
 import {HBThemeModel} from "../HBTheme/HBTheme.model";
 import {ThemeModel} from "../Theme/Theme.model";
+import {PackPreviewsModel} from "./PackPreviews/PackPreviews.model";
 
 export const PackEntriesUnion = createUnionType({
     name: "PackEntries",
@@ -16,5 +17,8 @@ export class PackModel extends ItemModelInterface {
 
     @Field(() => [PackEntriesUnion])
     themes: typeof PackEntriesUnion[];
+
+    @Field(() => PackPreviewsModel)
+    previews: PackPreviewsModel;
 
 }

@@ -1,9 +1,10 @@
-import {BeforeUpdate, Column, Entity, Generated, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
-import {v4 as uuid} from "uuid";
+import {AfterLoad, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {LayoutEntity} from "../Layout.entity";
+import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
+import {CDNMapper} from "../../common/CDNMapper";
 
 @Entity()
-export class LayoutPreviewsEntity {
+export class LayoutPreviewsEntity extends PreviewsEntityInterface {
 
     @OneToOne(() => LayoutEntity, {onDelete: "CASCADE", cascade: true})
     @JoinColumn({name: "layoutId"})
@@ -12,23 +13,23 @@ export class LayoutPreviewsEntity {
     @PrimaryColumn()
     layoutId: string;
 
-    @Generated("uuid")
-    randomUuid: string;
-
-    @Column("bytea")
-    image720File: any;
-    @Column("bytea")
-    image360File: any;
-    @Column("bytea")
-    image240File: any;
-    @Column("bytea")
-    image180File: any;
-    @Column("bytea")
-    imagePlaceholderFile: any;
-
-    @BeforeUpdate()
-    randomizeUuid() {
-        this.randomUuid = uuid();
+    @AfterLoad()
+    afterLoad() {
+        if (!!this.image720File) {
+            this.image720Url = CDNMapper.layouts.previews(this.layoutId, "720", "webp", this.cacheUUID);
+        }
+        if (!!this.image360File) {
+            this.image360Url = CDNMapper.layouts.previews(this.layoutId, "360", "webp", this.cacheUUID);
+        }
+        if (!!this.image240File) {
+            this.image240Url = CDNMapper.layouts.previews(this.layoutId, "240", "webp", this.cacheUUID);
+        }
+        if (!!this.image180File) {
+            this.image180Url = CDNMapper.layouts.previews(this.layoutId, "180", "webp", this.cacheUUID);
+        }
+        if (!!this.imagePlaceholderFile) {
+            this.imagePlaceholderUrl = CDNMapper.layouts.previews(this.layoutId, "placeholder", "webp", this.cacheUUID);
+        }
     }
 
 }

@@ -2,7 +2,7 @@ import {ObjectType} from "@nestjs/graphql";
 import {PreviewsModelInterface} from "../../common/interfaces/Previews.model.interface";
 
 @ObjectType({implements: [PreviewsModelInterface]})
-export class LayoutPreviewsModel extends PreviewsModelInterface {
+export class PackPreviewsModel extends PreviewsModelInterface {
 
     image720Url: string;
 

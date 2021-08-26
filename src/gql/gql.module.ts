@@ -5,6 +5,7 @@ import * as path from "path";
 import {UserModule} from "./User/User.module";
 import {TypeOrmModule} from "@nestjs/typeorm";
 import {GraphQLModule} from "@nestjs/graphql";
+import {EntityNamingStrategy} from "./common/EntityNamingStrategy";
 
 @Module({
     imports: [
@@ -42,6 +43,7 @@ import {GraphQLModule} from "@nestjs/graphql";
             entities: ["./dist/**/*.entity.js"],
             autoLoadEntities: true,
             keepConnectionAlive: true,
+            namingStrategy: new EntityNamingStrategy(),
         }),
         UserModule,
     ],

@@ -1,4 +1,4 @@
-import {Field, ID, ObjectType} from "@nestjs/graphql";
+import {Field, ObjectType} from "@nestjs/graphql";
 import {ItemModelInterface} from "../common/interfaces/Item.model.interface";
 import {ThemeTagModel} from "../ThemeTag/ThemeTag.model";
 import {PackModel} from "../Pack/Pack.model";

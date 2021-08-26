@@ -3,7 +3,7 @@ import {UserModel} from "../../User/User.model";
 
 
 @InterfaceType()
-export class ItemModelInterface {
+export abstract class ItemModelInterface {
 
     @Field(() => ID)
     id: string;

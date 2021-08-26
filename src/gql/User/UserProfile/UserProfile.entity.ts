@@ -1,20 +1,11 @@
-import {
-    AfterLoad,
-    BaseEntity,
-    BeforeUpdate,
-    Column,
-    Entity,
-    Generated,
-    JoinColumn,
-    OneToOne,
-    PrimaryColumn,
-} from "typeorm";
-import {v4 as uuid} from "uuid";
+import {AfterLoad, Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {UserEntity} from "../User.entity";
+import {CDNMapper} from "../../common/CDNMapper";
+import {CachableEntityInterface} from "../../common/interfaces/Cachable.entity.interface";
 
 
 @Entity()
-export class UserProfileEntity extends BaseEntity {
+export class UserProfileEntity extends CachableEntityInterface {
 
     @OneToOne(() => UserEntity, user => user.profile, {onDelete: "CASCADE"})
     @JoinColumn({name: "userId"})
@@ -29,10 +20,6 @@ export class UserProfileEntity extends BaseEntity {
     @Column("char", {length: 6, nullable: true})
     color?: string;
 
-    @Column("uuid", {unique: true})
-    @Generated("uuid")
-    randomUuid: string;
-
     @Column("bytea", {nullable: true})
     avatarFile?: string;
 
@@ -45,16 +32,11 @@ export class UserProfileEntity extends BaseEntity {
     @AfterLoad()
     afterLoad() {
         if (!!this.avatarFile) {
-            this.avatarUrl = `https://cdn.themezer.net/creators/${this.userId}/avatar?${this.randomUuid}`;
+            this.avatarUrl = CDNMapper.users.avatar(this.userId, "webp", this.cacheUUID);
         }
         if (!!this.bannerFile) {
-            this.bannerUrl = `https://cdn.themezer.net/creators/${this.userId}/banner?${this.randomUuid}`;
+            this.bannerUrl = CDNMapper.users.banner(this.userId, "webp", this.cacheUUID);
         }
-    }
-
-    @BeforeUpdate()
-    randomizeUuid() {
-        this.randomUuid = uuid();
     }
 
 }

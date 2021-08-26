@@ -11,7 +11,7 @@ import {
 import {UserEntity} from "../../User/User.entity";
 
 
-export class ItemEntityInterface extends BaseEntity {
+export abstract class ItemEntityInterface extends BaseEntity {
 
     @Column("int", {select: false})
     @Generated("increment")

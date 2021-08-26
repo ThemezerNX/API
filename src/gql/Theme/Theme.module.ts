@@ -2,14 +2,13 @@ import {Module} from "@nestjs/common";
 import {TypeOrmModule} from "@nestjs/typeorm";
 import {ThemeResolver} from "./Theme.resolver";
 import {ThemeEntity} from "./Theme.entity";
-import {ThemePreviewsModule} from "./ThemePreviews/ThemePreviews.module";
+import {ThemeService} from "./Theme.service";
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([ThemeEntity]),
-        ThemePreviewsModule,
     ],
-    providers: [ThemeResolver],
+    providers: [ThemeService, ThemeResolver],
 })
 export class ThemeModule {
 }

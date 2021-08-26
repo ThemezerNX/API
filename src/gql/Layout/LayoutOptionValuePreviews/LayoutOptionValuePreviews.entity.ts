@@ -1,11 +1,20 @@
-import {BeforeUpdate, Column, Entity, Generated, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {AfterLoad, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {ObjectType} from "@nestjs/graphql";
-import {v4 as uuid} from "uuid";
 import {LayoutOptionValueEntity} from "../LayoutOptionValue/LayoutOptionValue.entity";
+import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
+import {CDNMapper} from "../../common/CDNMapper";
+import {LayoutEntity} from "../Layout.entity";
 
 @ObjectType()
 @Entity()
-export class LayoutOptionValuePreviewsEntity {
+export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
+
+    @OneToOne(() => LayoutEntity, {onDelete: "CASCADE", cascade: true})
+    @JoinColumn({name: "layoutId"})
+    layout: LayoutEntity;
+
+    @PrimaryColumn()
+    layoutId: string;
 
     @OneToOne(() => LayoutOptionValueEntity, {onDelete: "CASCADE", cascade: true})
     @JoinColumn({name: "layoutOptionValueUuid"})
@@ -14,23 +23,43 @@ export class LayoutOptionValuePreviewsEntity {
     @PrimaryColumn()
     layoutOptionValueUuid: string;
 
-    @Generated("uuid")
-    randomUuid: string;
-
-    @Column("bytea")
-    image720File: any;
-    @Column("bytea")
-    image360File: any;
-    @Column("bytea")
-    image240File: any;
-    @Column("bytea")
-    image180File: any;
-    @Column("bytea")
-    imagePlaceholderFile: any;
-
-    @BeforeUpdate()
-    randomizeUuid() {
-        this.randomUuid = uuid();
+    @AfterLoad()
+    afterLoad() {
+        if (!!this.image720File) {
+            this.image720Url = CDNMapper.layouts.options.previews(this.layoutId,
+                this.layoutOptionValueUuid,
+                "720",
+                "webp",
+                this.cacheUUID);
+        }
+        if (!!this.image360File) {
+            this.image360Url = CDNMapper.layouts.options.previews(this.layoutId,
+                this.layoutOptionValueUuid,
+                "360",
+                "webp",
+                this.cacheUUID);
+        }
+        if (!!this.image240File) {
+            this.image240Url = CDNMapper.layouts.options.previews(this.layoutId,
+                this.layoutOptionValueUuid,
+                "240",
+                "webp",
+                this.cacheUUID);
+        }
+        if (!!this.image180File) {
+            this.image180Url = CDNMapper.layouts.options.previews(this.layoutId,
+                this.layoutOptionValueUuid,
+                "180",
+                "webp",
+                this.cacheUUID);
+        }
+        if (!!this.imagePlaceholderFile) {
+            this.imagePlaceholderUrl = CDNMapper.layouts.options.previews(this.layoutId,
+                this.layoutOptionValueUuid,
+                "placeholder",
+                "webp",
+                this.cacheUUID);
+        }
     }
 
 }

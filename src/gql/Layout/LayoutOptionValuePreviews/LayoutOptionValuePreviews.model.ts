@@ -4,14 +4,14 @@ import {PreviewsModelInterface} from "../../common/interfaces/Previews.model.int
 @ObjectType({implements: [PreviewsModelInterface]})
 export class LayoutOptionValuePreviewsModel extends PreviewsModelInterface {
 
-    image720: string;
+    image720Url: string;
 
-    image360: string;
+    image360Url: string;
 
-    image240: string;
+    image240Url: string;
 
-    image180: string;
+    image180Url: string;
 
-    imagePlaceholder: string;
+    imagePlaceholderUrl: string;
 
 }

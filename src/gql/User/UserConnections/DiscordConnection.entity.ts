@@ -1,9 +1,9 @@
-import {Column, Entity, JoinColumn, OneToOne} from "typeorm";
+import {BaseEntity, Column, Entity, JoinColumn, OneToOne} from "typeorm";
 import {UserConnectionsEntity} from "./UserConnections.entity";
 
 
 @Entity()
-export class DiscordConnectionEntity {
+export class DiscordConnectionEntity extends BaseEntity {
 
     @OneToOne(() => UserConnectionsEntity,
         connections => connections.discord,

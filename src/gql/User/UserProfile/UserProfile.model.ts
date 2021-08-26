@@ -4,8 +4,6 @@ import {HexColorCodeResolver, URLResolver} from "graphql-scalars";
 @ObjectType()
 export class UserProfileModel {
 
-    userId: string;
-
     @Field({nullable: true})
     bio?: string;
 
