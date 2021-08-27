@@ -5,6 +5,10 @@ import * as path from "path";
 import {UserModule} from "./User/User.module";
 import {TypeOrmModule} from "@nestjs/typeorm";
 import {GraphQLModule} from "@nestjs/graphql";
+import {ThemeModule} from "./Theme/Theme.module";
+import {PackModule} from "./Pack/Pack.module";
+import {LayoutModule} from "./Layout/Layout.module";
+import {HBThemeModule} from "./HBTheme/HBTheme.module";
 import {EntityNamingStrategy} from "./common/EntityNamingStrategy";
 
 @Module({
@@ -46,6 +50,10 @@ import {EntityNamingStrategy} from "./common/EntityNamingStrategy";
             namingStrategy: new EntityNamingStrategy(),
         }),
         UserModule,
+        ThemeModule,
+        HBThemeModule,
+        PackModule,
+        LayoutModule,
     ],
 })
 export class GqlModule {

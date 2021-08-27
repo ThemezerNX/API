@@ -2,7 +2,7 @@ import {Field, ID, Int, InterfaceType} from "@nestjs/graphql";
 import {UserModel} from "../../User/User.model";
 
 
-@InterfaceType()
+@InterfaceType("ItemInterface")
 export abstract class ItemModelInterface {
 
     @Field(() => ID)

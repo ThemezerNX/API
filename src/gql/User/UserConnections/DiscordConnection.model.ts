@@ -1,7 +1,7 @@
 import {Field, Int, ObjectType} from "@nestjs/graphql";
 
 
-@ObjectType()
+@ObjectType("DiscordConnection")
 export class DiscordConnectionModel {
 
     @Field()

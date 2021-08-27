@@ -1,11 +1,9 @@
-import {AfterLoad, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
-import {ObjectType} from "@nestjs/graphql";
+import {Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {LayoutOptionValueEntity} from "../LayoutOptionValue/LayoutOptionValue.entity";
 import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
 import {LayoutEntity} from "../Layout.entity";
 
-@ObjectType()
 @Entity()
 export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
 
@@ -23,43 +21,44 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
     @PrimaryColumn()
     layoutOptionValueUuid: string;
 
-    @AfterLoad()
-    afterLoad() {
-        if (!!this.image720File) {
-            this.image720Url = CDNMapper.layouts.options.previews(this.layoutId,
-                this.layoutOptionValueUuid,
-                "720",
-                "webp",
-                this.cacheUUID);
-        }
-        if (!!this.image360File) {
-            this.image360Url = CDNMapper.layouts.options.previews(this.layoutId,
-                this.layoutOptionValueUuid,
-                "360",
-                "webp",
-                this.cacheUUID);
-        }
-        if (!!this.image240File) {
-            this.image240Url = CDNMapper.layouts.options.previews(this.layoutId,
-                this.layoutOptionValueUuid,
-                "240",
-                "webp",
-                this.cacheUUID);
-        }
-        if (!!this.image180File) {
-            this.image180Url = CDNMapper.layouts.options.previews(this.layoutId,
-                this.layoutOptionValueUuid,
-                "180",
-                "webp",
-                this.cacheUUID);
-        }
-        if (!!this.imagePlaceholderFile) {
-            this.imagePlaceholderUrl = CDNMapper.layouts.options.previews(this.layoutId,
-                this.layoutOptionValueUuid,
-                "placeholder",
-                "webp",
-                this.cacheUUID);
-        }
+    get image720Url() {
+        return !!this.image720File ? CDNMapper.layouts.options.previews(this.layoutId,
+            this.layoutOptionValueUuid,
+            "720",
+            "webp",
+            this.cacheID) : null;
+    }
+
+    get image360Url() {
+        return !!this.image360File ? CDNMapper.layouts.options.previews(this.layoutId,
+            this.layoutOptionValueUuid,
+            "360",
+            "webp",
+            this.cacheID) : null;
+    }
+
+    get image240Url() {
+        return !!this.image240File ? CDNMapper.layouts.options.previews(this.layoutId,
+            this.layoutOptionValueUuid,
+            "240",
+            "webp",
+            this.cacheID) : null;
+    }
+
+    get image180Url() {
+        return !!this.image180File ? CDNMapper.layouts.options.previews(this.layoutId,
+            this.layoutOptionValueUuid,
+            "180",
+            "webp",
+            this.cacheID) : null;
+    }
+
+    get imagePlaceholderUrl() {
+        return !!this.imagePlaceholderFile ? CDNMapper.layouts.options.previews(this.layoutId,
+            this.layoutOptionValueUuid,
+            "placeholder",
+            "webp",
+            this.cacheID) : null;
     }
 
 }

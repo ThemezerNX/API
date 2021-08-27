@@ -1,10 +1,10 @@
 import {registerEnumType} from "@nestjs/graphql";
 
 export enum FilterSort {
-    DOWNLOADS = "downloads",
+    DOWNLOADS = "dlCount",
     // LIKES = "likes",
-    UPDATED = "updated",
-    ADDED = "added",
+    UPDATED = "updatedTimestamp",
+    ADDED = "addedTimestamp",
 }
 
 registerEnumType(FilterSort, {
@@ -12,8 +12,8 @@ registerEnumType(FilterSort, {
 });
 
 export enum FilterOrder {
-    ASC = "asc",
-    DESC = "desc",
+    ASC = "ASC",
+    DESC = "DESC",
 }
 
 registerEnumType(FilterOrder, {

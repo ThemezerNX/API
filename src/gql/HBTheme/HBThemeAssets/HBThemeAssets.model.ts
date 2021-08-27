@@ -1,7 +1,7 @@
 import {Field, ObjectType} from "@nestjs/graphql";
 import {URLResolver} from "graphql-scalars";
 
-@ObjectType()
+@ObjectType("HBThemeAssets")
 export class HBThemeAssetsModel {
 
     @Field(() => URLResolver, {nullable: true})

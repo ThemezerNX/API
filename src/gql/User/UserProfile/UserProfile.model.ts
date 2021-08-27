@@ -1,7 +1,7 @@
 import {Field, ObjectType} from "@nestjs/graphql";
 import {HexColorCodeResolver, URLResolver} from "graphql-scalars";
 
-@ObjectType()
+@ObjectType("UserProfile")
 export class UserProfileModel {
 
     @Field({nullable: true})

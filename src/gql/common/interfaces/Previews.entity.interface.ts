@@ -15,10 +15,14 @@ export abstract class PreviewsEntityInterface extends CachableEntityInterface {
     @Column("bytea")
     imagePlaceholderFile: any;
 
-    image720Url: string;
-    image360Url: string;
-    image240Url: string;
-    image180Url: string;
-    imagePlaceholderUrl: string;
+    abstract get image720Url(): string;
+
+    abstract get image360Url(): string;
+
+    abstract get image240Url(): string;
+
+    abstract get image180Url(): string;
+
+    abstract get imagePlaceholderUrl(): string;
 
 }

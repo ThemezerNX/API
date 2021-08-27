@@ -1,20 +1,33 @@
-import {Injectable} from "@nestjs/common";
-import {InjectRepository} from "@nestjs/typeorm";
+import {PackEntity} from "./Pack.entity";
 import {FindConditions, In, Repository} from "typeorm";
-import {ThemeEntity} from "./Theme.entity";
-import {PaginationArgs, paginationConditions} from "../common/args/Pagination.args";
-import {Target} from "../common/enums/Target";
-import {FilterOrder, FilterSort} from "../common/enums/SortOrder";
+import {Injectable} from "@nestjs/common";
 import {combineConditions} from "../common/CombineConditions";
+import {Target} from "../common/enums/Target";
+import {InjectRepository} from "@nestjs/typeorm";
+import {FilterOrder, FilterSort} from "../common/enums/SortOrder";
 import {StringContains} from "../common/findOperators/StringContains";
+import {PaginationArgs, paginationConditions} from "../common/args/Pagination.args";
+import {ThemeEntity} from "../Theme/Theme.entity";
 
 @Injectable()
-export class ThemeService {
+export class PackService {
 
-    constructor(@InjectRepository(ThemeEntity) private repository: Repository<ThemeEntity>) {
+    constructor(
+        @InjectRepository(PackEntity) private repository: Repository<PackEntity>,
+        @InjectRepository(ThemeEntity) private themeRepository: Repository<ThemeEntity>,
+    ) {
     }
 
-    async findOne({id}): Promise<ThemeEntity> {
+    async isNSFW(packId: string): Promise<boolean> {
+        return !!await this.themeRepository.findOne({
+            where: {
+                packId,
+                isNSFW: true,
+            },
+        });
+    }
+
+    async findOne({id}): Promise<PackEntity> {
         return this.repository.findOne({
             where: {id},
         });
@@ -22,49 +35,35 @@ export class ThemeService {
 
     async findAll(
         {
-            packId,
             paginationArgs,
             sort,
             order,
-            target,
             query,
             creators,
-            layouts,
             includeNSFW = false,
         }:
             {
-                packId?: string,
                 paginationArgs?: PaginationArgs,
                 sort?: FilterSort,
                 order?: FilterOrder,
                 query?: string,
                 target?: Target,
                 creators?: string[],
-                layouts?: string[],
                 includeNSFW?: boolean
             },
-    ): Promise<ThemeEntity[]> {
-        const commonAndConditions: FindConditions<ThemeEntity> = {};
-        const orConditions: FindConditions<ThemeEntity>[] = [];
+    ): Promise<PackEntity[]> {
+        const commonAndConditions: FindConditions<PackEntity> = {};
+        const orConditions: FindConditions<PackEntity>[] = [];
 
-        if (packId) {
-            commonAndConditions.packId = packId;
-        }
-        if (target) {
-            commonAndConditions.target = target;
-        }
         if (creators) {
             commonAndConditions.creator = {
                 id: In(creators),
             };
         }
-        if (layouts) {
-            commonAndConditions.layout = {
-                id: In(layouts),
-            };
-        }
         if (includeNSFW) {
-            commonAndConditions.isNSFW = In([includeNSFW, false]);
+            commonAndConditions.themes = {
+                isNSFW: In([includeNSFW, false]),
+            } as FindConditions<ThemeEntity>;
         }
         if (query?.length > 0) {
             orConditions.push({
@@ -74,12 +73,13 @@ export class ThemeService {
                 description: StringContains(query),
             });
             // orConditions.push({
-            //     tags: [{
-            //         name: StringContains(query),
-            //     }] as FindConditions<ThemeTagEntity>[],
+            //     themes: {
+            //         tags: [{
+            //             name: StringContains(query),
+            //         }] as FindConditions<ThemeTagEntity>[],
+            //     } as FindConditions<ThemeEntity>,
             // });
         }
-
         return this.repository.find({
             where: combineConditions(commonAndConditions, orConditions),
             order: {

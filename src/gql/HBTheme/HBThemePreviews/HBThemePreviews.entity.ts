@@ -1,4 +1,4 @@
-import {AfterLoad, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {HBThemeEntity} from "../HBTheme.entity";
 import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
@@ -13,26 +13,27 @@ export class HBThemePreviewsEntity extends PreviewsEntityInterface {
     @PrimaryColumn()
     hbThemeId: string;
 
-    @AfterLoad()
-    afterLoad() {
-        if (!!this.image720File) {
-            this.image720Url = CDNMapper.hbThemes.previews(this.hbThemeId, "720", "webp", this.cacheUUID);
-        }
-        if (!!this.image360File) {
-            this.image360Url = CDNMapper.hbThemes.previews(this.hbThemeId, "360", "webp", this.cacheUUID);
-        }
-        if (!!this.image240File) {
-            this.image240Url = CDNMapper.hbThemes.previews(this.hbThemeId, "240", "webp", this.cacheUUID);
-        }
-        if (!!this.image180File) {
-            this.image180Url = CDNMapper.hbThemes.previews(this.hbThemeId, "180", "webp", this.cacheUUID);
-        }
-        if (!!this.imagePlaceholderFile) {
-            this.imagePlaceholderUrl = CDNMapper.hbThemes.previews(this.hbThemeId,
-                "placeholder",
-                "webp",
-                this.cacheUUID);
-        }
+    get image720Url() {
+        return !!this.image720File ? CDNMapper.hbThemes.previews(this.hbThemeId, "720", "webp", this.cacheID) : null;
+    }
+
+    get image360Url() {
+        return !!this.image360File ? CDNMapper.hbThemes.previews(this.hbThemeId, "360", "webp", this.cacheID) : null;
+    }
+
+    get image240Url() {
+        return !!this.image240File ? CDNMapper.hbThemes.previews(this.hbThemeId, "240", "webp", this.cacheID) : null;
+    }
+
+    get image180Url() {
+        return !!this.image180File ? CDNMapper.hbThemes.previews(this.hbThemeId, "180", "webp", this.cacheID) : null;
+    }
+
+    get imagePlaceholderUrl() {
+        return !!this.imagePlaceholderFile ? CDNMapper.hbThemes.previews(this.hbThemeId,
+            "placeholder",
+            "webp",
+            this.cacheID) : null;
     }
 
 }

@@ -4,19 +4,25 @@ import {HBThemePreviewsEntity} from "./HBThemePreviews/HBThemePreviews.entity";
 import {HBThemeAssetsEntity} from "./HBThemeAssets/HBThemeAssets.entity";
 import {PackEntity} from "../Pack/Pack.entity";
 import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
+import {Target} from "../common/enums/Target";
 
 
 @Entity()
 export class HBThemeEntity extends ItemEntityInterface {
 
-    @JoinColumn()
-    @ManyToOne(() => PackEntity, {onDelete: "CASCADE", eager: true})
-    pack: PackEntity;
+    @ManyToOne(() => PackEntity, {onDelete: "CASCADE"})
+    @JoinColumn({name: "packId"})
+    pack?: PackEntity;
+
+    @Column({nullable: true})
+    packId?: string;
+
+    readonly target: Target = Target.HBMENU;
 
     @Column()
     isNSFW: boolean;
 
-    @ManyToMany(() => ThemeTagEntity, {onDelete: "CASCADE", cascade: true})
+    @ManyToMany(() => ThemeTagEntity, {onDelete: "CASCADE", cascade: true, eager: true})
     @JoinTable()
     tags: ThemeTagEntity[];
 

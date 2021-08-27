@@ -1,6 +1,6 @@
 import {Field, ID, ObjectType} from "@nestjs/graphql";
 
-@ObjectType()
+@ObjectType("ThemeTag")
 export class ThemeTagModel {
 
     @Field(() => ID)

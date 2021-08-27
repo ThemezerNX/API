@@ -1,4 +1,4 @@
-import {AfterLoad, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
 import {PackEntity} from "../Pack.entity";
@@ -13,23 +13,27 @@ export class PackPreviewsEntity extends PreviewsEntityInterface {
     @PrimaryColumn()
     packId: string;
 
-    @AfterLoad()
-    afterLoad() {
-        if (!!this.image720File) {
-            this.image720Url = CDNMapper.packs.previews(this.packId, "720", "webp", this.cacheUUID);
-        }
-        if (!!this.image360File) {
-            this.image360Url = CDNMapper.packs.previews(this.packId, "360", "webp", this.cacheUUID);
-        }
-        if (!!this.image240File) {
-            this.image240Url = CDNMapper.packs.previews(this.packId, "240", "webp", this.cacheUUID);
-        }
-        if (!!this.image180File) {
-            this.image180Url = CDNMapper.packs.previews(this.packId, "180", "webp", this.cacheUUID);
-        }
-        if (!!this.imagePlaceholderFile) {
-            this.imagePlaceholderUrl = CDNMapper.packs.previews(this.packId, "placeholder", "webp", this.cacheUUID);
-        }
+    get image720Url() {
+        return !!this.image720File ? CDNMapper.packs.previews(this.packId, "720", "webp", this.cacheID) : null;
+    }
+
+    get image360Url() {
+        return !!this.image360File ? CDNMapper.packs.previews(this.packId, "360", "webp", this.cacheID) : null;
+    }
+
+    get image240Url() {
+        return !!this.image240File ? CDNMapper.packs.previews(this.packId, "240", "webp", this.cacheID) : null;
+    }
+
+    get image180Url() {
+        return !!this.image180File ? CDNMapper.packs.previews(this.packId, "180", "webp", this.cacheID) : null;
+    }
+
+    get imagePlaceholderUrl() {
+        return !!this.imagePlaceholderFile ? CDNMapper.packs.previews(this.packId,
+            "placeholder",
+            "webp",
+            this.cacheID) : null;
     }
 
 }

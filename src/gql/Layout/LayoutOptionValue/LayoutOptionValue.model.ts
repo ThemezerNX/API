@@ -3,7 +3,7 @@ import {JSONResolver, UUIDResolver} from "graphql-scalars";
 import {LayoutOptionValuePreviewsModel} from "../LayoutOptionValuePreviews/LayoutOptionValuePreviews.model";
 
 
-@ObjectType()
+@ObjectType("LayoutOptionValue")
 export class LayoutOptionValueModel {
 
     @Field(() => UUIDResolver)

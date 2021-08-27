@@ -3,6 +3,7 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {FindConditions, Repository} from "typeorm";
 import {UserEntity} from "./User.entity";
 import {StringContains} from "../common/findOperators/StringContains";
+import {PaginationArgs, paginationConditions} from "../common/args/Pagination.args";
 
 @Injectable()
 export class UserService {
@@ -16,9 +17,16 @@ export class UserService {
         });
     }
 
-    async findAll({
-                      query,
-                  }): Promise<UserEntity[]> {
+    async findAll(
+        {
+            paginationArgs,
+            query,
+        }:
+            {
+                paginationArgs?: PaginationArgs,
+                query?: string
+            },
+    ): Promise<UserEntity[]> {
         const findConditions: FindConditions<UserEntity> = {};
 
         if (query?.length > 0) {
@@ -27,6 +35,7 @@ export class UserService {
 
         return this.repository.find({
             where: findConditions,
+            ...paginationConditions(paginationArgs),
         });
     }
 

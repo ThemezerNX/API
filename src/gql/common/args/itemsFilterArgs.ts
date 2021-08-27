@@ -1,10 +1,10 @@
 import {ArgsType, Field} from "@nestjs/graphql";
 import {Target} from "../enums/Target";
 import {FilterOrder, FilterSort} from "../enums/SortOrder";
-import {PaginationArgs} from "./pagination.args";
+import {PaginationArgs} from "./Pagination.args";
 
 @ArgsType()
-export class itemsFilterArgs extends PaginationArgs {
+export class ItemsFilterArgs extends PaginationArgs {
 
     @Field(() => Target, {nullable: true})
     target?: Target;

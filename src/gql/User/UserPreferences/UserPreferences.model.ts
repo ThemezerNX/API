@@ -1,7 +1,7 @@
 import {Field, ObjectType} from "@nestjs/graphql";
 
 
-@ObjectType()
+@ObjectType("UserPreferences")
 export class UserPreferencesModel {
 
     @Field()

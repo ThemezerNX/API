@@ -2,7 +2,7 @@ import {Field, ObjectType} from "@nestjs/graphql";
 import {LayoutOptionValueModel} from "../LayoutOptionValue/LayoutOptionValue.model";
 
 
-@ObjectType()
+@ObjectType("LayoutOption")
 export class LayoutOptionModel {
 
     @Field(() => [LayoutOptionValueModel])

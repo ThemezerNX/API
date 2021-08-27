@@ -1,20 +1,20 @@
-import {Injectable} from "@nestjs/common";
-import {InjectRepository} from "@nestjs/typeorm";
+import {LayoutEntity} from "./Layout.entity";
 import {FindConditions, In, Repository} from "typeorm";
-import {ThemeEntity} from "./Theme.entity";
-import {PaginationArgs, paginationConditions} from "../common/args/Pagination.args";
-import {Target} from "../common/enums/Target";
-import {FilterOrder, FilterSort} from "../common/enums/SortOrder";
+import {Injectable} from "@nestjs/common";
 import {combineConditions} from "../common/CombineConditions";
+import {Target} from "../common/enums/Target";
+import {InjectRepository} from "@nestjs/typeorm";
+import {FilterOrder, FilterSort} from "../common/enums/SortOrder";
 import {StringContains} from "../common/findOperators/StringContains";
+import {PaginationArgs, paginationConditions} from "../common/args/Pagination.args";
 
 @Injectable()
-export class ThemeService {
+export class LayoutService {
 
-    constructor(@InjectRepository(ThemeEntity) private repository: Repository<ThemeEntity>) {
+    constructor(@InjectRepository(LayoutEntity) private repository: Repository<LayoutEntity>) {
     }
 
-    async findOne({id}): Promise<ThemeEntity> {
+    async findOne({id}): Promise<LayoutEntity> {
         return this.repository.findOne({
             where: {id},
         });
@@ -22,34 +22,25 @@ export class ThemeService {
 
     async findAll(
         {
-            packId,
             paginationArgs,
             sort,
             order,
             target,
             query,
             creators,
-            layouts,
-            includeNSFW = false,
         }:
             {
-                packId?: string,
                 paginationArgs?: PaginationArgs,
                 sort?: FilterSort,
                 order?: FilterOrder,
                 query?: string,
                 target?: Target,
                 creators?: string[],
-                layouts?: string[],
-                includeNSFW?: boolean
             },
-    ): Promise<ThemeEntity[]> {
-        const commonAndConditions: FindConditions<ThemeEntity> = {};
-        const orConditions: FindConditions<ThemeEntity>[] = [];
+    ): Promise<LayoutEntity[]> {
+        const commonAndConditions: FindConditions<LayoutEntity> = {};
+        const orConditions: FindConditions<LayoutEntity>[] = [];
 
-        if (packId) {
-            commonAndConditions.packId = packId;
-        }
         if (target) {
             commonAndConditions.target = target;
         }
@@ -58,14 +49,6 @@ export class ThemeService {
                 id: In(creators),
             };
         }
-        if (layouts) {
-            commonAndConditions.layout = {
-                id: In(layouts),
-            };
-        }
-        if (includeNSFW) {
-            commonAndConditions.isNSFW = In([includeNSFW, false]);
-        }
         if (query?.length > 0) {
             orConditions.push({
                 name: StringContains(query),
@@ -73,11 +56,6 @@ export class ThemeService {
             orConditions.push({
                 description: StringContains(query),
             });
-            // orConditions.push({
-            //     tags: [{
-            //         name: StringContains(query),
-            //     }] as FindConditions<ThemeTagEntity>[],
-            // });
         }
 
         return this.repository.find({

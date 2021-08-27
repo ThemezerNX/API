@@ -1,7 +1,7 @@
 import {ObjectType} from "@nestjs/graphql";
 import {PreviewsModelInterface} from "../../common/interfaces/Previews.model.interface";
 
-@ObjectType({implements: [PreviewsModelInterface]})
+@ObjectType("HBThemePreviews", {implements: [PreviewsModelInterface]})
 export class HBThemePreviewsModel extends PreviewsModelInterface {
 
     image720Url: string;

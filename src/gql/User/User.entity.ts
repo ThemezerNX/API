@@ -9,7 +9,7 @@ export class UserEntity extends BaseEntity {
 
     @Column("int", {select: false})
     @Generated("increment")
-    counter: number;
+    readonly counter: number;
 
     @PrimaryColumn({
         type: "varchar",
@@ -17,7 +17,7 @@ export class UserEntity extends BaseEntity {
         update: false,
         asExpression: "lpad(('x' || substr(md5(counter::VARCHAR), 1, 16))::BIT(63)::BIGINT::VARCHAR, 19, '0'))",
     })
-    id: string;
+    readonly id: string;
 
     @Column({unique: true, nullable: true})
     email?: string;

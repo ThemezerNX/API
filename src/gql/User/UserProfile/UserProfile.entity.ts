@@ -1,4 +1,4 @@
-import {AfterLoad, Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {UserEntity} from "../User.entity";
 import {CDNMapper} from "../../common/CDNMapper";
 import {CachableEntityInterface} from "../../common/interfaces/Cachable.entity.interface";
@@ -26,17 +26,12 @@ export class UserProfileEntity extends CachableEntityInterface {
     @Column("bytea", {nullable: true})
     bannerFile?: string;
 
-    avatarUrl: string;
-    bannerUrl: string;
+    get avatarUrl(): string {
+        return !!this.avatarFile ? CDNMapper.users.avatar(this.userId, "webp", this.cacheID) : null;
+    };
 
-    @AfterLoad()
-    afterLoad() {
-        if (!!this.avatarFile) {
-            this.avatarUrl = CDNMapper.users.avatar(this.userId, "webp", this.cacheUUID);
-        }
-        if (!!this.bannerFile) {
-            this.bannerUrl = CDNMapper.users.banner(this.userId, "webp", this.cacheUUID);
-        }
+    get bannerUrl(): string {
+        return !!this.bannerFile ? CDNMapper.users.banner(this.userId, "webp", this.cacheID) : null;
     }
 
 }

@@ -24,9 +24,12 @@ export abstract class ItemEntityInterface extends BaseEntity {
     })
     id: string;
 
-    @JoinColumn()
+    @JoinColumn({name: "creatorId"})
     @ManyToOne(() => UserEntity, {onDelete: "CASCADE"})
     creator: UserEntity;
+
+    @Column()
+    creatorId: string;
 
     @Column({length: 100})
     name: string;

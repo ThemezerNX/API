@@ -1,7 +1,7 @@
 import {Field, ObjectType} from "@nestjs/graphql";
 import {JSONResolver, URLResolver} from "graphql-scalars";
 
-@ObjectType()
+@ObjectType("ThemeAssets")
 export class ThemeAssetsModel {
 
     @Field(() => JSONResolver, {nullable: true})
@@ -11,27 +11,27 @@ export class ThemeAssetsModel {
     customCommonLayoutJson?: JSON;
 
     @Field(() => URLResolver, {nullable: true})
-    image: string;
+    imageUrl: string;
 
     @Field(() => URLResolver, {nullable: true})
-    albumIcon: string;
+    albumIconUrl: string;
 
     @Field(() => URLResolver, {nullable: true})
-    newsIcon: string;
+    newsIconUrl: string;
 
     @Field(() => URLResolver, {nullable: true})
-    shopIcon: string;
+    shopIconUrl: string;
 
     @Field(() => URLResolver, {nullable: true})
-    controllerIcon: string;
+    controllerIconUrl: string;
 
     @Field(() => URLResolver, {nullable: true})
-    settingsIcon: string;
+    settingsIconUrl: string;
 
     @Field(() => URLResolver, {nullable: true})
-    powerIcon: string;
+    powerIconUrl: string;
 
     @Field(() => URLResolver, {nullable: true})
-    homeIcon: string;
+    homeIconUrl: string;
 
 }

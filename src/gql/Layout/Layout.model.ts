@@ -6,7 +6,7 @@ import {UserModel} from "../User/User.model";
 import {LayoutOptionModel} from "./LayoutOption/LayoutOption.model";
 
 
-@ObjectType({implements: () => [ItemModelInterface]})
+@ObjectType("Layout", {implements: () => [ItemModelInterface]})
 export class LayoutModel extends ItemModelInterface {
 
     @Field(() => UUIDResolver)

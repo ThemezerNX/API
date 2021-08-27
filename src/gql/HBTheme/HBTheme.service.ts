@@ -1,20 +1,19 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
 import {FindConditions, In, Repository} from "typeorm";
-import {ThemeEntity} from "./Theme.entity";
 import {PaginationArgs, paginationConditions} from "../common/args/Pagination.args";
-import {Target} from "../common/enums/Target";
 import {FilterOrder, FilterSort} from "../common/enums/SortOrder";
 import {combineConditions} from "../common/CombineConditions";
 import {StringContains} from "../common/findOperators/StringContains";
+import {HBThemeEntity} from "./HBTheme.entity";
 
 @Injectable()
-export class ThemeService {
+export class HBThemeService {
 
-    constructor(@InjectRepository(ThemeEntity) private repository: Repository<ThemeEntity>) {
+    constructor(@InjectRepository(HBThemeEntity) private repository: Repository<HBThemeEntity>) {
     }
 
-    async findOne({id}): Promise<ThemeEntity> {
+    async findOne({id}): Promise<HBThemeEntity> {
         return this.repository.findOne({
             where: {id},
         });
@@ -26,10 +25,8 @@ export class ThemeService {
             paginationArgs,
             sort,
             order,
-            target,
             query,
             creators,
-            layouts,
             includeNSFW = false,
         }:
             {
@@ -38,29 +35,19 @@ export class ThemeService {
                 sort?: FilterSort,
                 order?: FilterOrder,
                 query?: string,
-                target?: Target,
                 creators?: string[],
-                layouts?: string[],
                 includeNSFW?: boolean
             },
-    ): Promise<ThemeEntity[]> {
-        const commonAndConditions: FindConditions<ThemeEntity> = {};
-        const orConditions: FindConditions<ThemeEntity>[] = [];
+    ): Promise<HBThemeEntity[]> {
+        const commonAndConditions: FindConditions<HBThemeEntity> = {};
+        const orConditions: FindConditions<HBThemeEntity>[] = [];
 
         if (packId) {
             commonAndConditions.packId = packId;
         }
-        if (target) {
-            commonAndConditions.target = target;
-        }
         if (creators) {
             commonAndConditions.creator = {
                 id: In(creators),
-            };
-        }
-        if (layouts) {
-            commonAndConditions.layout = {
-                id: In(layouts),
             };
         }
         if (includeNSFW) {
@@ -76,7 +63,7 @@ export class ThemeService {
             // orConditions.push({
             //     tags: [{
             //         name: StringContains(query),
-            //     }] as FindConditions<ThemeTagEntity>[],
+            //     }] as FindConditions<HBThemeTagEntity>[],
             // });
         }
 

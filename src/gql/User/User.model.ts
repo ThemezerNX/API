@@ -6,7 +6,7 @@ import {UserPreferencesModel} from "./UserPreferences/UserPreferences.model";
 import {UserConnectionsModel} from "./UserConnections/UserConnections.model";
 
 
-@ObjectType()
+@ObjectType("User")
 export class UserModel {
 
     @Field(() => ID)

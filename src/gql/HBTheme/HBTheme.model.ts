@@ -4,28 +4,17 @@ import {ThemeTagModel} from "../ThemeTag/ThemeTag.model";
 import {PackModel} from "../Pack/Pack.model";
 import {HBThemePreviewsModel} from "./HBThemePreviews/HBThemePreviews.model";
 import {HBThemeAssetsModel} from "./HBThemeAssets/HBThemeAssets.model";
-import {UserModel} from "../User/User.model";
+import {Target} from "../common/enums/Target";
 
 
-@ObjectType({implements: () => [ItemModelInterface]})
+@ObjectType("HBTheme", {implements: () => [ItemModelInterface]})
 export class HBThemeModel extends ItemModelInterface {
 
-    id: string;
+    @Field(() => PackModel, {nullable: true})
+    pack?: PackModel;
 
-    creator: UserModel;
-
-    name: string;
-
-    description?: string;
-
-    addedTimestamp: Date;
-
-    updatedTimestamp: Date;
-
-    dlCount: number;
-
-    @Field(() => PackModel)
-    pack: PackModel;
+    @Field(() => Target)
+    readonly target: Target = Target.HBMENU;
 
     @Field()
     isNSFW: boolean;

@@ -1,6 +1,7 @@
 import {Args, Query, Resolver} from "@nestjs/graphql";
 import {UserService} from "./User.service";
 import {UserModel} from "./User.model";
+import {PaginationArgs} from "../common/args/Pagination.args";
 
 @Resolver(UserModel)
 export class UserResolver {
@@ -21,9 +22,10 @@ export class UserResolver {
         description: `Find multiple users`,
     })
     async users(
+        @Args() paginationArgs: PaginationArgs,
         @Args("query", {nullable: true}) query?: string,
     ): Promise<UserModel[]> {
-        return this.userService.findAll({query});
+        return this.userService.findAll({paginationArgs, query});
     }
 
 }

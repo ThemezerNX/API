@@ -1,4 +1,4 @@
-import {AfterLoad, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {ThemeEntity} from "../Theme.entity";
 import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
@@ -13,23 +13,27 @@ export class ThemePreviewsEntity extends PreviewsEntityInterface {
     @PrimaryColumn()
     themeId: string;
 
-    @AfterLoad()
-    afterLoad() {
-        if (!!this.image720File) {
-            this.image720Url = CDNMapper.themes.previews(this.themeId, "720", "webp", this.cacheUUID);
-        }
-        if (!!this.image360File) {
-            this.image360Url = CDNMapper.themes.previews(this.themeId, "360", "webp", this.cacheUUID);
-        }
-        if (!!this.image240File) {
-            this.image240Url = CDNMapper.themes.previews(this.themeId, "240", "jpg", this.cacheUUID);
-        }
-        if (!!this.image180File) {
-            this.image180Url = CDNMapper.themes.previews(this.themeId, "180", "webp", this.cacheUUID);
-        }
-        if (!!this.imagePlaceholderFile) {
-            this.imagePlaceholderUrl = CDNMapper.themes.previews(this.themeId, "placeholder", "webp", this.cacheUUID);
-        }
+    get image720Url() {
+        return !!this.image720File ? CDNMapper.themes.previews(this.themeId, "720", "webp", this.cacheID) : null;
+    }
+
+    get image360Url() {
+        return !!this.image360File ? CDNMapper.themes.previews(this.themeId, "360", "webp", this.cacheID) : null;
+    }
+
+    get image240Url() {
+        return !!this.image240File ? CDNMapper.themes.previews(this.themeId, "240", "jpg", this.cacheID) : null;
+    }
+
+    get image180Url() {
+        return !!this.image180File ? CDNMapper.themes.previews(this.themeId, "180", "webp", this.cacheID) : null;
+    }
+
+    get imagePlaceholderUrl() {
+        return !!this.imagePlaceholderFile ? CDNMapper.themes.previews(this.themeId,
+            "placeholder",
+            "webp",
+            this.cacheID) : null;
     }
 
 }

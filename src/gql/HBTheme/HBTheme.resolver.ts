@@ -1,16 +1,16 @@
 import {Args, ArgsType, Field, Parent, Query, ResolveField, Resolver} from "@nestjs/graphql";
 import {Target} from "../common/enums/Target";
-import {ThemeModel} from "./Theme.model";
-import {ThemeService} from "./Theme.service";
+import {HBThemeModel} from "./HBTheme.model";
+import {HBThemeService} from "./HBTheme.service";
 import {PaginationArgs} from "../common/args/Pagination.args";
 import {UserService} from "../User/User.service";
 import {UserModel} from "../User/User.model";
-import {ThemeEntity} from "./Theme.entity";
+import {HBThemeEntity} from "./HBTheme.entity";
 import {ItemOrderArgs} from "../common/args/ItemOrder.args";
 
 
 @ArgsType()
-class ThemeListArgs {
+class HBThemeListArgs {
 
     @Field(() => Target, {nullable: true})
     target?: Target;
@@ -25,39 +25,39 @@ class ThemeListArgs {
 
 }
 
-@Resolver(ThemeModel)
-export class ThemeResolver {
+@Resolver(HBThemeModel)
+export class HBThemeResolver {
 
-    constructor(private themeService: ThemeService, private userService: UserService) {
+    constructor(private themeService: HBThemeService, private userService: UserService) {
     }
 
-    @Query(() => ThemeModel, {
-        description: `Find a single theme`,
+    @Query(() => HBThemeModel, {
+        description: `Find a single hbtheme`,
     })
-    async theme(
+    async hbtheme(
         @Args("id", {nullable: false}) id: string,
-    ): Promise<ThemeModel> {
+    ): Promise<HBThemeModel> {
         return this.themeService.findOne({id});
     }
 
-    @Query(() => [ThemeModel], {
-        description: `Find multiple themes`,
+    @Query(() => [HBThemeModel], {
+        description: `Find multiple hbthemes`,
     })
-    async themes(
+    async hbthemes(
         @Args() paginationArgs: PaginationArgs,
         @Args() itemSortingArgs: ItemOrderArgs,
-        @Args() themeListArgs?: ThemeListArgs,
-    ): Promise<ThemeModel[]> {
+        @Args() hbThemeListArgs?: HBThemeListArgs,
+    ): Promise<HBThemeModel[]> {
         return this.themeService.findAll({
             paginationArgs,
             ...itemSortingArgs,
-            ...themeListArgs,
+            ...hbThemeListArgs,
         });
     }
 
     @ResolveField(() => UserModel)
-    async creator(@Parent() theme: ThemeEntity): Promise<UserModel> {
-        const id = theme.creatorId;
+    async creator(@Parent() hbTheme: HBThemeEntity): Promise<UserModel> {
+        const id = hbTheme.creatorId;
         return this.userService.findOne({id});
     }
 

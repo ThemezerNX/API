@@ -9,16 +9,16 @@ export const PackEntriesUnion = createUnionType({
     types: () => [ThemeModel, HBThemeModel],
 });
 
-@ObjectType({implements: () => [ItemModelInterface]})
+@ObjectType("Pack", {implements: () => [ItemModelInterface]})
 export class PackModel extends ItemModelInterface {
 
     @Field()
     isNSFW: boolean;
 
-    @Field(() => [PackEntriesUnion])
-    themes: typeof PackEntriesUnion[];
-
     @Field(() => PackPreviewsModel)
     previews: PackPreviewsModel;
+
+    @Field(() => [PackEntriesUnion])
+    themes: Array<typeof PackEntriesUnion>;
 
 }

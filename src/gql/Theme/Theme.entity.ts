@@ -11,9 +11,12 @@ import {LayoutEntity} from "../Layout/Layout.entity";
 @Entity()
 export class ThemeEntity extends ItemEntityInterface {
 
-    @JoinColumn()
-    @ManyToOne(() => PackEntity, {onDelete: "CASCADE", eager: true})
+    @ManyToOne(() => PackEntity, {onDelete: "CASCADE"})
+    @JoinColumn({name: "packId"})
     pack?: PackEntity;
+
+    @Column({nullable: true})
+    packId?: string;
 
     @Column({
         type: "enum",
@@ -25,11 +28,14 @@ export class ThemeEntity extends ItemEntityInterface {
     @Column()
     isNSFW: boolean;
 
-    @JoinColumn()
     @ManyToOne(() => LayoutEntity, {onDelete: "RESTRICT"})
+    @JoinColumn({name: "layoutId"})
     layout?: LayoutEntity;
 
-    @ManyToMany(() => ThemeTagEntity, {onDelete: "CASCADE", cascade: true})
+    @Column({nullable: true})
+    layoutId?: string;
+
+    @ManyToMany(() => ThemeTagEntity, {onDelete: "CASCADE", cascade: true, eager: true})
     @JoinTable()
     tags: ThemeTagEntity[];
 
