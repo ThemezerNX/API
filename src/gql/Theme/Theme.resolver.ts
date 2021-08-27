@@ -6,11 +6,11 @@ import {PaginationArgs} from "../common/args/Pagination.args";
 import {UserService} from "../User/User.service";
 import {UserModel} from "../User/User.model";
 import {ThemeEntity} from "./Theme.entity";
-import {ItemOrderArgs} from "../common/args/ItemOrder.args";
+import {ItemSortArgs} from "../common/args/ItemSortArgs";
 
 
 @ArgsType()
-class ThemeListArgs {
+class ListArgs {
 
     @Field(() => Target, {nullable: true})
     target?: Target;
@@ -45,13 +45,13 @@ export class ThemeResolver {
     })
     async themes(
         @Args() paginationArgs: PaginationArgs,
-        @Args() itemSortingArgs: ItemOrderArgs,
-        @Args() themeListArgs?: ThemeListArgs,
+        @Args() itemSortArgs: ItemSortArgs,
+        @Args() listArgs?: ListArgs,
     ): Promise<ThemeModel[]> {
         return this.themeService.findAll({
             paginationArgs,
-            ...itemSortingArgs,
-            ...themeListArgs,
+            ...itemSortArgs,
+            ...listArgs,
         });
     }
 

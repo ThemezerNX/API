@@ -1,19 +1,19 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
 import {FindConditions, Repository} from "typeorm";
-import {UserEntity} from "./User.entity";
-import {StringContains} from "../common/findOperators/StringContains";
 import {PaginationArgs, paginationConditions} from "../common/args/Pagination.args";
 import {SortOrder} from "../common/enums/SortOrder";
-import {UserSort} from "./User.resolver";
+import {StringContains} from "../common/findOperators/StringContains";
+import {ThemeTagEntity} from "./ThemeTag.entity";
+import {TagSort} from "./ThemeTag.resolver";
 
 @Injectable()
-export class UserService {
+export class ThemeTagService {
 
-    constructor(@InjectRepository(UserEntity) private repository: Repository<UserEntity>) {
+    constructor(@InjectRepository(ThemeTagEntity) private repository: Repository<ThemeTagEntity>) {
     }
 
-    async findOne({id}): Promise<UserEntity> {
+    async findOne({id}): Promise<ThemeTagEntity> {
         return this.repository.findOne({
             where: {id},
         });
@@ -22,26 +22,21 @@ export class UserService {
     async findAll(
         {
             paginationArgs,
-            sort = UserSort.USERNAME,
+            sort = TagSort.NAME,
             order = SortOrder.ASC,
             query,
-            isAdmin,
         }:
             {
-                paginationArgs?: PaginationArgs
-                sort?: UserSort,
+                paginationArgs?: PaginationArgs,
+                sort?: TagSort,
                 order?: SortOrder,
-                query?: string
-                isAdmin?: boolean
+                query?: string,
             },
-    ): Promise<UserEntity[]> {
-        const findConditions: FindConditions<UserEntity> = {};
+    ): Promise<ThemeTagEntity[]> {
+        const findConditions: FindConditions<ThemeTagEntity> = {};
 
         if (query?.length > 0) {
-            findConditions.username = StringContains(query);
-        }
-        if (isAdmin) {
-            findConditions.isAdmin = isAdmin;
+            findConditions.name = StringContains(query);
         }
 
         return this.repository.find({

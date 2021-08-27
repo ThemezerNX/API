@@ -4,9 +4,10 @@ import {FindConditions, In, Repository} from "typeorm";
 import {ThemeEntity} from "./Theme.entity";
 import {PaginationArgs, paginationConditions} from "../common/args/Pagination.args";
 import {Target} from "../common/enums/Target";
-import {FilterOrder, FilterSort} from "../common/enums/SortOrder";
+import {SortOrder} from "../common/enums/SortOrder";
 import {combineConditions} from "../common/CombineConditions";
 import {StringContains} from "../common/findOperators/StringContains";
+import {ItemSort} from "../common/args/ItemSortArgs";
 
 @Injectable()
 export class ThemeService {
@@ -24,8 +25,8 @@ export class ThemeService {
         {
             packId,
             paginationArgs,
-            sort,
-            order,
+            sort = ItemSort.ADDED,
+            order = SortOrder.DESC,
             target,
             query,
             creators,
@@ -35,8 +36,8 @@ export class ThemeService {
             {
                 packId?: string,
                 paginationArgs?: PaginationArgs,
-                sort?: FilterSort,
-                order?: FilterOrder,
+                sort?: ItemSort,
+                order?: SortOrder,
                 query?: string,
                 target?: Target,
                 creators?: string[],

@@ -6,11 +6,11 @@ import {PaginationArgs} from "../common/args/Pagination.args";
 import {UserService} from "../User/User.service";
 import {UserModel} from "../User/User.model";
 import {HBThemeEntity} from "./HBTheme.entity";
-import {ItemOrderArgs} from "../common/args/ItemOrder.args";
+import {ItemSortArgs} from "../common/args/ItemSortArgs";
 
 
 @ArgsType()
-class HBThemeListArgs {
+class ListArgs {
 
     @Field(() => Target, {nullable: true})
     target?: Target;
@@ -45,13 +45,13 @@ export class HBThemeResolver {
     })
     async hbthemes(
         @Args() paginationArgs: PaginationArgs,
-        @Args() itemSortingArgs: ItemOrderArgs,
-        @Args() hbThemeListArgs?: HBThemeListArgs,
+        @Args() itemSortArgs: ItemSortArgs,
+        @Args() listArgs?: ListArgs,
     ): Promise<HBThemeModel[]> {
         return this.themeService.findAll({
             paginationArgs,
-            ...itemSortingArgs,
-            ...hbThemeListArgs,
+            ...itemSortArgs,
+            ...listArgs,
         });
     }
 

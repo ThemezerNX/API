@@ -1,10 +1,9 @@
 import {Args, ArgsType, Field, Parent, Query, ResolveField, Resolver} from "@nestjs/graphql";
-import {Target} from "../common/enums/Target";
 import {PackService} from "./Pack.service";
 import {PaginationArgs} from "../common/args/Pagination.args";
 import {UserService} from "../User/User.service";
 import {UserModel} from "../User/User.model";
-import {ItemOrderArgs} from "../common/args/ItemOrder.args";
+import {ItemSortArgs} from "../common/args/ItemSortArgs";
 import {PackEntriesUnion, PackModel} from "./Pack.model";
 import {PackEntity} from "./Pack.entity";
 import {ThemeService} from "../Theme/Theme.service";
@@ -12,10 +11,8 @@ import {HBThemeService} from "../HBTheme/HBTheme.service";
 
 
 @ArgsType()
-class PackListArgs {
+class ListArgs {
 
-    @Field(() => Target, {nullable: true})
-    target?: Target;
     @Field({nullable: true})
     query?: string;
     @Field(() => [String], {nullable: true})
@@ -48,13 +45,13 @@ export class PackResolver {
     })
     async packs(
         @Args() paginationArgs: PaginationArgs,
-        @Args() itemSortingArgs: ItemOrderArgs,
-        @Args() layoutListArgs?: PackListArgs,
-    ): Promise<PackModel[]> {
+        @Args() itemSortArgs: ItemSortArgs,
+        @Args() listArgs?: ListArgs,
+    ): Promise<PackEntity[]> {
         return this.packService.findAll({
             paginationArgs,
-            ...itemSortingArgs,
-            ...layoutListArgs,
+            ...itemSortArgs,
+            ...listArgs,
         });
     }
 
@@ -70,7 +67,7 @@ export class PackResolver {
     }
 
     @ResolveField()
-    async themes(@Parent() pack: PackEntity): Promise<Array<typeof PackEntriesUnion>> {
+    async entries(@Parent() pack: PackEntity): Promise<Array<typeof PackEntriesUnion>> {
         const themes = await this.themeService.findAll({packId: pack.id});
         const hbThemes = await this.hbThemeService.findAll({packId: pack.id});
 

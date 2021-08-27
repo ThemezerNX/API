@@ -11,8 +11,8 @@ export class PaginationArgs {
 
 }
 
-export const paginationConditions = (paginationArgs: PaginationArgs) => {
-    if (paginationArgs) {
+export const paginationConditions = (paginationArgs: PaginationArgs | null | undefined) => {
+    if (!!paginationArgs) {
         const {page, limit} = paginationArgs;
 
         return {

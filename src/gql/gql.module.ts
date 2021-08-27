@@ -10,6 +10,7 @@ import {PackModule} from "./Pack/Pack.module";
 import {LayoutModule} from "./Layout/Layout.module";
 import {HBThemeModule} from "./HBTheme/HBTheme.module";
 import {EntityNamingStrategy} from "./common/EntityNamingStrategy";
+import {ThemeTagModule} from "./ThemeTag/ThemeTag.module";
 
 @Module({
     imports: [
@@ -54,6 +55,7 @@ import {EntityNamingStrategy} from "./common/EntityNamingStrategy";
         HBThemeModule,
         PackModule,
         LayoutModule,
+        ThemeTagModule,
     ],
 })
 export class GqlModule {

@@ -2,10 +2,11 @@ import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
 import {FindConditions, In, Repository} from "typeorm";
 import {PaginationArgs, paginationConditions} from "../common/args/Pagination.args";
-import {FilterOrder, FilterSort} from "../common/enums/SortOrder";
+import {SortOrder} from "../common/enums/SortOrder";
 import {combineConditions} from "../common/CombineConditions";
 import {StringContains} from "../common/findOperators/StringContains";
 import {HBThemeEntity} from "./HBTheme.entity";
+import {ItemSort} from "../common/args/ItemSortArgs";
 
 @Injectable()
 export class HBThemeService {
@@ -23,8 +24,8 @@ export class HBThemeService {
         {
             packId,
             paginationArgs,
-            sort,
-            order,
+            sort = ItemSort.ADDED,
+            order = SortOrder.DESC,
             query,
             creators,
             includeNSFW = false,
@@ -32,8 +33,8 @@ export class HBThemeService {
             {
                 packId?: string,
                 paginationArgs?: PaginationArgs,
-                sort?: FilterSort,
-                order?: FilterOrder,
+                sort?: ItemSort,
+                order?: SortOrder,
                 query?: string,
                 creators?: string[],
                 includeNSFW?: boolean

@@ -11,7 +11,7 @@ import {LayoutEntity} from "../Layout/Layout.entity";
 @Entity()
 export class ThemeEntity extends ItemEntityInterface {
 
-    @ManyToOne(() => PackEntity, {onDelete: "CASCADE"})
+    @ManyToOne(() => PackEntity, pack => pack.themes, {onDelete: "CASCADE"})
     @JoinColumn({name: "packId"})
     pack?: PackEntity;
 

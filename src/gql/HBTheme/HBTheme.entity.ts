@@ -10,7 +10,7 @@ import {Target} from "../common/enums/Target";
 @Entity()
 export class HBThemeEntity extends ItemEntityInterface {
 
-    @ManyToOne(() => PackEntity, {onDelete: "CASCADE"})
+    @ManyToOne(() => PackEntity, pack => pack.hbThemes,{onDelete: "CASCADE"})
     @JoinColumn({name: "packId"})
     pack?: PackEntity;
 

@@ -6,11 +6,11 @@ import {PaginationArgs} from "../common/args/Pagination.args";
 import {UserService} from "../User/User.service";
 import {UserModel} from "../User/User.model";
 import {LayoutEntity} from "./Layout.entity";
-import {ItemOrderArgs} from "../common/args/ItemOrder.args";
+import {ItemSortArgs} from "../common/args/ItemSortArgs";
 
 
 @ArgsType()
-class LayoutListArgs {
+class ListArgs {
 
     @Field(() => Target, {nullable: true})
     target?: Target;
@@ -41,13 +41,13 @@ export class LayoutResolver {
     })
     async layouts(
         @Args() paginationArgs: PaginationArgs,
-        @Args() itemSortingArgs: ItemOrderArgs,
-        @Args() layoutListArgs?: LayoutListArgs,
+        @Args() itemSortArgs: ItemSortArgs,
+        @Args() listArgs?: ListArgs,
     ): Promise<LayoutModel[]> {
         return this.layoutService.findAll({
             paginationArgs,
-            ...itemSortingArgs,
-            ...layoutListArgs,
+            ...itemSortArgs,
+            ...listArgs,
         });
     }
 

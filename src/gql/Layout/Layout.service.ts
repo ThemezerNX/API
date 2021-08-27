@@ -4,9 +4,10 @@ import {Injectable} from "@nestjs/common";
 import {combineConditions} from "../common/CombineConditions";
 import {Target} from "../common/enums/Target";
 import {InjectRepository} from "@nestjs/typeorm";
-import {FilterOrder, FilterSort} from "../common/enums/SortOrder";
+import {SortOrder} from "../common/enums/SortOrder";
 import {StringContains} from "../common/findOperators/StringContains";
 import {PaginationArgs, paginationConditions} from "../common/args/Pagination.args";
+import {ItemSort} from "../common/args/ItemSortArgs";
 
 @Injectable()
 export class LayoutService {
@@ -23,16 +24,16 @@ export class LayoutService {
     async findAll(
         {
             paginationArgs,
-            sort,
-            order,
+            sort = ItemSort.ADDED,
+            order = SortOrder.DESC,
             target,
             query,
             creators,
         }:
             {
                 paginationArgs?: PaginationArgs,
-                sort?: FilterSort,
-                order?: FilterOrder,
+                sort?: ItemSort,
+                order?: SortOrder,
                 query?: string,
                 target?: Target,
                 creators?: string[],
