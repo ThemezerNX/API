@@ -4,14 +4,4 @@ import {PreviewsModelInterface} from "../../common/interfaces/Previews.model.int
 @ObjectType("PackPreviews", {implements: [PreviewsModelInterface]})
 export class PackPreviewsModel extends PreviewsModelInterface {
 
-    image720Url: string;
-
-    image360Url: string;
-
-    image240Url: string;
-
-    image180Url: string;
-
-    imagePlaceholderUrl: string;
-
 }

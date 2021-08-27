@@ -4,7 +4,6 @@ import {HBThemePreviewsEntity} from "./HBThemePreviews/HBThemePreviews.entity";
 import {HBThemeAssetsEntity} from "./HBThemeAssets/HBThemeAssets.entity";
 import {PackEntity} from "../Pack/Pack.entity";
 import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
-import {Target} from "../common/enums/Target";
 
 
 @Entity()
@@ -16,8 +15,6 @@ export class HBThemeEntity extends ItemEntityInterface {
 
     @Column({nullable: true})
     packId?: string;
-
-    readonly target: Target = Target.HBMENU;
 
     @Column()
     isNSFW: boolean;

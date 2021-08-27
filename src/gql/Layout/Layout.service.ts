@@ -68,4 +68,22 @@ export class LayoutService {
         });
     }
 
+    async findRandom(
+        {
+            limit,
+        }:
+            {
+                limit?: number,
+            },
+    ): Promise<LayoutEntity[]> {
+        const query = this.repository.createQueryBuilder()
+            .orderBy("RANDOM()");
+
+        if (limit) {
+            query.limit(limit);
+        }
+
+        return query.getMany();
+    }
+
 }

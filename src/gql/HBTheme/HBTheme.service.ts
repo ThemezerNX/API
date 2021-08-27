@@ -28,7 +28,7 @@ export class HBThemeService {
             order = SortOrder.DESC,
             query,
             creators,
-            includeNSFW = false,
+            includeNSFW,
         }:
             {
                 packId?: string,
@@ -51,8 +51,8 @@ export class HBThemeService {
                 id: In(creators),
             };
         }
-        if (includeNSFW) {
-            commonAndConditions.isNSFW = In([includeNSFW, false]);
+        if (!includeNSFW) {
+            commonAndConditions.isNSFW = false;
         }
         if (query?.length > 0) {
             orConditions.push({
@@ -75,6 +75,33 @@ export class HBThemeService {
             },
             ...paginationConditions(paginationArgs),
         });
+    }
+
+    async findRandom(
+        {
+            limit,
+            includeNSFW,
+        }:
+            {
+                limit?: number,
+                includeNSFW?: boolean
+            },
+    ): Promise<HBThemeEntity[]> {
+        const findConditions: FindConditions<HBThemeEntity> = {};
+
+        if (!includeNSFW) {
+            findConditions.isNSFW = false;
+        }
+
+        const query = this.repository.createQueryBuilder()
+            .where(findConditions)
+            .orderBy("RANDOM()");
+
+        if (limit) {
+            query.limit(limit);
+        }
+
+        return query.getMany();
     }
 
 }

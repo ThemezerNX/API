@@ -2,7 +2,7 @@ import {Args, ArgsType, Field, Parent, Query, ResolveField, Resolver} from "@nes
 import {Target} from "../common/enums/Target";
 import {ThemeModel} from "./Theme.model";
 import {ThemeService} from "./Theme.service";
-import {PaginationArgs} from "../common/args/Pagination.args";
+import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
 import {UserService} from "../User/User.service";
 import {UserModel} from "../User/User.model";
 import {ThemeEntity} from "./Theme.entity";
@@ -21,7 +21,7 @@ class ListArgs {
     @Field(() => [String], {nullable: true})
     layouts?: string[];
     @Field({nullable: true})
-    includeNSFW?: boolean;
+    includeNSFW?: boolean = false;
 
 }
 
@@ -29,6 +29,12 @@ class ListArgs {
 export class ThemeResolver {
 
     constructor(private themeService: ThemeService, private userService: UserService) {
+    }
+
+    @ResolveField(() => UserModel)
+    async creator(@Parent() theme: ThemeEntity): Promise<UserModel> {
+        const id = theme.creatorId;
+        return this.userService.findOne({id});
     }
 
     @Query(() => ThemeModel, {
@@ -55,10 +61,19 @@ export class ThemeResolver {
         });
     }
 
-    @ResolveField(() => UserModel)
-    async creator(@Parent() theme: ThemeEntity): Promise<UserModel> {
-        const id = theme.creatorId;
-        return this.userService.findOne({id});
+    @Query(() => [ThemeModel], {
+        description: `Fetch random themes`,
+    })
+    async randomThemes(
+        @Args() limitArg?: LimitArg,
+        @Args("includeNSFW", {nullable: true}) includeNSFW: boolean = false,
+        @Args("target", {nullable: true}) target?: Target,
+    ): Promise<ThemeModel[]> {
+        return this.themeService.findRandom({
+            ...limitArg,
+            includeNSFW,
+            target,
+        });
     }
 
 }

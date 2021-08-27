@@ -41,7 +41,7 @@ export class PackService {
             order = SortOrder.DESC,
             query,
             creators,
-            includeNSFW = false,
+            includeNSFW,
         }:
             {
                 paginationArgs?: PaginationArgs,
@@ -61,9 +61,9 @@ export class PackService {
                 id: In(creators),
             };
         }
-        if (includeNSFW) {
+        if (!includeNSFW)  {
             commonAndConditions.themes = [{
-                isNSFW: In([includeNSFW, false]),
+                isNSFW: false,
             }];
         }
         if (query?.length > 0) {
@@ -88,6 +88,35 @@ export class PackService {
             },
             ...paginationConditions(paginationArgs),
         });
+    }
+
+    async findRandom(
+        {
+            limit,
+            includeNSFW,
+        }:
+            {
+                limit?: number,
+                includeNSFW?: boolean
+            },
+    ): Promise<PackEntity[]> {
+        const findConditions: FindConditions<PackEntity> = {};
+
+        if (!includeNSFW){
+            findConditions.themes = [{
+                isNSFW: false,
+            }];
+        }
+
+        const query = this.repository.createQueryBuilder()
+            .where(findConditions)
+            .orderBy("RANDOM()");
+
+        if (limit) {
+            query.limit(limit);
+        }
+
+        return query.getMany();
     }
 
 }

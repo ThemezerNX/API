@@ -1,6 +1,6 @@
 import {Args, ArgsType, Field, Parent, Query, ResolveField, Resolver} from "@nestjs/graphql";
 import {PackService} from "./Pack.service";
-import {PaginationArgs} from "../common/args/Pagination.args";
+import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
 import {UserService} from "../User/User.service";
 import {UserModel} from "../User/User.model";
 import {ItemSortArgs} from "../common/args/ItemSortArgs";
@@ -31,30 +31,6 @@ export class PackResolver {
     ) {
     }
 
-    @Query(() => PackModel, {
-        description: `Find a single pack`,
-    })
-    async pack(
-        @Args("id", {nullable: false}) id: string,
-    ): Promise<PackModel> {
-        return this.packService.findOne({id});
-    }
-
-    @Query(() => [PackModel], {
-        description: `Find multiple packs`,
-    })
-    async packs(
-        @Args() paginationArgs: PaginationArgs,
-        @Args() itemSortArgs: ItemSortArgs,
-        @Args() listArgs?: ListArgs,
-    ): Promise<PackEntity[]> {
-        return this.packService.findAll({
-            paginationArgs,
-            ...itemSortArgs,
-            ...listArgs,
-        });
-    }
-
     @ResolveField(() => UserModel)
     async creator(@Parent() pack: PackEntity): Promise<UserModel> {
         const id = pack.creatorId;
@@ -72,6 +48,43 @@ export class PackResolver {
         const hbThemes = await this.hbThemeService.findAll({packId: pack.id});
 
         return [...themes, ...hbThemes];
+    }
+
+    @Query(() => PackModel, {
+        description: `Find a single pack`,
+    })
+    async pack(
+        @Args("id", {nullable: false}) id: string,
+    ): Promise<PackModel> {
+        return this.packService.findOne({id});
+    }
+
+    @Query(() => [PackModel], {
+        description: `Find multiple packs`,
+    })
+    async packs(
+        @Args() paginationArgs: PaginationArgs,
+        @Args() itemSortArgs: ItemSortArgs,
+        @Args() listArgs?: ListArgs,
+    ): Promise<PackModel[]> {
+        return this.packService.findAll({
+            paginationArgs,
+            ...itemSortArgs,
+            ...listArgs,
+        });
+    }
+
+    @Query(() => [PackModel], {
+        description: `Fetch random packs`,
+    })
+    async randomPacks(
+        @Args() limitArg?: LimitArg,
+        @Args("includeNSFW", {nullable: true}) includeNSFW: boolean = false,
+    ): Promise<PackModel[]> {
+        return this.packService.findRandom({
+            ...limitArg,
+            includeNSFW,
+        });
     }
 
 }

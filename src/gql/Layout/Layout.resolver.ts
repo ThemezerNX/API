@@ -2,7 +2,7 @@ import {Args, ArgsType, Field, Parent, Query, ResolveField, Resolver} from "@nes
 import {Target} from "../common/enums/Target";
 import {LayoutModel} from "./Layout.model";
 import {LayoutService} from "./Layout.service";
-import {PaginationArgs} from "../common/args/Pagination.args";
+import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
 import {UserService} from "../User/User.service";
 import {UserModel} from "../User/User.model";
 import {LayoutEntity} from "./Layout.entity";
@@ -25,6 +25,12 @@ class ListArgs {
 export class LayoutResolver {
 
     constructor(private layoutService: LayoutService, private userService: UserService) {
+    }
+
+    @ResolveField(() => UserModel)
+    async creator(@Parent() layout: LayoutEntity): Promise<UserModel> {
+        const id = layout.creatorId;
+        return this.userService.findOne({id});
     }
 
     @Query(() => LayoutModel, {
@@ -51,10 +57,15 @@ export class LayoutResolver {
         });
     }
 
-    @ResolveField(() => UserModel)
-    async creator(@Parent() layout: LayoutEntity): Promise<UserModel> {
-        const id = layout.creatorId;
-        return this.userService.findOne({id});
+    @Query(() => [LayoutModel], {
+        description: `Fetch random layouts`,
+    })
+    async randomLayouts(
+        @Args() limitArg?: LimitArg,
+    ): Promise<LayoutModel[]> {
+        return this.layoutService.findRandom({
+            ...limitArg,
+        });
     }
 
 }

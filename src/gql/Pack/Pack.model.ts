@@ -3,17 +3,15 @@ import {ItemModelInterface} from "../common/interfaces/Item.model.interface";
 import {HBThemeModel} from "../HBTheme/HBTheme.model";
 import {ThemeModel} from "../Theme/Theme.model";
 import {PackPreviewsModel} from "./PackPreviews/PackPreviews.model";
-import {Target} from "../common/enums/Target";
+import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
+import {ThemeEntity} from "../Theme/Theme.entity";
 
 export const PackEntriesUnion = createUnionType({
     name: "PackEntries",
     types: () => [ThemeModel, HBThemeModel],
     resolveType(value) {
-        if (value.target == Target.HBMENU) {
-            return HBThemeModel;
-        } else {
-            return ThemeModel;
-        }
+        if (value instanceof ThemeEntity) return ThemeModel;
+        if (value instanceof HBThemeEntity) return HBThemeModel;
     },
 });
 
