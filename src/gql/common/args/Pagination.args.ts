@@ -16,8 +16,8 @@ export const paginationConditions = (paginationArgs: PaginationArgs) => {
         const {page, limit} = paginationArgs;
 
         return {
-            skip: (page - 1) * limit,
-            take: limit,
+            skip: page - 1 >= 0 ? (page - 1) * limit : 0,
+            take: limit > 0 ? limit : 20,
         };
     }
 
