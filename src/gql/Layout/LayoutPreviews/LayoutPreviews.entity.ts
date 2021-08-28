@@ -6,7 +6,7 @@ import {CDNMapper} from "../../common/CDNMapper";
 @Entity()
 export class LayoutPreviewsEntity extends PreviewsEntityInterface {
 
-    @OneToOne(() => LayoutEntity, {onDelete: "CASCADE", cascade: true})
+    @OneToOne(() => LayoutEntity, layout => layout.previews, {onDelete: "CASCADE"})
     @JoinColumn({name: "layoutId"})
     layout: LayoutEntity;
 

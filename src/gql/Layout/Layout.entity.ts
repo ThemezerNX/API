@@ -1,8 +1,9 @@
-import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
+import {Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne} from "typeorm";
 import {Target} from "../common/enums/Target";
 import {LayoutOptionEntity} from "./LayoutOption/LayoutOption.entity";
 import {UserEntity} from "../User/User.entity";
 import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
+import {LayoutPreviewsEntity} from "./LayoutPreviews/LayoutPreviews.entity";
 
 
 @Entity()
@@ -30,7 +31,10 @@ export class LayoutEntity extends ItemEntityInterface {
     @Column("jsonb", {nullable: true})
     commonJson?: string;
 
-    @JoinColumn()
+    @OneToMany(() => LayoutOptionEntity, layoutOption => layoutOption.layout, {cascade: true, eager: true})
     options: LayoutOptionEntity[];
+
+    @OneToOne(() => LayoutPreviewsEntity, layoutPreviews => layoutPreviews.layout, {cascade: true, eager: true})
+    previews: LayoutPreviewsEntity;
 
 }

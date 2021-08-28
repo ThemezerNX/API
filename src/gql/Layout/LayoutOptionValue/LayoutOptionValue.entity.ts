@@ -1,4 +1,4 @@
-import {BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn} from "typeorm";
+import {BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn} from "typeorm";
 import {LayoutOptionValuePreviewsEntity} from "../LayoutOptionValuePreviews/LayoutOptionValuePreviews.entity";
 import {LayoutOptionEntity} from "../LayoutOption/LayoutOption.entity";
 
@@ -6,7 +6,7 @@ import {LayoutOptionEntity} from "../LayoutOption/LayoutOption.entity";
 @Entity()
 export class LayoutOptionValueEntity extends BaseEntity {
 
-    @ManyToOne(() => LayoutOptionEntity, {onDelete: "CASCADE", cascade: true})
+    @ManyToOne(() => LayoutOptionEntity, layoutOption => layoutOption.values, {onDelete: "CASCADE"})
     @JoinColumn()
     layoutOption: LayoutOptionEntity;
 
@@ -16,7 +16,9 @@ export class LayoutOptionValueEntity extends BaseEntity {
     @Column("jsonb")
     json: string;
 
-    @JoinColumn()
+    @OneToOne(() => LayoutOptionValuePreviewsEntity,
+        layoutOptionValuePreviews => layoutOptionValuePreviews.layoutOptionValue,
+        {onDelete: "CASCADE", cascade: true, eager: true})
     previews: LayoutOptionValuePreviewsEntity;
 
 }

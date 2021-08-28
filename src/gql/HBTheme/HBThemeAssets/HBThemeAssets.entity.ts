@@ -6,7 +6,7 @@ import {CDNMapper} from "../../common/CDNMapper";
 @Entity()
 export class HBThemeAssetsEntity extends CachableEntityInterface {
 
-    @OneToOne(() => HBThemeEntity, {onDelete: "CASCADE"})
+    @OneToOne(() => HBThemeEntity, hbThemeEntity => hbThemeEntity.assets, {onDelete: "CASCADE"})
     @JoinColumn({name: "hbThemeId"})
     hbTheme: HBThemeEntity;
 

@@ -6,7 +6,7 @@ import {PackEntity} from "../Pack.entity";
 @Entity()
 export class PackPreviewsEntity extends PreviewsEntityInterface {
 
-    @OneToOne(() => PackEntity, {onDelete: "CASCADE"})
+    @OneToOne(() => PackEntity, pack => pack.previews, {onDelete: "CASCADE"})
     @JoinColumn({name: "packId"})
     pack: PackEntity;
 

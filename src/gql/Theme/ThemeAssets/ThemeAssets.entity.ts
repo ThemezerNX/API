@@ -6,7 +6,7 @@ import {CachableEntityInterface} from "../../common/interfaces/Cachable.entity.i
 @Entity()
 export class ThemeAssetsEntity extends CachableEntityInterface {
 
-    @OneToOne(() => ThemeEntity, {onDelete: "CASCADE"})
+    @OneToOne(() => ThemeEntity, theme => theme.assets, {onDelete: "CASCADE"})
     @JoinColumn({name: "themeId"})
     theme: ThemeEntity;
 

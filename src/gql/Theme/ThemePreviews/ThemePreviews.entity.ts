@@ -6,7 +6,7 @@ import {CDNMapper} from "../../common/CDNMapper";
 @Entity()
 export class ThemePreviewsEntity extends PreviewsEntityInterface {
 
-    @OneToOne(() => ThemeEntity, {onDelete: "CASCADE"})
+    @OneToOne(() => ThemeEntity, themeEntity => themeEntity.previews, {onDelete: "CASCADE"})
     @JoinColumn({name: "themeId"})
     theme: ThemeEntity;
 

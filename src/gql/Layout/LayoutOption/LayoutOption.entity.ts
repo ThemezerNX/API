@@ -1,4 +1,4 @@
-import {BaseEntity, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
+import {BaseEntity, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
 import {LayoutOptionValueEntity} from "../LayoutOptionValue/LayoutOptionValue.entity";
 import {LayoutEntity} from "../Layout.entity";
 
@@ -9,11 +9,11 @@ export class LayoutOptionEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => LayoutEntity, {onDelete: "CASCADE", cascade: true})
+    @ManyToOne(() => LayoutEntity, layout => layout.options, {onDelete: "CASCADE"})
     @JoinColumn()
     layout: LayoutEntity;
 
-    @JoinColumn()
+    @OneToMany(() => LayoutOptionValueEntity, layoutOptionValue => layoutOptionValue.layoutOption, {cascade: true, eager: true})
     values: LayoutOptionValueEntity[];
 
 }

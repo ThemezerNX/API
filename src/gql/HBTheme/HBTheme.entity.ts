@@ -9,7 +9,7 @@ import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
 @Entity()
 export class HBThemeEntity extends ItemEntityInterface {
 
-    @ManyToOne(() => PackEntity, pack => pack.hbThemes,{onDelete: "CASCADE"})
+    @ManyToOne(() => PackEntity, pack => pack.hbThemes, {onDelete: "CASCADE"})
     @JoinColumn({name: "packId"})
     pack?: PackEntity;
 

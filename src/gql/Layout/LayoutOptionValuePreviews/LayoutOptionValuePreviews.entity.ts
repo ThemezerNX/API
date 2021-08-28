@@ -1,4 +1,4 @@
-import {Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {LayoutOptionValueEntity} from "../LayoutOptionValue/LayoutOptionValue.entity";
 import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
@@ -7,14 +7,16 @@ import {LayoutEntity} from "../Layout.entity";
 @Entity()
 export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
 
-    @OneToOne(() => LayoutEntity, {onDelete: "CASCADE", cascade: true})
+    @OneToOne(() => LayoutEntity, {onDelete: "CASCADE"})
     @JoinColumn({name: "layoutId"})
     layout: LayoutEntity;
 
-    @PrimaryColumn()
+    @Column()
     layoutId: string;
 
-    @OneToOne(() => LayoutOptionValueEntity, {onDelete: "CASCADE", cascade: true})
+    @OneToOne(() => LayoutOptionValueEntity,
+        layoutOptionValue => layoutOptionValue.previews,
+        {onDelete: "CASCADE"})
     @JoinColumn({name: "layoutOptionValueUuid"})
     layoutOptionValue: LayoutOptionValueEntity;
 
