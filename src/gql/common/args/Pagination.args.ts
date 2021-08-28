@@ -28,7 +28,6 @@ const take = (limit) => {
     return limit > 0 ? limit : 20;
 };
 
-
 export const paginationConditions = (paginationArgs: PaginationArgs) => {
     if (!!paginationArgs) {
         const {page, limit} = paginationArgs;
@@ -42,7 +41,7 @@ export const paginationConditions = (paginationArgs: PaginationArgs) => {
     return {};
 };
 
-export const executeAndPaginate = <Entity>(paginationArgs: PaginationArgs, queryBuilder: SelectQueryBuilder<Entity>): Promise<[Entity[], number ]> => {
+export const executeAndPaginate = <Entity>(paginationArgs: PaginationArgs, queryBuilder: SelectQueryBuilder<Entity>): Promise<[Entity[], number]> => {
     if (!!paginationArgs && !!queryBuilder) {
         const {page, limit} = paginationArgs;
 
