@@ -15,9 +15,10 @@ export class LayoutService {
     constructor(@InjectRepository(LayoutEntity) private repository: Repository<LayoutEntity>) {
     }
 
-    findOne({id}): Promise<LayoutEntity> {
+    findOne({id}, relations: string[] = []): Promise<LayoutEntity> {
         return this.repository.findOne({
             where: {id},
+            relations,
         });
     }
 
@@ -60,8 +61,10 @@ export class LayoutService {
         }
 
         return executeAndPaginate(paginationArgs,
-            this.repository.createQueryBuilder()
+            this.repository.createQueryBuilder("layout")
                 .where(combineConditions(commonAndConditions, orConditions))
+                .leftJoinAndSelect("layout.previews", "previews")
+                .leftJoinAndSelect("layout.assets", "assets")
                 .orderBy({[sort]: order}),
         );
     }

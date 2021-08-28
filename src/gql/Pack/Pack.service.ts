@@ -28,9 +28,10 @@ export class PackService {
         });
     }
 
-    findOne({id}): Promise<PackEntity> {
+    findOne({id}, relations: string[] = []): Promise<PackEntity> {
         return this.repository.findOne({
             where: {id},
+            relations,
         });
     }
 
@@ -83,8 +84,9 @@ export class PackService {
         }
 
         return executeAndPaginate(paginationArgs,
-            this.repository.createQueryBuilder()
+            this.repository.createQueryBuilder("pack")
                 .where(combineConditions(commonAndConditions, orConditions))
+                .leftJoinAndSelect("pack.previews", "previews")
                 .orderBy({[sort]: order}),
         );
     }

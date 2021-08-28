@@ -11,6 +11,7 @@ import {LayoutModule} from "./Layout/Layout.module";
 import {HBThemeModule} from "./HBTheme/HBTheme.module";
 import {EntityNamingStrategy} from "./common/EntityNamingStrategy";
 import {ThemeTagModule} from "./ThemeTag/ThemeTag.module";
+import {NXInstallerModule} from "./NXInstaller/NXInstaller.module";
 
 @Module({
     imports: [
@@ -32,8 +33,14 @@ import {ThemeTagModule} from "./ThemeTag/ThemeTag.module";
             context: ({req, connection}) =>
                 connection
                     ? {req: connection.context, currentUser: req.user}
-                    : {req, currentUser: req.user}
-            ,
+                    : {req, currentUser: req.user},
+            formatResponse: (response, _requestContext) => {
+                if (response?.data?.nxinstaller) {
+                    response.data = response?.data?.nxinstaller;
+                }
+
+                return response;
+            },
         }),
         TypeOrmModule.forRoot({
             type: "postgres",
@@ -56,6 +63,7 @@ import {ThemeTagModule} from "./ThemeTag/ThemeTag.module";
         PackModule,
         LayoutModule,
         ThemeTagModule,
+        NXInstallerModule,
     ],
 })
 export class GqlModule {

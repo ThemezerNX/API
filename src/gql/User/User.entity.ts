@@ -37,8 +37,8 @@ export class UserEntity extends BaseEntity {
     @Column({default: false})
     isBlocked: boolean;
 
-    @Column("varchar", {array: true, default: []})
-    roles: string[];
+    @Column("varchar", {array: true})
+    roles: string[] = [];
 
     @OneToOne(() => UserProfileEntity, profile => profile.user, {cascade: true, eager: true})
     profile: UserProfileEntity;

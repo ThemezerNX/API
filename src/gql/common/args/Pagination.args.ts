@@ -5,6 +5,10 @@ import {Min} from "class-validator";
 @ArgsType()
 export class LimitArg {
 
+    constructor(limit: number) {
+        this.limit = limit;
+    }
+
     @Field(() => Int, {description: "The maximum amount of items to return"})
     @Min(1)
     limit: number = 20;
@@ -13,6 +17,11 @@ export class LimitArg {
 
 @ArgsType()
 export class PaginationArgs extends LimitArg {
+
+    constructor(limit?: number, page?: number) {
+        super(limit);
+        this.page = page;
+    }
 
     @Field(() => Int, {description: "Which page of items to return. Calculated using the limit argument."})
     @Min(1)

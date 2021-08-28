@@ -13,9 +13,10 @@ export class ThemeTagService {
     constructor(@InjectRepository(ThemeTagEntity) private repository: Repository<ThemeTagEntity>) {
     }
 
-    findOne({id}): Promise<ThemeTagEntity> {
+    findOne({id}, relations: string[] = []): Promise<ThemeTagEntity> {
         return this.repository.findOne({
             where: {id},
+            relations,
         });
     }
 

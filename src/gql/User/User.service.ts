@@ -13,9 +13,10 @@ export class UserService {
     constructor(@InjectRepository(UserEntity) private repository: Repository<UserEntity>) {
     }
 
-    findOne({id}): Promise<UserEntity> {
+    findOne({id}, relations: string[] = []): Promise<UserEntity> {
         return this.repository.findOne({
             where: {id},
+            relations,
         });
     }
 
@@ -45,8 +46,11 @@ export class UserService {
         }
 
         return executeAndPaginate(paginationArgs,
-            this.repository.createQueryBuilder()
+            this.repository.createQueryBuilder("user")
                 .where(findConditions)
+                .leftJoinAndSelect("user.profile", "profile")
+                .leftJoinAndSelect("user.preferences", "preferences")
+                .leftJoinAndSelect("user.connections", "connections")
                 .orderBy({[sort]: order}),
         );
     }

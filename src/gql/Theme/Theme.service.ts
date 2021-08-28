@@ -15,9 +15,10 @@ export class ThemeService {
     constructor(@InjectRepository(ThemeEntity) private repository: Repository<ThemeEntity>) {
     }
 
-    findOne({id}): Promise<ThemeEntity> {
+    findOne({id}, relations: string[] = []): Promise<ThemeEntity> {
         return this.repository.findOne({
             where: {id},
+            relations,
         });
     }
 
@@ -82,8 +83,10 @@ export class ThemeService {
         }
 
         return executeAndPaginate(paginationArgs,
-            this.repository.createQueryBuilder()
+            this.repository.createQueryBuilder("theme")
                 .where(combineConditions(commonAndConditions, orConditions))
+                .leftJoinAndSelect("theme.previews", "previews")
+                .leftJoinAndSelect("theme.assets", "assets")
                 .orderBy({[sort]: order}),
         );
     }
@@ -109,8 +112,10 @@ export class ThemeService {
             findConditions.isNSFW = false;
         }
 
-        const query = this.repository.createQueryBuilder()
+        const query = this.repository.createQueryBuilder("theme")
             .where(findConditions)
+            .leftJoinAndSelect("theme.previews", "previews")
+            .leftJoinAndSelect("theme.assets", "assets")
             .orderBy("RANDOM()");
 
         if (limit) {

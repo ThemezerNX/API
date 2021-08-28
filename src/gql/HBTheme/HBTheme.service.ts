@@ -14,9 +14,10 @@ export class HBThemeService {
     constructor(@InjectRepository(HBThemeEntity) private repository: Repository<HBThemeEntity>) {
     }
 
-    findOne({id}): Promise<HBThemeEntity> {
+    findOne({id}, relations: string[] = []): Promise<HBThemeEntity> {
         return this.repository.findOne({
             where: {id},
+            relations,
         });
     }
 
@@ -69,8 +70,10 @@ export class HBThemeService {
         }
 
         return executeAndPaginate(paginationArgs,
-            this.repository.createQueryBuilder()
+            this.repository.createQueryBuilder("hbTheme")
                 .where(combineConditions(commonAndConditions, orConditions))
+                .leftJoinAndSelect("hbTheme.previews", "previews")
+                .leftJoinAndSelect("hbTheme.assets", "assets")
                 .orderBy({[sort]: order}),
         );
     }
