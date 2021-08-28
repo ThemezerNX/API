@@ -55,7 +55,7 @@ export class PackResolver {
         description: `Find a single pack`,
     })
     pack(
-        @Args("id", {nullable: false}) id: string,
+        @Args("id") id: string,
     ): Promise<PackModel> {
         return this.packService.findOne({id});
     }

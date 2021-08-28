@@ -42,7 +42,7 @@ export class ThemeResolver {
         description: `Find a single theme`,
     })
     theme(
-        @Args("id", {nullable: false}) id: string,
+        @Args("id") id: string,
     ): Promise<ThemeModel> {
         return this.themeService.findOne({id});
     }

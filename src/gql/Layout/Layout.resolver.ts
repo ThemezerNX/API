@@ -38,7 +38,7 @@ export class LayoutResolver {
         description: `Find a single layout`,
     })
     layout(
-        @Args("id", {nullable: false}) id: string,
+        @Args("id") id: string,
     ): Promise<LayoutModel> {
         return this.layoutService.findOne({id});
     }

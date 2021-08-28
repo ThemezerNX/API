@@ -5,42 +5,42 @@ import {URLResolver} from "graphql-scalars";
 export class HBThemeAssetsModel {
 
     @Field(() => URLResolver, {nullable: true})
-    batteryIconUrl: string;
+    batteryIconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    chargingIconUrl: string;
+    chargingIconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    folderIconUrl: string;
+    folderIconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    invalidIconUrl: string;
+    invalidIconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    themeIconDarkUrl: string;
+    themeIconDarkUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    themeIconLightUrl: string;
+    themeIconLightUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    airplaneIconUrl: string;
+    airplaneIconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    wifiNoneIconUrl: string;
+    wifiNoneIconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    wifi1IconUrl: string;
+    wifi1IconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    wifi2IconUrl: string;
+    wifi2IconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    wifi3IconUrl: string;
+    wifi3IconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    ethIconUrl: string;
+    ethIconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    backgroundImageUrl: string;
+    backgroundImageUrl?: string;
 
 }

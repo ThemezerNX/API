@@ -41,7 +41,7 @@ export class ThemeTagResolver {
         description: `Find a single themeTag`,
     })
     themeTag(
-        @Args("id", {nullable: false}) id: string,
+        @Args("id") id: string,
     ): Promise<ThemeTagModel> {
         return this.tagService.findOne({id});
     }

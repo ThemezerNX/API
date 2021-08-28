@@ -21,7 +21,7 @@ class ListArgs {
     creators?: string[];
     @Field(() => [String], {nullable: true})
     layouts?: string[];
-    @Field({nullable: true})
+    @Field()
     includeNSFW: boolean = false;
 
 }
@@ -42,7 +42,7 @@ export class HBThemeResolver {
         description: `Find a single hbtheme`,
     })
     hbTheme(
-        @Args("id", {nullable: false}) id: string,
+        @Args("id") id: string,
     ): Promise<HBThemeModel> {
         return this.hbThemeService.findOne({id});
     }

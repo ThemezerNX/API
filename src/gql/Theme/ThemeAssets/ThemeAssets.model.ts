@@ -11,27 +11,27 @@ export class ThemeAssetsModel {
     customCommonLayoutJson?: JSON;
 
     @Field(() => URLResolver, {nullable: true})
-    imageUrl: string;
+    imageUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    albumIconUrl: string;
+    albumIconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    newsIconUrl: string;
+    newsIconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    shopIconUrl: string;
+    shopIconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    controllerIconUrl: string;
+    controllerIconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    settingsIconUrl: string;
+    settingsIconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    powerIconUrl: string;
+    powerIconUrl?: string;
 
     @Field(() => URLResolver, {nullable: true})
-    homeIconUrl: string;
+    homeIconUrl?: string;
 
 }

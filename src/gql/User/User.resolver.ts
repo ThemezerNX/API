@@ -44,7 +44,7 @@ export class UserResolver {
         description: `Find a single user`,
     })
     user(
-        @Args("id", {nullable: false}) id: string,
+        @Args("id") id: string,
     ): Promise<UserModel> {
         return this.userService.findOne({id});
     }
