@@ -6,7 +6,7 @@ import {HBThemePreviewsModel} from "./HBThemePreviews/HBThemePreviews.model";
 import {HBThemeAssetsModel} from "./HBThemeAssets/HBThemeAssets.model";
 
 
-@ObjectType("HBTheme", {implements: () => [ItemModelInterface]})
+@ObjectType("HBTheme", {implements: [ItemModelInterface]})
 export class HBThemeModel extends ItemModelInterface {
 
     @Field(() => PackModel, {nullable: true})

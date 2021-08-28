@@ -3,6 +3,7 @@ import {ThemeTagService} from "./ThemeTag.service";
 import {PaginationArgs} from "../common/args/Pagination.args";
 import {ThemeTagModel} from "./ThemeTag.model";
 import {SortInterface} from "../common/interfaces/Sort.interface";
+import {PaginatedThemeTags} from "./PaginatedThemeTags.model";
 
 
 export enum TagSort {
@@ -45,19 +46,21 @@ export class ThemeTagResolver {
         return this.tagService.findOne({id});
     }
 
-    @Query(() => [ThemeTagModel], {
+    @Query(() => PaginatedThemeTags, {
         description: `Find multiple themeTags`,
     })
     async themeTags(
         @Args() paginationArgs: PaginationArgs,
         @Args() sortArgs: SortArgs,
         @Args() listArgs?: ListArgs,
-    ): Promise<ThemeTagModel[]> {
-        return this.tagService.findAll({
+    ): Promise<PaginatedThemeTags> {
+        const result = await this.tagService.findAll({
             paginationArgs,
             ...sortArgs,
             ...listArgs,
         });
+
+        return new PaginatedThemeTags(paginationArgs, result[1], result[0]);
     }
 
 }

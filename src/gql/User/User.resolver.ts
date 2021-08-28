@@ -3,6 +3,7 @@ import {UserService} from "./User.service";
 import {UserModel} from "./User.model";
 import {PaginationArgs} from "../common/args/Pagination.args";
 import {SortInterface} from "../common/interfaces/Sort.interface";
+import {PaginatedUsers} from "./PaginatedUsers.model";
 
 export enum UserSort {
     ID = "id",
@@ -42,25 +43,27 @@ export class UserResolver {
     @Query(() => UserModel, {
         description: `Find a single user`,
     })
-    async user(
+    user(
         @Args("id", {nullable: false}) id: string,
     ): Promise<UserModel> {
         return this.userService.findOne({id});
     }
 
-    @Query(() => [UserModel], {
+    @Query(() => PaginatedUsers, {
         description: `Find multiple users`,
     })
     async users(
         @Args() paginationArgs: PaginationArgs,
         @Args() sortArgs: SortArgs,
         @Args() listArgs?: ListArgs,
-    ): Promise<UserModel[]> {
-        return this.userService.findAll({
+    ): Promise<PaginatedUsers> {
+        const result = await this.userService.findAll({
             paginationArgs,
             ...sortArgs,
             ...listArgs,
         });
+
+        return new PaginatedUsers(paginationArgs, result[1], result[0]);
     }
 
 }

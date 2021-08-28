@@ -3,7 +3,7 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {FindConditions, Repository} from "typeorm";
 import {UserEntity} from "./User.entity";
 import {StringContains} from "../common/findOperators/StringContains";
-import {PaginationArgs, paginationConditions} from "../common/args/Pagination.args";
+import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {SortOrder} from "../common/enums/SortOrder";
 import {UserSort} from "./User.resolver";
 
@@ -13,7 +13,7 @@ export class UserService {
     constructor(@InjectRepository(UserEntity) private repository: Repository<UserEntity>) {
     }
 
-    async findOne({id}): Promise<UserEntity> {
+    findOne({id}): Promise<UserEntity> {
         return this.repository.findOne({
             where: {id},
         });
@@ -34,7 +34,7 @@ export class UserService {
                 query?: string
                 isAdmin?: boolean
             },
-    ): Promise<UserEntity[]> {
+    ): Promise<[UserEntity[], number]> {
         const findConditions: FindConditions<UserEntity> = {};
 
         if (query?.length > 0) {
@@ -44,13 +44,11 @@ export class UserService {
             findConditions.isAdmin = isAdmin;
         }
 
-        return this.repository.find({
-            where: findConditions,
-            order: {
-                [sort]: order,
-            },
-            ...paginationConditions(paginationArgs),
-        });
+        return executeAndPaginate(paginationArgs,
+            this.repository.createQueryBuilder()
+                .where(findConditions)
+                .orderBy({[sort]: order}),
+        );
     }
 
 }

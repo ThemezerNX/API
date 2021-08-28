@@ -6,7 +6,7 @@ import {Target} from "../common/enums/Target";
 import {InjectRepository} from "@nestjs/typeorm";
 import {SortOrder} from "../common/enums/SortOrder";
 import {StringContains} from "../common/findOperators/StringContains";
-import {PaginationArgs, paginationConditions} from "../common/args/Pagination.args";
+import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {ThemeEntity} from "../Theme/Theme.entity";
 import {ItemSort} from "../common/args/ItemSortArgs";
 
@@ -52,7 +52,7 @@ export class PackService {
                 creators?: string[],
                 includeNSFW?: boolean
             },
-    ): Promise<PackEntity[]> {
+    ): Promise<[PackEntity[], number]> {
         const commonAndConditions: FindConditions<PackEntity> = {};
         const orConditions: FindConditions<PackEntity>[] = [];
 
@@ -61,7 +61,7 @@ export class PackService {
                 id: In(creators),
             };
         }
-        if (!includeNSFW)  {
+        if (!includeNSFW) {
             commonAndConditions.themes = [{
                 isNSFW: false,
             }];
@@ -81,13 +81,12 @@ export class PackService {
             //     } as FindConditions<ThemeEntity>,
             // });
         }
-        return this.repository.find({
-            where: combineConditions(commonAndConditions, orConditions),
-            order: {
-                [sort]: order,
-            },
-            ...paginationConditions(paginationArgs),
-        });
+
+        return executeAndPaginate(paginationArgs,
+            this.repository.createQueryBuilder()
+                .where(combineConditions(commonAndConditions, orConditions))
+                .orderBy({[sort]: order}),
+        );
     }
 
     async findRandom(
@@ -102,7 +101,7 @@ export class PackService {
     ): Promise<PackEntity[]> {
         const findConditions: FindConditions<PackEntity> = {};
 
-        if (!includeNSFW){
+        if (!includeNSFW) {
             findConditions.themes = [{
                 isNSFW: false,
             }];

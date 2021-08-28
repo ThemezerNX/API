@@ -8,6 +8,7 @@ import {PackEntriesUnion, PackModel} from "./Pack.model";
 import {PackEntity} from "./Pack.entity";
 import {ThemeService} from "../Theme/Theme.service";
 import {HBThemeService} from "../HBTheme/HBTheme.service";
+import {PaginatedPacks} from "./PaginatedPacks.model";
 
 
 @ArgsType()
@@ -32,14 +33,14 @@ export class PackResolver {
     }
 
     @ResolveField(() => UserModel)
-    async creator(@Parent() pack: PackEntity): Promise<UserModel> {
+    creator(@Parent() pack: PackEntity): Promise<UserModel> {
         const id = pack.creatorId;
         return this.userService.findOne({id});
     }
 
     @ResolveField()
-    async isNSFW(@Parent() pack: PackEntity): Promise<boolean> {
-        return await this.packService.isNSFW(pack.id);
+    isNSFW(@Parent() pack: PackEntity): Promise<boolean> {
+        return this.packService.isNSFW(pack.id);
     }
 
     @ResolveField()
@@ -47,31 +48,33 @@ export class PackResolver {
         const themes = await this.themeService.findAll({packId: pack.id});
         const hbThemes = await this.hbThemeService.findAll({packId: pack.id});
 
-        return [...themes, ...hbThemes];
+        return [...themes[0], ...hbThemes[0]];
     }
 
     @Query(() => PackModel, {
         description: `Find a single pack`,
     })
-    async pack(
+    pack(
         @Args("id", {nullable: false}) id: string,
     ): Promise<PackModel> {
         return this.packService.findOne({id});
     }
 
-    @Query(() => [PackModel], {
+    @Query(() => PaginatedPacks, {
         description: `Find multiple packs`,
     })
     async packs(
         @Args() paginationArgs: PaginationArgs,
         @Args() itemSortArgs: ItemSortArgs,
         @Args() listArgs?: ListArgs,
-    ): Promise<PackModel[]> {
-        return this.packService.findAll({
+    ): Promise<PaginatedPacks> {
+        const result = await this.packService.findAll({
             paginationArgs,
             ...itemSortArgs,
             ...listArgs,
         });
+
+        return new PaginatedPacks(paginationArgs, result[1], result[0]);
     }
 
     @Query(() => [PackModel], {

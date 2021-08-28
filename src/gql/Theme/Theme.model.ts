@@ -8,7 +8,7 @@ import {ThemePreviewsModel} from "./ThemePreviews/ThemePreviews.model";
 import {ThemeTagModel} from "../ThemeTag/ThemeTag.model";
 
 
-@ObjectType("Theme", {implements: () => [ItemModelInterface]})
+@ObjectType("Theme", {implements: [ItemModelInterface]})
 export class ThemeModel extends ItemModelInterface {
 
     @Field(() => PackModel, {nullable: true})

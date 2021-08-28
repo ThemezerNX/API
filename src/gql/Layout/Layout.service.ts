@@ -6,7 +6,7 @@ import {Target} from "../common/enums/Target";
 import {InjectRepository} from "@nestjs/typeorm";
 import {SortOrder} from "../common/enums/SortOrder";
 import {StringContains} from "../common/findOperators/StringContains";
-import {PaginationArgs, paginationConditions} from "../common/args/Pagination.args";
+import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {ItemSort} from "../common/args/ItemSortArgs";
 
 @Injectable()
@@ -38,7 +38,7 @@ export class LayoutService {
                 target?: Target,
                 creators?: string[],
             },
-    ): Promise<LayoutEntity[]> {
+    ): Promise<[LayoutEntity[], number]> {
         const commonAndConditions: FindConditions<LayoutEntity> = {};
         const orConditions: FindConditions<LayoutEntity>[] = [];
 
@@ -59,13 +59,11 @@ export class LayoutService {
             });
         }
 
-        return this.repository.find({
-            where: combineConditions(commonAndConditions, orConditions),
-            order: {
-                [sort]: order,
-            },
-            ...paginationConditions(paginationArgs),
-        });
+        return executeAndPaginate(paginationArgs,
+            this.repository.createQueryBuilder()
+                .where(combineConditions(commonAndConditions, orConditions))
+                .orderBy({[sort]: order}),
+        );
     }
 
     async findRandom(

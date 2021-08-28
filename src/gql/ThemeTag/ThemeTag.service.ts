@@ -1,7 +1,7 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
 import {FindConditions, Repository} from "typeorm";
-import {PaginationArgs, paginationConditions} from "../common/args/Pagination.args";
+import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {SortOrder} from "../common/enums/SortOrder";
 import {StringContains} from "../common/findOperators/StringContains";
 import {ThemeTagEntity} from "./ThemeTag.entity";
@@ -32,20 +32,18 @@ export class ThemeTagService {
                 order?: SortOrder,
                 query?: string,
             },
-    ): Promise<ThemeTagEntity[]> {
+    ): Promise<[ThemeTagEntity[], number]> {
         const findConditions: FindConditions<ThemeTagEntity> = {};
 
         if (query?.length > 0) {
             findConditions.name = StringContains(query);
         }
 
-        return this.repository.find({
-            where: findConditions,
-            order: {
-                [sort]: order,
-            },
-            ...paginationConditions(paginationArgs),
-        });
+        return executeAndPaginate(paginationArgs,
+            this.repository.createQueryBuilder()
+                .where(findConditions)
+                .orderBy({[sort]: order}),
+        );
     }
 
 }

@@ -7,6 +7,7 @@ import {UserService} from "../User/User.service";
 import {UserModel} from "../User/User.model";
 import {LayoutEntity} from "./Layout.entity";
 import {ItemSortArgs} from "../common/args/ItemSortArgs";
+import {PaginatedLayouts} from "./PaginatedLayouts.model";
 
 
 @ArgsType()
@@ -42,19 +43,21 @@ export class LayoutResolver {
         return this.layoutService.findOne({id});
     }
 
-    @Query(() => [LayoutModel], {
+    @Query(() => PaginatedLayouts, {
         description: `Find multiple layouts`,
     })
     async layouts(
         @Args() paginationArgs: PaginationArgs,
         @Args() itemSortArgs: ItemSortArgs,
         @Args() listArgs?: ListArgs,
-    ): Promise<LayoutModel[]> {
-        return this.layoutService.findAll({
+    ): Promise<PaginatedLayouts> {
+        const result = await this.layoutService.findAll({
             paginationArgs,
             ...itemSortArgs,
             ...listArgs,
         });
+
+        return new PaginatedLayouts(paginationArgs, result[1], result[0]);
     }
 
     @Query(() => [LayoutModel], {

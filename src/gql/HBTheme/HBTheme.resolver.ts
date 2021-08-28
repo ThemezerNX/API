@@ -7,6 +7,7 @@ import {UserService} from "../User/User.service";
 import {UserModel} from "../User/User.model";
 import {HBThemeEntity} from "./HBTheme.entity";
 import {ItemSortArgs} from "../common/args/ItemSortArgs";
+import {PaginatedHBThemes} from "./PaginatedHBThemes.model";
 
 
 @ArgsType()
@@ -40,25 +41,27 @@ export class HBThemeResolver {
     @Query(() => HBThemeModel, {
         description: `Find a single hbtheme`,
     })
-    async HBtheme(
+    async hbTheme(
         @Args("id", {nullable: false}) id: string,
     ): Promise<HBThemeModel> {
         return this.hbThemeService.findOne({id});
     }
 
-    @Query(() => [HBThemeModel], {
+    @Query(() => PaginatedHBThemes, {
         description: `Find multiple hbthemes`,
     })
-    async HBthemes(
+    async hbThemes(
         @Args() paginationArgs: PaginationArgs,
         @Args() itemSortArgs: ItemSortArgs,
         @Args() listArgs?: ListArgs,
-    ): Promise<HBThemeModel[]> {
-        return this.hbThemeService.findAll({
+    ): Promise<PaginatedHBThemes> {
+        const result = await this.hbThemeService.findAll({
             paginationArgs,
             ...itemSortArgs,
             ...listArgs,
         });
+
+        return new PaginatedHBThemes(paginationArgs, result[1], result[0]);
     }
 
     @Query(() => [HBThemeModel], {

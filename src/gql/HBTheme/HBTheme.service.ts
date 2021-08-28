@@ -1,7 +1,7 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
 import {FindConditions, In, Repository} from "typeorm";
-import {PaginationArgs, paginationConditions} from "../common/args/Pagination.args";
+import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {SortOrder} from "../common/enums/SortOrder";
 import {combineConditions} from "../common/CombineConditions";
 import {StringContains} from "../common/findOperators/StringContains";
@@ -39,7 +39,7 @@ export class HBThemeService {
                 creators?: string[],
                 includeNSFW?: boolean
             },
-    ): Promise<HBThemeEntity[]> {
+    ): Promise<[HBThemeEntity[], number]> {
         const commonAndConditions: FindConditions<HBThemeEntity> = {};
         const orConditions: FindConditions<HBThemeEntity>[] = [];
 
@@ -68,13 +68,11 @@ export class HBThemeService {
             // });
         }
 
-        return this.repository.find({
-            where: combineConditions(commonAndConditions, orConditions),
-            order: {
-                [sort]: order,
-            },
-            ...paginationConditions(paginationArgs),
-        });
+        return executeAndPaginate(paginationArgs,
+            this.repository.createQueryBuilder()
+                .where(combineConditions(commonAndConditions, orConditions))
+                .orderBy({[sort]: order}),
+        );
     }
 
     async findRandom(

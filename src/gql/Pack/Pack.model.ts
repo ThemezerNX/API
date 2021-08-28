@@ -6,6 +6,7 @@ import {PackPreviewsModel} from "./PackPreviews/PackPreviews.model";
 import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
 import {ThemeEntity} from "../Theme/Theme.entity";
 
+
 export const PackEntriesUnion = createUnionType({
     name: "PackEntries",
     types: () => [ThemeModel, HBThemeModel],
@@ -15,7 +16,7 @@ export const PackEntriesUnion = createUnionType({
     },
 });
 
-@ObjectType("Pack", {implements: () => [ItemModelInterface]})
+@ObjectType("Pack", {implements: [ItemModelInterface]})
 export class PackModel extends ItemModelInterface {
 
     @Field()

@@ -7,6 +7,7 @@ import {UserService} from "../User/User.service";
 import {UserModel} from "../User/User.model";
 import {ThemeEntity} from "./Theme.entity";
 import {ItemSortArgs} from "../common/args/ItemSortArgs";
+import {PaginatedThemes} from "./PaginatedThemes.model";
 
 
 @ArgsType()
@@ -32,7 +33,7 @@ export class ThemeResolver {
     }
 
     @ResolveField(() => UserModel)
-    async creator(@Parent() theme: ThemeEntity): Promise<UserModel> {
+    creator(@Parent() theme: ThemeEntity): Promise<UserModel> {
         const id = theme.creatorId;
         return this.userService.findOne({id});
     }
@@ -40,31 +41,33 @@ export class ThemeResolver {
     @Query(() => ThemeModel, {
         description: `Find a single theme`,
     })
-    async theme(
+    theme(
         @Args("id", {nullable: false}) id: string,
     ): Promise<ThemeModel> {
         return this.themeService.findOne({id});
     }
 
-    @Query(() => [ThemeModel], {
+    @Query(() => PaginatedThemes, {
         description: `Find multiple themes`,
     })
     async themes(
         @Args() paginationArgs: PaginationArgs,
         @Args() itemSortArgs: ItemSortArgs,
         @Args() listArgs?: ListArgs,
-    ): Promise<ThemeModel[]> {
-        return this.themeService.findAll({
+    ): Promise<PaginatedThemes> {
+        const result = await this.themeService.findAll({
             paginationArgs,
             ...itemSortArgs,
             ...listArgs,
         });
+
+        return new PaginatedThemes(paginationArgs, result[1], result[0]);
     }
 
     @Query(() => [ThemeModel], {
         description: `Fetch random themes`,
     })
-    async randomThemes(
+    randomThemes(
         @Args() limitArg?: LimitArg,
         @Args("includeNSFW", {nullable: true}) includeNSFW: boolean = false,
         @Args("target", {nullable: true}) target?: Target,
