@@ -19,7 +19,7 @@ export class UserService {
         });
     }
 
-    async findAll(
+    findAll(
         {
             paginationArgs,
             sort = UserSort.USERNAME,

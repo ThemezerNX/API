@@ -15,13 +15,13 @@ export class LayoutService {
     constructor(@InjectRepository(LayoutEntity) private repository: Repository<LayoutEntity>) {
     }
 
-    async findOne({id}): Promise<LayoutEntity> {
+    findOne({id}): Promise<LayoutEntity> {
         return this.repository.findOne({
             where: {id},
         });
     }
 
-    async findAll(
+    findAll(
         {
             paginationArgs,
             sort = ItemSort.ADDED,
@@ -66,7 +66,7 @@ export class LayoutService {
         );
     }
 
-    async findRandom(
+    findRandom(
         {
             limit,
         }:

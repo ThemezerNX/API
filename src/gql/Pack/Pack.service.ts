@@ -28,13 +28,13 @@ export class PackService {
         });
     }
 
-    async findOne({id}): Promise<PackEntity> {
+    findOne({id}): Promise<PackEntity> {
         return this.repository.findOne({
             where: {id},
         });
     }
 
-    async findAll(
+    findAll(
         {
             paginationArgs,
             sort = ItemSort.ADDED,
@@ -89,7 +89,7 @@ export class PackService {
         );
     }
 
-    async findRandom(
+    findRandom(
         {
             limit,
             includeNSFW,

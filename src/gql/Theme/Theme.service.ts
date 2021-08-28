@@ -15,13 +15,13 @@ export class ThemeService {
     constructor(@InjectRepository(ThemeEntity) private repository: Repository<ThemeEntity>) {
     }
 
-    async findOne({id}): Promise<ThemeEntity> {
+    findOne({id}): Promise<ThemeEntity> {
         return this.repository.findOne({
             where: {id},
         });
     }
 
-    async findAll(
+    findAll(
         {
             packId,
             paginationArgs,
@@ -88,7 +88,7 @@ export class ThemeService {
         );
     }
 
-    async findRandom(
+    findRandom(
         {
             limit,
             target,

@@ -33,7 +33,7 @@ export class HBThemeResolver {
     }
 
     @ResolveField(() => UserModel)
-    async creator(@Parent() hbTheme: HBThemeEntity): Promise<UserModel> {
+    creator(@Parent() hbTheme: HBThemeEntity): Promise<UserModel> {
         const id = hbTheme.creatorId;
         return this.userService.findOne({id});
     }
@@ -41,7 +41,7 @@ export class HBThemeResolver {
     @Query(() => HBThemeModel, {
         description: `Find a single hbtheme`,
     })
-    async hbTheme(
+    hbTheme(
         @Args("id", {nullable: false}) id: string,
     ): Promise<HBThemeModel> {
         return this.hbThemeService.findOne({id});
@@ -67,7 +67,7 @@ export class HBThemeResolver {
     @Query(() => [HBThemeModel], {
         description: `Fetch random hbthemes`,
     })
-    async randomHBThemes(
+    randomHBThemes(
         @Args() limitArg?: LimitArg,
         @Args("includeNSFW", {nullable: true}) includeNSFW: boolean = false,
     ): Promise<HBThemeModel[]> {

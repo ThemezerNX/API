@@ -80,7 +80,7 @@ export class PackResolver {
     @Query(() => [PackModel], {
         description: `Fetch random packs`,
     })
-    async randomPacks(
+    randomPacks(
         @Args() limitArg?: LimitArg,
         @Args("includeNSFW", {nullable: true}) includeNSFW: boolean = false,
     ): Promise<PackModel[]> {

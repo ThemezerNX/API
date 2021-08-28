@@ -40,7 +40,7 @@ export class ThemeTagResolver {
     @Query(() => ThemeTagModel, {
         description: `Find a single themeTag`,
     })
-    async themeTag(
+    themeTag(
         @Args("id", {nullable: false}) id: string,
     ): Promise<ThemeTagModel> {
         return this.tagService.findOne({id});

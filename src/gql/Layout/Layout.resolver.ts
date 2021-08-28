@@ -29,7 +29,7 @@ export class LayoutResolver {
     }
 
     @ResolveField(() => UserModel)
-    async creator(@Parent() layout: LayoutEntity): Promise<UserModel> {
+    creator(@Parent() layout: LayoutEntity): Promise<UserModel> {
         const id = layout.creatorId;
         return this.userService.findOne({id});
     }
@@ -37,7 +37,7 @@ export class LayoutResolver {
     @Query(() => LayoutModel, {
         description: `Find a single layout`,
     })
-    async layout(
+    layout(
         @Args("id", {nullable: false}) id: string,
     ): Promise<LayoutModel> {
         return this.layoutService.findOne({id});
@@ -63,7 +63,7 @@ export class LayoutResolver {
     @Query(() => [LayoutModel], {
         description: `Fetch random layouts`,
     })
-    async randomLayouts(
+    randomLayouts(
         @Args() limitArg?: LimitArg,
     ): Promise<LayoutModel[]> {
         return this.layoutService.findRandom({

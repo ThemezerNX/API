@@ -13,13 +13,13 @@ export class ThemeTagService {
     constructor(@InjectRepository(ThemeTagEntity) private repository: Repository<ThemeTagEntity>) {
     }
 
-    async findOne({id}): Promise<ThemeTagEntity> {
+    findOne({id}): Promise<ThemeTagEntity> {
         return this.repository.findOne({
             where: {id},
         });
     }
 
-    async findAll(
+    findAll(
         {
             paginationArgs,
             sort = TagSort.NAME,

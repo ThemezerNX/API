@@ -14,13 +14,13 @@ export class HBThemeService {
     constructor(@InjectRepository(HBThemeEntity) private repository: Repository<HBThemeEntity>) {
     }
 
-    async findOne({id}): Promise<HBThemeEntity> {
+    findOne({id}): Promise<HBThemeEntity> {
         return this.repository.findOne({
             where: {id},
         });
     }
 
-    async findAll(
+    findAll(
         {
             packId,
             paginationArgs,
@@ -75,7 +75,7 @@ export class HBThemeService {
         );
     }
 
-    async findRandom(
+    findRandom(
         {
             limit,
             includeNSFW,
