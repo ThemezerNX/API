@@ -1,9 +1,10 @@
-import {Module} from "@nestjs/common";
+import {MiddlewareConsumer, Module, NestModule} from "@nestjs/common";
 import {ConfigModule} from "@nestjs/config";
 import {I18nJsonParser, I18nModule} from "nestjs-i18n";
 import * as path from "path";
 import {UserModule} from "./User/User.module";
 import {TypeOrmModule} from "@nestjs/typeorm";
+import {graphqlUploadExpress} from "graphql-upload";
 import {GraphQLModule} from "@nestjs/graphql";
 import {ThemeModule} from "./Theme/Theme.module";
 import {PackModule} from "./Pack/Pack.module";
@@ -29,14 +30,36 @@ import {NXInstallerModule} from "./NXInstaller/NXInstaller.module";
             path: "/",
             introspection: true,
             autoSchemaFile: true,
+            // https://github.com/nestjs/graphql/issues/901#issuecomment-780007582
+            uploads: false,
             // authChecker,
-            context: ({req, connection}) =>
-                connection
-                    ? {req: connection.context, currentUser: req.user}
-                    : {req, currentUser: req.user},
-            formatResponse: (response, _requestContext) => {
+            formatResponse: (response, requestContext) => {
                 if (response?.data?.nxinstaller) {
                     response.data = response?.data?.nxinstaller;
+                }
+
+                // localize errors
+                if (response?.errors) {
+                    const $t = (requestContext.context as any).req.__;
+
+                    response.errors = response.errors.map((err) => {
+                        const ex = err.extensions.exception;
+
+                        if (ex.isTranslatable) {
+                            const newError = {
+                                statusCode: ex.statusCode,
+                                ...err,
+                                message: $t(ex.langKey, ex.i18nParams),
+                            };
+
+                            delete ex.isTranslatable;
+                            delete ex.i18nParams;
+
+                            return newError;
+                        }
+
+                        return err;
+                    });
                 }
 
                 return response;
@@ -66,5 +89,8 @@ import {NXInstallerModule} from "./NXInstaller/NXInstaller.module";
         NXInstallerModule,
     ],
 })
-export class GqlModule {
+export class GqlModule implements NestModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(graphqlUploadExpress()).forRoutes("/");
+    }
 }
