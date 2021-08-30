@@ -15,9 +15,25 @@ export class ThemeService {
     constructor(@InjectRepository(ThemeEntity) private repository: Repository<ThemeEntity>) {
     }
 
-    findOne({id}, relations: string[] = []): Promise<ThemeEntity> {
+    findOne({
+                id,
+                isNSFW,
+                packId,
+            }: { id?: string, isNSFW?: boolean, packId?: string }, relations: string[] = []): Promise<ThemeEntity> {
+        const findConditions: FindConditions<ThemeEntity> = {};
+
+        if (id != undefined) {
+            findConditions.id = packId;
+        }
+        if (isNSFW != undefined) {
+            findConditions.isNSFW = false;
+        }
+        if (packId != undefined) {
+            findConditions.packId = packId;
+        }
+
         return this.repository.findOne({
-            where: {id},
+            where: findConditions,
             relations,
         });
     }
@@ -43,29 +59,29 @@ export class ThemeService {
                 target?: Target,
                 creators?: string[],
                 layouts?: string[],
-                includeNSFW?: boolean
+                includeNSFW?: Boolean
             },
     ): Promise<[ThemeEntity[], number]> {
         const commonAndConditions: FindConditions<ThemeEntity> = {};
         const orConditions: FindConditions<ThemeEntity>[] = [];
 
-        if (packId) {
+        if (packId != undefined) {
             commonAndConditions.packId = packId;
         }
-        if (target) {
+        if (target != undefined) {
             commonAndConditions.target = target;
         }
-        if (creators) {
+        if (creators?.length > 0) {
             commonAndConditions.creator = {
                 id: In(creators),
             };
         }
-        if (layouts) {
+        if (layouts?.length > 0) {
             commonAndConditions.layout = {
                 id: In(layouts),
             };
         }
-        if (!includeNSFW) {
+        if (includeNSFW != true) {
             commonAndConditions.isNSFW = false;
         }
         if (query?.length > 0) {
@@ -105,10 +121,10 @@ export class ThemeService {
     ): Promise<ThemeEntity[]> {
         const findConditions: FindConditions<ThemeEntity> = {};
 
-        if (target) {
+        if (target != undefined) {
             findConditions.target = target;
         }
-        if (!includeNSFW) {
+        if (includeNSFW != true) {
             findConditions.isNSFW = false;
         }
 
@@ -118,7 +134,7 @@ export class ThemeService {
             .leftJoinAndSelect("theme.assets", "assets")
             .orderBy("RANDOM()");
 
-        if (limit) {
+        if (limit != undefined) {
             query.limit(limit);
         }
 

@@ -13,7 +13,7 @@ export class UserService {
     constructor(@InjectRepository(UserEntity) private repository: Repository<UserEntity>) {
     }
 
-    findOne({id}, relations: string[] = []): Promise<UserEntity> {
+    findOne({id}: { id: string }, relations: string[] = []): Promise<UserEntity> {
         return this.repository.findOne({
             where: {id},
             relations,
@@ -41,7 +41,7 @@ export class UserService {
         if (query?.length > 0) {
             findConditions.username = StringContains(query);
         }
-        if (isAdmin) {
+        if (isAdmin != undefined) {
             findConditions.isAdmin = isAdmin;
         }
 

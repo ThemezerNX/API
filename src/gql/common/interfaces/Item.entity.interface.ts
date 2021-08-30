@@ -1,4 +1,5 @@
 import {
+    AfterInsert,
     BaseEntity,
     Column,
     CreateDateColumn,
@@ -13,9 +14,9 @@ import {UserEntity} from "../../User/User.entity";
 
 export abstract class ItemEntityInterface extends BaseEntity {
 
-    @Column("int", {select: false})
+    @Column("int")
     @Generated("increment")
-    counter: number;
+    readonly counter: number;
 
     @PrimaryColumn("varchar", {
         generatedType: "STORED",
@@ -45,5 +46,12 @@ export abstract class ItemEntityInterface extends BaseEntity {
 
     @Column("int", {default: 0})
     dlCount: number;
+
+    @AfterInsert()
+    generateId() {
+        console.log(this)
+        this.id = this.counter.toString(16);
+        this.save().then();
+    }
 
 }

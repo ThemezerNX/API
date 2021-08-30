@@ -14,7 +14,7 @@ export class HBThemeService {
     constructor(@InjectRepository(HBThemeEntity) private repository: Repository<HBThemeEntity>) {
     }
 
-    findOne({id}, relations: string[] = []): Promise<HBThemeEntity> {
+    findOne({id}: { id: string }, relations: string[] = []): Promise<HBThemeEntity> {
         return this.repository.findOne({
             where: {id},
             relations,
@@ -44,15 +44,15 @@ export class HBThemeService {
         const commonAndConditions: FindConditions<HBThemeEntity> = {};
         const orConditions: FindConditions<HBThemeEntity>[] = [];
 
-        if (packId) {
+        if (packId != undefined) {
             commonAndConditions.packId = packId;
         }
-        if (creators) {
+        if (creators?.length > 0) {
             commonAndConditions.creator = {
                 id: In(creators),
             };
         }
-        if (!includeNSFW) {
+        if (includeNSFW != true) {
             commonAndConditions.isNSFW = false;
         }
         if (query?.length > 0) {
@@ -90,7 +90,7 @@ export class HBThemeService {
     ): Promise<HBThemeEntity[]> {
         const findConditions: FindConditions<HBThemeEntity> = {};
 
-        if (!includeNSFW) {
+        if (includeNSFW != true) {
             findConditions.isNSFW = false;
         }
 

@@ -3,15 +3,15 @@ import {TypeOrmModule} from "@nestjs/typeorm";
 import {ThemeResolver} from "./Theme.resolver";
 import {ThemeEntity} from "./Theme.entity";
 import {ThemeService} from "./Theme.service";
-import {UserService} from "../User/User.service";
-import {UserEntity} from "../User/User.entity";
+import {UserModule} from "../User/User.module";
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([ThemeEntity]),
-        TypeOrmModule.forFeature([UserEntity]),
+        UserModule,
     ],
-    providers: [ThemeResolver, ThemeService, UserService],
+    providers: [ThemeResolver, ThemeService],
+    exports: [ThemeService],
 })
 export class ThemeModule {
 }

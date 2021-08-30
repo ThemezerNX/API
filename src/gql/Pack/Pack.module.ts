@@ -1,23 +1,21 @@
 import {Module} from "@nestjs/common";
 import {TypeOrmModule} from "@nestjs/typeorm";
-import {UserEntity} from "../User/User.entity";
 import {PackService} from "./Pack.service";
 import {PackResolver} from "./Pack.resolver";
 import {PackEntity} from "./Pack.entity";
-import {ThemeService} from "../Theme/Theme.service";
-import {UserService} from "../User/User.service";
-import {ThemeEntity} from "../Theme/Theme.entity";
-import {HBThemeService} from "../HBTheme/HBTheme.service";
-import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
+import {UserModule} from "../User/User.module";
+import {ThemeModule} from "../Theme/Theme.module";
+import {HBThemeModule} from "../HBTheme/HBTheme.module";
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([PackEntity]),
-        TypeOrmModule.forFeature([UserEntity]),
-        TypeOrmModule.forFeature([ThemeEntity]),
-        TypeOrmModule.forFeature([HBThemeEntity]),
+        HBThemeModule,
+        ThemeModule,
+        UserModule,
     ],
-    providers: [PackResolver, PackService, UserService, ThemeService, HBThemeService],
+    providers: [PackResolver, PackService],
+    exports: [PackService],
 })
 export class PackModule {
 }

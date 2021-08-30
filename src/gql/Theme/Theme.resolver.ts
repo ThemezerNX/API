@@ -1,4 +1,4 @@
-import {Args, ArgsType, Field, Parent, Query, ResolveField, Resolver} from "@nestjs/graphql";
+import {Args, ArgsType, Field, Mutation, Parent, Query, ResolveField, Resolver} from "@nestjs/graphql";
 import {Target} from "../common/enums/Target";
 import {ThemeModel} from "./Theme.model";
 import {ThemeService} from "./Theme.service";
@@ -21,7 +21,7 @@ class ListArgs {
     creators?: string[];
     @Field(() => [String], {nullable: true})
     layouts?: string[];
-    @Field({nullable: true})
+    @Field({defaultValue: false})
     includeNSFW?: boolean = false;
 
 }
@@ -69,7 +69,7 @@ export class ThemeResolver {
     })
     randomThemes(
         @Args() limitArg?: LimitArg,
-        @Args("includeNSFW", {nullable: true}) includeNSFW: boolean = false,
+        @Args("includeNSFW", {defaultValue: false}) includeNSFW: boolean = false,
         @Args("target", {nullable: true}) target?: Target,
     ): Promise<ThemeModel[]> {
         return this.themeService.findRandom({

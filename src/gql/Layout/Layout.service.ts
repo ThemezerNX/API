@@ -15,7 +15,7 @@ export class LayoutService {
     constructor(@InjectRepository(LayoutEntity) private repository: Repository<LayoutEntity>) {
     }
 
-    findOne({id}, relations: string[] = []): Promise<LayoutEntity> {
+    findOne({id}: { id: string }, relations: string[] = []): Promise<LayoutEntity> {
         return this.repository.findOne({
             where: {id},
             relations,
@@ -43,10 +43,10 @@ export class LayoutService {
         const commonAndConditions: FindConditions<LayoutEntity> = {};
         const orConditions: FindConditions<LayoutEntity>[] = [];
 
-        if (target) {
+        if (target != undefined) {
             commonAndConditions.target = target;
         }
-        if (creators) {
+        if (creators?.length > 0) {
             commonAndConditions.creator = {
                 id: In(creators),
             };
@@ -80,7 +80,7 @@ export class LayoutService {
         const query = this.repository.createQueryBuilder()
             .orderBy("RANDOM()");
 
-        if (limit) {
+        if (limit != undefined) {
             query.limit(limit);
         }
 

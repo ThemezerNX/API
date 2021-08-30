@@ -9,6 +9,8 @@ import {ThemeTagEntity} from "./ThemeTag.entity";
         TypeOrmModule.forFeature([ThemeTagEntity]),
     ],
     providers: [ThemeTagResolver, ThemeTagService],
+    exports: [ThemeTagService],
+
 })
 export class ThemeTagModule {
 }

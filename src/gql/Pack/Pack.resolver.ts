@@ -82,7 +82,7 @@ export class PackResolver {
     })
     randomPacks(
         @Args() limitArg?: LimitArg,
-        @Args("includeNSFW", {nullable: true}) includeNSFW: boolean = false,
+        @Args("includeNSFW", {defaultValue: false}) includeNSFW: boolean = false,
     ): Promise<PackModel[]> {
         return this.packService.findRandom({
             ...limitArg,

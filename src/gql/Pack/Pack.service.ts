@@ -7,28 +7,26 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {SortOrder} from "../common/enums/SortOrder";
 import {StringContains} from "../common/findOperators/StringContains";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
-import {ThemeEntity} from "../Theme/Theme.entity";
 import {ItemSort} from "../common/args/ItemSortArgs";
+import {ThemeService} from "../Theme/Theme.service";
 
 @Injectable()
 export class PackService {
 
     constructor(
         @InjectRepository(PackEntity) private repository: Repository<PackEntity>,
-        @InjectRepository(ThemeEntity) private themeRepository: Repository<ThemeEntity>,
+        private themeService: ThemeService,
     ) {
     }
 
     async isNSFW(packId: string): Promise<boolean> {
-        return !!await this.themeRepository.findOne({
-            where: {
-                packId,
-                isNSFW: true,
-            },
+        return !!await this.themeService.findOne({
+            packId,
+            isNSFW: true,
         });
     }
 
-    findOne({id}, relations: string[] = []): Promise<PackEntity> {
+    findOne({id}: { id: string }, relations: string[] = []): Promise<PackEntity> {
         return this.repository.findOne({
             where: {id},
             relations,
@@ -57,12 +55,12 @@ export class PackService {
         const commonAndConditions: FindConditions<PackEntity> = {};
         const orConditions: FindConditions<PackEntity>[] = [];
 
-        if (creators) {
+        if (creators?.length > 0) {
             commonAndConditions.creator = {
                 id: In(creators),
             };
         }
-        if (!includeNSFW) {
+        if (includeNSFW != true) {
             commonAndConditions.themes = [{
                 isNSFW: false,
             }];
@@ -103,7 +101,7 @@ export class PackService {
     ): Promise<PackEntity[]> {
         const findConditions: FindConditions<PackEntity> = {};
 
-        if (!includeNSFW) {
+        if (includeNSFW != true) {
             findConditions.themes = [{
                 isNSFW: false,
             }];
@@ -113,7 +111,7 @@ export class PackService {
             .where(findConditions)
             .orderBy("RANDOM()");
 
-        if (limit) {
+        if (limit != undefined) {
             query.limit(limit);
         }
 

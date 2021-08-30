@@ -9,7 +9,7 @@ export class LimitArg {
         this.limit = limit;
     }
 
-    @Field(() => Int, {description: "The maximum amount of items to return"})
+    @Field(() => Int, {defaultValue: 20, description: "The maximum amount of items to return"})
     @Min(1)
     limit: number = 20;
 
@@ -23,17 +23,17 @@ export class PaginationArgs extends LimitArg {
         this.page = page;
     }
 
-    @Field(() => Int, {description: "Which page of items to return. Calculated using the limit argument."})
+    @Field(() => Int, {defaultValue: 1, description: "Which page of items to return"})
     @Min(1)
     page: number = 1;
 
 }
 
-const skip = (page, limit) => {
+const skip = (page: number, limit: number) => {
     return page - 1 >= 0 ? (page - 1) * limit : 0;
 };
 
-const take = (limit) => {
+const take = (limit: number) => {
     return limit > 0 ? limit : 20;
 };
 
@@ -60,5 +60,5 @@ export const executeAndPaginate = <Entity>(paginationArgs: PaginationArgs, query
             .getManyAndCount();
     }
 
-    return null;
+    return queryBuilder.getManyAndCount();
 };

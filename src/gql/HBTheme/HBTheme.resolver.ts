@@ -21,7 +21,7 @@ class ListArgs {
     creators?: string[];
     @Field(() => [String], {nullable: true})
     layouts?: string[];
-    @Field()
+    @Field({defaultValue: false})
     includeNSFW: boolean = false;
 
 }
@@ -69,8 +69,9 @@ export class HBThemeResolver {
     })
     randomHBThemes(
         @Args() limitArg?: LimitArg,
-        @Args("includeNSFW", {nullable: true}) includeNSFW: boolean = false,
+        @Args("includeNSFW", {defaultValue: false}) includeNSFW: boolean = false,
     ): Promise<HBThemeModel[]> {
+        console.log("includeNSFW:", includeNSFW)
         return this.hbThemeService.findRandom({
             ...limitArg,
             includeNSFW,
