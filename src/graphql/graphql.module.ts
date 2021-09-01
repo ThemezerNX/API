@@ -10,9 +10,9 @@ import {ThemeModule} from "./Theme/Theme.module";
 import {PackModule} from "./Pack/Pack.module";
 import {LayoutModule} from "./Layout/Layout.module";
 import {HBThemeModule} from "./HBTheme/HBTheme.module";
-import {EntityNamingStrategy} from "./common/EntityNamingStrategy";
 import {ThemeTagModule} from "./ThemeTag/ThemeTag.module";
 import {NXInstallerModule} from "./NXInstaller/NXInstaller.module";
+import {getConnectionOptions} from "typeorm";
 
 @Module({
     imports: [
@@ -65,20 +65,12 @@ import {NXInstallerModule} from "./NXInstaller/NXInstaller.module";
                 return response;
             },
         }),
-        TypeOrmModule.forRoot({
-            type: "postgres",
-            host: process.env.POSTGRES_HOST,
-            port: Number(process.env.POSTGRES_PORT),
-            database: process.env.POSTGRES_DB,
-            username: process.env.POSTGRES_USER,
-            password: process.env.POSTGRES_PASSWORD,
-            schema: process.env.POSTGRES_SCHEMA,
-            logging: process.env.NODE_ENV === "development",
-            synchronize: process.env.NODE_ENV === "development" && true,
-            entities: ["./dist/**/*.entity.js"],
-            autoLoadEntities: true,
-            keepConnectionAlive: true,
-            namingStrategy: new EntityNamingStrategy(),
+        TypeOrmModule.forRootAsync({
+            useFactory: async () =>
+                Object.assign(await getConnectionOptions(), {
+                    autoLoadEntities: true,
+                    keepConnectionAlive: true,
+                }),
         }),
         UserModule,
         ThemeModule,
