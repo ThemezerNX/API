@@ -71,7 +71,6 @@ export class HBThemeResolver {
         @Args() limitArg?: LimitArg,
         @Args("includeNSFW", {defaultValue: false}) includeNSFW: boolean = false,
     ): Promise<HBThemeModel[]> {
-        console.log("includeNSFW:", includeNSFW)
         return this.hbThemeService.findRandom({
             ...limitArg,
             includeNSFW,

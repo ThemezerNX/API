@@ -1,4 +1,14 @@
-import {BaseEntity, Column, CreateDateColumn, Entity, Generated, OneToOne, PrimaryColumn} from "typeorm";
+import {
+    BaseEntity,
+    BeforeInsert,
+    BeforeUpdate,
+    Column,
+    CreateDateColumn,
+    Entity,
+    Generated,
+    OneToOne,
+    PrimaryColumn,
+} from "typeorm";
 import {UserPreferencesEntity} from "./UserPreferences/UserPreferences.entity";
 import {UserConnectionsEntity} from "./UserConnections/UserConnections.entity";
 import {UserProfileEntity} from "./UserProfile/UserProfile.entity";
@@ -11,12 +21,7 @@ export class UserEntity extends BaseEntity {
     @Generated("increment")
     readonly counter: number;
 
-    @PrimaryColumn({
-        type: "varchar",
-        generatedType: "STORED",
-        update: false,
-        asExpression: "lpad(('x' || substr(md5(counter::VARCHAR), 1, 16))::BIT(63)::BIGINT::VARCHAR, 19, '0'))",
-    })
+    @PrimaryColumn({type: "varchar", length: 19})
     readonly id: string;
 
     @Column({unique: true, nullable: true})
@@ -24,6 +29,9 @@ export class UserEntity extends BaseEntity {
 
     @Column({length: 32})
     username: string;
+
+    @Column({nullable: true})
+    password?: string;
 
     @CreateDateColumn({type: "timestamp"})
     joinedTimestamp: Date;

@@ -20,6 +20,13 @@ export class UserService {
         });
     }
 
+    findOneByEmail(email: string, relations: string[] = []): Promise<UserEntity> {
+        return this.repository.findOne({
+            where: {email},
+            relations,
+        });
+    }
+
     findAll(
         {
             paginationArgs,
@@ -53,6 +60,14 @@ export class UserService {
                 .leftJoinAndSelect("user.connections", "connections")
                 .orderBy({[sort]: order}),
         );
+    }
+
+    create(email: string, password: string, username: string): UserEntity {
+        const newUser = UserEntity.create({email, password, username});
+        const savedUser = newUser.save()
+        console.log(newUser, savedUser)
+
+        return newUser;
     }
 
 }

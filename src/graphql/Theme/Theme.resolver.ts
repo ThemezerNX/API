@@ -8,6 +8,8 @@ import {UserModel} from "../User/User.model";
 import {ThemeEntity} from "./Theme.entity";
 import {ItemSortArgs} from "../common/args/ItemSortArgs";
 import {PaginatedThemes} from "./PaginatedThemes.model";
+import {FileUpload, GraphQLUpload} from "graphql-upload";
+import {UnknownError} from "../../errors/Unknown.error";
 
 
 @ArgsType()
@@ -77,6 +79,39 @@ export class ThemeResolver {
             includeNSFW,
             target,
         });
+    }
+
+    @Mutation(() => Boolean)
+    async uploadThemes(@Args("files", {type: () => [GraphQLUpload]}) files: Promise<FileUpload>[]): Promise<boolean> {
+        let zipCount = 0;
+        let nxthemeCount = 0;
+        const filteredFiles = (await Promise.all(files)).filter(({mimetype}) => {
+            if (mimetype == "application/zip") {
+                zipCount++;
+                return true;
+            } else if (mimetype == "application/nxtheme") {
+                nxthemeCount++;
+                return true;
+            } else return false;
+        });
+
+        if (zipCount == 1 && nxthemeCount == 0) {
+            // Process as zip
+
+        } else if (zipCount == 0 && nxthemeCount > 0) {
+            // Process as nxtheme
+        } else throw Error("HELLO");
+
+        return true;
+    }
+
+    @Mutation(() => Boolean)
+    createTheme(): boolean {
+        throw new UnknownError();
+        const theme = ThemeEntity.create();
+        theme.target = Target.ResidentMenu;
+        console.log(theme);
+        return true;
     }
 
 }

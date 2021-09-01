@@ -89,7 +89,7 @@ import {NXInstallerModule} from "./NXInstaller/NXInstaller.module";
         NXInstallerModule,
     ],
 })
-export class GqlModule implements NestModule {
+export class GraphqlModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
         consumer.apply(graphqlUploadExpress()).forRoutes("/");
     }
