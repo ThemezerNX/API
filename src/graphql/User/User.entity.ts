@@ -21,7 +21,18 @@ export class UserEntity extends BaseEntity {
     @Generated("increment")
     readonly counter: number;
 
-    @PrimaryColumn({type: "varchar", length: 19})
+    @PrimaryColumn({
+        type: "varchar",
+        length: 19,
+        default: () => `
+            lpad(
+                        ('x' || substr(md5((lastval())::VARCHAR), 1, 16))
+                            ::BIT(63)::BIGINT::VARCHAR,
+                        19,
+                        '0'
+                    )
+        `,
+    })
     readonly id: string;
 
     @Column({unique: true, nullable: true})
@@ -45,7 +56,7 @@ export class UserEntity extends BaseEntity {
     @Column({default: false})
     isBlocked: boolean;
 
-    @Column("varchar", {array: true})
+    @Column("varchar", {array: true, default: []})
     roles: string[] = [];
 
     @OneToOne(() => UserProfileEntity, profile => profile.user, {cascade: true, eager: true})

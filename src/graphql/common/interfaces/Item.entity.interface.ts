@@ -1,5 +1,4 @@
 import {
-    AfterInsert,
     BaseEntity,
     Column,
     CreateDateColumn,
@@ -18,11 +17,7 @@ export abstract class ItemEntityInterface extends BaseEntity {
     @Generated("increment")
     readonly counter: number;
 
-    @PrimaryColumn("varchar", {
-        generatedType: "STORED",
-        update: false,
-        asExpression: "to_hex(counter)",
-    })
+    @PrimaryColumn("varchar", {default: () => "to_hex(lastval())"})
     id: string;
 
     @JoinColumn({name: "creatorId"})
@@ -46,12 +41,5 @@ export abstract class ItemEntityInterface extends BaseEntity {
 
     @Column("int", {default: 0})
     dlCount: number;
-
-    @AfterInsert()
-    generateId() {
-        console.log(this)
-        this.id = this.counter.toString(16);
-        this.save().then();
-    }
 
 }
