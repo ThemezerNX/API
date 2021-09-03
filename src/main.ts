@@ -24,7 +24,7 @@ const locales = fs.readdirSync(path.resolve(__dirname, "../lang")).map((file) =>
 const i18n = new I18n();
 i18n.configure({
     locales,
-    directory: path.resolve(__dirname, "../lang"),
+    directory: path.resolve(__dirname, "lang"),
     defaultLocale: "en",
     retryInDefaultLocale: true,
     mustacheConfig: {
@@ -69,9 +69,9 @@ async function bootstrap() {
 
     const port = process.env.PORT;
     const host = process.env.HOST;
-    const path = "/";
+    const appPath = "/";
     await app.listen(4100, () => {
-        console.log(`🚀 Server ready at http://${host}:${port}${path}`);
+        console.log(`🚀 Server ready at http://${host}:${port}${appPath}`);
     });
 }
 
