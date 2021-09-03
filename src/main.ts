@@ -67,6 +67,13 @@ async function bootstrap() {
     app.use(i18n.init);
     configurePassport(app);
 
+    app.use((req, res, next) => {
+        req.getClientIp = () => {
+            return req?.headers["cf-connecting-ip"] || req?.headers["x-forwarded-for"] || req?.connection.remoteAddress;
+        };
+        next();
+    });
+
     const port = process.env.PORT;
     const host = process.env.HOST;
     const appPath = "/";

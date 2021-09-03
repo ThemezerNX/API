@@ -6,6 +6,7 @@ import {ThemeAssetsEntity} from "./ThemeAssets/ThemeAssets.entity";
 import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
 import {PackEntity} from "../Pack/Pack.entity";
 import {LayoutEntity} from "../Layout/Layout.entity";
+import {CDNMapper} from "../common/CDNMapper";
 
 
 @Entity()
@@ -44,5 +45,9 @@ export class ThemeEntity extends ItemEntityInterface {
 
     @OneToOne(() => ThemeAssetsEntity, themeAssets => themeAssets.theme, {cascade: true, eager: true})
     assets: ThemeAssetsEntity;
+
+    get downloadUrl(): string {
+        return CDNMapper.themes.download(this.id);
+    }
 
 }

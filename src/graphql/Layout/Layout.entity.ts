@@ -4,6 +4,7 @@ import {LayoutOptionEntity} from "./LayoutOption/LayoutOption.entity";
 import {UserEntity} from "../User/User.entity";
 import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
 import {LayoutPreviewsEntity} from "./LayoutPreviews/LayoutPreviews.entity";
+import {CDNMapper} from "../common/CDNMapper";
 
 
 @Entity()
@@ -37,5 +38,13 @@ export class LayoutEntity extends ItemEntityInterface {
 
     @OneToOne(() => LayoutPreviewsEntity, layoutPreviews => layoutPreviews.layout, {cascade: true, eager: true})
     previews: LayoutPreviewsEntity;
+
+    get downloadUrl(): string {
+        return CDNMapper.layouts.download(this.id);
+    }
+
+    get downloadCommonUrl(): string {
+        return CDNMapper.layouts.downloadCommon(this.id);
+    }
 
 }

@@ -6,31 +6,31 @@ import {CDNMapper} from "../../common/CDNMapper";
 @Entity()
 export class HBThemePreviewsEntity extends PreviewsEntityInterface {
 
-    @OneToOne(() => HBThemeEntity, hbThemeEntity => hbThemeEntity.previews,{onDelete: "CASCADE"})
-    @JoinColumn({name: "hbThemeId"})
-    hbTheme: HBThemeEntity;
+    @OneToOne(() => HBThemeEntity, hbthemeEntity => hbthemeEntity.previews,{onDelete: "CASCADE"})
+    @JoinColumn({name: "hbthemeId"})
+    hbtheme: HBThemeEntity;
 
     @PrimaryColumn({update: false})
-    hbThemeId: string;
+    hbthemeId: string;
 
     get image720Url() {
-        return !!this.image720File ? CDNMapper.hbThemes.previews(this.hbThemeId, "720", "webp", this.cacheID) : null;
+        return !!this.image720File ? CDNMapper.hbthemes.previews(this.hbthemeId, "720", "webp", this.cacheID) : null;
     }
 
     get image360Url() {
-        return !!this.image360File ? CDNMapper.hbThemes.previews(this.hbThemeId, "360", "webp", this.cacheID) : null;
+        return !!this.image360File ? CDNMapper.hbthemes.previews(this.hbthemeId, "360", "webp", this.cacheID) : null;
     }
 
     get image240Url() {
-        return !!this.image240File ? CDNMapper.hbThemes.previews(this.hbThemeId, "240", "webp", this.cacheID) : null;
+        return !!this.image240File ? CDNMapper.hbthemes.previews(this.hbthemeId, "240", "webp", this.cacheID) : null;
     }
 
     get image180Url() {
-        return !!this.image180File ? CDNMapper.hbThemes.previews(this.hbThemeId, "180", "webp", this.cacheID) : null;
+        return !!this.image180File ? CDNMapper.hbthemes.previews(this.hbthemeId, "180", "webp", this.cacheID) : null;
     }
 
     get imagePlaceholderUrl() {
-        return !!this.imagePlaceholderFile ? CDNMapper.hbThemes.previews(this.hbThemeId,
+        return !!this.imagePlaceholderFile ? CDNMapper.hbthemes.previews(this.hbthemeId,
             "placeholder",
             "webp",
             this.cacheID) : null;

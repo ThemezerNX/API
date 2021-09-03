@@ -30,12 +30,12 @@ export class NXInstallerResolver {
     ) {
     }
 
-    private static mapTheme({id, name, target, previews}: ThemeEntity) {
+    private static mapTheme({id, name, target, previews, downloadUrl}: ThemeEntity) {
         const nxtheme = new NXInstallerTheme();
         nxtheme.id = id;
         nxtheme.name = name;
         nxtheme.target = target;
-        nxtheme.url = "https://google.com/image"; // TODO once every item has a downloadUrl
+        nxtheme.url = downloadUrl;
         nxtheme.preview = previews.image720Url;
         nxtheme.thumbnail = previews.image240Url;
 

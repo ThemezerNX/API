@@ -3,6 +3,7 @@ import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
 import {PackPreviewsEntity} from "./PackPreviews/PackPreviews.entity";
 import {ThemeEntity} from "../Theme/Theme.entity";
 import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
+import {CDNMapper} from "../common/CDNMapper";
 
 @Entity()
 export class PackEntity extends ItemEntityInterface {
@@ -17,11 +18,15 @@ export class PackEntity extends ItemEntityInterface {
     @OneToMany(() => ThemeEntity, theme => theme.pack, {onDelete: "CASCADE"})
     themes: ThemeEntity[];
 
-    @OneToMany(() => HBThemeEntity, hbTheme => hbTheme.pack, {onDelete: "CASCADE"})
-    hbThemes: HBThemeEntity[];
+    @OneToMany(() => HBThemeEntity, hbtheme => hbtheme.pack, {onDelete: "CASCADE"})
+    hbthemes: HBThemeEntity[];
 
     get entries() {
-        return [...(this.themes || []), ...(this.hbThemes || [])];
+        return [...(this.themes || []), ...(this.hbthemes || [])];
+    }
+
+    get downloadUrl(): string {
+        return CDNMapper.packs.download(this.id);
     }
 
 }

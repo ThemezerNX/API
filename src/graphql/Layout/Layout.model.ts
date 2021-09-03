@@ -1,5 +1,5 @@
 import {Field, ObjectType} from "@nestjs/graphql";
-import {HexColorCodeResolver, JSONResolver, UUIDResolver} from "graphql-scalars";
+import {HexColorCodeResolver, JSONResolver, URLResolver, UUIDResolver} from "graphql-scalars";
 import {Target} from "../common/enums/Target";
 import {ItemModelInterface} from "../common/interfaces/Item.model.interface";
 import {UserModel} from "../User/User.model";
@@ -34,5 +34,7 @@ export class LayoutModel extends ItemModelInterface {
     @Field(() => LayoutPreviewsModel)
     previews: LayoutPreviewsModel;
 
+    @Field(() => URLResolver)
+    downloadCommonUrl: string;
 
 }

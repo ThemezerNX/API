@@ -7,18 +7,18 @@ export class HBThemeDownloadEntity extends ItemDownloadEntityInterface {
 
     @JoinColumn()
     @ManyToOne(() => HBThemeEntity, {primary: true, onDelete: "CASCADE"})
-    hbTheme: HBThemeEntity;
+    hbtheme: HBThemeEntity;
 
     @AfterInsert()
     async addCount() {
-        this.hbTheme.dlCount++;
-        await getConnection().getRepository(HBThemeEntity).save(this.hbTheme);
+        this.hbtheme.dlCount++;
+        await getConnection().getRepository(HBThemeEntity).save(this.hbtheme);
     }
 
     @AfterRemove()
     async removeCount() {
-        this.hbTheme.dlCount--;
-        await getConnection().getRepository(HBThemeEntity).save(this.hbTheme);
+        this.hbtheme.dlCount--;
+        await getConnection().getRepository(HBThemeEntity).save(this.hbtheme);
     }
 
 }

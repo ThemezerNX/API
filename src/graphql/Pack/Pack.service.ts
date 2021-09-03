@@ -18,7 +18,7 @@ export class PackService {
     constructor(
         @InjectRepository(PackEntity) private repository: Repository<PackEntity>,
         private themeService: ThemeService,
-        private hbThemeService: HBThemeService,
+        private hbthemeService: HBThemeService,
     ) {
     }
 
@@ -28,7 +28,7 @@ export class PackService {
                 packId,
                 isNSFW: true,
             }),
-            await this.hbThemeService.findOne({
+            await this.hbthemeService.findOne({
                 packId,
                 isNSFW: true,
             }),
@@ -96,7 +96,7 @@ export class PackService {
 
         queryBuilder
             .leftJoinAndSelect("pack.themes", "themes")
-            .leftJoinAndSelect("pack.hbThemes", "hbthemes")
+            .leftJoinAndSelect("pack.hbthemes", "hbthemes")
             .leftJoinAndSelect("pack.previews", "previews")
             .orderBy({["pack." + sort]: order});
 

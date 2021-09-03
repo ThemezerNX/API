@@ -29,33 +29,33 @@ class ListArgs {
 @Resolver(HBThemeModel)
 export class HBThemeResolver {
 
-    constructor(private hbThemeService: HBThemeService, private userService: UserService) {
+    constructor(private hbthemeService: HBThemeService, private userService: UserService) {
     }
 
     @ResolveField(() => UserModel)
-    creator(@Parent() hbTheme: HBThemeEntity): Promise<UserModel> {
-        const id = hbTheme.creatorId;
+    creator(@Parent() hbtheme: HBThemeEntity): Promise<UserModel> {
+        const id = hbtheme.creatorId;
         return this.userService.findOne({id});
     }
 
     @Query(() => HBThemeModel, {
         description: `Find a single hbtheme`,
     })
-    hbTheme(
+    hbtheme(
         @Args("id") id: string,
     ): Promise<HBThemeModel> {
-        return this.hbThemeService.findOne({id});
+        return this.hbthemeService.findOne({id});
     }
 
     @Query(() => PaginatedHBThemes, {
         description: `Find multiple hbthemes`,
     })
-    async hbThemes(
+    async hbthemes(
         @Args() paginationArgs: PaginationArgs,
         @Args() itemSortArgs: ItemSortArgs,
         @Args() listArgs?: ListArgs,
     ): Promise<PaginatedHBThemes> {
-        const result = await this.hbThemeService.findAll({
+        const result = await this.hbthemeService.findAll({
             paginationArgs,
             ...itemSortArgs,
             ...listArgs,
@@ -71,7 +71,7 @@ export class HBThemeResolver {
         @Args() limitArg?: LimitArg,
         @Args("includeNSFW", {defaultValue: false}) includeNSFW: boolean = false,
     ): Promise<HBThemeModel[]> {
-        return this.hbThemeService.findRandom({
+        return this.hbthemeService.findRandom({
             ...limitArg,
             includeNSFW,
         });

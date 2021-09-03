@@ -1,5 +1,9 @@
-const cacheUrl = (path: string, cacheID: number) => {
-    return process.env.CDN_ENDPOINT + "/" + path + "?" + cacheID;
+const url = (path: string) => {
+    return process.env.CDN_ENDPOINT + "/" + path;
+};
+
+const cacheUrl = (path: string, cacheID: number, alreadyHasQueryParameters: boolean = false) => {
+    return url(path + (alreadyHasQueryParameters ? "&" : "?") + "cache=" + cacheID);
 };
 
 const itemRoute = (itemType: string, itemId: string, itemProperty: string, fileName: string, extension: string, cacheID: number) => {
@@ -13,7 +17,21 @@ const itemRoutes = {
     assets: (itemType: string, itemId: string, fileName: string, extension: string, cacheID: number) => {
         return itemRoute(itemType, itemId, "assets", fileName, extension, cacheID);
     },
+    download: (itemType: string, itemId: string, asset?: string) => {
+        return url(`${itemType}/${itemId}/download` + (asset ? `/${asset}` : ""));
+    },
 };
+
+// /themes/id/download (uncached, increment download count)
+//                     ^-- create:
+//                                 - create random token when querying, save in db, check when visited: increment (bypass)
+//                                 - create encrypted time token, if timedifference < 30s when visited: increment (bypass)
+//                                 - create encrypted time + IP token, if timedifference <30s when visited: increment (bypass)
+//                                 - create encrypted time based on hour + IP + item id + type + token, if timedifference <2h (must also be valid in the next hour) when visited -> if token not found in db> increment dl count and insert download into table
+//                                 - require an express session token, also validate it. (curl issues, not stateless)
+//                                 - don't use any token at all, when visited: check db for entry with time, ip, id, type. If time < 2h, insert new row and increment count.
+// -> 301
+// /themes/id/download/nxtheme.bin?cache=12 (cached)
 
 export const CDNMapper = {
     users: {
@@ -24,12 +42,15 @@ export const CDNMapper = {
             return cacheUrl(`users/${userId}/avatar.${extension}`, cacheID);
         },
     },
-    hbThemes: {
-        previews: (hbThemeId: string, resolution: string, extension: string, cacheID: number) => {
-            return itemRoutes.previews("hbthemes", hbThemeId, resolution, extension, cacheID);
+    hbthemes: {
+        previews: (hbthemeId: string, resolution: string, extension: string, cacheID: number) => {
+            return itemRoutes.previews("hbthemes", hbthemeId, resolution, extension, cacheID);
         },
-        assets: (hbThemeId: string, asset: string, extension: string, cacheID: number) => {
-            return itemRoutes.assets("hbthemes", hbThemeId, asset, extension, cacheID);
+        assets: (hbthemeId: string, asset: string, extension: string, cacheID: number) => {
+            return itemRoutes.assets("hbthemes", hbthemeId, asset, extension, cacheID);
+        },
+        download: (hbthemeId: string) => {
+            return itemRoutes.download("hbthemes", hbthemeId);
         },
     },
     themes: {
@@ -38,6 +59,9 @@ export const CDNMapper = {
         },
         assets: (themeId: string, asset: string, extension: string, cacheID: number) => {
             return itemRoutes.assets("themes", themeId, asset, extension, cacheID);
+        },
+        download: (themeId: string) => {
+            return itemRoutes.download("themes", themeId);
         },
     },
     layouts: {
@@ -49,10 +73,19 @@ export const CDNMapper = {
                 return itemRoutes.previews(`layouts/${layoutId}/options`, optionUuid, resolution, extension, cacheID);
             },
         },
+        download: (layoutId: string) => {
+            return itemRoutes.download("layouts", layoutId, "layout");
+        },
+        downloadCommon: (layoutId: string) => {
+            return itemRoutes.download("layouts", layoutId, "common");
+        },
     },
     packs: {
         previews: (packId: string, resolution: string, extension: string, cacheID: number) => {
             return itemRoutes.previews("packs", packId, resolution, extension, cacheID);
+        },
+        download: (packId: string) => {
+            return itemRoutes.download("packs", packId);
         },
     },
 };

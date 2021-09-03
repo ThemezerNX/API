@@ -4,12 +4,13 @@ import {HBThemePreviewsEntity} from "./HBThemePreviews/HBThemePreviews.entity";
 import {HBThemeAssetsEntity} from "./HBThemeAssets/HBThemeAssets.entity";
 import {PackEntity} from "../Pack/Pack.entity";
 import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
+import {CDNMapper} from "../common/CDNMapper";
 
 
 @Entity()
 export class HBThemeEntity extends ItemEntityInterface {
 
-    @ManyToOne(() => PackEntity, pack => pack.hbThemes, {onDelete: "CASCADE"})
+    @ManyToOne(() => PackEntity, pack => pack.hbthemes, {onDelete: "CASCADE"})
     @JoinColumn({name: "packId"})
     pack?: PackEntity;
 
@@ -23,10 +24,14 @@ export class HBThemeEntity extends ItemEntityInterface {
     @JoinTable()
     tags: ThemeTagEntity[];
 
-    @OneToOne(() => HBThemePreviewsEntity, hbThemePreviews => hbThemePreviews.hbTheme, {cascade: true, eager: true})
+    @OneToOne(() => HBThemePreviewsEntity, hbthemePreviews => hbthemePreviews.hbtheme, {cascade: true, eager: true})
     previews: HBThemePreviewsEntity;
 
-    @OneToOne(() => HBThemeAssetsEntity, hbThemeAssets => hbThemeAssets.hbTheme, {cascade: true, eager: true})
+    @OneToOne(() => HBThemeAssetsEntity, hbthemeAssets => hbthemeAssets.hbtheme, {cascade: true, eager: true})
     assets: HBThemeAssetsEntity;
+
+    get downloadUrl(): string {
+        return CDNMapper.hbthemes.download(this.id);
+    }
 
 }

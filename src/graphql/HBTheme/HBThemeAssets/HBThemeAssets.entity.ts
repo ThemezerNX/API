@@ -6,12 +6,12 @@ import {CDNMapper} from "../../common/CDNMapper";
 @Entity()
 export class HBThemeAssetsEntity extends CachableEntityInterface {
 
-    @OneToOne(() => HBThemeEntity, hbThemeEntity => hbThemeEntity.assets, {onDelete: "CASCADE"})
-    @JoinColumn({name: "hbThemeId"})
-    hbTheme: HBThemeEntity;
+    @OneToOne(() => HBThemeEntity, hbthemeEntity => hbthemeEntity.assets, {onDelete: "CASCADE"})
+    @JoinColumn({name: "hbthemeId"})
+    hbtheme: HBThemeEntity;
 
     @PrimaryColumn({update: false})
-    hbThemeId: string;
+    hbthemeId: string;
 
     @Column("bytea")
     batteryIconFile: any;
@@ -41,91 +41,91 @@ export class HBThemeAssetsEntity extends CachableEntityInterface {
     backgroundImageFile: any;
 
     get batteryIconUrl(): string {
-        return !!this.batteryIconFile ? CDNMapper.hbThemes.assets(this.hbThemeId,
+        return !!this.batteryIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "batteryIcon",
             "png",
             this.cacheID) : null;
     }
 
     get chargingIconUrl(): string {
-        return !!this.chargingIconFile ? CDNMapper.hbThemes.assets(this.hbThemeId,
+        return !!this.chargingIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "chargingIcon",
             "png",
             this.cacheID) : null;
     }
 
     get folderIconUrl(): string {
-        return !!this.folderIconFile ? CDNMapper.hbThemes.assets(this.hbThemeId,
+        return !!this.folderIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "folderIcon",
             "png",
             this.cacheID) : null;
     }
 
     get invalidIconUrl(): string {
-        return !!this.invalidIconFile ? CDNMapper.hbThemes.assets(this.hbThemeId,
+        return !!this.invalidIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "invalidIcon",
             "png",
             this.cacheID) : null;
     }
 
     get themeIconDarkUrl(): string {
-        return !!this.themeIconDarkFile ? CDNMapper.hbThemes.assets(this.hbThemeId,
+        return !!this.themeIconDarkFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "themeIconDark",
             "png",
             this.cacheID) : null;
     }
 
     get themeIconLightUrl(): string {
-        return !!this.themeIconLightFile ? CDNMapper.hbThemes.assets(this.hbThemeId,
+        return !!this.themeIconLightFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "themeIconLight",
             "png",
             this.cacheID) : null;
     }
 
     get airplaneIconUrl(): string {
-        return !!this.airplaneIconFile ? CDNMapper.hbThemes.assets(this.hbThemeId,
+        return !!this.airplaneIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "airplaneIcon",
             "png",
             this.cacheID) : null;
     }
 
     get wifiNoneIconUrl(): string {
-        return !!this.wifiNoneIconFile ? CDNMapper.hbThemes.assets(this.hbThemeId,
+        return !!this.wifiNoneIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "wifiNoneIcon",
             "png",
             this.cacheID) : null;
     }
 
     get wifi1IconUrl(): string {
-        return !!this.wifi1IconFile ? CDNMapper.hbThemes.assets(this.hbThemeId,
+        return !!this.wifi1IconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "wifi1Icon",
             "png",
             this.cacheID) : null;
     }
 
     get wifi2IconUrl(): string {
-        return !!this.wifi2IconFile ? CDNMapper.hbThemes.assets(this.hbThemeId,
+        return !!this.wifi2IconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "wifi2Icon",
             "png",
             this.cacheID) : null;
     }
 
     get wifi3IconUrl(): string {
-        return !!this.wifi3IconFile ? CDNMapper.hbThemes.assets(this.hbThemeId,
+        return !!this.wifi3IconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "wifi3Icon",
             "png",
             this.cacheID) : null;
     }
 
     get ethIconUrl(): string {
-        return !!this.ethIconFile ? CDNMapper.hbThemes.assets(this.hbThemeId,
+        return !!this.ethIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "ethIcon",
             "png",
             this.cacheID) : null;
     }
 
     get backgroundImageUrl(): string {
-        return !!this.backgroundImageFile ? CDNMapper.hbThemes.assets(this.hbThemeId,
+        return !!this.backgroundImageFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "backgroundImage",
             "png",
             this.cacheID) : null;

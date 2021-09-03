@@ -1,5 +1,6 @@
 import {Field, ID, Int, InterfaceType} from "@nestjs/graphql";
 import {UserModel} from "../../User/User.model";
+import {URLResolver} from "graphql-scalars";
 
 
 @InterfaceType("ItemInterface")
@@ -25,5 +26,8 @@ export abstract class ItemModelInterface {
 
     @Field(() => Int)
     dlCount: number;
+
+    @Field(() => URLResolver)
+    downloadUrl: string;
 
 }
