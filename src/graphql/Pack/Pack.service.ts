@@ -1,14 +1,16 @@
 import {PackEntity} from "./Pack.entity";
 import {FindConditions, In, Repository} from "typeorm";
 import {Injectable} from "@nestjs/common";
-import {combineConditions} from "../common/CombineConditions";
 import {Target} from "../common/enums/Target";
 import {InjectRepository} from "@nestjs/typeorm";
 import {SortOrder} from "../common/enums/SortOrder";
-import {StringContains} from "../common/findOperators/StringContains";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {ItemSort} from "../common/args/ItemSortArgs";
 import {ThemeService} from "../Theme/Theme.service";
+import {toTsQuery} from "../common/TsQueryCreator";
+import {HBThemeService} from "../HBTheme/HBTheme.service";
+import {ThemeEntity} from "../Theme/Theme.entity";
+import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
 
 @Injectable()
 export class PackService {
@@ -16,14 +18,23 @@ export class PackService {
     constructor(
         @InjectRepository(PackEntity) private repository: Repository<PackEntity>,
         private themeService: ThemeService,
+        private hbThemeService: HBThemeService,
     ) {
     }
 
     async isNSFW(packId: string): Promise<boolean> {
-        return !!await this.themeService.findOne({
-            packId,
-            isNSFW: true,
-        });
+        const results = await Promise.all([
+            await this.themeService.findOne({
+                packId,
+                isNSFW: true,
+            }),
+            await this.hbThemeService.findOne({
+                packId,
+                isNSFW: true,
+            }),
+        ]);
+
+        return results.some((r) => r);
     }
 
     findOne({id}: { id: string }, relations: string[] = []): Promise<PackEntity> {
@@ -52,41 +63,44 @@ export class PackService {
                 includeNSFW?: boolean
             },
     ): Promise<[PackEntity[], number]> {
-        const commonAndConditions: FindConditions<PackEntity> = {};
-        const orConditions: FindConditions<PackEntity>[] = [];
+        const findConditions: FindConditions<PackEntity> = {};
 
         if (creators?.length > 0) {
-            commonAndConditions.creator = {
+            findConditions.creator = {
                 id: In(creators),
             };
         }
+
+        const queryBuilder = this.repository.createQueryBuilder("pack")
+            .where(findConditions);
+
         if (includeNSFW != true) {
-            commonAndConditions.themes = [{
-                isNSFW: false,
-            }];
-        }
-        if (query?.length > 0) {
-            orConditions.push({
-                name: StringContains(query),
+            queryBuilder.andWhere(qb => {
+                const sub = qb.subQuery()
+                    .select("theme2.isNSFW OR hbtheme2.isNSFW")
+                    .from(PackEntity, "pack2")
+                    .where("pack2.id = pack.id")
+                    .leftJoin(ThemeEntity, "theme2", "pack2.id = theme2.packId")
+                    .leftJoin(HBThemeEntity, "hbtheme2", "pack2.id = hbtheme2.packId");
+                return "TRUE NOT IN" + sub.getQuery();
             });
-            orConditions.push({
-                description: StringContains(query),
-            });
-            // orConditions.push({
-            //     themes: {
-            //         tags: [{
-            //             name: StringContains(query),
-            //         }] as FindConditions<ThemeTagEntity>[],
-            //     } as FindConditions<ThemeEntity>,
-            // });
         }
 
-        return executeAndPaginate(paginationArgs,
-            this.repository.createQueryBuilder("pack")
-                .where(combineConditions(commonAndConditions, orConditions))
-                .leftJoinAndSelect("pack.previews", "previews")
-                .orderBy({[sort]: order}),
-        );
+        if (query?.length > 0) {
+            queryBuilder.andWhere(`to_tsquery(:query) @@ (
+                setweight(to_tsvector('pg_catalog.english', coalesce(pack.name, '')), 'A') ||
+                setweight(to_tsvector('pg_catalog.english', coalesce(pack.description, '')), 'C') ||
+                to_tsvector('pg_catalog.english', coalesce(CASE WHEN themes."isNSFW" OR hbthemes."isNSFW" THEN 'NSFW' END, ''))
+            )`, {query: toTsQuery(query)});
+        }
+
+        queryBuilder
+            .leftJoinAndSelect("pack.themes", "themes")
+            .leftJoinAndSelect("pack.hbThemes", "hbthemes")
+            .leftJoinAndSelect("pack.previews", "previews")
+            .orderBy({["pack." + sort]: order});
+
+        return executeAndPaginate(paginationArgs, queryBuilder);
     }
 
     findRandom(

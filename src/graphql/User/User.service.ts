@@ -60,7 +60,7 @@ export class UserService {
         }
 
         return executeAndPaginate(paginationArgs,
-            this.repository.createQueryBuilder("user")
+            this.userRepository.createQueryBuilder("user")
                 .where(findConditions)
                 .leftJoinAndSelect("user.profile", "profile")
                 .leftJoinAndSelect("user.preferences", "preferences")

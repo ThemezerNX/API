@@ -10,7 +10,7 @@ export class ThemeAssetsEntity extends CachableEntityInterface {
     @JoinColumn({name: "themeId"})
     theme: ThemeEntity;
 
-    @PrimaryColumn()
+    @PrimaryColumn({update: false})
     themeId: string;
 
     @Column("jsonb", {nullable: true})

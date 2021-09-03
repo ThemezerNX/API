@@ -9,7 +9,7 @@ import {LayoutPreviewsEntity} from "./LayoutPreviews/LayoutPreviews.entity";
 @Entity()
 export class LayoutEntity extends ItemEntityInterface {
 
-    @Column("uuid", {unique: true})
+    @Column({type: "uuid", unique: true, update: false})
     uuid: string;
 
     @ManyToOne(() => UserEntity, {onDelete: "SET NULL"})
@@ -19,6 +19,7 @@ export class LayoutEntity extends ItemEntityInterface {
     @Column({
         type: "enum",
         enum: Target,
+        update: false,
     })
     target: Target;
 

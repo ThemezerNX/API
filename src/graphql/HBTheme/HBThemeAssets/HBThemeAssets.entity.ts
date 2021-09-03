@@ -10,7 +10,7 @@ export class HBThemeAssetsEntity extends CachableEntityInterface {
     @JoinColumn({name: "hbThemeId"})
     hbTheme: HBThemeEntity;
 
-    @PrimaryColumn()
+    @PrimaryColumn({update: false})
     hbThemeId: string;
 
     @Column("bytea")

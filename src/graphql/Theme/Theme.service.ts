@@ -5,9 +5,8 @@ import {ThemeEntity} from "./Theme.entity";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {Target} from "../common/enums/Target";
 import {SortOrder} from "../common/enums/SortOrder";
-import {combineConditions} from "../common/CombineConditions";
-import {StringContains} from "../common/findOperators/StringContains";
 import {ItemSort} from "../common/args/ItemSortArgs";
+import {toTsQuery} from "../common/TsQueryCreator";
 
 @Injectable()
 export class ThemeService {
@@ -26,7 +25,7 @@ export class ThemeService {
             findConditions.id = packId;
         }
         if (isNSFW != undefined) {
-            findConditions.isNSFW = false;
+            findConditions.isNSFW = isNSFW;
         }
         if (packId != undefined) {
             findConditions.packId = packId;
@@ -62,49 +61,45 @@ export class ThemeService {
                 includeNSFW?: Boolean
             },
     ): Promise<[ThemeEntity[], number]> {
-        const commonAndConditions: FindConditions<ThemeEntity> = {};
-        const orConditions: FindConditions<ThemeEntity>[] = [];
+        const findConditions: FindConditions<ThemeEntity> = {};
 
         if (packId != undefined) {
-            commonAndConditions.packId = packId;
+            findConditions.packId = packId;
         }
         if (target != undefined) {
-            commonAndConditions.target = target;
+            findConditions.target = target;
         }
         if (creators?.length > 0) {
-            commonAndConditions.creator = {
+            findConditions.creator = {
                 id: In(creators),
             };
         }
         if (layouts?.length > 0) {
-            commonAndConditions.layout = {
+            findConditions.layout = {
                 id: In(layouts),
             };
         }
         if (includeNSFW != true) {
-            commonAndConditions.isNSFW = false;
-        }
-        if (query?.length > 0) {
-            orConditions.push({
-                name: StringContains(query),
-            });
-            orConditions.push({
-                description: StringContains(query),
-            });
-            // orConditions.push({
-            //     tags: [{
-            //         name: StringContains(query),
-            //     }] as FindConditions<ThemeTagEntity>[],
-            // });
+            findConditions.isNSFW = false;
         }
 
-        return executeAndPaginate(paginationArgs,
-            this.repository.createQueryBuilder("theme")
-                .where(combineConditions(commonAndConditions, orConditions))
-                .leftJoinAndSelect("theme.previews", "previews")
-                .leftJoinAndSelect("theme.assets", "assets")
-                .orderBy({[sort]: order}),
-        );
+        const queryBuilder = this.repository.createQueryBuilder("theme")
+            .where(findConditions)
+            .leftJoinAndSelect("theme.previews", "previews")
+            .leftJoinAndSelect("theme.assets", "assets")
+            .leftJoinAndSelect("theme.tags", "tags")
+            .orderBy({["theme." + sort]: order});
+
+        if (query?.length > 0) {
+            queryBuilder.andWhere(`to_tsquery(:query) @@ (
+                setweight(to_tsvector('pg_catalog.english', coalesce(theme.name, '')), 'A') ||
+                setweight(to_tsvector('pg_catalog.english', coalesce(theme.description, '')), 'C') ||
+                to_tsvector('pg_catalog.english', coalesce(CASE WHEN theme."isNSFW" THEN 'NSFW' END, '')) ||
+                to_tsvector(tags.name)
+            )`, {query: toTsQuery(query)});
+        }
+
+        return executeAndPaginate(paginationArgs, queryBuilder);
     }
 
     findRandom(

@@ -10,7 +10,7 @@ export class ThemePreviewsEntity extends PreviewsEntityInterface {
     @JoinColumn({name: "themeId"})
     theme: ThemeEntity;
 
-    @PrimaryColumn()
+    @PrimaryColumn({update: false})
     themeId: string;
 
     get image720Url() {

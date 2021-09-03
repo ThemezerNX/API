@@ -1,13 +1,12 @@
 import {LayoutEntity} from "./Layout.entity";
 import {FindConditions, In, Repository} from "typeorm";
 import {Injectable} from "@nestjs/common";
-import {combineConditions} from "../common/CombineConditions";
 import {Target} from "../common/enums/Target";
 import {InjectRepository} from "@nestjs/typeorm";
 import {SortOrder} from "../common/enums/SortOrder";
-import {StringContains} from "../common/findOperators/StringContains";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {ItemSort} from "../common/args/ItemSortArgs";
+import {toTsQuery} from "../common/TsQueryCreator";
 
 @Injectable()
 export class LayoutService {
@@ -40,33 +39,31 @@ export class LayoutService {
                 creators?: string[],
             },
     ): Promise<[LayoutEntity[], number]> {
-        const commonAndConditions: FindConditions<LayoutEntity> = {};
-        const orConditions: FindConditions<LayoutEntity>[] = [];
+        const findConditions: FindConditions<LayoutEntity> = {};
 
         if (target != undefined) {
-            commonAndConditions.target = target;
+            findConditions.target = target;
         }
         if (creators?.length > 0) {
-            commonAndConditions.creator = {
+            findConditions.creator = {
                 id: In(creators),
             };
         }
+
+        const queryBuilder = this.repository.createQueryBuilder("layout")
+            .where(findConditions)
+            .leftJoinAndSelect("layout.previews", "previews")
+            .leftJoinAndSelect("layout.assets", "assets")
+            .orderBy({["layout." + sort]: order});
+
         if (query?.length > 0) {
-            orConditions.push({
-                name: StringContains(query),
-            });
-            orConditions.push({
-                description: StringContains(query),
-            });
+            queryBuilder.andWhere(`to_tsquery(:query) @@ (
+                setweight(to_tsvector('pg_catalog.english', coalesce(layout.name, '')), 'A') ||
+                setweight(to_tsvector('pg_catalog.english', coalesce(layout.description, '')), 'C')
+            )`, {query: toTsQuery(query)});
         }
 
-        return executeAndPaginate(paginationArgs,
-            this.repository.createQueryBuilder("layout")
-                .where(combineConditions(commonAndConditions, orConditions))
-                .leftJoinAndSelect("layout.previews", "previews")
-                .leftJoinAndSelect("layout.assets", "assets")
-                .orderBy({[sort]: order}),
-        );
+        return executeAndPaginate(paginationArgs, queryBuilder);
     }
 
     findRandom(

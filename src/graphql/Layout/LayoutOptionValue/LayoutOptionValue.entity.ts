@@ -10,7 +10,7 @@ export class LayoutOptionValueEntity extends BaseEntity {
     @JoinColumn()
     layoutOption: LayoutOptionEntity;
 
-    @PrimaryColumn("uuid")
+    @PrimaryColumn("uuid", {update: false})
     uuid: string;
 
     @Column("jsonb")

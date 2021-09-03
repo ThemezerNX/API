@@ -4,10 +4,8 @@ import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
 import {UserService} from "../User/User.service";
 import {UserModel} from "../User/User.model";
 import {ItemSortArgs} from "../common/args/ItemSortArgs";
-import {PackEntriesUnion, PackModel} from "./Pack.model";
+import {PackModel} from "./Pack.model";
 import {PackEntity} from "./Pack.entity";
-import {ThemeService} from "../Theme/Theme.service";
-import {HBThemeService} from "../HBTheme/HBTheme.service";
 import {PaginatedPacks} from "./PaginatedPacks.model";
 
 
@@ -18,6 +16,8 @@ class ListArgs {
     query?: string;
     @Field(() => [String], {nullable: true})
     creators?: string[];
+    @Field({defaultValue: false, description: "Whether to include NSFW results. If false, a pack will be excluded if any of the themes is NSFW."})
+    includeNSFW?: boolean = false;
 
 }
 
@@ -27,8 +27,6 @@ export class PackResolver {
     constructor(
         private packService: PackService,
         private userService: UserService,
-        private themeService: ThemeService,
-        private hbThemeService: HBThemeService,
     ) {
     }
 
@@ -41,14 +39,6 @@ export class PackResolver {
     @ResolveField()
     isNSFW(@Parent() pack: PackEntity): Promise<boolean> {
         return this.packService.isNSFW(pack.id);
-    }
-
-    @ResolveField()
-    async entries(@Parent() pack: PackEntity): Promise<Array<typeof PackEntriesUnion>> {
-        const themes = await this.themeService.findAll({packId: pack.id});
-        const hbThemes = await this.hbThemeService.findAll({packId: pack.id});
-
-        return [...themes[0], ...hbThemes[0]];
     }
 
     @Query(() => PackModel, {

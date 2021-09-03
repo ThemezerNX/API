@@ -10,7 +10,7 @@ export class LayoutPreviewsEntity extends PreviewsEntityInterface {
     @JoinColumn({name: "layoutId"})
     layout: LayoutEntity;
 
-    @PrimaryColumn()
+    @PrimaryColumn({update: false})
     layoutId: string;
 
     get image720Url() {

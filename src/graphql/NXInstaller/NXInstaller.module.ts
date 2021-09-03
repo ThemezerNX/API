@@ -1,17 +1,18 @@
 import {Module} from "@nestjs/common";
 import {TypeOrmModule} from "@nestjs/typeorm";
 import {NXInstallerResolver} from "./NXInstaller.resolver";
-import {ThemeService} from "../Theme/Theme.service";
-import {ThemeEntity} from "../Theme/Theme.entity";
 import {PackEntity} from "../Pack/Pack.entity";
 import {PackService} from "../Pack/Pack.service";
+import {ThemeModule} from "../Theme/Theme.module";
+import {HBThemeModule} from "../HBTheme/HBTheme.module";
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([PackEntity]),
-        TypeOrmModule.forFeature([ThemeEntity]),
+        ThemeModule,
+        HBThemeModule,
     ],
-    providers: [NXInstallerResolver, PackService, ThemeService],
+    providers: [NXInstallerResolver, PackService],
 })
 export class NXInstallerModule {
 }

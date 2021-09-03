@@ -11,7 +11,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
     @JoinColumn({name: "layoutId"})
     layout: LayoutEntity;
 
-    @Column()
+    @Column({update: false})
     layoutId: string;
 
     @OneToOne(() => LayoutOptionValueEntity,
@@ -20,7 +20,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
     @JoinColumn({name: "layoutOptionValueUuid"})
     layoutOptionValue: LayoutOptionValueEntity;
 
-    @PrimaryColumn()
+    @PrimaryColumn({update: false})
     layoutOptionValueUuid: string;
 
     get image720Url() {

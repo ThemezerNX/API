@@ -10,7 +10,7 @@ export class PackPreviewsEntity extends PreviewsEntityInterface {
     @JoinColumn({name: "packId"})
     pack: PackEntity;
 
-    @PrimaryColumn()
+    @PrimaryColumn({update: false})
     packId: string;
 
     get image720Url() {

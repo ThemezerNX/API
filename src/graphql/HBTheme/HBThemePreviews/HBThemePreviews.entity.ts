@@ -10,7 +10,7 @@ export class HBThemePreviewsEntity extends PreviewsEntityInterface {
     @JoinColumn({name: "hbThemeId"})
     hbTheme: HBThemeEntity;
 
-    @PrimaryColumn()
+    @PrimaryColumn({update: false})
     hbThemeId: string;
 
     get image720Url() {
