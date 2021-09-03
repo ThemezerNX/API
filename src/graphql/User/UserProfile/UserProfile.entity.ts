@@ -11,7 +11,7 @@ export class UserProfileEntity extends CachableEntityInterface {
     @JoinColumn({name: "userId"})
     user: UserEntity;
 
-    @PrimaryColumn()
+    @PrimaryColumn("char", {length: 19})
     userId: string;
 
     @Column({length: 10000, nullable: true})

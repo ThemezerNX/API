@@ -1,14 +1,4 @@
-import {
-    BaseEntity,
-    BeforeInsert,
-    BeforeUpdate,
-    Column,
-    CreateDateColumn,
-    Entity,
-    Generated,
-    OneToOne,
-    PrimaryColumn,
-} from "typeorm";
+import {BaseEntity, Column, CreateDateColumn, Entity, Generated, OneToOne, PrimaryColumn} from "typeorm";
 import {UserPreferencesEntity} from "./UserPreferences/UserPreferences.entity";
 import {UserConnectionsEntity} from "./UserConnections/UserConnections.entity";
 import {UserProfileEntity} from "./UserProfile/UserProfile.entity";
@@ -17,12 +7,11 @@ import {UserProfileEntity} from "./UserProfile/UserProfile.entity";
 @Entity()
 export class UserEntity extends BaseEntity {
 
-    @Column("int", {select: false})
+    @Column({type: "int", select: false, update: false})
     @Generated("increment")
     readonly counter: number;
 
-    @PrimaryColumn({
-        type: "varchar",
+    @PrimaryColumn("char", {
         length: 19,
         default: () => `
             lpad(
@@ -32,8 +21,9 @@ export class UserEntity extends BaseEntity {
                         '0'
                     )
         `,
+        update: false
     })
-    readonly id: string;
+    id: string;
 
     @Column({unique: true, nullable: true})
     email?: string;
@@ -44,17 +34,28 @@ export class UserEntity extends BaseEntity {
     @Column({nullable: true})
     password?: string;
 
-    @CreateDateColumn({type: "timestamp"})
+    @Column({
+        type: "char",
+        length: 32,
+        default: () => "md5(random()::text)",
+        update: false
+    })
+    verificationToken: string;
+
+    @Column({default: false})
+    isVerified: boolean = false;
+
+    @CreateDateColumn({type: "timestamp", update: false})
     joinedTimestamp: Date;
 
     @Column({default: false})
-    hasAccepted: boolean;
+    hasAccepted: boolean = false;
 
     @Column({default: false})
-    isAdmin: boolean;
+    isAdmin: boolean = false;
 
     @Column({default: false})
-    isBlocked: boolean;
+    isBlocked: boolean = false;
 
     @Column("varchar", {array: true, default: []})
     roles: string[] = [];

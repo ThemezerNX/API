@@ -6,23 +6,30 @@ import {StringContains} from "../common/findOperators/StringContains";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {SortOrder} from "../common/enums/SortOrder";
 import {UserSort} from "./User.resolver";
+import {EmailAlreadyRegisteredError} from "../../errors/auth/EmailAlreadyRegistered.error";
+import {UnknownError} from "../../errors/Unknown.error";
+import {UserConnectionsEntity} from "./UserConnections/UserConnections.entity";
+import {UserPreferencesEntity} from "./UserPreferences/UserPreferences.entity";
+import {UserProfileEntity} from "./UserProfile/UserProfile.entity";
 
 @Injectable()
 export class UserService {
 
-    constructor(@InjectRepository(UserEntity) private repository: Repository<UserEntity>) {
+    constructor(@InjectRepository(UserEntity) private userRepository: Repository<UserEntity>) {
     }
 
-    findOne({id}: { id: string }, relations: string[] = []): Promise<UserEntity> {
-        return this.repository.findOne({
-            where: {id},
-            relations,
-        });
-    }
+    findOne({id, email}: { id?: string, email?: string }, relations: string[] = []): Promise<UserEntity> {
+        const findConditions: FindConditions<UserEntity> = {};
 
-    findOneByEmail(email: string, relations: string[] = []): Promise<UserEntity> {
-        return this.repository.findOne({
-            where: {email},
+        if (id != undefined) {
+            findConditions.id = id;
+        }
+        if (email != undefined) {
+            findConditions.email = email;
+        }
+
+        return this.userRepository.findOne({
+            where: findConditions,
             relations,
         });
     }
@@ -62,12 +69,18 @@ export class UserService {
         );
     }
 
-    create(email: string, password: string, username: string): UserEntity {
-        const newUser = UserEntity.create({email, password, username});
-        const savedUser = newUser.save()
-        console.log(newUser, savedUser)
-
-        return newUser;
+    async create(email: string, password: string, username: string): Promise<UserEntity> {
+        try {
+            const user = UserEntity.create({email, password, username});
+            user.connections = new UserConnectionsEntity();
+            user.preferences = new UserPreferencesEntity();
+            user.profile = new UserProfileEntity();
+            return user.save();
+        } catch (err) {
+            if (err.message.includes("UQ")) {
+                throw new EmailAlreadyRegisteredError();
+            } else throw new UnknownError();
+        }
     }
 
 }

@@ -11,6 +11,7 @@ import {PackModule} from "./Pack/Pack.module";
 import {LayoutModule} from "./Layout/Layout.module";
 import {HBThemeModule} from "./HBTheme/HBTheme.module";
 import {ThemeTagModule} from "./ThemeTag/ThemeTag.module";
+import {AuthModule} from "./Auth/Auth.module";
 import {NXInstallerModule} from "./NXInstaller/NXInstaller.module";
 import {getConnectionOptions} from "typeorm";
 
@@ -45,7 +46,7 @@ import {getConnectionOptions} from "typeorm";
                     response.errors = response.errors.map((err) => {
                         const ex = err.extensions.exception;
 
-                        if (ex.isTranslatable) {
+                        if (ex?.isTranslatable) {
                             const newError = {
                                 statusCode: ex.statusCode,
                                 ...err,
@@ -79,6 +80,7 @@ import {getConnectionOptions} from "typeorm";
         LayoutModule,
         ThemeTagModule,
         NXInstallerModule,
+        AuthModule,
     ],
 })
 export class GraphqlModule implements NestModule {
