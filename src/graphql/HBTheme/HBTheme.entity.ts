@@ -1,7 +1,7 @@
 import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne} from "typeorm";
 import {ThemeTagEntity} from "../ThemeTag/ThemeTag.entity";
-import {HBThemePreviewsEntity} from "./HBThemePreviews/HBThemePreviews.entity";
-import {HBThemeAssetsEntity} from "./HBThemeAssets/HBThemeAssets.entity";
+import {HBThemePreviewsEntity} from "./Previews/HBThemePreviews.entity";
+import {HBThemeAssetsEntity} from "./Assets/HBThemeAssets.entity";
 import {PackEntity} from "../Pack/Pack.entity";
 import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
 import {CDNMapper} from "../common/CDNMapper";

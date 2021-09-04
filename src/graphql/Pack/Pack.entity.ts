@@ -1,6 +1,6 @@
 import {Entity, OneToMany, OneToOne} from "typeorm";
 import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
-import {PackPreviewsEntity} from "./PackPreviews/PackPreviews.entity";
+import {PackPreviewsEntity} from "./Previews/PackPreviews.entity";
 import {ThemeEntity} from "../Theme/Theme.entity";
 import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
 import {CDNMapper} from "../common/CDNMapper";

@@ -1,6 +1,6 @@
 import {AfterInsert, AfterRemove, Entity, getConnection, JoinColumn, ManyToOne} from "typeorm";
 import {ItemDownloadEntityInterface} from "../../common/interfaces/ItemDownload.entity.interface";
-import {LayoutEntity} from "../Layout.entity";
+import {LayoutEntity} from "../../Layout/Layout.entity";
 
 @Entity()
 export class LayoutDownloadEntity extends ItemDownloadEntityInterface {

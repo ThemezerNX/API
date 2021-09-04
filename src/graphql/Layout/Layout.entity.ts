@@ -1,9 +1,9 @@
 import {Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne} from "typeorm";
 import {Target} from "../common/enums/Target";
-import {LayoutOptionEntity} from "./LayoutOption/LayoutOption.entity";
+import {LayoutOptionEntity} from "./Option/LayoutOption.entity";
 import {UserEntity} from "../User/User.entity";
 import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
-import {LayoutPreviewsEntity} from "./LayoutPreviews/LayoutPreviews.entity";
+import {LayoutPreviewsEntity} from "./Previews/LayoutPreviews.entity";
 import {CDNMapper} from "../common/CDNMapper";
 
 

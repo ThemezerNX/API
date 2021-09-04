@@ -1,5 +1,5 @@
 import {Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
-import {LayoutOptionValueEntity} from "../LayoutOptionValue/LayoutOptionValue.entity";
+import {LayoutOptionValueEntity} from "../OptionValue/LayoutOptionValue.entity";
 import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
 import {LayoutEntity} from "../Layout.entity";

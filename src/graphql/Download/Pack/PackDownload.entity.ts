@@ -1,12 +1,14 @@
 import {AfterInsert, AfterRemove, Entity, getConnection, JoinColumn, ManyToOne} from "typeorm";
 import {ItemDownloadEntityInterface} from "../../common/interfaces/ItemDownload.entity.interface";
-import {PackEntity} from "../Pack.entity";
+import {PackEntity} from "../../Pack/Pack.entity";
 
 @Entity()
 export class PackDownloadEntity extends ItemDownloadEntityInterface {
 
     @JoinColumn()
-    @ManyToOne(() => PackEntity, {primary: true, onDelete: "CASCADE"})
+    @ManyToOne(() => {
+        return PackEntity;
+    }, {primary: true, onDelete: "CASCADE"})
     pack: PackEntity;
 
     @AfterInsert()

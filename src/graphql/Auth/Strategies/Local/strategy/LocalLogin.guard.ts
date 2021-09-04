@@ -1,7 +1,7 @@
 import {ExecutionContext, Injectable} from "@nestjs/common";
 import {AuthGuard} from "@nestjs/passport";
 import {GqlExecutionContext} from "@nestjs/graphql";
-import {AlreadyAuthenticatedError} from "../../../../../errors/auth/AlreadyAuthenticated.error";
+import {AlreadyAuthenticatedError} from "../../../../common/errors/auth/AlreadyAuthenticated.error";
 
 @Injectable()
 export class LocalLoginGuard extends AuthGuard("local") {

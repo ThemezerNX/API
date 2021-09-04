@@ -2,13 +2,13 @@ import {Injectable} from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 import {UserService} from "../User/User.service";
 import {UserEntity} from "../User/User.entity";
-import {EmailNotRegisteredError} from "../../errors/auth/EmailNotRegistered.error";
-import {PasswordIncorrectError} from "../../errors/auth/PasswordIncorrect.error";
-import {EmailVerificationPendingError} from "../../errors/auth/EmailVerificationPending.error";
 import {MailService} from "../../mail/mail.service";
-import {UserNotFoundError} from "../../errors/auth/UserNotFound.error";
-import {EmailAlreadyVerifiedError} from "../../errors/auth/EmailAlreadyVerified.error";
-import {UnauthorizedError} from "../../errors/auth/Unauthorized.error";
+import {EmailNotRegisteredError} from "../common/errors/auth/EmailNotRegistered.error";
+import {EmailVerificationPendingError} from "../common/errors/auth/EmailVerificationPending.error";
+import {PasswordIncorrectError} from "../common/errors/auth/PasswordIncorrect.error";
+import {UserNotFoundError} from "../common/errors/auth/UserNotFound.error";
+import {UnauthorizedError} from "../common/errors/auth/Unauthorized.error";
+import {EmailAlreadyVerifiedError} from "../common/errors/auth/EmailAlreadyVerified.error";
 
 @Injectable()
 export class AuthService {

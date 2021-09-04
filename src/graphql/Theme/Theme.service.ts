@@ -22,7 +22,7 @@ export class ThemeService {
         const findConditions: FindConditions<ThemeEntity> = {};
 
         if (id != undefined) {
-            findConditions.id = packId;
+            findConditions.id = id;
         }
         if (isNSFW != undefined) {
             findConditions.isNSFW = isNSFW;

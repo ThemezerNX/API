@@ -38,7 +38,7 @@ export class ThemeAssetsEntity extends CachableEntityInterface {
 
     get imageUrl(): string {
         return !!this.imageFile ? CDNMapper.themes.assets(this.themeId,
-            "imageUrl",
+            "image",
             "jpg",
             this.cacheID) : null;
     };

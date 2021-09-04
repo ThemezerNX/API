@@ -1,7 +1,7 @@
 import {Module} from "@nestjs/common";
-import {RestModule} from "./rest/rest.module";
 import {GraphqlModule} from "./graphql/graphql.module";
 import {MailModule} from "./mail/mail.module";
+import {RestModule} from "./rest/rest.module";
 
 
 @Module({

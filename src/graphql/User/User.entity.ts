@@ -1,7 +1,7 @@
 import {BaseEntity, Column, CreateDateColumn, Entity, Generated, OneToOne, PrimaryColumn} from "typeorm";
-import {UserPreferencesEntity} from "./UserPreferences/UserPreferences.entity";
-import {UserConnectionsEntity} from "./UserConnections/UserConnections.entity";
-import {UserProfileEntity} from "./UserProfile/UserProfile.entity";
+import {UserPreferencesEntity} from "./Preferences/UserPreferences.entity";
+import {UserConnectionsEntity} from "./Connections/UserConnections.entity";
+import {UserProfileEntity} from "./Profile/UserProfile.entity";
 
 
 @Entity()

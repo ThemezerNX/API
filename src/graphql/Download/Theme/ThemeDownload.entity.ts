@@ -1,6 +1,6 @@
 import {AfterInsert, AfterRemove, Entity, getConnection, JoinColumn, ManyToOne} from "typeorm";
-import {ThemeEntity} from "../Theme.entity";
 import {ItemDownloadEntityInterface} from "../../common/interfaces/ItemDownload.entity.interface";
+import {ThemeEntity} from "../../Theme/Theme.entity";
 
 @Entity()
 export class ThemeDownloadEntity extends ItemDownloadEntityInterface {

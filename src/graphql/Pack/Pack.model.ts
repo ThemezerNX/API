@@ -2,7 +2,7 @@ import {createUnionType, Field, ObjectType} from "@nestjs/graphql";
 import {ItemModelInterface} from "../common/interfaces/Item.model.interface";
 import {HBThemeModel} from "../HBTheme/HBTheme.model";
 import {ThemeModel} from "../Theme/Theme.model";
-import {PackPreviewsModel} from "./PackPreviews/PackPreviews.model";
+import {PackPreviewsModel} from "./Previews/PackPreviews.model";
 import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
 import {ThemeEntity} from "../Theme/Theme.entity";
 

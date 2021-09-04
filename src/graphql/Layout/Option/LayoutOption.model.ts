@@ -1,5 +1,5 @@
 import {Field, ObjectType} from "@nestjs/graphql";
-import {LayoutOptionValueModel} from "../LayoutOptionValue/LayoutOptionValue.model";
+import {LayoutOptionValueModel} from "../OptionValue/LayoutOptionValue.model";
 
 
 @ObjectType("LayoutOption")

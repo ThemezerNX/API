@@ -1,6 +1,6 @@
 import {BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn} from "typeorm";
-import {LayoutOptionValuePreviewsEntity} from "../LayoutOptionValuePreviews/LayoutOptionValuePreviews.entity";
-import {LayoutOptionEntity} from "../LayoutOption/LayoutOption.entity";
+import {LayoutOptionValuePreviewsEntity} from "../OptionValuePreviews/LayoutOptionValuePreviews.entity";
+import {LayoutOptionEntity} from "../Option/LayoutOption.entity";
 
 
 @Entity()

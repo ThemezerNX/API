@@ -3,8 +3,8 @@ import {HexColorCodeResolver, JSONResolver, URLResolver, UUIDResolver} from "gra
 import {Target} from "../common/enums/Target";
 import {ItemModelInterface} from "../common/interfaces/Item.model.interface";
 import {UserModel} from "../User/User.model";
-import {LayoutOptionModel} from "./LayoutOption/LayoutOption.model";
-import {LayoutPreviewsModel} from "./LayoutPreviews/LayoutPreviews.model";
+import {LayoutOptionModel} from "./Option/LayoutOption.model";
+import {LayoutPreviewsModel} from "./Previews/LayoutPreviews.model";
 
 
 @ObjectType("Layout", {implements: [ItemModelInterface]})

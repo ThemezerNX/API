@@ -1,6 +1,6 @@
 import {AfterInsert, AfterRemove, Entity, getConnection, JoinColumn, ManyToOne} from "typeorm";
-import {HBThemeEntity} from "../HBTheme.entity";
 import {ItemDownloadEntityInterface} from "../../common/interfaces/ItemDownload.entity.interface";
+import {HBThemeEntity} from "../../HBTheme/HBTheme.entity";
 
 @Entity()
 export class HBThemeDownloadEntity extends ItemDownloadEntityInterface {

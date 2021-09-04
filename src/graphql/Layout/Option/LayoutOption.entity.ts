@@ -1,5 +1,5 @@
 import {BaseEntity, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
-import {LayoutOptionValueEntity} from "../LayoutOptionValue/LayoutOptionValue.entity";
+import {LayoutOptionValueEntity} from "../OptionValue/LayoutOptionValue.entity";
 import {LayoutEntity} from "../Layout.entity";
 
 

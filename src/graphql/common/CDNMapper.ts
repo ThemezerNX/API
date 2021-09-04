@@ -29,9 +29,39 @@ const itemRoutes = {
 //                                 - create encrypted time + IP token, if timedifference <30s when visited: increment (bypass)
 //                                 - create encrypted time based on hour + IP + item id + type + token, if timedifference <2h (must also be valid in the next hour) when visited -> if token not found in db> increment dl count and insert download into table
 //                                 - require an express session token, also validate it. (curl issues, not stateless)
-//                                 - don't use any token at all, when visited: check db for entry with time, ip, id, type. If time < 2h, insert new row and increment count.
+//                                 -> don't use any token at all, when visited: check db for entry with time, ip, id, type. If time < 2h, insert new row and increment count.
 // -> 301
-// /themes/id/download/nxtheme.bin?cache=12 (cached)
+// /themes/id/download/file.nxtheme?cache=12 (cached)
+/**
+ * URLs currently in use:
+ *
+ * /resources
+ *
+ V /users/<id>/banner.webp?cache
+ V /users/<id>/avatar.webp?cache
+ *
+ V /themes/<id>/previews/<filename>.<extension>?cache
+ V /themes/<id>/assets/<filename>.<extension>?cache
+ * /themes/<id>/download
+ * /themes/<id>/download/theme.nxtheme?cache
+ *
+ * /hbthemes/<id>/previews/<filename>.<extension>?cache
+ * /hbthemes/<id>/assets/<filename>.<extension>?cache
+ * /hbthemes/<id>/download
+ * /hbthemes/<id>/download/theme.romfs?cache
+ *
+ * /packs/<id>/previews/<filename>.<extension>?cache
+ * /packs/<id>/download
+ * /packs/<id>/download/pack.zip?cache
+ *
+ * /layouts/<id>/previews/<filename>.<extension>?cache
+ * /layouts/<id>/options/<options uuid>/previews/<filename>.<extension>?cache
+ * /layouts/<id>/download
+ * /layouts/<id>/downloadCommon
+ * /layouts/<id>/download/layout.json?cache
+ * /layouts/<id>/downloadCommon/commonLayout.json?cache
+ *
+ */
 
 export const CDNMapper = {
     users: {
@@ -40,6 +70,17 @@ export const CDNMapper = {
         },
         avatar: (userId: string, extension: string, cacheID: number) => {
             return cacheUrl(`users/${userId}/avatar.${extension}`, cacheID);
+        },
+    },
+    themes: {
+        previews: (themeId: string, resolution: string, extension: string, cacheID: number) => {
+            return itemRoutes.previews("themes", themeId, resolution, extension, cacheID);
+        },
+        assets: (themeId: string, asset: string, extension: string, cacheID: number) => {
+            return itemRoutes.assets("themes", themeId, asset, extension, cacheID);
+        },
+        download: (themeId: string) => {
+            return itemRoutes.download("themes", themeId);
         },
     },
     hbthemes: {
@@ -53,15 +94,12 @@ export const CDNMapper = {
             return itemRoutes.download("hbthemes", hbthemeId);
         },
     },
-    themes: {
-        previews: (themeId: string, resolution: string, extension: string, cacheID: number) => {
-            return itemRoutes.previews("themes", themeId, resolution, extension, cacheID);
+    packs: {
+        previews: (packId: string, resolution: string, extension: string, cacheID: number) => {
+            return itemRoutes.previews("packs", packId, resolution, extension, cacheID);
         },
-        assets: (themeId: string, asset: string, extension: string, cacheID: number) => {
-            return itemRoutes.assets("themes", themeId, asset, extension, cacheID);
-        },
-        download: (themeId: string) => {
-            return itemRoutes.download("themes", themeId);
+        download: (packId: string) => {
+            return itemRoutes.download("packs", packId);
         },
     },
     layouts: {
@@ -78,14 +116,6 @@ export const CDNMapper = {
         },
         downloadCommon: (layoutId: string) => {
             return itemRoutes.download("layouts", layoutId, "common");
-        },
-    },
-    packs: {
-        previews: (packId: string, resolution: string, extension: string, cacheID: number) => {
-            return itemRoutes.previews("packs", packId, resolution, extension, cacheID);
-        },
-        download: (packId: string) => {
-            return itemRoutes.download("packs", packId);
         },
     },
 };

@@ -6,11 +6,11 @@ import {StringContains} from "../common/findOperators/StringContains";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {SortOrder} from "../common/enums/SortOrder";
 import {UserSort} from "./User.resolver";
-import {EmailAlreadyRegisteredError} from "../../errors/auth/EmailAlreadyRegistered.error";
-import {UnknownError} from "../../errors/Unknown.error";
-import {UserConnectionsEntity} from "./UserConnections/UserConnections.entity";
-import {UserPreferencesEntity} from "./UserPreferences/UserPreferences.entity";
-import {UserProfileEntity} from "./UserProfile/UserProfile.entity";
+import {UserConnectionsEntity} from "./Connections/UserConnections.entity";
+import {UserProfileEntity} from "./Profile/UserProfile.entity";
+import {EmailAlreadyRegisteredError} from "../common/errors/auth/EmailAlreadyRegistered.error";
+import {UnknownError} from "../common/errors/Unknown.error";
+import {UserPreferencesEntity} from "./Preferences/UserPreferences.entity";
 
 @Injectable()
 export class UserService {

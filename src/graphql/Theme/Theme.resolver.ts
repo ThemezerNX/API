@@ -9,7 +9,7 @@ import {ThemeEntity} from "./Theme.entity";
 import {ItemSortArgs} from "../common/args/ItemSortArgs";
 import {PaginatedThemes} from "./PaginatedThemes.model";
 import {FileUpload, GraphQLUpload} from "graphql-upload";
-import {UnknownError} from "../../errors/Unknown.error";
+import {UnknownError} from "../common/errors/Unknown.error";
 
 
 @ArgsType()

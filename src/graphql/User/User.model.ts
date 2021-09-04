@@ -1,9 +1,9 @@
 import {IsEmail} from "class-validator";
 import {EmailAddressResolver} from "graphql-scalars";
 import {Field, ID, ObjectType} from "@nestjs/graphql";
-import {UserProfileModel} from "./UserProfile/UserProfile.model";
-import {UserPreferencesModel} from "./UserPreferences/UserPreferences.model";
-import {UserConnectionsModel} from "./UserConnections/UserConnections.model";
+import {UserProfileModel} from "./Profile/UserProfile.model";
+import {UserPreferencesModel} from "./Preferences/UserPreferences.model";
+import {UserConnectionsModel} from "./Connections/UserConnections.model";
 
 
 @ObjectType("User")

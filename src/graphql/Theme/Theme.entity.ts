@@ -1,8 +1,8 @@
 import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne} from "typeorm";
 import {Target} from "../common/enums/Target";
 import {ThemeTagEntity} from "../ThemeTag/ThemeTag.entity";
-import {ThemePreviewsEntity} from "./ThemePreviews/ThemePreviews.entity";
-import {ThemeAssetsEntity} from "./ThemeAssets/ThemeAssets.entity";
+import {ThemePreviewsEntity} from "./Previews/ThemePreviews.entity";
+import {ThemeAssetsEntity} from "./Assets/ThemeAssets.entity";
 import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
 import {PackEntity} from "../Pack/Pack.entity";
 import {LayoutEntity} from "../Layout/Layout.entity";

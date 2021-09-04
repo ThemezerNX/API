@@ -96,7 +96,7 @@ export class PackService {
 
         queryBuilder
             .leftJoinAndSelect("pack.themes", "themes")
-            .leftJoinAndSelect("pack.hbthemes", "hbthemes")
+            .leftJoinAndSelect("pack.hbThemes", "hbthemes")
             .leftJoinAndSelect("pack.previews", "previews")
             .orderBy({["pack." + sort]: order});
 
