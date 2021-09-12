@@ -1,9 +1,9 @@
 import {Entity, JoinColumn, ManyToOne} from "typeorm";
-import {CachedItemEntityInterface} from "../CachedItem.entity.interface";
+import {ItemCacheEntityInterface} from "../ItemCache.entity.interface";
 import {LayoutEntity} from "../../Layout/Layout.entity";
 
 @Entity()
-export class CachedLayoutEntity extends CachedItemEntityInterface {
+export class LayoutCacheEntity extends ItemCacheEntityInterface {
 
     @JoinColumn()
     @ManyToOne(() => LayoutEntity, {primary: true, onDelete: "CASCADE"})

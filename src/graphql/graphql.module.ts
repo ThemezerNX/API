@@ -28,7 +28,6 @@ import {getConnectionOptions} from "typeorm";
             },
         }),
         GraphQLModule.forRoot({
-            path: "/",
             introspection: true,
             autoSchemaFile: true,
             // https://github.com/nestjs/graphql/issues/901#issuecomment-780007582

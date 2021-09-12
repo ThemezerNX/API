@@ -42,8 +42,8 @@ const itemRoutes = {
  *
  V /themes/<id>/previews/<filename>.<extension>?cache
  V /themes/<id>/assets/<filename>.<extension>?cache
- * /themes/<id>/download
- * /themes/<id>/download/theme.nxtheme?cache
+ V /themes/<id>/download
+ V /themes/<id>/download/theme.nxtheme?cache
  *
  * /hbthemes/<id>/previews/<filename>.<extension>?cache
  * /hbthemes/<id>/assets/<filename>.<extension>?cache

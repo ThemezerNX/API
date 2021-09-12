@@ -5,7 +5,7 @@ import {UseGuards} from "@nestjs/common";
 import {LocalLoginGuard} from "./Strategies/Local/strategy/LocalLogin.guard";
 import {UserModel} from "../User/User.model";
 import {GqlAuthGuard} from "./GqlAuth.guard";
-import {CurrentUser} from "../common/decorators/CurrentUser.decorator";
+import {CurrentUser} from "../common/decorators/CurrentUser.gql.decorator";
 import {UserEntity} from "../User/User.entity";
 
 @InputType()
@@ -48,7 +48,6 @@ class VerificationData {
 }
 
 
-
 @Resolver()
 export class AuthResolver {
 
@@ -72,9 +71,12 @@ export class AuthResolver {
     }
 
     @Mutation(() => Boolean)
-    @UseGuards(GqlAuthGuard)
     logout(@Context() context): boolean {
-        context.req.logout()
+        context.req.logout();
+        context.req.session.destroy();
+        context.req.res.clearCookie('connect.sid')
+        // console.log(context.req.user)
+        // console.log(context.req.session)
         return true;
     }
 

@@ -10,5 +10,5 @@ import {join} from "path";
         }),
     ],
 })
-export class ResourcesModule {
+export class ResourcesRestModule {
 }

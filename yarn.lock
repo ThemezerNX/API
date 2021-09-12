@@ -1054,6 +1054,28 @@
   resolved "https://registry.yarnpkg.com/@sqltools/formatter/-/formatter-1.2.3.tgz#1185726610acc37317ddab11c3c7f9066966bd20"
   integrity sha512-O3uyB/JbkAEMZaP3YqyHH7TMnex7tWyCbCI4EfJdOCoN6HIhqdJBWTM6aCCiWQ/5f5wxjgU735QAIpJbjDvmzg==
 
+"@themezernx/layout-id-parser@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@themezernx/layout-id-parser/-/layout-id-parser-1.1.1.tgz#b672aed7155493fbe71bc06f8e2154d583239b70"
+  integrity sha512-t9+iYyIhGyXLRnlmV/X+So9Ro0BWyDjxK1Qna+nzmTnJecz6DVVZjEqsXo6GcUz0+U/aaWTkbhM8ptqp7vMY4g==
+
+"@themezernx/sarclib@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@themezernx/sarclib/-/sarclib-1.0.1.tgz#ff6cd0c044bd05660685eb02d0f510270c4d6be5"
+  integrity sha512-MM9nCVxm6M6YVmE96NRfbUiD3nyVQGN77GxQwLNlmaSb4ZvUCXuvMATVqukiTXUwG9BlvhEWM5kgBqjGZXxu8g==
+  dependencies:
+    "@themezernx/yaz0lib" "^1.0.2"
+
+"@themezernx/target-parser@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@themezernx/target-parser/-/target-parser-1.0.5.tgz#f99d38fe697125e47d2405ba135d7f122f62fd5c"
+  integrity sha512-QkABjbyk175o3aoXnKtAyMdLePfZfi5mbmmWoso0qYGSN8HWSpGGIhBx2QS1qO0UNr+5E6D4qyhq4TA79MhLnQ==
+
+"@themezernx/yaz0lib@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@themezernx/yaz0lib/-/yaz0lib-1.0.2.tgz#c70866998198bf3acf0de9527b1a3bbc2d400ff9"
+  integrity sha512-WyGpIdIucFWgAvJzacoU+6/yoolSc6oIok2lB0ICtkxR+dFI8IMGRZocf+VvT8FfvZt4u4m0RO+9Iid18Kv6IA==
+
 "@tokenizer/token@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@tokenizer/token/-/token-0.3.0.tgz#fe98a93fe789247e998c75e74e9c7c63217aa276"
@@ -5296,11 +5318,6 @@ object.getownpropertydescriptors@^2.1.1:
     define-properties "^1.1.3"
     es-abstract "^1.18.0-next.2"
 
-obuf@~1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/obuf/-/obuf-1.1.2.tgz#09bea3343d41859ebd446292d11c9d4db619084e"
-  integrity sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==
-
 on-finished@^2.3.0, on-finished@~2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/on-finished/-/on-finished-2.3.0.tgz#20f1336481b083cd75337992a16971aa2d906947"
@@ -5672,13 +5689,6 @@ postgres-array@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/postgres-array/-/postgres-array-2.0.0.tgz#48f8fce054fbc69671999329b8834b772652d82e"
   integrity sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==
-
-postgres-bytea@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/postgres-bytea/-/postgres-bytea-3.0.0.tgz#9048dc461ac7ba70a6a42d109221619ecd1cb089"
-  integrity sha512-CNd4jim9RFPkObHSjVHlVrxoVQXz7quwNFpz7RY1okNNme49+sVyiTvTRobiLV548Hx/hb1BG+iE7h9493WzFw==
-  dependencies:
-    obuf "~1.1.2"
 
 postgres-bytea@~1.0.0:
   version "1.0.0"

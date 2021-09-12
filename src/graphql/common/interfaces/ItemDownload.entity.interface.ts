@@ -1,21 +1,27 @@
-import {BaseEntity, Column, CreateDateColumn, JoinColumn, ManyToOne} from "typeorm";
+import {BaseEntity, Column, CreateDateColumn, JoinColumn, ManyToOne, PrimaryColumn} from "typeorm";
 import {UserEntity} from "../../User/User.entity";
-import {DownloadClientEntity} from "../../Download/DownloadClient.entity";
+import {DownloadClientEntity} from "../../DownloadClient/DownloadClient.entity";
 
 export abstract class ItemDownloadEntityInterface extends BaseEntity {
 
-    @JoinColumn()
-    @ManyToOne(() => UserEntity, {primary: true, onDelete: "CASCADE"})
+    @ManyToOne(() => UserEntity, {onDelete: "CASCADE"})
+    @JoinColumn({name: "userId"})
     user: UserEntity;
+
+    @Column({nullable: true})
+    userId: string;
 
     @CreateDateColumn({primary: true, type: "timestamp"})
     timestamp: Date;
 
-    @Column()
+    @PrimaryColumn()
     ip: string;
 
-    @JoinColumn()
-    @ManyToOne(() => DownloadClientEntity, {primary: true})
+    @ManyToOne(() => DownloadClientEntity)
+    @JoinColumn({name: "downloadClientId"})
     downloadClient: DownloadClientEntity;
+
+    @Column("int")
+    downloadClientId: number;
 
 }

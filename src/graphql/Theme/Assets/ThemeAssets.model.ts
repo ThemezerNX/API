@@ -5,10 +5,10 @@ import {JSONResolver, URLResolver} from "graphql-scalars";
 export class ThemeAssetsModel {
 
     @Field(() => JSONResolver, {nullable: true})
-    customLayoutJson?: JSON;
+    customLayoutJson?: string;
 
     @Field(() => JSONResolver, {nullable: true})
-    customCommonLayoutJson?: JSON;
+    customCommonLayoutJson?: string;
 
     @Field(() => URLResolver, {nullable: true})
     imageUrl?: string;

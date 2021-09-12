@@ -68,17 +68,16 @@ async function bootstrap() {
     configurePassport(app);
 
     app.use((req, res, next) => {
-        req.getClientIp = () => {
-            return req?.headers["cf-connecting-ip"] || req?.headers["x-forwarded-for"] || req?.connection.remoteAddress;
+        req.getClientIP = () => {
+            return req?.headers["cf-connecting-ip"] || req?.headers["x-forwarded-for"] || req?.ip || req?.connection.remoteAddress;
         };
         next();
     });
 
     const port = process.env.PORT;
     const host = process.env.HOST;
-    const appPath = "/";
     await app.listen(4100, () => {
-        console.log(`🚀 Server ready at http://${host}:${port}${appPath}`);
+        console.log(`🚀 Server ready at http://${host}:${port}/`);
     });
 }
 

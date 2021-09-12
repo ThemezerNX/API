@@ -1,7 +1,7 @@
 import {BaseEntity, Column, CreateDateColumn} from "typeorm";
 
 
-export class CachedItemEntityInterface extends BaseEntity {
+export class ItemCacheEntityInterface extends BaseEntity {
 
     @CreateDateColumn()
     timestamp: Date;
