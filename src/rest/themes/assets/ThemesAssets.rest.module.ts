@@ -1,12 +1,12 @@
 import {Module} from "@nestjs/common";
-import {ThemesPreviewsController} from "./themesPreviews.controller";
+import {ThemesAssetsRestController} from "./ThemesAssets.rest.controller";
 import {ThemeModule} from "../../../graphql/Theme/Theme.module";
 
 @Module({
     imports: [
         ThemeModule,
     ],
-    controllers: [ThemesPreviewsController],
+    controllers: [ThemesAssetsRestController],
 })
-export class ThemesPreviewsRestModule {
+export class ThemesAssetsRestModule {
 }

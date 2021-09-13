@@ -7,7 +7,7 @@ export class ItemCacheEntityInterface extends BaseEntity {
     timestamp: Date;
 
     @Column("bytea")
-    file: any;
+    file: Buffer;
 
     @Column()
     fileName: string;

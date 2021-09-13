@@ -45,10 +45,10 @@ const itemRoutes = {
  V /themes/<id>/download
  V /themes/<id>/download/theme.nxtheme?cache
  *
- * /hbthemes/<id>/previews/<filename>.<extension>?cache
- * /hbthemes/<id>/assets/<filename>.<extension>?cache
- * /hbthemes/<id>/download
- * /hbthemes/<id>/download/theme.romfs?cache
+ V /hbthemes/<id>/previews/<filename>.<extension>?cache
+ V /hbthemes/<id>/assets/<filename>.<extension>?cache
+ V /hbthemes/<id>/download
+ V /hbthemes/<id>/download/theme.romfs?cache
  *
  * /packs/<id>/previews/<filename>.<extension>?cache
  * /packs/<id>/download

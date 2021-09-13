@@ -14,6 +14,6 @@ export class ThemeCacheEntity extends ItemCacheEntityInterface {
     themeId: string;
 
     @Column()
-    file: any;
+    file: Buffer;
 
 }

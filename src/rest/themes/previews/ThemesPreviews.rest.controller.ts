@@ -4,12 +4,12 @@ import {ThemeService} from "../../../graphql/Theme/Theme.service";
 import {ThemePreviewsEntity} from "../../../graphql/Theme/Previews/ThemePreviews.entity";
 
 @Controller()
-export class ThemesPreviewsController {
+export class ThemesPreviewsRestController {
 
     constructor(private themeService: ThemeService) {
     }
 
-    private async getFile(id: string, property: keyof ThemePreviewsEntity) {
+    private async getFile(id: string, property: keyof ThemePreviewsEntity): Promise<StreamableFile> {
         const entity = await this.themeService.findOne({id}, ["previews"]);
         const file = entity.previews[property];
         if (!entity || !file) {
@@ -19,27 +19,27 @@ export class ThemesPreviewsController {
     }
 
     @Get("720.webp")
-    getImage720(@Param("id") id: string): Promise<StreamableFile> {
+    getImage720(@Param("id") id: string) {
         return this.getFile(id, "image720File");
     }
 
     @Get("360.webp")
-    getImage360(@Param("id") id: string): Promise<StreamableFile> {
+    getImage360(@Param("id") id: string) {
         return this.getFile(id, "image360File");
     }
 
     @Get("240.jpg")
-    getImage240(@Param("id") id: string): Promise<StreamableFile> {
+    getImage240(@Param("id") id: string) {
         return this.getFile(id, "image240File");
     }
 
     @Get("180.webp")
-    getImage180(@Param("id") id: string): Promise<StreamableFile> {
+    getImage180(@Param("id") id: string) {
         return this.getFile(id, "image180File");
     }
 
     @Get("placeholder.webp")
-    getImagePlaceholder(@Param("id") id: string): Promise<StreamableFile> {
+    getImagePlaceholder(@Param("id") id: string) {
         return this.getFile(id, "imagePlaceholderFile");
     }
 

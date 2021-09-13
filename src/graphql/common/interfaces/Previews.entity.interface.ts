@@ -5,15 +5,15 @@ import {CachableEntityInterface} from "./Cachable.entity.interface";
 export abstract class PreviewsEntityInterface extends CachableEntityInterface {
 
     @Column("bytea")
-    image720File: any;
+    image720File: Buffer;
     @Column("bytea")
-    image360File: any;
+    image360File: Buffer;
     @Column("bytea")
-    image240File: any;
+    image240File: Buffer;
     @Column("bytea")
-    image180File: any;
+    image180File: Buffer;
     @Column("bytea")
-    imagePlaceholderFile: any;
+    imagePlaceholderFile: Buffer;
 
     abstract get image720Url(): string;
 

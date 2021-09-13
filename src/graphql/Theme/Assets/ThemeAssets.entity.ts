@@ -20,21 +20,21 @@ export class ThemeAssetsEntity extends CachableEntityInterface {
     customCommonLayoutJson?: string;
 
     @Column("bytea", {nullable: true})
-    imageFile?: any;
+    imageFile?: Buffer;
     @Column("bytea", {nullable: true})
-    albumIconFile?: any;
+    albumIconFile?: Buffer;
     @Column("bytea", {nullable: true})
-    newsIconFile?: any;
+    newsIconFile?: Buffer;
     @Column("bytea", {nullable: true})
-    shopIconFile?: any;
+    shopIconFile?: Buffer;
     @Column("bytea", {nullable: true})
-    controllerIconFile?: any;
+    controllerIconFile?: Buffer;
     @Column("bytea", {nullable: true})
-    settingsIconFile?: any;
+    settingsIconFile?: Buffer;
     @Column("bytea", {nullable: true})
-    powerIconFile?: any;
+    powerIconFile?: Buffer;
     @Column("bytea", {nullable: true})
-    homeIconFile?: any;
+    homeIconFile?: Buffer;
 
     get imageUrl(): string {
         return !!this.imageFile ? CDNMapper.themes.assets(this.themeId,

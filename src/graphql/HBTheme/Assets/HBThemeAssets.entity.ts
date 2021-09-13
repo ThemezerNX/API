@@ -14,31 +14,31 @@ export class HBThemeAssetsEntity extends CachableEntityInterface {
     hbthemeId: string;
 
     @Column("bytea")
-    batteryIconFile: any;
+    batteryIconFile: Buffer;
     @Column("bytea")
-    chargingIconFile: any;
+    chargingIconFile: Buffer;
     @Column("bytea")
-    folderIconFile: any;
+    folderIconFile: Buffer;
     @Column("bytea")
-    invalidIconFile: any;
+    invalidIconFile: Buffer;
     @Column("bytea")
-    themeIconDarkFile: any;
+    themeIconDarkFile: Buffer;
     @Column("bytea")
-    themeIconLightFile: any;
+    themeIconLightFile: Buffer;
     @Column("bytea")
-    airplaneIconFile: any;
+    airplaneIconFile: Buffer;
     @Column("bytea")
-    wifiNoneIconFile: any;
+    wifiNoneIconFile: Buffer;
     @Column("bytea")
-    wifi1IconFile: any;
+    wifi1IconFile: Buffer;
     @Column("bytea")
-    wifi2IconFile: any;
+    wifi2IconFile: Buffer;
     @Column("bytea")
-    wifi3IconFile: any;
+    wifi3IconFile: Buffer;
     @Column("bytea")
-    ethIconFile: any;
+    ethIconFile: Buffer;
     @Column("bytea")
-    backgroundImageFile: any;
+    backgroundImageFile: Buffer;
 
     get batteryIconUrl(): string {
         return !!this.batteryIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
@@ -57,28 +57,28 @@ export class HBThemeAssetsEntity extends CachableEntityInterface {
     get folderIconUrl(): string {
         return !!this.folderIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "folderIcon",
-            "png",
+            "jpg",
             this.cacheID) : null;
     }
 
     get invalidIconUrl(): string {
         return !!this.invalidIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "invalidIcon",
-            "png",
+            "jpg",
             this.cacheID) : null;
     }
 
     get themeIconDarkUrl(): string {
         return !!this.themeIconDarkFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "themeIconDark",
-            "png",
+            "jpg",
             this.cacheID) : null;
     }
 
     get themeIconLightUrl(): string {
         return !!this.themeIconLightFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "themeIconLight",
-            "png",
+            "jpg",
             this.cacheID) : null;
     }
 
@@ -127,7 +127,7 @@ export class HBThemeAssetsEntity extends CachableEntityInterface {
     get backgroundImageUrl(): string {
         return !!this.backgroundImageFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "backgroundImage",
-            "png",
+            "jpg",
             this.cacheID) : null;
     }
 
