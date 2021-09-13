@@ -9,6 +9,8 @@ import {ThemesDownloadRestModule} from "./themes/download/ThemesDownload.rest.mo
 import {HBThemesPreviewsRestModule} from "./hbthemes/previews/HBThemesPreviews.rest.module";
 import {HBThemesAssetsRestModule} from "./hbthemes/assets/HBThemesAssets.rest.module";
 import {HBThemesDownloadRestModule} from "./hbthemes/download/HBThemesDownload.rest.module";
+import {PacksDownloadRestModule} from "./packs/download/PacksDownload.rest.module";
+import {PacksPreviewsRestModule} from "./packs/previews/PacksPreviews.rest.module";
 
 @Module({
     imports: [
@@ -20,6 +22,8 @@ import {HBThemesDownloadRestModule} from "./hbthemes/download/HBThemesDownload.r
         HBThemesPreviewsRestModule,
         HBThemesAssetsRestModule,
         HBThemesDownloadRestModule,
+        PacksDownloadRestModule,
+        PacksPreviewsRestModule,
         RouterModule.register([
             {
                 path: "cdn",
@@ -59,6 +63,19 @@ import {HBThemesDownloadRestModule} from "./hbthemes/download/HBThemesDownload.r
                             {
                                 path: "download",
                                 module: HBThemesDownloadRestModule,
+                            },
+                        ],
+                    },
+                    {
+                        path: "packs/:id",
+                        children: [
+                            {
+                                path: "previews",
+                                module: PacksPreviewsRestModule,
+                            },
+                            {
+                                path: "download",
+                                module: PacksDownloadRestModule,
                             },
                         ],
                     },

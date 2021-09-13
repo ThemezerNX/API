@@ -6,6 +6,7 @@ import {PackEntity} from "./Pack.entity";
 import {UserModule} from "../User/User.module";
 import {ThemeModule} from "../Theme/Theme.module";
 import {HBThemeModule} from "../HBTheme/HBTheme.module";
+import {PackDownloadModule} from "./Download/PackDownload.module";
 
 @Module({
     imports: [
@@ -13,9 +14,10 @@ import {HBThemeModule} from "../HBTheme/HBTheme.module";
         HBThemeModule,
         ThemeModule,
         UserModule,
+        PackDownloadModule,
     ],
     providers: [PackResolver, PackService],
-    exports: [PackService],
+    exports: [PackService, PackDownloadModule],
 })
 export class PackModule {
 }

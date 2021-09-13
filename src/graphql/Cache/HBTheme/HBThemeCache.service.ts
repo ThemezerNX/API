@@ -26,7 +26,7 @@ export class HBThemeCacheService {
 
     async getFile(hbthemeId: string): Promise<{ data: Buffer, fileName: string }> {
         const theme = await this.themeService.findOne({id: hbthemeId}, ["creator"]);
-        const existingCache = await this.cacheRepository.findOne({where: {themeId: hbthemeId}});
+        const existingCache = await this.cacheRepository.findOne({where: {hbthemeId}});
 
         let data: Buffer;
         let fileName: string;

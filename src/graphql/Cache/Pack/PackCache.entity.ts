@@ -1,12 +1,18 @@
-import {Entity, JoinColumn, ManyToOne} from "typeorm";
+import {Column, Entity, JoinColumn, ManyToOne, PrimaryColumn} from "typeorm";
 import {PackEntity} from "../../Pack/Pack.entity";
 import {ItemCacheEntityInterface} from "../ItemCache.entity.interface";
 
 @Entity()
 export class PackCacheEntity extends ItemCacheEntityInterface {
 
-    @JoinColumn()
     @ManyToOne(() => PackEntity, {primary: true, onDelete: "CASCADE"})
-    theme: PackEntity;
+    @JoinColumn({name: "packId"})
+    pack: PackEntity;
+
+    @PrimaryColumn()
+    packId: string;
+
+    @Column()
+    file: Buffer;
 
 }

@@ -50,9 +50,9 @@ const itemRoutes = {
  V /hbthemes/<id>/download
  V /hbthemes/<id>/download/theme.romfs?cache
  *
- * /packs/<id>/previews/<filename>.<extension>?cache
- * /packs/<id>/download
- * /packs/<id>/download/pack.zip?cache
+ V /packs/<id>/previews/<filename>.<extension>?cache
+ V /packs/<id>/download
+ V /packs/<id>/download/pack.zip?cache
  *
  * /layouts/<id>/previews/<filename>.<extension>?cache
  * /layouts/<id>/options/<options uuid>/previews/<filename>.<extension>?cache
