@@ -13,32 +13,32 @@ export class HBThemeAssetsEntity extends CachableEntityInterface {
     @PrimaryColumn({update: false})
     hbthemeId: string;
 
-    @Column("bytea")
-    batteryIconFile: Buffer;
-    @Column("bytea")
-    chargingIconFile: Buffer;
-    @Column("bytea")
-    folderIconFile: Buffer;
-    @Column("bytea")
-    invalidIconFile: Buffer;
-    @Column("bytea")
-    themeIconDarkFile: Buffer;
-    @Column("bytea")
-    themeIconLightFile: Buffer;
-    @Column("bytea")
-    airplaneIconFile: Buffer;
-    @Column("bytea")
-    wifiNoneIconFile: Buffer;
-    @Column("bytea")
-    wifi1IconFile: Buffer;
-    @Column("bytea")
-    wifi2IconFile: Buffer;
-    @Column("bytea")
-    wifi3IconFile: Buffer;
-    @Column("bytea")
-    ethIconFile: Buffer;
-    @Column("bytea")
-    backgroundImageFile: Buffer;
+    @Column("bytea", {nullable: true})
+    batteryIconFile?: Buffer;
+    @Column("bytea", {nullable: true})
+    chargingIconFile?: Buffer;
+    @Column("bytea", {nullable: true})
+    folderIconFile?: Buffer;
+    @Column("bytea", {nullable: true})
+    invalidIconFile?: Buffer;
+    @Column("bytea", {nullable: true})
+    themeIconDarkFile?: Buffer;
+    @Column("bytea", {nullable: true})
+    themeIconLightFile?: Buffer;
+    @Column("bytea", {nullable: true})
+    airplaneIconFile?: Buffer;
+    @Column("bytea", {nullable: true})
+    wifiNoneIconFile?: Buffer;
+    @Column("bytea", {nullable: true})
+    wifi1IconFile?: Buffer;
+    @Column("bytea", {nullable: true})
+    wifi2IconFile?: Buffer;
+    @Column("bytea", {nullable: true})
+    wifi3IconFile?: Buffer;
+    @Column("bytea", {nullable: true})
+    ethIconFile?: Buffer;
+    @Column("bytea", {nullable: true})
+    backgroundImageFile?: Buffer;
 
     get batteryIconUrl(): string {
         return !!this.batteryIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,

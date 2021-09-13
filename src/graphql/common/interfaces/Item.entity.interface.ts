@@ -1,17 +1,9 @@
-import {
-    BaseEntity,
-    Column,
-    CreateDateColumn,
-    Generated,
-    JoinColumn,
-    ManyToOne,
-    PrimaryColumn,
-    UpdateDateColumn,
-} from "typeorm";
+import {Column, CreateDateColumn, Generated, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn} from "typeorm";
 import {UserEntity} from "../../User/User.entity";
+import {CachableEntityInterface} from "./Cachable.entity.interface";
 
 
-export abstract class ItemEntityInterface extends BaseEntity {
+export abstract class ItemEntityInterface extends CachableEntityInterface {
 
     @Column({type: "int", update: false})
     @Generated("increment")

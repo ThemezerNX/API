@@ -11,6 +11,9 @@ import {HBThemesAssetsRestModule} from "./hbthemes/assets/HBThemesAssets.rest.mo
 import {HBThemesDownloadRestModule} from "./hbthemes/download/HBThemesDownload.rest.module";
 import {PacksDownloadRestModule} from "./packs/download/PacksDownload.rest.module";
 import {PacksPreviewsRestModule} from "./packs/previews/PacksPreviews.rest.module";
+import {LayoutsDownloadRestModule} from "./layouts/download/LayoutsDownload.rest.module";
+import {LayoutsPreviewsRestModule} from "./layouts/previews/LayoutsPreviews.rest.module";
+import {LayoutsOptionsPreviewsRestModule} from "./layouts/options/previews/LayoutsOptionsPreviews.rest.module";
 
 @Module({
     imports: [
@@ -24,6 +27,9 @@ import {PacksPreviewsRestModule} from "./packs/previews/PacksPreviews.rest.modul
         HBThemesDownloadRestModule,
         PacksDownloadRestModule,
         PacksPreviewsRestModule,
+        LayoutsDownloadRestModule,
+        LayoutsPreviewsRestModule,
+        LayoutsOptionsPreviewsRestModule,
         RouterModule.register([
             {
                 path: "cdn",
@@ -76,6 +82,28 @@ import {PacksPreviewsRestModule} from "./packs/previews/PacksPreviews.rest.modul
                             {
                                 path: "download",
                                 module: PacksDownloadRestModule,
+                            },
+                        ],
+                    },
+                    {
+                        path: "layouts/:id",
+                        children: [
+                            {
+                                path: "previews",
+                                module: LayoutsPreviewsRestModule,
+                            },
+                            {
+                                path: "download",
+                                module: LayoutsDownloadRestModule,
+                            },
+                            {
+                                path: "options/:id",
+                                children: [
+                                    {
+                                        path: "previews",
+                                        module: LayoutsOptionsPreviewsRestModule,
+                                    },
+                                ],
                             },
                         ],
                     },

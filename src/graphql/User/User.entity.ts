@@ -1,11 +1,12 @@
-import {BaseEntity, Column, CreateDateColumn, Entity, Generated, OneToOne, PrimaryColumn} from "typeorm";
+import {Column, CreateDateColumn, Entity, Generated, OneToOne, PrimaryColumn} from "typeorm";
 import {UserPreferencesEntity} from "./Preferences/UserPreferences.entity";
 import {UserConnectionsEntity} from "./Connections/UserConnections.entity";
 import {UserProfileEntity} from "./Profile/UserProfile.entity";
+import {CachableEntityInterface} from "../common/interfaces/Cachable.entity.interface";
 
 
 @Entity()
-export class UserEntity extends BaseEntity {
+export class UserEntity extends CachableEntityInterface {
 
     @Column({type: "int", select: false, update: false})
     @Generated("increment")
@@ -21,7 +22,7 @@ export class UserEntity extends BaseEntity {
                         '0'
                     )
         `,
-        update: false
+        update: false,
     })
     id: string;
 
@@ -38,7 +39,7 @@ export class UserEntity extends BaseEntity {
         type: "char",
         length: 32,
         default: () => "md5(random()::text)",
-        update: false
+        update: false,
     })
     verificationToken: string;
 

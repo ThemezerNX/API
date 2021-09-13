@@ -7,6 +7,7 @@ import {UserEntity} from "../../../graphql/User/User.entity";
 import {UserAgent} from "../../common/decorators/UserAgent.decorator";
 import {ThemeDownloadService} from "../../../graphql/Theme/Download/ThemeDownload.service";
 import {ThemeCacheService} from "../../../graphql/Cache/Theme/ThemeCache.service";
+import {ThemeEntity} from "../../../graphql/Theme/Theme.entity";
 
 @Controller()
 export class ThemesDownloadRestController {
@@ -14,32 +15,33 @@ export class ThemesDownloadRestController {
     constructor(private themeService: ThemeService, private themeDownloadService: ThemeDownloadService, private themeCacheService: ThemeCacheService) {
     }
 
-    private async exists(id: string) {
-        const entity = await this.themeService.findOne({id}, []);
+    private async exists(id: string): Promise<ThemeEntity> {
+        const entity = await this.themeService.findOne({id}, ["layout", "creator"]);
         if (!entity) {
             throw new NotFoundException();
         }
+        return entity;
     }
 
     @Get()
     @Redirect()
     async getDownload(@Param("id") id: string, @ClientIP() ip: string, @CurrentUser() user: UserEntity, @UserAgent() userAgent: string) {
-        await this.exists(id);
+        const item = await this.exists(id);
 
         await this.themeDownloadService.increment(id, ip, userAgent, user ? user.id : undefined);
 
-        return {url: "download/theme.nxtheme"};
+        return {url: "download/theme.nxtheme?cache=" + item.cacheID + item.assets.cacheID + (item.layout ? item.layout.cacheID : 0) + item.creator.cacheID};
     }
 
     @Get("theme.nxtheme")
     @Header("Content-type", "application/nxtheme")
-    async getDownloadFile(@Param("id") id: string, @Res() res: Response){
+    async getDownloadFile(@Param("id") id: string, @Res() res: Response) {
         await this.exists(id);
 
         const {data, fileName} = await this.themeCacheService.getFile(id);
 
-        res.attachment(fileName)
-        res.end(data, 'binary')
+        res.attachment(fileName);
+        res.end(data, "binary");
     }
 
 }

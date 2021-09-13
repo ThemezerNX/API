@@ -25,7 +25,7 @@ export class PackCacheService {
 
         let data: Buffer;
         let fileName: string;
-        if (existingCache && false) {
+        if (existingCache) {
             data = existingCache.file;
             fileName = existingCache.fileName;
         } else {

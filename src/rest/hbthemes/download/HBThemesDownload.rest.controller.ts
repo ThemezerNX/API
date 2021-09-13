@@ -7,6 +7,7 @@ import {UserAgent} from "../../common/decorators/UserAgent.decorator";
 import {HBThemeService} from "../../../graphql/HBTheme/HBTheme.service";
 import {HBThemeDownloadService} from "../../../graphql/HBTheme/Download/HBThemeDownload.service";
 import {HBThemeCacheService} from "../../../graphql/Cache/HBTheme/HBThemeCache.service";
+import {HBThemeEntity} from "../../../graphql/HBTheme/HBTheme.entity";
 
 @Controller()
 export class HBThemesDownloadRestController {
@@ -14,32 +15,33 @@ export class HBThemesDownloadRestController {
     constructor(private hbthemeService: HBThemeService, private hbthemeDownloadService: HBThemeDownloadService, private hbthemeCacheService: HBThemeCacheService) {
     }
 
-    private async exists(id: string) {
-        const entity = await this.hbthemeService.findOne({id}, []);
+    private async exists(id: string): Promise<HBThemeEntity> {
+        const entity = await this.hbthemeService.findOne({id}, ["creator"]);
         if (!entity) {
             throw new NotFoundException();
         }
+        return entity;
     }
 
     @Get()
     @Redirect()
     async getDownload(@Param("id") id: string, @ClientIP() ip: string, @CurrentUser() user: UserEntity, @UserAgent() userAgent: string) {
-        await this.exists(id);
+        const item = await this.exists(id);
 
         await this.hbthemeDownloadService.increment(id, ip, userAgent, user ? user.id : undefined);
 
-        return {url: "download/theme.romfs"};
+        return {url: "download/theme.romfs?cache=" + item.cacheID + item.assets.cacheID + item.creator.cacheID};
     }
 
     @Get("theme.romfs")
     @Header("Content-type", "application/romfs")
-    async getDownloadFile(@Param("id") id: string, @Res() res: Response){
+    async getDownloadFile(@Param("id") id: string, @Res() res: Response) {
         await this.exists(id);
 
         const {data, fileName} = await this.hbthemeCacheService.getFile(id);
 
-        res.attachment(fileName)
-        res.end(data, 'binary')
+        res.attachment(fileName);
+        res.end(data, "binary");
     }
 
 }
