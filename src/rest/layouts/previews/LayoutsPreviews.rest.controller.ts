@@ -1,5 +1,4 @@
 import {Controller, Get, NotFoundException, Param, StreamableFile} from "@nestjs/common";
-import * as decode from "postgres-bytea";
 import {LayoutService} from "../../../graphql/Layout/Layout.service";
 import {LayoutPreviewsEntity} from "../../../graphql/Layout/Previews/LayoutPreviews.entity";
 
@@ -11,11 +10,11 @@ export class LayoutsPreviewsRestController {
 
     private async getFile(id: string, property: keyof LayoutPreviewsEntity): Promise<StreamableFile> {
         const entity = await this.layoutService.findOne({id}, ["previews"]);
-        const file = entity.previews[property];
+        const file = (entity?.previews[property] as Buffer);
         if (!entity || !file) {
             throw new NotFoundException();
         }
-        return new StreamableFile(decode(entity.previews[property]));
+        return new StreamableFile(file);
     }
 
     @Get("720.webp")

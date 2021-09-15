@@ -1,7 +1,7 @@
 import {Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
-import {LayoutEntity} from "../Layout.entity";
 import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
+import {LayoutEntity} from "../Layout.entity";
 
 @Entity()
 export class LayoutPreviewsEntity extends PreviewsEntityInterface {

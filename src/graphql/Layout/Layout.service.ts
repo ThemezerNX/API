@@ -11,7 +11,9 @@ import {toTsQuery} from "../common/TsQueryCreator";
 @Injectable()
 export class LayoutService {
 
-    constructor(@InjectRepository(LayoutEntity) private repository: Repository<LayoutEntity>) {
+    constructor(
+        @InjectRepository(LayoutEntity) private repository: Repository<LayoutEntity>,
+    ) {
     }
 
     findOne({id}: { id: string }, relations: string[] = []): Promise<LayoutEntity> {
@@ -53,7 +55,6 @@ export class LayoutService {
         const queryBuilder = this.repository.createQueryBuilder("layout")
             .where(findConditions)
             .leftJoinAndSelect("layout.previews", "previews")
-            .leftJoinAndSelect("layout.assets", "assets")
             .orderBy({["layout." + sort]: order});
 
         if (query?.length > 0) {

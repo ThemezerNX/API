@@ -1,10 +1,10 @@
 import {Module} from "@nestjs/common";
-import {HBThemeModule} from "../../../../graphql/HBTheme/HBTheme.module";
 import {LayoutsOptionsPreviewsRestController} from "./LayoutsOptionsPreviews.rest.controller";
+import {LayoutOptionModule} from "../../../graphql/LayoutOption/LayoutOption.module";
 
 @Module({
     imports: [
-        HBThemeModule,
+        LayoutOptionModule,
     ],
     controllers: [LayoutsOptionsPreviewsRestController],
 })

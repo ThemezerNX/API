@@ -13,10 +13,10 @@ export class ThemeAssetsEntity extends CachableEntityInterface {
     @PrimaryColumn({update: false})
     themeId: string;
 
-    @Column("jsonb", {nullable: true})
+    @Column("varchar", {nullable: true})
     customLayoutJson?: string;
 
-    @Column("jsonb", {nullable: true})
+    @Column("varchar", {nullable: true})
     customCommonLayoutJson?: string;
 
     @Column("bytea", {nullable: true})

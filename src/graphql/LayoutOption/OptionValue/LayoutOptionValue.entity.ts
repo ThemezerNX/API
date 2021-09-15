@@ -1,6 +1,6 @@
 import {BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn} from "typeorm";
 import {LayoutOptionValuePreviewsEntity} from "../OptionValuePreviews/LayoutOptionValuePreviews.entity";
-import {LayoutOptionEntity} from "../Option/LayoutOption.entity";
+import {LayoutOptionEntity} from "../LayoutOption.entity";
 
 
 @Entity()
@@ -13,7 +13,7 @@ export class LayoutOptionValueEntity extends BaseEntity {
     @PrimaryColumn("uuid", {update: false})
     uuid: string;
 
-    @Column("jsonb")
+    @Column("varchar")
     json: string;
 
     @OneToOne(() => LayoutOptionValuePreviewsEntity,

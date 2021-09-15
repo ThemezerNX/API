@@ -1,18 +1,10 @@
-import {Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {LayoutOptionValueEntity} from "../OptionValue/LayoutOptionValue.entity";
 import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
-import {LayoutEntity} from "../Layout.entity";
 
 @Entity()
 export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
-
-    @OneToOne(() => LayoutEntity, {onDelete: "CASCADE"})
-    @JoinColumn({name: "layoutId"})
-    layout: LayoutEntity;
-
-    @Column({update: false})
-    layoutId: string;
 
     @OneToOne(() => LayoutOptionValueEntity,
         layoutOptionValue => layoutOptionValue.previews,
@@ -24,7 +16,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
     layoutOptionValueUuid: string;
 
     get image720Url() {
-        return !!this.image720File ? CDNMapper.layouts.options.previews(this.layoutId,
+        return !!this.image720File ? CDNMapper.layoutOptions.previews(
             this.layoutOptionValueUuid,
             "720",
             "webp",
@@ -32,7 +24,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
     }
 
     get image360Url() {
-        return !!this.image360File ? CDNMapper.layouts.options.previews(this.layoutId,
+        return !!this.image360File ? CDNMapper.layoutOptions.previews(
             this.layoutOptionValueUuid,
             "360",
             "webp",
@@ -40,7 +32,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
     }
 
     get image240Url() {
-        return !!this.image240File ? CDNMapper.layouts.options.previews(this.layoutId,
+        return !!this.image240File ? CDNMapper.layoutOptions.previews(
             this.layoutOptionValueUuid,
             "240",
             "webp",
@@ -48,7 +40,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
     }
 
     get image180Url() {
-        return !!this.image180File ? CDNMapper.layouts.options.previews(this.layoutId,
+        return !!this.image180File ? CDNMapper.layoutOptions.previews(
             this.layoutOptionValueUuid,
             "180",
             "webp",
@@ -56,7 +48,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
     }
 
     get imagePlaceholderUrl() {
-        return !!this.imagePlaceholderFile ? CDNMapper.layouts.options.previews(this.layoutId,
+        return !!this.imagePlaceholderFile ? CDNMapper.layoutOptions.previews(
             this.layoutOptionValueUuid,
             "placeholder",
             "webp",

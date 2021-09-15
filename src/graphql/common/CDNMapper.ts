@@ -55,11 +55,12 @@ const itemRoutes = {
  V /packs/<id>/download/pack.zip?cache
  *
  * /layouts/<id>/previews/<filename>.<extension>?cache
- * /layouts/<id>/options/<options uuid>/previews/<filename>.<extension>?cache
  * /layouts/<id>/download
  * /layouts/<id>/downloadCommon
  * /layouts/<id>/download/layout.json?cache
  * /layouts/<id>/downloadCommon/commonLayout.json?cache
+ *
+ * /layoutOptions/<option uuid>/previews/<filename>.<extension>?cache
  *
  */
 
@@ -106,16 +107,16 @@ export const CDNMapper = {
         previews: (layoutId: string, resolution: string, extension: string, cacheID: number) => {
             return itemRoutes.previews("layouts", layoutId, resolution, extension, cacheID);
         },
-        options: {
-            previews: (layoutId: string, optionUuid: string, resolution: string, extension: string, cacheID: number) => {
-                return itemRoutes.previews(`layouts/${layoutId}/options`, optionUuid, resolution, extension, cacheID);
-            },
-        },
         download: (layoutId: string) => {
             return itemRoutes.download("layouts", layoutId, "layout");
         },
         downloadCommon: (layoutId: string) => {
             return itemRoutes.download("layouts", layoutId, "common");
+        },
+    },
+    layoutOptions: {
+        previews: (optionUuid: string, resolution: string, extension: string, cacheID: number) => {
+            return itemRoutes.previews("layoutOptions", optionUuid, resolution, extension, cacheID);
         },
     },
 };

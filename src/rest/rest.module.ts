@@ -13,7 +13,7 @@ import {PacksDownloadRestModule} from "./packs/download/PacksDownload.rest.modul
 import {PacksPreviewsRestModule} from "./packs/previews/PacksPreviews.rest.module";
 import {LayoutsDownloadRestModule} from "./layouts/download/LayoutsDownload.rest.module";
 import {LayoutsPreviewsRestModule} from "./layouts/previews/LayoutsPreviews.rest.module";
-import {LayoutsOptionsPreviewsRestModule} from "./layouts/options/previews/LayoutsOptionsPreviews.rest.module";
+import {LayoutsOptionsPreviewsRestModule} from "./layoutOptions/previews/LayoutsOptionsPreviews.rest.module";
 
 @Module({
     imports: [
@@ -96,14 +96,14 @@ import {LayoutsOptionsPreviewsRestModule} from "./layouts/options/previews/Layou
                                 path: "download",
                                 module: LayoutsDownloadRestModule,
                             },
+                        ],
+                    },
+                    {
+                        path: "layoutOptions/:uuid",
+                        children: [
                             {
-                                path: "options/:id",
-                                children: [
-                                    {
-                                        path: "previews",
-                                        module: LayoutsOptionsPreviewsRestModule,
-                                    },
-                                ],
+                                path: "previews",
+                                module: LayoutsOptionsPreviewsRestModule,
                             },
                         ],
                     },

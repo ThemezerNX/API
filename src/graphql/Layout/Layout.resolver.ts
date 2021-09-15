@@ -8,6 +8,8 @@ import {UserModel} from "../User/User.model";
 import {LayoutEntity} from "./Layout.entity";
 import {ItemSortArgs} from "../common/args/ItemSortArgs";
 import {PaginatedLayouts} from "./PaginatedLayouts.model";
+import {LayoutOptionModel} from "../LayoutOption/LayoutOption.model";
+import {LayoutOptionService} from "../LayoutOption/LayoutOption.service";
 
 
 @ArgsType()
@@ -25,13 +27,23 @@ class ListArgs {
 @Resolver(LayoutModel)
 export class LayoutResolver {
 
-    constructor(private layoutService: LayoutService, private userService: UserService) {
+    constructor(private layoutService: LayoutService, private layoutOptionService: LayoutOptionService, private userService: UserService) {
     }
 
     @ResolveField(() => UserModel)
     creator(@Parent() layout: LayoutEntity): Promise<UserModel> {
         const id = layout.creatorId;
         return this.userService.findOne({id});
+    }
+
+    @ResolveField(() => [LayoutOptionModel])
+    options(@Parent() layout: LayoutEntity): Promise<LayoutOptionModel[]> {
+        return this.layoutOptionService.findAll({layoutId: layout.id});
+    }
+
+    @ResolveField(() => [LayoutOptionModel])
+    globalOptions(): Promise<LayoutOptionModel[]> {
+        return this.layoutOptionService.findAll({layoutId: null});
     }
 
     @Query(() => LayoutModel, {

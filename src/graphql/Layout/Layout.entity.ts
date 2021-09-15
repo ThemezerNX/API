@@ -1,6 +1,6 @@
-import {Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne} from "typeorm";
+import {Column, Entity, JoinColumn, ManyToOne, OneToOne} from "typeorm";
 import {Target} from "../common/enums/Target";
-import {LayoutOptionEntity} from "./Option/LayoutOption.entity";
+import {LayoutOptionEntity} from "../LayoutOption/LayoutOption.entity";
 import {UserEntity} from "../User/User.entity";
 import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
 import {LayoutPreviewsEntity} from "./Previews/LayoutPreviews.entity";
@@ -27,14 +27,15 @@ export class LayoutEntity extends ItemEntityInterface {
     @Column("char", {length: 6, nullable: true})
     color?: string;
 
-    @Column("jsonb", {nullable: true})
+    @Column("varchar", {nullable: true})
     json?: string;
 
-    @Column("jsonb", {nullable: true})
+    @Column("varchar", {nullable: true})
     commonJson?: string;
 
-    @OneToMany(() => LayoutOptionEntity, layoutOption => layoutOption.layout, {cascade: true, eager: true})
     options: LayoutOptionEntity[];
+
+    globalOptions: LayoutOptionEntity[];
 
     @OneToOne(() => LayoutPreviewsEntity, layoutPreviews => layoutPreviews.layout, {cascade: true, eager: true})
     previews: LayoutPreviewsEntity;

@@ -1,5 +1,4 @@
 import {Controller, Get, NotFoundException, Param, StreamableFile} from "@nestjs/common";
-import * as decode from "postgres-bytea";
 import {ThemeService} from "../../../graphql/Theme/Theme.service";
 import {ThemeAssetsEntity} from "../../../graphql/Theme/Assets/ThemeAssets.entity";
 
@@ -11,11 +10,11 @@ export class ThemesAssetsRestController {
 
     private async getFile(id: string, property: keyof ThemeAssetsEntity): Promise<StreamableFile> {
         const entity = await this.themeService.findOne({id});
-        const file = entity.assets[property];
+        const file = (entity?.assets[property] as Buffer);
         if (!entity || !file) {
             throw new NotFoundException();
         }
-        return new StreamableFile(decode(entity.assets[property]));
+        return new StreamableFile(file);
     }
 
     @Get("image.jpg")

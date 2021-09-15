@@ -1,5 +1,4 @@
 import {Controller, Get, NotFoundException, Param, StreamableFile} from "@nestjs/common";
-import * as decode from "postgres-bytea";
 import {HBThemeService} from "../../../graphql/HBTheme/HBTheme.service";
 import {HBThemeAssetsEntity} from "../../../graphql/HBTheme/Assets/HBThemeAssets.entity";
 
@@ -11,11 +10,11 @@ export class HBThemesAssetsRestController {
 
     private async getFile(id: string, property: keyof HBThemeAssetsEntity): Promise<StreamableFile> {
         const entity = await this.hbthemeService.findOne({id});
-        const file = entity.assets[property];
+        const file = (entity?.assets[property] as Buffer);
         if (!entity || !file) {
             throw new NotFoundException();
         }
-        return new StreamableFile(decode(entity.assets[property]));
+        return new StreamableFile(file);
     }
 
     @Get("batteryIcon.png")

@@ -21,10 +21,10 @@ export class UserProfileEntity extends CachableEntityInterface {
     color?: string;
 
     @Column("bytea", {nullable: true})
-    avatarFile?: string;
+    avatarFile?: Buffer;
 
     @Column("bytea", {nullable: true})
-    bannerFile?: string;
+    bannerFile?: Buffer;
 
     get avatarUrl(): string {
         return !!this.avatarFile ? CDNMapper.users.avatar(this.userId, "webp", this.cacheID) : null;

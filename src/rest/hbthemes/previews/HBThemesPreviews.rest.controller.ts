@@ -1,5 +1,4 @@
 import {Controller, Get, NotFoundException, Param, StreamableFile} from "@nestjs/common";
-import * as decode from "postgres-bytea";
 import {HBThemeService} from "../../../graphql/HBTheme/HBTheme.service";
 import {HBThemePreviewsEntity} from "../../../graphql/HBTheme/Previews/HBThemePreviews.entity";
 
@@ -11,11 +10,11 @@ export class HBThemesPreviewsRestController {
 
     private async getFile(id: string, property: keyof HBThemePreviewsEntity): Promise<StreamableFile> {
         const entity = await this.hbthemeService.findOne({id}, ["previews"]);
-        const file = entity.previews[property];
+        const file = (entity?.previews[property] as Buffer);
         if (!entity || !file) {
             throw new NotFoundException();
         }
-        return new StreamableFile(decode(entity.previews[property]));
+        return new StreamableFile(file);
     }
 
     @Get("720.webp")
