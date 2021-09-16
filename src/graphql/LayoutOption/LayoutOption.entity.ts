@@ -20,6 +20,9 @@ export class LayoutOptionEntity extends BaseEntity {
     })
     type: LayoutOptionType;
 
+    @Column()
+    order: number;
+
     @ManyToOne(() => LayoutEntity, layout => layout.options, {onDelete: "CASCADE", nullable: true})
     @JoinColumn({name: "layoutId"})
     layout?: LayoutEntity;

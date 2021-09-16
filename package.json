@@ -29,6 +29,7 @@
         "@nestjs/platform-express": "^8.0.0",
         "@nestjs/serve-static": "^2.2.2",
         "@nestjs/typeorm": "^8.0.2",
+        "@themezernx/json-merger": "https://github.com/ThemezerNX/JSON-Merger.git",
         "@themezernx/layout-id-parser": "^1.1.1",
         "@themezernx/sarclib": "^1.0.1",
         "@themezernx/target-parser": "^1.0.5",
@@ -42,6 +43,7 @@
         "cookie-parser": "^1.4.5",
         "discord.js": "^13.1.0",
         "dotenv": "^10.0.0",
+        "expr-eval": "^2.0.2",
         "express-session": "^1.17.2",
         "file-type": "^16.5.3",
         "graphql": "^15.5.1",
@@ -58,7 +60,8 @@
         "reflect-metadata": "^0.1.13",
         "rimraf": "^3.0.2",
         "rxjs": "^7.2.0",
-        "typeorm": "^0.2.37"
+        "typeorm": "^0.2.37",
+        "uuid": "^8.3.2"
     },
     "devDependencies": {
         "@nestjs/cli": "^8.0.0",

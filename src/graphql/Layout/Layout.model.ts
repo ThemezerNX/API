@@ -10,9 +10,6 @@ import {LayoutPreviewsModel} from "./Previews/LayoutPreviews.model";
 @ObjectType("Layout", {implements: [ItemModelInterface]})
 export class LayoutModel extends ItemModelInterface {
 
-    @Field(() => UUIDResolver)
-    uuid: string;
-
     @Field()
     creator: UserModel;
 

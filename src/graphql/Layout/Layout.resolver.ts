@@ -10,6 +10,8 @@ import {ItemSortArgs} from "../common/args/ItemSortArgs";
 import {PaginatedLayouts} from "./PaginatedLayouts.model";
 import {LayoutOptionModel} from "../LayoutOption/LayoutOption.model";
 import {LayoutOptionService} from "../LayoutOption/LayoutOption.service";
+import {FileModel} from "../common/models/File.model";
+import {IsDecimal, IsHexColor, IsInt, IsNumber, IsUUID} from "class-validator";
 
 
 @ArgsType()
@@ -21,6 +23,33 @@ class ListArgs {
     query?: string;
     @Field(() => [String], {nullable: true})
     creators?: string[];
+
+}
+
+@ArgsType()
+export class ChosenLayoutOption {
+
+    @Field({nullable: true})
+    @IsUUID()
+    uuid: string;
+
+    @Field({nullable: true})
+    stringValue?: string;
+
+    @Field({nullable: true})
+    @IsHexColor()
+    colorValue?: string;
+
+    @Field({nullable: true})
+    @IsInt()
+    integerValue?: number;
+
+    @Field({nullable: true})
+    @IsDecimal()
+    decimalValue?: number;
+
+    @Field({nullable: true})
+    booleanValue?: boolean;
 
 }
 
@@ -81,6 +110,16 @@ export class LayoutResolver {
         return this.layoutService.findRandom({
             ...limitArg,
         });
+    }
+
+    @Query(() => FileModel, {
+        description: `Combine a layout with options`,
+    })
+    buildLayout(
+        @Args("id") id: string,
+        @Args("options") options: ChosenLayoutOption[],
+    ): Promise<FileModel> {
+        return this.layoutService.buildOne({id}, options);
     }
 
 }
