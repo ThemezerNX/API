@@ -123,17 +123,18 @@ export class ThemeService {
             findConditions.isNSFW = false;
         }
 
-        const query = this.repository.createQueryBuilder("theme")
+        const queryBuilder = this.repository.createQueryBuilder("theme")
             .where(findConditions)
             .leftJoinAndSelect("theme.previews", "previews")
             .leftJoinAndSelect("theme.assets", "assets")
+            .leftJoinAndSelect("theme.tags", "tags")
             .orderBy("RANDOM()");
 
         if (limit != undefined) {
-            query.limit(limit);
+            queryBuilder.limit(limit);
         }
 
-        return query.getMany();
+        return queryBuilder.getMany();
     }
 
 }

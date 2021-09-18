@@ -105,15 +105,18 @@ export class HBThemeService {
             findConditions.isNSFW = false;
         }
 
-        const query = this.repository.createQueryBuilder()
+        const queryBuilder = this.repository.createQueryBuilder("hbtheme")
             .where(findConditions)
+            .leftJoinAndSelect("hbtheme.previews", "previews")
+            .leftJoinAndSelect("hbtheme.assets", "assets")
+            .leftJoinAndSelect("hbtheme.tags", "tags")
             .orderBy("RANDOM()");
 
-        if (limit) {
-            query.limit(limit);
+        if (limit != undefined) {
+            queryBuilder.limit(limit);
         }
 
-        return query.getMany();
+        return queryBuilder.getMany();
     }
 
 }

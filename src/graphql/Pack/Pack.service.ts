@@ -113,23 +113,31 @@ export class PackService {
                 includeNSFW?: boolean
             },
     ): Promise<PackEntity[]> {
-        const findConditions: FindConditions<PackEntity> = {};
+        const queryBuilder = this.repository.createQueryBuilder("pack");
 
         if (includeNSFW != true) {
-            findConditions.themes = [{
-                isNSFW: false,
-            }];
+            queryBuilder.andWhere(qb => {
+                const sub = qb.subQuery()
+                    .select("theme2.isNSFW OR hbtheme2.isNSFW")
+                    .from(PackEntity, "pack2")
+                    .where("pack2.id = pack.id")
+                    .leftJoin(ThemeEntity, "theme2", "pack2.id = theme2.packId")
+                    .leftJoin(HBThemeEntity, "hbtheme2", "pack2.id = hbtheme2.packId");
+                return "TRUE NOT IN" + sub.getQuery();
+            });
         }
-
-        const query = this.repository.createQueryBuilder()
-            .where(findConditions)
-            .orderBy("RANDOM()");
 
         if (limit != undefined) {
-            query.limit(limit);
+            queryBuilder.limit(limit);
         }
 
-        return query.getMany();
+        queryBuilder
+            .leftJoinAndSelect("pack.themes", "themes")
+            .leftJoinAndSelect("pack.hbThemes", "hbthemes")
+            .leftJoinAndSelect("pack.previews", "previews")
+            .orderBy("RANDOM()");
+
+        return queryBuilder.getMany();
     }
 
 }

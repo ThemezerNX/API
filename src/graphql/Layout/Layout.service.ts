@@ -162,19 +162,29 @@ export class LayoutService {
     findRandom(
         {
             limit,
+            target,
         }:
             {
                 limit?: number,
+                target?: Target,
             },
     ): Promise<LayoutEntity[]> {
-        const query = this.repository.createQueryBuilder()
+        const findConditions: FindConditions<LayoutEntity> = {};
+
+        if (target != undefined) {
+            findConditions.target = target;
+        }
+
+        const queryBuilder = this.repository.createQueryBuilder("layout")
+            .where(findConditions)
+            .leftJoinAndSelect("layout.previews", "previews")
             .orderBy("RANDOM()");
 
         if (limit != undefined) {
-            query.limit(limit);
+            queryBuilder.limit(limit);
         }
 
-        return query.getMany();
+        return queryBuilder.getMany();
     }
 
     async buildOne(id: string, options: ChosenLayoutOption[]): Promise<FileModel> {
