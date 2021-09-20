@@ -17,6 +17,7 @@ export const errorName = {
     MAX_50_NXTHEMES: "MAX_50_NXTHEMES",
     INVALID_FILE_TYPE: "INVALID_FILE_TYPE",
     INVALID_SCREENSHOT_DIMENSIONS: "INVALID_SCREENSHOT_DIMENSIONS",
+    NOT_A_SCREENSHOT: "NOT_A_SCREENSHOT",
     INVALID_TMP: "INVALID_TMP",
     INVALID_ID: "INVALID_ID",
     INVALID_TARGET_NAME: "INVALID_TARGET_NAME",
@@ -103,6 +104,9 @@ export const errorType = {
             size: "1280×720",
         },
         statusCode: 4011,
+    },
+    NOT_A_SCREENSHOT: {
+        statusCode: 4012,
     },
     INVALID_TMP: {
         statusCode: 4005,

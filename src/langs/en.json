@@ -13,6 +13,7 @@
     "MAX_50_NXTHEMES": "A maximum of 50 NXThemes is allowed",
     "INVALID_FILE_TYPE": "Invalid file type detected",
     "INVALID_SCREENSHOT_DIMENSIONS": "Screenshots must be {size}",
+    "NOT_A_SCREENSHOT": "Screenshots must be taken on the Switch",
     "INVALID_TMP": "Invalid tmp argument",
     "INVALID_ID": "Invalid Themezer Layout ID",
     "INVALID_TARGET_NAME": "'{param1}' invalid. Try recreating the theme",

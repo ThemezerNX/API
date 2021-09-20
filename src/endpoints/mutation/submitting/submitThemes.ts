@@ -8,6 +8,7 @@ import {fileNameToWebName, validFileName} from "../../../util/targetParser";
 import {packMessage, themeMessage} from "../../../util/webhookMessages";
 import {avatar, packsCS, saveFiles, storagePath, themesCS, urlNameREGEX} from "../../resolvers";
 import {allowedFilesInNXTheme} from "../../../filetypes/Theme";
+import exifr from "exifr";
 
 const webhook = require("webhook-discord");
 const rimraf = require("rimraf");
@@ -61,15 +62,21 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                 const path = decrypt(themes[i].tmp);
                                 // If a valid jpeg
                                 const imagePath = `${path}/${file}`;
-                                if (await isJpegPromisified(imagePath)) {
-                                    sizeOf(imagePath, function (err, dimensions) {
-                                        if (err) reject(err);
-                                        else if (dimensions.width === 1280 && dimensions.height === 720) {
-                                            resolve(path);
-                                        } else {
-                                            reject(new Error(errorName.INVALID_SCREENSHOT_DIMENSIONS));
-                                        }
-                                    });
+                                const isJpeg = await isJpegPromisified(imagePath);
+                                const hasSwitchMetadata = (await exifr.parse(imagePath))?.Make.includes("Nintendo");
+                                if (isJpeg) {
+                                    if (hasSwitchMetadata) {
+                                        sizeOf(imagePath, function (err, dimensions) {
+                                            if (err) reject(err);
+                                            else if (dimensions.width === 1280 && dimensions.height === 720) {
+                                                resolve(path);
+                                            } else {
+                                                reject(new Error(errorName.INVALID_SCREENSHOT_DIMENSIONS));
+                                            }
+                                        });
+                                    } else {
+                                        reject(new Error(errorName.NOT_A_SCREENSHOT))
+                                    }
                                 }
                             });
                         });
