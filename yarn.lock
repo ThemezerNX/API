@@ -1058,10 +1058,10 @@
   version "1.0.2"
   resolved "https://github.com/ThemezerNX/JSON-Merger.git#d8c536faf6fbf405192eb0fe4dddc76f2a46f65c"
 
-"@themezernx/layout-id-parser@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@themezernx/layout-id-parser/-/layout-id-parser-1.1.1.tgz#b672aed7155493fbe71bc06f8e2154d583239b70"
-  integrity sha512-t9+iYyIhGyXLRnlmV/X+So9Ro0BWyDjxK1Qna+nzmTnJecz6DVVZjEqsXo6GcUz0+U/aaWTkbhM8ptqp7vMY4g==
+"@themezernx/layout-id-parser@^2.0.0":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@themezernx/layout-id-parser/-/layout-id-parser-2.0.1.tgz#70816045b0c8a22c6a30e4cc7e640cf11a5818be"
+  integrity sha512-2VuRck2oYeDYci8An5y93GH9BtABP424VqjOE5p9y7BsyqKwrYLAYczbdIETXiOIUxwnf4eDnN+vR2MoPFWtww==
 
 "@themezernx/sarclib@^1.0.1":
   version "1.0.1"

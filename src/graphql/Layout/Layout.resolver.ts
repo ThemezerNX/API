@@ -1,4 +1,4 @@
-import {Args, ArgsType, Field, Parent, Query, ResolveField, Resolver} from "@nestjs/graphql";
+import {Args, ArgsType, Field, InputType, Parent, Query, ResolveField, Resolver} from "@nestjs/graphql";
 import {Target} from "../common/enums/Target";
 import {LayoutModel} from "./Layout.model";
 import {LayoutService} from "./Layout.service";
@@ -11,7 +11,7 @@ import {PaginatedLayouts} from "./PaginatedLayouts.model";
 import {LayoutOptionModel} from "../LayoutOption/LayoutOption.model";
 import {LayoutOptionService} from "../LayoutOption/LayoutOption.service";
 import {FileModel} from "../common/models/File.model";
-import {IsDecimal, IsHexColor, IsInt, IsNumber, IsUUID} from "class-validator";
+import {IsDecimal, IsHexColor, IsInt, IsNotEmpty, IsUUID, Length} from "class-validator";
 
 
 @ArgsType()
@@ -26,30 +26,29 @@ class ListArgs {
 
 }
 
-@ArgsType()
-export class ChosenLayoutOption {
+@InputType()
+export class ChosenLayoutOptionValue {
 
     @Field({nullable: true})
     @IsUUID()
     uuid: string;
 
-    @Field({nullable: true})
-    stringValue?: string;
-
-    @Field({nullable: true})
-    @IsHexColor()
-    colorValue?: string;
-
-    @Field({nullable: true})
+    @Field({nullable: true, description: "Only one of the value fields is required."})
     @IsInt()
     integerValue?: number;
 
-    @Field({nullable: true})
+    @Field({nullable: true, description: "Only one of the value fields is required."})
     @IsDecimal()
     decimalValue?: number;
 
-    @Field({nullable: true})
-    booleanValue?: boolean;
+    @Field({nullable: true, description: "Only one of the value fields is required."})
+    @IsNotEmpty()
+    stringValue?: string;
+
+    @Field({nullable: true, description: "Only one of the value fields is required."})
+    @IsHexColor()
+    @Length(8, 8) // TODO: check if this works
+    colorValue?: string;
 
 }
 
@@ -61,18 +60,13 @@ export class LayoutResolver {
 
     @ResolveField(() => UserModel)
     creator(@Parent() layout: LayoutEntity): Promise<UserModel> {
-        const id = layout.creatorId;
-        return this.userService.findOne({id});
+        return this.userService.findOne({id: layout.creatorId});
     }
 
     @ResolveField(() => [LayoutOptionModel])
     options(@Parent() layout: LayoutEntity): Promise<LayoutOptionModel[]> {
-        return this.layoutOptionService.findAll({layoutId: layout.id});
-    }
-
-    @ResolveField(() => [LayoutOptionModel])
-    globalOptions(): Promise<LayoutOptionModel[]> {
-        return this.layoutOptionService.findAll({layoutId: null});
+        // this loads all options by priority asc, instead of randomly (typeorm relation can't be ordered by)
+        return this.layoutOptionService.findAllOptions({layoutId: layout.id});
     }
 
     @Query(() => LayoutModel, {
@@ -106,9 +100,11 @@ export class LayoutResolver {
     })
     randomLayouts(
         @Args() limitArg?: LimitArg,
+        @Args("target", {nullable: true}) target?: Target,
     ): Promise<LayoutModel[]> {
         return this.layoutService.findRandom({
             ...limitArg,
+            target,
         });
     }
 
@@ -117,9 +113,9 @@ export class LayoutResolver {
     })
     buildLayout(
         @Args("id") id: string,
-        @Args("options") options: ChosenLayoutOption[],
+        @Args({name: "options", type: () => [ChosenLayoutOptionValue]}) options: ChosenLayoutOptionValue[],
     ): Promise<FileModel> {
-        return this.layoutService.buildOne({id}, options);
+        return this.layoutService.buildOne(id, options);
     }
 
 }

@@ -6,6 +6,7 @@ import {LayoutModel} from "../Layout/Layout.model";
 import {ThemeAssetsModel} from "./Assets/ThemeAssets.model";
 import {ThemePreviewsModel} from "./Previews/ThemePreviews.model";
 import {ThemeTagModel} from "../ThemeTag/ThemeTag.model";
+import {ThemeOptionModel} from "./ThemeOptions/ThemeOption.model";
 
 
 @ObjectType("Theme", {implements: [ItemModelInterface]})
@@ -28,6 +29,9 @@ export class ThemeModel extends ItemModelInterface {
 
     @Field(() => ThemePreviewsModel)
     previews: ThemePreviewsModel;
+
+    @Field(() => [ThemeOptionModel])
+    options: ThemeOptionModel[];
 
     @Field(() => ThemeAssetsModel)
     assets: ThemeAssetsModel;

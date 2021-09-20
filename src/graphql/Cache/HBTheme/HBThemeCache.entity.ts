@@ -13,7 +13,7 @@ export class HBThemeCacheEntity extends ItemCacheEntityInterface {
     @PrimaryColumn()
     hbthemeId: string;
 
-    @Column()
+    @Column({type: "bytea"})
     file: Buffer;
 
 }

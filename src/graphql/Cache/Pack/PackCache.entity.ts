@@ -12,7 +12,7 @@ export class PackCacheEntity extends ItemCacheEntityInterface {
     @PrimaryColumn()
     packId: string;
 
-    @Column()
+    @Column({type: "bytea"})
     file: Buffer;
 
 }

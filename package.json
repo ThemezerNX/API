@@ -30,7 +30,7 @@
         "@nestjs/serve-static": "^2.2.2",
         "@nestjs/typeorm": "^8.0.2",
         "@themezernx/json-merger": "https://github.com/ThemezerNX/JSON-Merger.git",
-        "@themezernx/layout-id-parser": "^1.1.1",
+        "@themezernx/layout-id-parser": "^2.0.0",
         "@themezernx/sarclib": "^1.0.1",
         "@themezernx/target-parser": "^1.0.5",
         "adm-zip": "^0.5.6",

@@ -20,19 +20,28 @@ export class LayoutOptionService {
         });
     }
 
-    findValues({uuids}: { uuids: string[] }, relations: string[] = []): Promise<LayoutOptionValueEntity[]> {
+    findValues({uuids}: { uuids: string[] }): Promise<LayoutOptionValueEntity[]> {
         return this.valueRepository.createQueryBuilder("values")
             .where({uuid: In(uuids)})
-            .leftJoin("value.layoutOption", "layoutOption")
-            .orderBy({"layoutOption.order": "ASC"}) // NULLs must be last! (global has NULL)
+            .leftJoinAndSelect("value.layoutOption", "layoutOption")
+            .orderBy({"layoutOption.priority": "ASC"}) // Order by priority; <= 99: layout-specific, >=100 global
             .getMany();
     }
 
-    findAll({layoutId}: { layoutId: string }, relations: string[] = []): Promise<LayoutOptionEntity[]> {
-        return this.repository.find({
-            where: {layoutId},
+    findOption({
+                   id,
+               }: { id: number }, relations: string[] = []): Promise<LayoutOptionEntity> {
+        return this.repository.findOne({
+            where: {id},
             relations,
         });
+    }
+
+    findAllOptions({layoutId}: { layoutId: string }): Promise<LayoutOptionEntity[]> {
+        return this.repository.createQueryBuilder("options")
+            .where({layoutId})
+            .orderBy({"priority": "ASC"}) // Order by priority; <= 99: layout-specific, >=100 global
+            .getMany();
     }
 
 }

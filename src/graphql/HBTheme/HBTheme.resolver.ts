@@ -34,8 +34,7 @@ export class HBThemeResolver {
 
     @ResolveField(() => UserModel)
     creator(@Parent() hbtheme: HBThemeEntity): Promise<UserModel> {
-        const id = hbtheme.creatorId;
-        return this.userService.findOne({id});
+        return this.userService.findOne({id: hbtheme.creatorId});
     }
 
     @Query(() => HBThemeModel, {

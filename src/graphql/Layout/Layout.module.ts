@@ -14,7 +14,7 @@ import {LayoutOptionModule} from "../LayoutOption/LayoutOption.module";
         LayoutOptionModule,
         LayoutDownloadModule,
     ],
-    providers: [LayoutResolver, LayoutService],
+    providers: [LayoutService, LayoutResolver],
     exports: [LayoutService, LayoutDownloadModule],
 })
 export class LayoutModule {

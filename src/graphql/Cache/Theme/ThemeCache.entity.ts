@@ -13,7 +13,7 @@ export class ThemeCacheEntity extends ItemCacheEntityInterface {
     @PrimaryColumn()
     themeId: string;
 
-    @Column()
+    @Column({type: "bytea"})
     file: Buffer;
 
 }

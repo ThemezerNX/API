@@ -4,6 +4,8 @@ import {UserModule} from "../User/User.module";
 import {LayoutOptionEntity} from "./LayoutOption.entity";
 import {LayoutOptionService} from "./LayoutOption.service";
 import {LayoutOptionValueEntity} from "./OptionValue/LayoutOptionValue.entity";
+import {LayoutOptionValueResolver} from "./OptionValue/LayoutOptionValue.resolver";
+import {LayoutOptionResolver} from "./LayoutOption.resolver";
 
 @Module({
     imports: [
@@ -11,7 +13,7 @@ import {LayoutOptionValueEntity} from "./OptionValue/LayoutOptionValue.entity";
         TypeOrmModule.forFeature([LayoutOptionValueEntity]),
         UserModule,
     ],
-    providers: [LayoutOptionService],
+    providers: [LayoutOptionService, LayoutOptionResolver, LayoutOptionValueResolver],
     exports: [LayoutOptionService],
 })
 export class LayoutOptionModule {

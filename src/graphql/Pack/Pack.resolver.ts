@@ -32,8 +32,7 @@ export class PackResolver {
 
     @ResolveField(() => UserModel)
     creator(@Parent() pack: PackEntity): Promise<UserModel> {
-        const id = pack.creatorId;
-        return this.userService.findOne({id});
+        return this.userService.findOne({id: pack.creatorId});
     }
 
     @ResolveField()

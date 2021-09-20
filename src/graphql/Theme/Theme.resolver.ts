@@ -10,6 +10,8 @@ import {ItemSortArgs} from "../common/args/ItemSortArgs";
 import {PaginatedThemes} from "./PaginatedThemes.model";
 import {FileUpload, GraphQLUpload} from "graphql-upload";
 import {UnknownError} from "../common/errors/Unknown.error";
+import {ThemeOptionModel} from "./ThemeOptions/ThemeOption.model";
+import {ThemeOptionService} from "./ThemeOptions/ThemeOption.service";
 
 
 @ArgsType()
@@ -31,13 +33,17 @@ class ListArgs {
 @Resolver(ThemeModel)
 export class ThemeResolver {
 
-    constructor(private themeService: ThemeService, private userService: UserService) {
+    constructor(private themeService: ThemeService, private userService: UserService, private optionService: ThemeOptionService) {
     }
 
     @ResolveField(() => UserModel)
     creator(@Parent() theme: ThemeEntity): Promise<UserModel> {
-        const id = theme.creatorId;
-        return this.userService.findOne({id});
+        return this.userService.findOne({id: theme.creatorId});
+    }
+
+    @ResolveField(() => [ThemeOptionModel])
+    options(@Parent() theme: ThemeEntity): Promise<ThemeOptionModel[]> {
+        return this.optionService.findAll({themeId: theme.id});
     }
 
     @Query(() => ThemeModel, {

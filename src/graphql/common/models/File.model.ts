@@ -1,4 +1,5 @@
 import {Field, ObjectType} from "@nestjs/graphql";
+import {ByteResolver, UUIDResolver} from "graphql-scalars";
 
 @ObjectType("File")
 export class FileModel {
@@ -12,7 +13,7 @@ export class FileModel {
     @Field()
     filename: string;
 
-    @Field(() => Buffer)
+    @Field(() => [ByteResolver])
     data: Buffer;
 
     @Field()

@@ -14,6 +14,7 @@ import {ThemeTagModule} from "./ThemeTag/ThemeTag.module";
 import {AuthModule} from "./Auth/Auth.module";
 import {NXInstallerModule} from "./NXInstaller/NXInstaller.module";
 import {getConnectionOptions} from "typeorm";
+import {LayoutOptionModule} from "./LayoutOption/LayoutOption.module";
 
 @Module({
     imports: [
@@ -77,6 +78,7 @@ import {getConnectionOptions} from "typeorm";
         HBThemeModule,
         PackModule,
         LayoutModule,
+        LayoutOptionModule,
         ThemeTagModule,
         NXInstallerModule,
         AuthModule,
@@ -84,6 +86,6 @@ import {getConnectionOptions} from "typeorm";
 })
 export class GraphqlModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
-        consumer.apply(graphqlUploadExpress()).forRoutes("/");
+        consumer.apply(graphqlUploadExpress()).forRoutes("/"); // TODO: should this be /graphql?
     }
 }

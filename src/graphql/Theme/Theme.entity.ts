@@ -46,6 +46,10 @@ export class ThemeEntity extends ItemEntityInterface {
     @OneToOne(() => ThemeAssetsEntity, themeAssets => themeAssets.theme, {cascade: true, eager: true})
     assets: ThemeAssetsEntity;
 
+    get options(): undefined {
+        return undefined;
+    }
+
     get downloadUrl(): string {
         return CDNMapper.themes.download(this.id);
     }
