@@ -40,56 +40,56 @@ export class ThemeAssetsEntity extends CachableEntityInterface {
         return !!this.imageFile ? CDNMapper.themes.assets(this.themeId,
             "image",
             "jpg",
-            this.cacheID) : null;
+            this.cacheId) : null;
     };
 
     get albumIconUrl(): string {
         return !!this.albumIconFile ? CDNMapper.themes.assets(this.themeId,
             "albumIcon",
             "png",
-            this.cacheID) : null;
+            this.cacheId) : null;
     };
 
     get newsIconUrl(): string {
         return !!this.newsIconFile ? CDNMapper.themes.assets(this.themeId,
             "newsIcon",
             "png",
-            this.cacheID) : null;
+            this.cacheId) : null;
     };
 
     get shopIconUrl(): string {
         return !!this.shopIconFile ? CDNMapper.themes.assets(this.themeId,
             "shopIcon",
             "png",
-            this.cacheID) : null;
+            this.cacheId) : null;
     };
 
     get controllerIconUrl(): string {
         return !!this.controllerIconFile ? CDNMapper.themes.assets(this.themeId,
             "controllerIcon",
             "png",
-            this.cacheID) : null;
+            this.cacheId) : null;
     };
 
     get settingsIconUrl(): string {
         return !!this.settingsIconFile ? CDNMapper.themes.assets(this.themeId,
             "settingsIcon",
             "png",
-            this.cacheID) : null;
+            this.cacheId) : null;
     };
 
     get powerIconUrl(): string {
         return !!this.powerIconFile ? CDNMapper.themes.assets(this.themeId,
             "powerIcon",
             "png",
-            this.cacheID) : null;
+            this.cacheId) : null;
     };
 
     get homeIconUrl(): string {
         return !!this.homeIconFile ? CDNMapper.themes.assets(this.themeId,
             "homeIcon",
             "png",
-            this.cacheID) : null;
+            this.cacheId) : null;
     };
 
 }

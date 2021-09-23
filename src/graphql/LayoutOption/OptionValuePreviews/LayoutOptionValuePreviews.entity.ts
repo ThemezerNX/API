@@ -20,7 +20,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
             this.layoutOptionValueUuid,
             "720",
             "webp",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get image360Url() {
@@ -28,7 +28,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
             this.layoutOptionValueUuid,
             "360",
             "webp",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get image240Url() {
@@ -36,7 +36,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
             this.layoutOptionValueUuid,
             "240",
             "webp",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get image180Url() {
@@ -44,7 +44,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
             this.layoutOptionValueUuid,
             "180",
             "webp",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get imagePlaceholderUrl() {
@@ -52,7 +52,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
             this.layoutOptionValueUuid,
             "placeholder",
             "webp",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
 }

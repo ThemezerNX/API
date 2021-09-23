@@ -33,16 +33,16 @@ export class PacksDownloadRestController {
         let themesCacheId = 0;
         if (item.themes) {
             for (const theme of item.themes) {
-                themesCacheId += theme.cacheID + theme.assets.cacheID + (theme.layout ? theme.layout.cacheID : 0);
+                themesCacheId += theme.cacheId + theme.assets.cacheId + (theme.layout ? theme.layout.cacheId : 0);
             }
         }
         if (item.hbthemes) {
             for (const hbtheme of item.hbthemes) {
-                themesCacheId += hbtheme.cacheID + hbtheme.assets.cacheID;
+                themesCacheId += hbtheme.cacheId + hbtheme.assets.cacheId;
             }
         }
 
-        return {url: "download/pack.zip?cache=" + item.cacheID + item.creator.cacheID + themesCacheId};
+        return {url: "download/pack.zip?cache=" + item.cacheId + item.creator.cacheId + themesCacheId};
     }
 
     @Get("pack.zip")

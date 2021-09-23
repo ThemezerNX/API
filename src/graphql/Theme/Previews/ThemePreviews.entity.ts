@@ -14,26 +14,26 @@ export class ThemePreviewsEntity extends PreviewsEntityInterface {
     themeId: string;
 
     get image720Url() {
-        return !!this.image720File ? CDNMapper.themes.previews(this.themeId, "720", "webp", this.cacheID) : null;
+        return !!this.image720File ? CDNMapper.themes.previews(this.themeId, "720", "webp", this.cacheId) : null;
     }
 
     get image360Url() {
-        return !!this.image360File ? CDNMapper.themes.previews(this.themeId, "360", "webp", this.cacheID) : null;
+        return !!this.image360File ? CDNMapper.themes.previews(this.themeId, "360", "webp", this.cacheId) : null;
     }
 
     get image240Url() {
-        return !!this.image240File ? CDNMapper.themes.previews(this.themeId, "240", "jpg", this.cacheID) : null;
+        return !!this.image240File ? CDNMapper.themes.previews(this.themeId, "240", "jpg", this.cacheId) : null;
     }
 
     get image180Url() {
-        return !!this.image180File ? CDNMapper.themes.previews(this.themeId, "180", "webp", this.cacheID) : null;
+        return !!this.image180File ? CDNMapper.themes.previews(this.themeId, "180", "webp", this.cacheId) : null;
     }
 
     get imagePlaceholderUrl() {
         return !!this.imagePlaceholderFile ? CDNMapper.themes.previews(this.themeId,
             "placeholder",
             "webp",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
 }

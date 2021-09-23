@@ -30,7 +30,7 @@ export class HBThemesDownloadRestController {
 
         await this.hbthemeDownloadService.increment(id, ip, userAgent, user ? user.id : undefined);
 
-        return {url: "download/theme.romfs?cache=" + item.cacheID + item.assets.cacheID + item.creator.cacheID};
+        return {url: "download/theme.romfs?cache=" + item.cacheId + item.assets.cacheId + item.creator.cacheId};
     }
 
     @Get("theme.romfs")

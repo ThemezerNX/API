@@ -27,11 +27,11 @@ export class UserProfileEntity extends CachableEntityInterface {
     bannerFile?: Buffer;
 
     get avatarUrl(): string {
-        return !!this.avatarFile ? CDNMapper.users.avatar(this.userId, "webp", this.cacheID) : null;
+        return !!this.avatarFile ? CDNMapper.users.avatar(this.userId, "webp", this.cacheId) : null;
     };
 
     get bannerUrl(): string {
-        return !!this.bannerFile ? CDNMapper.users.banner(this.userId, "webp", this.cacheID) : null;
+        return !!this.bannerFile ? CDNMapper.users.banner(this.userId, "webp", this.cacheId) : null;
     }
 
 }

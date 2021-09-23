@@ -30,7 +30,7 @@ export class ThemesDownloadRestController {
 
         await this.themeDownloadService.increment(id, ip, userAgent, user ? user.id : undefined);
 
-        return {url: "download/theme.nxtheme?cache=" + item.cacheID + item.assets.cacheID + (item.layout ? item.layout.cacheID : 0) + item.creator.cacheID};
+        return {url: "download/theme.nxtheme?cache=" + item.cacheId + item.assets.cacheId + (item.layout ? item.layout.cacheId : 0) + item.creator.cacheId};
     }
 
     @Get("theme.nxtheme")

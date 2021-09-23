@@ -2,20 +2,20 @@ const url = (path: string) => {
     return process.env.CDN_ENDPOINT + "/" + path;
 };
 
-const cacheUrl = (path: string, cacheID: number, alreadyHasQueryParameters: boolean = false) => {
-    return url(path + (alreadyHasQueryParameters ? "&" : "?") + "cache=" + cacheID);
+const cacheUrl = (path: string, cacheId: number, alreadyHasQueryParameters: boolean = false) => {
+    return url(path + (alreadyHasQueryParameters ? "&" : "?") + "cache=" + cacheId);
 };
 
-const itemRoute = (itemType: string, itemId: string, itemProperty: string, fileName: string, extension: string, cacheID: number) => {
-    return cacheUrl(`${itemType}/${itemId}/${itemProperty}/${fileName}.${extension}`, cacheID);
+const itemRoute = (itemType: string, itemId: string, itemProperty: string, fileName: string, extension: string, cacheId: number) => {
+    return cacheUrl(`${itemType}/${itemId}/${itemProperty}/${fileName}.${extension}`, cacheId);
 };
 
 const itemRoutes = {
-    previews: (itemType: string, itemId: string, fileName: string, extension: string, cacheID: number) => {
-        return itemRoute(itemType, itemId, "previews", fileName, extension, cacheID);
+    previews: (itemType: string, itemId: string, fileName: string, extension: string, cacheId: number) => {
+        return itemRoute(itemType, itemId, "previews", fileName, extension, cacheId);
     },
-    assets: (itemType: string, itemId: string, fileName: string, extension: string, cacheID: number) => {
-        return itemRoute(itemType, itemId, "assets", fileName, extension, cacheID);
+    assets: (itemType: string, itemId: string, fileName: string, extension: string, cacheId: number) => {
+        return itemRoute(itemType, itemId, "assets", fileName, extension, cacheId);
     },
     download: (itemType: string, itemId: string, asset?: string) => {
         return url(`${itemType}/${itemId}/download` + (asset ? `/${asset}` : ""));
@@ -66,46 +66,46 @@ const itemRoutes = {
 
 export const CDNMapper = {
     users: {
-        banner: (userId: string, extension: string, cacheID: number) => {
-            return cacheUrl(`users/${userId}/banner.${extension}`, cacheID);
+        banner: (userId: string, extension: string, cacheId: number) => {
+            return cacheUrl(`users/${userId}/banner.${extension}`, cacheId);
         },
-        avatar: (userId: string, extension: string, cacheID: number) => {
-            return cacheUrl(`users/${userId}/avatar.${extension}`, cacheID);
+        avatar: (userId: string, extension: string, cacheId: number) => {
+            return cacheUrl(`users/${userId}/avatar.${extension}`, cacheId);
         },
     },
     themes: {
-        previews: (themeId: string, resolution: string, extension: string, cacheID: number) => {
-            return itemRoutes.previews("themes", themeId, resolution, extension, cacheID);
+        previews: (themeId: string, resolution: string, extension: string, cacheId: number) => {
+            return itemRoutes.previews("themes", themeId, resolution, extension, cacheId);
         },
-        assets: (themeId: string, asset: string, extension: string, cacheID: number) => {
-            return itemRoutes.assets("themes", themeId, asset, extension, cacheID);
+        assets: (themeId: string, asset: string, extension: string, cacheId: number) => {
+            return itemRoutes.assets("themes", themeId, asset, extension, cacheId);
         },
         download: (themeId: string) => {
             return itemRoutes.download("themes", themeId);
         },
     },
     hbthemes: {
-        previews: (hbthemeId: string, resolution: string, extension: string, cacheID: number) => {
-            return itemRoutes.previews("hbthemes", hbthemeId, resolution, extension, cacheID);
+        previews: (hbthemeId: string, resolution: string, extension: string, cacheId: number) => {
+            return itemRoutes.previews("hbthemes", hbthemeId, resolution, extension, cacheId);
         },
-        assets: (hbthemeId: string, asset: string, extension: string, cacheID: number) => {
-            return itemRoutes.assets("hbthemes", hbthemeId, asset, extension, cacheID);
+        assets: (hbthemeId: string, asset: string, extension: string, cacheId: number) => {
+            return itemRoutes.assets("hbthemes", hbthemeId, asset, extension, cacheId);
         },
         download: (hbthemeId: string) => {
             return itemRoutes.download("hbthemes", hbthemeId);
         },
     },
     packs: {
-        previews: (packId: string, resolution: string, extension: string, cacheID: number) => {
-            return itemRoutes.previews("packs", packId, resolution, extension, cacheID);
+        previews: (packId: string, resolution: string, extension: string, cacheId: number) => {
+            return itemRoutes.previews("packs", packId, resolution, extension, cacheId);
         },
         download: (packId: string) => {
             return itemRoutes.download("packs", packId);
         },
     },
     layouts: {
-        previews: (layoutId: string, resolution: string, extension: string, cacheID: number) => {
-            return itemRoutes.previews("layouts", layoutId, resolution, extension, cacheID);
+        previews: (layoutId: string, resolution: string, extension: string, cacheId: number) => {
+            return itemRoutes.previews("layouts", layoutId, resolution, extension, cacheId);
         },
         download: (layoutId: string) => {
             return itemRoutes.download("layouts", layoutId, "layout");
@@ -115,8 +115,8 @@ export const CDNMapper = {
         },
     },
     layoutOptions: {
-        previews: (optionUuid: string, resolution: string, extension: string, cacheID: number) => {
-            return itemRoutes.previews("layoutOptions", optionUuid, resolution, extension, cacheID);
+        previews: (optionUuid: string, resolution: string, extension: string, cacheId: number) => {
+            return itemRoutes.previews("layoutOptions", optionUuid, resolution, extension, cacheId);
         },
     },
 };

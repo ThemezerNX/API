@@ -13,6 +13,9 @@ export class LayoutOptionEntity extends BaseEntity {
     @Column({type: "varchar"})
     name: string;
 
+    @Column({type: "varchar", nullable: true})
+    description?: string;
+
     @Column({
         type: "enum",
         enum: LayoutOptionType,

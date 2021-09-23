@@ -44,91 +44,91 @@ export class HBThemeAssetsEntity extends CachableEntityInterface {
         return !!this.batteryIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "batteryIcon",
             "png",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get chargingIconUrl(): string {
         return !!this.chargingIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "chargingIcon",
             "png",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get folderIconUrl(): string {
         return !!this.folderIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "folderIcon",
             "jpg",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get invalidIconUrl(): string {
         return !!this.invalidIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "invalidIcon",
             "jpg",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get themeIconDarkUrl(): string {
         return !!this.themeIconDarkFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "themeIconDark",
             "jpg",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get themeIconLightUrl(): string {
         return !!this.themeIconLightFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "themeIconLight",
             "jpg",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get airplaneIconUrl(): string {
         return !!this.airplaneIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "airplaneIcon",
             "png",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get wifiNoneIconUrl(): string {
         return !!this.wifiNoneIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "wifiNoneIcon",
             "png",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get wifi1IconUrl(): string {
         return !!this.wifi1IconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "wifi1Icon",
             "png",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get wifi2IconUrl(): string {
         return !!this.wifi2IconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "wifi2Icon",
             "png",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get wifi3IconUrl(): string {
         return !!this.wifi3IconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "wifi3Icon",
             "png",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get ethIconUrl(): string {
         return !!this.ethIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "ethIcon",
             "png",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
     get backgroundImageUrl(): string {
         return !!this.backgroundImageFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "backgroundImage",
             "jpg",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
 }

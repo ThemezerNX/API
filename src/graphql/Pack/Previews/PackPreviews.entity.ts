@@ -14,26 +14,26 @@ export class PackPreviewsEntity extends PreviewsEntityInterface {
     packId: string;
 
     get image720Url() {
-        return !!this.image720File ? CDNMapper.packs.previews(this.packId, "720", "webp", this.cacheID) : null;
+        return !!this.image720File ? CDNMapper.packs.previews(this.packId, "720", "webp", this.cacheId) : null;
     }
 
     get image360Url() {
-        return !!this.image360File ? CDNMapper.packs.previews(this.packId, "360", "webp", this.cacheID) : null;
+        return !!this.image360File ? CDNMapper.packs.previews(this.packId, "360", "webp", this.cacheId) : null;
     }
 
     get image240Url() {
-        return !!this.image240File ? CDNMapper.packs.previews(this.packId, "240", "webp", this.cacheID) : null;
+        return !!this.image240File ? CDNMapper.packs.previews(this.packId, "240", "webp", this.cacheId) : null;
     }
 
     get image180Url() {
-        return !!this.image180File ? CDNMapper.packs.previews(this.packId, "180", "webp", this.cacheID) : null;
+        return !!this.image180File ? CDNMapper.packs.previews(this.packId, "180", "webp", this.cacheId) : null;
     }
 
     get imagePlaceholderUrl() {
         return !!this.imagePlaceholderFile ? CDNMapper.packs.previews(this.packId,
             "placeholder",
             "webp",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
 }

@@ -14,26 +14,26 @@ export class LayoutPreviewsEntity extends PreviewsEntityInterface {
     layoutId: string;
 
     get image720Url() {
-        return !!this.image720File ? CDNMapper.layouts.previews(this.layoutId, "720", "webp", this.cacheID) : null;
+        return !!this.image720File ? CDNMapper.layouts.previews(this.layoutId, "720", "webp", this.cacheId) : null;
     }
 
     get image360Url() {
-        return !!this.image360File ? CDNMapper.layouts.previews(this.layoutId, "360", "webp", this.cacheID) : null;
+        return !!this.image360File ? CDNMapper.layouts.previews(this.layoutId, "360", "webp", this.cacheId) : null;
     }
 
     get image240Url() {
-        return !!this.image240File ? CDNMapper.layouts.previews(this.layoutId, "240", "webp", this.cacheID) : null;
+        return !!this.image240File ? CDNMapper.layouts.previews(this.layoutId, "240", "webp", this.cacheId) : null;
     }
 
     get image180Url() {
-        return !!this.image180File ? CDNMapper.layouts.previews(this.layoutId, "180", "webp", this.cacheID) : null;
+        return !!this.image180File ? CDNMapper.layouts.previews(this.layoutId, "180", "webp", this.cacheId) : null;
     }
 
     get imagePlaceholderUrl() {
         return !!this.imagePlaceholderFile ? CDNMapper.layouts.previews(this.layoutId,
             "placeholder",
             "webp",
-            this.cacheID) : null;
+            this.cacheId) : null;
     }
 
 }
