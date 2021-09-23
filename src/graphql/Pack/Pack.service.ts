@@ -37,11 +37,25 @@ export class PackService {
         return results.some((r) => r);
     }
 
-    findOne({id}: { id: string }, relations: string[] = []): Promise<PackEntity> {
-        return this.repository.findOne({
-            where: {id},
-            relations,
-        });
+    findOne({id}: { id: string }, relations: string[] = [], selectImageFiles: boolean = false): Promise<PackEntity> {
+        const queryBuilder = this.repository.createQueryBuilder("pack")
+            .where({id});
+
+        for (const relation of relations) {
+            queryBuilder.leftJoinAndSelect("pack." + relation, relation);
+        }
+
+        if (selectImageFiles) {
+            queryBuilder.addSelect([
+                "previews.image720File",
+                "previews.image360File",
+                "previews.image240File",
+                "previews.image180File",
+                "previews.imagePlaceholderFile",
+            ]);
+        }
+
+        return queryBuilder.getOne();
     }
 
     findAll(

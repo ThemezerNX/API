@@ -18,7 +18,7 @@ export class ThemeService {
                 id,
                 isNSFW,
                 packId,
-            }: { id?: string, isNSFW?: boolean, packId?: string }, relations: string[] = []): Promise<ThemeEntity> {
+            }: { id?: string, isNSFW?: boolean, packId?: string }, relations: string[] = [], selectImageFiles: boolean = false): Promise<ThemeEntity> {
         const findConditions: FindConditions<ThemeEntity> = {};
 
         if (id != undefined) {
@@ -31,10 +31,24 @@ export class ThemeService {
             findConditions.packId = packId;
         }
 
-        return this.repository.findOne({
-            where: findConditions,
-            relations,
-        });
+        const queryBuilder = this.repository.createQueryBuilder("theme")
+            .where(findConditions);
+
+        for (const relation of relations) {
+            queryBuilder.leftJoinAndSelect("theme." + relation, relation);
+        }
+
+        if (selectImageFiles) {
+            queryBuilder.addSelect([
+                "previews.image720File",
+                "previews.image360File",
+                "previews.image240File",
+                "previews.image180File",
+                "previews.imagePlaceholderFile",
+            ]);
+        }
+
+        return queryBuilder.getOne();
     }
 
     findAll(

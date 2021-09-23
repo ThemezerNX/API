@@ -1,4 +1,4 @@
-import {Controller, Get, NotFoundException, Param, StreamableFile} from "@nestjs/common";
+import {Controller, Get, Header, NotFoundException, Param, StreamableFile} from "@nestjs/common";
 import {UserService} from "../../graphql/User/User.service";
 import {UserProfileEntity} from "../../graphql/User/Profile/UserProfile.entity";
 
@@ -18,11 +18,13 @@ export class UsersController {
     }
 
     @Get("banner.webp")
+    @Header('Content-Type', 'image/webp')
     getBanner(@Param("id") id: string): Promise<StreamableFile> {
         return this.getFile(id, "bannerFile");
     }
 
     @Get("avatar.webp")
+    @Header('Content-Type', 'image/webp')
     getAvatar(@Param("id") id: string): Promise<StreamableFile> {
         return this.getFile(id, "avatarFile");
     }

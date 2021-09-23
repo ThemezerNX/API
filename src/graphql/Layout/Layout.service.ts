@@ -23,11 +23,25 @@ export class LayoutService {
     ) {
     }
 
-    findOne({id}: { id: string }, relations: string[] = []): Promise<LayoutEntity> {
-        return this.repository.findOne({
-            where: {id},
-            relations,
-        });
+    findOne({id}: { id: string }, relations: string[] = [], selectImageFiles: boolean = false): Promise<LayoutEntity> {
+        const queryBuilder = this.repository.createQueryBuilder("layout")
+            .where({id})
+
+        for (const relation of relations) {
+            queryBuilder.leftJoinAndSelect("layout." + relation, relation);
+        }
+
+        if (selectImageFiles) {
+            queryBuilder.addSelect([
+                "previews.image720File",
+                "previews.image360File",
+                "previews.image240File",
+                "previews.image180File",
+                "previews.imagePlaceholderFile",
+            ]);
+        }
+
+        return queryBuilder.getOne();
     }
 
     findAll(

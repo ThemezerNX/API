@@ -17,7 +17,7 @@ export class HBThemeService {
                 id,
                 isNSFW,
                 packId,
-            }: { id?: string, isNSFW?: boolean, packId?: string }, relations: string[] = []): Promise<HBThemeEntity> {
+            }: { id?: string, isNSFW?: boolean, packId?: string }, relations: string[] = [], selectImageFiles: boolean = false): Promise<HBThemeEntity> {
         const findConditions: FindConditions<HBThemeEntity> = {};
 
         if (id != undefined) {
@@ -30,10 +30,24 @@ export class HBThemeService {
             findConditions.packId = packId;
         }
 
-        return this.repository.findOne({
-            where: findConditions,
-            relations,
-        });
+        const queryBuilder = this.repository.createQueryBuilder("hbtheme")
+            .where(findConditions);
+
+        for (const relation of relations) {
+            queryBuilder.leftJoinAndSelect("hbtheme." + relation, relation);
+        }
+
+        if (selectImageFiles) {
+            queryBuilder.addSelect([
+                "previews.image720File",
+                "previews.image360File",
+                "previews.image240File",
+                "previews.image180File",
+                "previews.imagePlaceholderFile",
+            ]);
+        }
+
+        return queryBuilder.getOne();
     }
 
     findAll(

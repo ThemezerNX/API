@@ -13,15 +13,30 @@ export class LayoutOptionService {
     ) {
     }
 
-    findValue({uuid}: { uuid: string }, relations: string[] = []): Promise<LayoutOptionValueEntity> {
-        return this.valueRepository.findOne({
-            where: {uuid},
-            relations,
-        });
+    findValue({uuid}: { uuid: string }, relations: string[] = [], selectImageFiles: boolean = false): Promise<LayoutOptionValueEntity> {
+        const queryBuilder = this.valueRepository.createQueryBuilder("value")
+            .where({uuid})
+            .leftJoinAndSelect("value.previews", "previews");
+
+        for (const relation of relations) {
+            queryBuilder.leftJoinAndSelect("value." + relation, relation);
+        }
+
+        if (selectImageFiles) {
+            queryBuilder.addSelect([
+                "previews.image720File",
+                "previews.image360File",
+                "previews.image240File",
+                "previews.image180File",
+                "previews.imagePlaceholderFile",
+            ]);
+        }
+
+        return queryBuilder.getOne();
     }
 
     findValues({uuids}: { uuids: string[] }): Promise<LayoutOptionValueEntity[]> {
-        return this.valueRepository.createQueryBuilder("values")
+        return this.valueRepository.createQueryBuilder("value")
             .where({uuid: In(uuids)})
             .leftJoinAndSelect("value.layoutOption", "layoutOption")
             .orderBy({"layoutOption.priority": "ASC"}) // Order by priority; <= 99: layout-specific, >=100 global
@@ -38,8 +53,9 @@ export class LayoutOptionService {
     }
 
     findAllOptions({layoutId}: { layoutId: string }): Promise<LayoutOptionEntity[]> {
-        return this.repository.createQueryBuilder("options")
+        return this.repository.createQueryBuilder("option")
             .where({layoutId})
+            .leftJoinAndSelect("option.values", "values")
             .orderBy({"priority": "ASC"}) // Order by priority; <= 99: layout-specific, >=100 global
             .getMany();
     }

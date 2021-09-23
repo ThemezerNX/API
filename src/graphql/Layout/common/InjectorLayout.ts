@@ -34,6 +34,7 @@ export class InjectorLayout {
         if (piece.stringValue != null) {
             return json.replace(/\?\?string\?\?/gmi, piece.stringValue);
         } else if (piece.colorValue != null) {
+            // TODO: replace AA, BB, GG, RR individually
             return json.replace(/\?\?color\?\?/gmi, reverseHex(piece.colorValue.replace(/#/g, "")));
         } else if (piece.integerValue != null || piece.decimalValue != null) {
             return json.replace(/"?\?\?(.*?{(integer|decimal)}.*?)\?\?"?/gmi,
