@@ -9,15 +9,15 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
     @OneToOne(() => LayoutOptionValueEntity,
         layoutOptionValue => layoutOptionValue.previews,
         {onDelete: "CASCADE"})
-    @JoinColumn({name: "layoutOptionValueUuid"})
+    @JoinColumn({name: "layoutOptionValueUUID"})
     layoutOptionValue: LayoutOptionValueEntity;
 
     @PrimaryColumn({update: false})
-    layoutOptionValueUuid: string;
+    layoutOptionValueUUID: string;
 
     get image720Url() {
         return !!this.image720File ? CDNMapper.layoutOptions.previews(
-            this.layoutOptionValueUuid,
+            this.layoutOptionValueUUID,
             "720",
             "webp",
             this.cacheId) : null;
@@ -25,7 +25,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
 
     get image360Url() {
         return !!this.image360File ? CDNMapper.layoutOptions.previews(
-            this.layoutOptionValueUuid,
+            this.layoutOptionValueUUID,
             "360",
             "webp",
             this.cacheId) : null;
@@ -33,7 +33,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
 
     get image240Url() {
         return !!this.image240File ? CDNMapper.layoutOptions.previews(
-            this.layoutOptionValueUuid,
+            this.layoutOptionValueUUID,
             "240",
             "webp",
             this.cacheId) : null;
@@ -41,7 +41,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
 
     get image180Url() {
         return !!this.image180File ? CDNMapper.layoutOptions.previews(
-            this.layoutOptionValueUuid,
+            this.layoutOptionValueUUID,
             "180",
             "webp",
             this.cacheId) : null;
@@ -49,7 +49,7 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
 
     get imagePlaceholderUrl() {
         return !!this.imagePlaceholderFile ? CDNMapper.layoutOptions.previews(
-            this.layoutOptionValueUuid,
+            this.layoutOptionValueUUID,
             "placeholder",
             "webp",
             this.cacheId) : null;

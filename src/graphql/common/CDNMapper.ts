@@ -115,8 +115,8 @@ export const CDNMapper = {
         },
     },
     layoutOptions: {
-        previews: (optionUuid: string, resolution: string, extension: string, cacheId: number) => {
-            return itemRoutes.previews("layoutOptions", optionUuid, resolution, extension, cacheId);
+        previews: (optionUUID: string, resolution: string, extension: string, cacheId: number) => {
+            return itemRoutes.previews("layoutOptions", optionUUID, resolution, extension, cacheId);
         },
     },
 };
