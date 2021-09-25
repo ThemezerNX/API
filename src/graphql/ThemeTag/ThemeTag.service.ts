@@ -40,10 +40,11 @@ export class ThemeTagService {
             findConditions.name = StringContains(query);
         }
 
-        return executeAndPaginate(paginationArgs,
+        return executeAndPaginate(
             this.repository.createQueryBuilder()
                 .where(findConditions)
                 .orderBy({[sort]: order}),
+            paginationArgs,
         );
     }
 

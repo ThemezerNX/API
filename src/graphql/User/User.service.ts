@@ -59,13 +59,14 @@ export class UserService {
             findConditions.isAdmin = isAdmin;
         }
 
-        return executeAndPaginate(paginationArgs,
+        return executeAndPaginate(
             this.userRepository.createQueryBuilder("user")
                 .where(findConditions)
                 .leftJoinAndSelect("user.profile", "profile")
                 .leftJoinAndSelect("user.preferences", "preferences")
                 .leftJoinAndSelect("user.connections", "connections")
                 .orderBy({[sort]: order}),
+            paginationArgs,
         );
     }
 

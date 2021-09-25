@@ -100,7 +100,7 @@ export class LayoutService {
             )`, {query: toTsQuery(query)});
         }
 
-        return executeAndPaginate(paginationArgs, queryBuilder);
+        return executeAndPaginate(queryBuilder, paginationArgs);
     }
 
     findRandom(

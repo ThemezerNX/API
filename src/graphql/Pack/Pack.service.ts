@@ -114,7 +114,7 @@ export class PackService {
             .leftJoinAndSelect("pack.previews", "previews")
             .orderBy({["pack." + sort]: order});
 
-        return executeAndPaginate(paginationArgs, queryBuilder);
+        return executeAndPaginate(queryBuilder, paginationArgs);
     }
 
     findRandom(
