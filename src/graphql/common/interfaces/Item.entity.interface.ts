@@ -16,7 +16,7 @@ export abstract class ItemEntityInterface extends CachableEntityInterface {
     @ManyToOne(() => UserEntity, {onDelete: "CASCADE"})
     creator: UserEntity;
 
-    @Column("char", {length: 19})
+    @Column("varchar", {length: 19})
     creatorId: string;
 
     @Column({length: 100})

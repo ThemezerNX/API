@@ -12,7 +12,7 @@ export class UserEntity extends CachableEntityInterface {
     @Generated("increment")
     readonly counter: number;
 
-    @PrimaryColumn("char", {
+    @PrimaryColumn("varchar", {
         length: 19,
         default: () => `
             lpad(
