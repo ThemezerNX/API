@@ -39,13 +39,12 @@ export class AuthService {
     }
 
     async validateUser(email: string, password: string): Promise<UserEntity> {
-        console.log(email)
         const user = await this.userService.findOne({email});
 
         if (!user) {
             throw new EmailNotRegisteredError();
         }
-        if (!await AuthService.validatePassword(password, user.password)) {
+        if (!user.password || !await AuthService.validatePassword(password, user.password)) {
             throw new PasswordIncorrectError();
         }
         if (!user.isVerified) {
