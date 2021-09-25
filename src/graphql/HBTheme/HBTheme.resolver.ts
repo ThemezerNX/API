@@ -60,7 +60,7 @@ export class HBThemeResolver {
             ...listArgs,
         });
 
-        return new PaginatedHBThemes(paginationArgs, result[1], result[0]);
+        return new PaginatedHBThemes(paginationArgs, result.count, result.result);
     }
 
     @Query(() => [HBThemeModel], {

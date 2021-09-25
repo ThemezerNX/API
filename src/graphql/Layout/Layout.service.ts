@@ -13,6 +13,8 @@ import {ChosenLayoutOptionValue} from "./Layout.resolver";
 import {LayoutOptionService} from "../LayoutOption/LayoutOption.service";
 import {LayoutOptionType} from "../LayoutOption/common/LayoutOptionType.enum";
 import {InjectorLayout, LoadedLayoutOption} from "./common/InjectorLayout";
+import {PerchQueryBuilder} from "perch-query-builder";
+import {GraphQLResolveInfo} from "graphql";
 
 @Injectable()
 export class LayoutService {
@@ -25,7 +27,7 @@ export class LayoutService {
 
     findOne({id}: { id: string }, relations: string[] = [], selectImageFiles: boolean = false): Promise<LayoutEntity> {
         const queryBuilder = this.repository.createQueryBuilder("layout")
-            .where({id})
+            .where({id});
 
         for (const relation of relations) {
             queryBuilder.leftJoinAndSelect("layout." + relation, relation);
@@ -40,6 +42,13 @@ export class LayoutService {
                 "previews.imagePlaceholderFile",
             ]);
         }
+
+        return queryBuilder.getOne();
+    }
+
+    findOneDynamic({id}: { id: string }, info): Promise<LayoutEntity> {
+        const queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, info)
+            .where({id});
 
         return queryBuilder.getOne();
     }
@@ -61,7 +70,9 @@ export class LayoutService {
                 target?: Target,
                 creators?: string[],
             },
-    ): Promise<[LayoutEntity[], number]> {
+        relations: string[] = [],
+        info: GraphQLResolveInfo,
+    ) {
         const findConditions: FindConditions<LayoutEntity> = {};
 
         if (target != undefined) {
@@ -73,15 +84,19 @@ export class LayoutService {
             };
         }
 
-        const queryBuilder = this.repository.createQueryBuilder("layout")
-            .where(findConditions)
-            .leftJoinAndSelect("layout.previews", "previews")
-            .orderBy({["layout." + sort]: order});
+        const queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, info, {rootField: "nodes"});
+
+        queryBuilder.where(findConditions)
+            .orderBy({[queryBuilder.alias + "." + sort]: order});
+
+        for (const relation of relations) {
+            queryBuilder.leftJoinAndSelect(queryBuilder.alias + "." + relation, relation);
+        }
 
         if (query?.length > 0) {
             queryBuilder.andWhere(`to_tsquery(:query) @@ (
-                setweight(to_tsvector('pg_catalog.english', coalesce(layout.name, '')), 'A') ||
-                setweight(to_tsvector('pg_catalog.english', coalesce(layout.description, '')), 'C')
+                setweight(to_tsvector('pg_catalog.english', coalesce(${queryBuilder.alias}.name, '')), 'A') ||
+                setweight(to_tsvector('pg_catalog.english', coalesce(${queryBuilder.alias}.description, '')), 'C')
             )`, {query: toTsQuery(query)});
         }
 

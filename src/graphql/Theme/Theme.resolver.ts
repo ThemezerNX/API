@@ -69,7 +69,7 @@ export class ThemeResolver {
             ...listArgs,
         });
 
-        return new PaginatedThemes(paginationArgs, result[1], result[0]);
+        return new PaginatedThemes(paginationArgs, result.count, result.result);
     }
 
     @Query(() => [ThemeModel], {

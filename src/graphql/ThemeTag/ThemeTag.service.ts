@@ -33,7 +33,7 @@ export class ThemeTagService {
                 order?: SortOrder,
                 query?: string,
             },
-    ): Promise<[ThemeTagEntity[], number]> {
+    ) {
         const findConditions: FindConditions<ThemeTagEntity> = {};
 
         if (query?.length > 0) {

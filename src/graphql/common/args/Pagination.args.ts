@@ -50,15 +50,16 @@ export const paginationConditions = (paginationArgs: PaginationArgs) => {
     return {};
 };
 
-export const executeAndPaginate = <Entity>(paginationArgs: PaginationArgs, queryBuilder: SelectQueryBuilder<Entity>): Promise<[Entity[], number]> => {
+export const executeAndPaginate = async <Entity>(paginationArgs: PaginationArgs, queryBuilder: SelectQueryBuilder<Entity>): Promise<{result: Entity[], count: number}> => {
     if (!!paginationArgs && !!queryBuilder) {
         const {page, limit} = paginationArgs;
 
-        return queryBuilder
+        queryBuilder
             .skip(skip(page, limit))
-            .limit(take(limit))
-            .getManyAndCount();
+            .limit(take(limit));
+
+        return {result: await queryBuilder.getMany(), count: await queryBuilder.getCount()};
     }
 
-    return queryBuilder.getManyAndCount();
+    return {result: await queryBuilder.getMany(), count: await queryBuilder.getCount()};
 };

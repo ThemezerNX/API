@@ -71,7 +71,7 @@ export class NXInstallerResolver {
             response.themes = themes.map(NXInstallerResolver.mapTheme);
         } else if (idLower == "__special_recent") {
             // Recently added themes
-            const [themes] = await this.themeService.findAll({
+            const {result: themes} = await this.themeService.findAll({
                 paginationArgs: new PaginationArgs(12),
                 order: SortOrder.DESC,
                 sort: ItemSort.ADDED,
@@ -80,7 +80,7 @@ export class NXInstallerResolver {
             response.themes = themes.map(NXInstallerResolver.mapTheme);
         } else {
             // Search
-            const [themes] = await this.themeService.findAll({
+            const {result: themes} = await this.themeService.findAll({
                 paginationArgs: new PaginationArgs(12),
                 query: idLower,
             });

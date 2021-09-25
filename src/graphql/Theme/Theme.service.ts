@@ -74,7 +74,7 @@ export class ThemeService {
                 layouts?: string[],
                 includeNSFW?: Boolean
             },
-    ): Promise<[ThemeEntity[], number]> {
+    ) {
         const findConditions: FindConditions<ThemeEntity> = {};
 
         if (packId != undefined) {

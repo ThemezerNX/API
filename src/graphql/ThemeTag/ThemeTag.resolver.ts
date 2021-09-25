@@ -60,7 +60,7 @@ export class ThemeTagResolver {
             ...listArgs,
         });
 
-        return new PaginatedThemeTags(paginationArgs, result[1], result[0]);
+        return new PaginatedThemeTags(paginationArgs, result.count, result.result);
     }
 
 }

@@ -76,7 +76,7 @@ export class PackService {
                 creators?: string[],
                 includeNSFW?: boolean
             },
-    ): Promise<[PackEntity[], number]> {
+    ) {
         const findConditions: FindConditions<PackEntity> = {};
 
         if (creators?.length > 0) {

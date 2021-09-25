@@ -63,7 +63,7 @@ export class UserResolver {
             ...listArgs,
         });
 
-        return new PaginatedUsers(paginationArgs, result[1], result[0]);
+        return new PaginatedUsers(paginationArgs, result.count, result.result);
     }
 
 }

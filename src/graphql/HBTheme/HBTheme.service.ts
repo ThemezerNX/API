@@ -69,7 +69,7 @@ export class HBThemeService {
                 creators?: string[],
                 includeNSFW?: boolean
             },
-    ): Promise<[HBThemeEntity[], number]> {
+    ) {
         const findConditions: FindConditions<HBThemeEntity> = {};
 
         if (packId != undefined) {

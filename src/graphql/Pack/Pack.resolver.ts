@@ -63,7 +63,7 @@ export class PackResolver {
             ...listArgs,
         });
 
-        return new PaginatedPacks(paginationArgs, result[1], result[0]);
+        return new PaginatedPacks(paginationArgs, result.count, result.result);
     }
 
     @Query(() => [PackModel], {

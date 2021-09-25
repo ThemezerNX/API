@@ -1,17 +1,15 @@
-import {Args, ArgsType, Field, InputType, Parent, Query, ResolveField, Resolver} from "@nestjs/graphql";
+import {Args, ArgsType, Field, Info, InputType, Query, Resolver} from "@nestjs/graphql";
 import {Target} from "../common/enums/Target";
 import {LayoutModel} from "./Layout.model";
 import {LayoutService} from "./Layout.service";
 import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
 import {UserService} from "../User/User.service";
-import {UserModel} from "../User/User.model";
-import {LayoutEntity} from "./Layout.entity";
 import {ItemSortArgs} from "../common/args/ItemSortArgs";
 import {PaginatedLayouts} from "./PaginatedLayouts.model";
-import {LayoutOptionModel} from "../LayoutOption/LayoutOption.model";
 import {LayoutOptionService} from "../LayoutOption/LayoutOption.service";
 import {FileModel} from "../common/models/File.model";
 import {IsDecimal, IsHexColor, IsInt, IsNotEmpty, IsUUID, Length} from "class-validator";
+import {GraphQLResolveInfo} from "graphql";
 
 
 @ArgsType()
@@ -58,21 +56,22 @@ export class LayoutResolver {
     constructor(private layoutService: LayoutService, private layoutOptionService: LayoutOptionService, private userService: UserService) {
     }
 
-    @ResolveField(() => UserModel)
-    creator(@Parent() layout: LayoutEntity): Promise<UserModel> {
-        return this.userService.findOne({id: layout.creatorId});
-    }
+    // @ResolveField(() => UserModel)
+    // creator(@Parent() layout: LayoutEntity): Promise<UserModel> {
+    //     return this.userService.findOne({id: layout.creatorId});
+    // }
 
-    @ResolveField(() => [LayoutOptionModel])
-    options(@Parent() layout: LayoutEntity): Promise<LayoutOptionModel[]> {
-        // this loads all options by priority asc, instead of randomly (typeorm relation can't be ordered by)
-        return this.layoutOptionService.findAllOptions({layoutId: layout.id});
-    }
+    // @ResolveField(() => [LayoutOptionModel])
+    // options(@Parent() layout: LayoutEntity): Promise<LayoutOptionModel[]> {
+    //     // this loads all options by priority asc, instead of randomly (typeorm relation can't be ordered by)
+    //     return this.layoutOptionService.findAllOptions({layoutId: layout.id});
+    // }
 
     @Query(() => LayoutModel, {
         description: `Find a single layout`,
     })
     layout(
+        @Info() info: GraphQLResolveInfo,
         @Args("id") id: string,
     ): Promise<LayoutModel> {
         return this.layoutService.findOne({id});
@@ -82,6 +81,7 @@ export class LayoutResolver {
         description: `Find multiple layouts`,
     })
     async layouts(
+        @Info() info: GraphQLResolveInfo,
         @Args() paginationArgs: PaginationArgs,
         @Args() itemSortArgs: ItemSortArgs,
         @Args() listArgs?: ListArgs,
@@ -90,9 +90,9 @@ export class LayoutResolver {
             paginationArgs,
             ...itemSortArgs,
             ...listArgs,
-        });
+        }, ["previews"], info);
 
-        return new PaginatedLayouts(paginationArgs, result[1], result[0]);
+        return new PaginatedLayouts(paginationArgs, result.count, result.result);
     }
 
     @Query(() => [LayoutModel], {

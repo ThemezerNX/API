@@ -49,7 +49,7 @@ export class UserService {
                 query?: string
                 isAdmin?: boolean
             },
-    ): Promise<[UserEntity[], number]> {
+    ) {
         const findConditions: FindConditions<UserEntity> = {};
 
         if (query?.length > 0) {
