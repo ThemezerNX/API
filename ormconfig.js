@@ -13,7 +13,6 @@ module.exports = {
     synchronize: process.env.NODE_ENV === "development" && true,
     entities: ["./dist/**/*.entity.js"],
     migrations: ["./dist/migrations/*.js"],
-    namingStrategy: new EntityNamingStrategy(),
     cli: { migrationsDir: "migrations" },
     migrationsTransactionMode: "each"
 }

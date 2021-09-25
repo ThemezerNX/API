@@ -4,7 +4,7 @@ import {CDNMapper} from "../../common/CDNMapper";
 import {CachableEntityInterface} from "../../common/interfaces/Cachable.entity.interface";
 
 
-@Entity()
+@Entity("user_profile")
 export class UserProfileEntity extends CachableEntityInterface {
 
     @OneToOne(() => UserEntity, user => user.profile, {onDelete: "CASCADE"})

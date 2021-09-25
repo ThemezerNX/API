@@ -2,7 +2,7 @@ import {ISession} from "connect-typeorm";
 import {BaseEntity, Column, Entity, Index, PrimaryColumn} from "typeorm";
 
 
-@Entity()
+@Entity("session")
 export class SessionEntity extends BaseEntity implements ISession {
 
     @PrimaryColumn("varchar", {length: 255})

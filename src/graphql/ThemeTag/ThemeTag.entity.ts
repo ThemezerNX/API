@@ -1,6 +1,6 @@
 import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 
-@Entity()
+@Entity("theme_tag")
 export class ThemeTagEntity extends BaseEntity {
 
     @PrimaryGeneratedColumn()

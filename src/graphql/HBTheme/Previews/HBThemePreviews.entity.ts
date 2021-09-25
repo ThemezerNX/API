@@ -3,7 +3,7 @@ import {HBThemeEntity} from "../HBTheme.entity";
 import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
 
-@Entity()
+@Entity("hbtheme_previews")
 export class HBThemePreviewsEntity extends PreviewsEntityInterface {
 
     @OneToOne(() => HBThemeEntity, hbthemeEntity => hbthemeEntity.previews, {onDelete: "CASCADE"})

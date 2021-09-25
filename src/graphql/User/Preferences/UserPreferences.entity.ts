@@ -2,7 +2,7 @@ import {BaseEntity, Column, Entity, JoinColumn, OneToOne} from "typeorm";
 import {UserEntity} from "../User.entity";
 
 
-@Entity()
+@Entity("user_preferences")
 export class UserPreferencesEntity extends BaseEntity {
 
     @OneToOne(() => UserEntity, user => user.preferences, {primary: true, onDelete: "CASCADE"})

@@ -9,7 +9,7 @@ import {LayoutEntity} from "../Layout/Layout.entity";
 import {CDNMapper} from "../common/CDNMapper";
 
 
-@Entity()
+@Entity("theme")
 export class ThemeEntity extends ItemEntityInterface {
 
     @ManyToOne(() => PackEntity, pack => pack.themes, {onDelete: "CASCADE"})

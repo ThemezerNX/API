@@ -3,7 +3,7 @@ import {ItemCacheEntityInterface} from "../ItemCache.entity.interface";
 import {HBThemeEntity} from "../../HBTheme/HBTheme.entity";
 
 
-@Entity()
+@Entity("hbtheme_cache")
 export class HBThemeCacheEntity extends ItemCacheEntityInterface {
 
     @ManyToOne(() => HBThemeEntity, {onDelete: "CASCADE"})

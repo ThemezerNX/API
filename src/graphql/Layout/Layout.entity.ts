@@ -7,7 +7,7 @@ import {LayoutPreviewsEntity} from "./Previews/LayoutPreviews.entity";
 import {CDNMapper} from "../common/CDNMapper";
 
 
-@Entity()
+@Entity("layout")
 export class LayoutEntity extends ItemEntityInterface {
 
     @Column({type: "uuid", unique: true, update: false})

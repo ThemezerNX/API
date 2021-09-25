@@ -3,7 +3,7 @@ import {ThemeEntity} from "../Theme.entity";
 import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
 
-@Entity()
+@Entity("theme_previews")
 export class ThemePreviewsEntity extends PreviewsEntityInterface {
 
     @OneToOne(() => ThemeEntity, themeEntity => themeEntity.previews, {onDelete: "CASCADE"})

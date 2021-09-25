@@ -4,7 +4,7 @@ import {LayoutEntity} from "../Layout/Layout.entity";
 import {LayoutOptionType} from "./common/LayoutOptionType.enum";
 
 
-@Entity()
+@Entity("layout_option")
 export class LayoutOptionEntity extends BaseEntity {
 
     @PrimaryGeneratedColumn()

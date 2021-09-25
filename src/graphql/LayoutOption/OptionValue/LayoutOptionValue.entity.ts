@@ -3,7 +3,7 @@ import {LayoutOptionValuePreviewsEntity} from "../OptionValuePreviews/LayoutOpti
 import {LayoutOptionEntity} from "../LayoutOption.entity";
 
 
-@Entity()
+@Entity("layout_option_value")
 export class LayoutOptionValueEntity extends BaseEntity {
 
     @ManyToOne(() => LayoutOptionEntity, layoutOption => layoutOption.values, {onDelete: "CASCADE"})

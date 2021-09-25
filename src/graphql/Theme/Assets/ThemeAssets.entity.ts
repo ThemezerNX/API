@@ -3,7 +3,7 @@ import {ThemeEntity} from "../Theme.entity";
 import {CDNMapper} from "../../common/CDNMapper";
 import {CachableEntityInterface} from "../../common/interfaces/Cachable.entity.interface";
 
-@Entity()
+@Entity("theme_assets")
 export class ThemeAssetsEntity extends CachableEntityInterface {
 
     @OneToOne(() => ThemeEntity, theme => theme.assets, {onDelete: "CASCADE"})

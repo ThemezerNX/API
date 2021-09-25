@@ -7,7 +7,7 @@ import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
 import {CDNMapper} from "../common/CDNMapper";
 
 
-@Entity()
+@Entity("hbtheme")
 export class HBThemeEntity extends ItemEntityInterface {
 
     @ManyToOne(() => PackEntity, pack => pack.hbthemes, {onDelete: "CASCADE"})
