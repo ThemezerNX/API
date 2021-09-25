@@ -2,7 +2,7 @@ import {Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn} from "typeorm";
 import {DiscordConnectionEntity} from "./DiscordConnection.entity";
 import {UserEntity} from "../User.entity";
 
-@Entity("user_connections")
+@Entity()
 export class UserConnectionsEntity {
 
     @PrimaryGeneratedColumn()

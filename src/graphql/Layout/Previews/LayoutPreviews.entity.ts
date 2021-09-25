@@ -3,7 +3,7 @@ import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.i
 import {CDNMapper} from "../../common/CDNMapper";
 import {LayoutEntity} from "../Layout.entity";
 
-@Entity("layout_previews")
+@Entity()
 export class LayoutPreviewsEntity extends PreviewsEntityInterface {
 
     @OneToOne(() => LayoutEntity, layout => layout.previews, {onDelete: "CASCADE"})

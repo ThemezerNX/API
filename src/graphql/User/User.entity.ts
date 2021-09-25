@@ -5,7 +5,7 @@ import {UserProfileEntity} from "./Profile/UserProfile.entity";
 import {CachableEntityInterface} from "../common/interfaces/Cachable.entity.interface";
 
 
-@Entity("user")
+@Entity()
 export class UserEntity extends CachableEntityInterface {
 
     @Column({type: "int", select: false, update: false})

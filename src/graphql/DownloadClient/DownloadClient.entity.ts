@@ -1,7 +1,7 @@
 import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 
 
-@Entity("download_client")
+@Entity()
 export class DownloadClientEntity extends BaseEntity {
 
     @PrimaryGeneratedColumn()

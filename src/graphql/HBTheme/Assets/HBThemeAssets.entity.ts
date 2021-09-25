@@ -3,7 +3,7 @@ import {HBThemeEntity} from "../HBTheme.entity";
 import {CachableEntityInterface} from "../../common/interfaces/Cachable.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
 
-@Entity("hbtheme_assets")
+@Entity()
 export class HBThemeAssetsEntity extends CachableEntityInterface {
 
     @OneToOne(() => HBThemeEntity, hbthemeEntity => hbthemeEntity.assets, {onDelete: "CASCADE"})

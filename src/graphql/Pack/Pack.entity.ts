@@ -5,7 +5,7 @@ import {ThemeEntity} from "../Theme/Theme.entity";
 import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
 import {CDNMapper} from "../common/CDNMapper";
 
-@Entity("pack")
+@Entity()
 export class PackEntity extends ItemEntityInterface {
 
     get isNSFW() {

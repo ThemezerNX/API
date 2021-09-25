@@ -2,7 +2,7 @@ import {BaseEntity, Column, Entity, JoinColumn, OneToOne} from "typeorm";
 import {UserConnectionsEntity} from "./UserConnections.entity";
 
 
-@Entity("discord_connection")
+@Entity()
 export class DiscordConnectionEntity extends BaseEntity {
 
     @OneToOne(() => UserConnectionsEntity,

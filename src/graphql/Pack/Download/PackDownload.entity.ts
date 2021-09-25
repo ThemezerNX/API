@@ -2,7 +2,7 @@ import {AfterInsert, Entity, getConnection, JoinColumn, ManyToOne, PrimaryColumn
 import {ItemDownloadEntityInterface} from "../../common/interfaces/ItemDownload.entity.interface";
 import {PackEntity} from "../Pack.entity";
 
-@Entity("pack_download")
+@Entity()
 export class PackDownloadEntity extends ItemDownloadEntityInterface {
 
     @ManyToOne(() => PackEntity, {onDelete: "CASCADE"})

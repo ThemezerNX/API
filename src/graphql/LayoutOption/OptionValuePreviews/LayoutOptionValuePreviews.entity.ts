@@ -3,7 +3,7 @@ import {LayoutOptionValueEntity} from "../OptionValue/LayoutOptionValue.entity";
 import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
 
-@Entity("layout_option_value_previews")
+@Entity()
 export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
 
     @OneToOne(() => LayoutOptionValueEntity,

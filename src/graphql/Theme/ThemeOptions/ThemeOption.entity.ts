@@ -2,7 +2,7 @@ import {Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn} from "ty
 import {LayoutOptionValueEntity} from "../../LayoutOption/OptionValue/LayoutOptionValue.entity";
 import {ThemeEntity} from "../Theme.entity";
 
-@Entity("theme_option")
+@Entity()
 export class ThemeOptionEntity {
 
     @OneToOne(() => ThemeEntity, themeEntity => themeEntity.previews, {onDelete: "CASCADE"})

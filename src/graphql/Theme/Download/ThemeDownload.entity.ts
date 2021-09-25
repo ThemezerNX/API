@@ -2,7 +2,7 @@ import {AfterInsert, Entity, getConnection, JoinColumn, ManyToOne, PrimaryColumn
 import {ItemDownloadEntityInterface} from "../../common/interfaces/ItemDownload.entity.interface";
 import {ThemeEntity} from "../Theme.entity";
 
-@Entity("theme_download")
+@Entity()
 export class ThemeDownloadEntity extends ItemDownloadEntityInterface {
 
     @ManyToOne(() => ThemeEntity, {onDelete: "CASCADE"})
