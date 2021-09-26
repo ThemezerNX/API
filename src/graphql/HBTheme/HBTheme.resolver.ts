@@ -8,6 +8,7 @@ import {UserModel} from "../User/User.model";
 import {HBThemeEntity} from "./HBTheme.entity";
 import {ItemSortArgs} from "../common/args/ItemSortArgs";
 import {PaginatedHBThemes} from "./PaginatedHBThemes.model";
+import {PackNotFoundError} from "../common/errors/PackNotFound.error";
 
 
 @ArgsType()
@@ -40,10 +41,14 @@ export class HBThemeResolver {
     @Query(() => HBThemeModel, {
         description: `Find a single hbtheme`,
     })
-    hbtheme(
+    async hbtheme(
         @Args("id") id: string,
     ): Promise<HBThemeModel> {
-        return this.hbthemeService.findOne({id});
+        const hbtheme = await this.hbthemeService.findOne({id});
+        if (!hbtheme) {
+            throw new PackNotFoundError();
+        }
+        return hbtheme;
     }
 
     @Query(() => PaginatedHBThemes, {

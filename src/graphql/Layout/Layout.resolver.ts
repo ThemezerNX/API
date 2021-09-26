@@ -10,6 +10,7 @@ import {LayoutOptionService} from "../LayoutOption/LayoutOption.service";
 import {FileModel} from "../common/models/File.model";
 import {IsDecimal, IsHexColor, IsInt, IsNotEmpty, IsUUID, Length} from "class-validator";
 import {GraphQLResolveInfo} from "graphql";
+import {PackNotFoundError} from "../common/errors/PackNotFound.error";
 
 
 @ArgsType()
@@ -70,11 +71,15 @@ export class LayoutResolver {
     @Query(() => LayoutModel, {
         description: `Find a single layout`,
     })
-    layout(
+    async layout(
         @Info() info: GraphQLResolveInfo,
         @Args("id") id: string,
     ): Promise<LayoutModel> {
-        return this.layoutService.findOne({id});
+        const layout = await this.layoutService.findOne({id}, {info});
+        if (!layout) {
+            throw new PackNotFoundError();
+        }
+        return layout;
     }
 
     @Query(() => PaginatedLayouts, {

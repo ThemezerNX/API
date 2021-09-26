@@ -12,6 +12,7 @@ import {FileUpload, GraphQLUpload} from "graphql-upload";
 import {UnknownError} from "../common/errors/Unknown.error";
 import {ThemeOptionModel} from "./ThemeOptions/ThemeOption.model";
 import {ThemeOptionService} from "./ThemeOptions/ThemeOption.service";
+import {PackNotFoundError} from "../common/errors/PackNotFound.error";
 
 
 @ArgsType()
@@ -49,10 +50,14 @@ export class ThemeResolver {
     @Query(() => ThemeModel, {
         description: `Find a single theme`,
     })
-    theme(
+    async theme(
         @Args("id") id: string,
     ): Promise<ThemeModel> {
-        return this.themeService.findOne({id});
+        const theme = await this.themeService.findOne({id});
+        if (!theme) {
+            throw new PackNotFoundError();
+        }
+        return theme;
     }
 
     @Query(() => PaginatedThemes, {

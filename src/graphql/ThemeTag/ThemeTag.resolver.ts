@@ -4,6 +4,7 @@ import {PaginationArgs} from "../common/args/Pagination.args";
 import {ThemeTagModel} from "./ThemeTag.model";
 import {SortInterface} from "../common/interfaces/Sort.interface";
 import {PaginatedThemeTags} from "./PaginatedThemeTags.model";
+import {PackNotFoundError} from "../common/errors/PackNotFound.error";
 
 
 export enum TagSort {
@@ -40,10 +41,14 @@ export class ThemeTagResolver {
     @Query(() => ThemeTagModel, {
         description: `Find a single themeTag`,
     })
-    themeTag(
+    async themeTag(
         @Args("id") id: string,
     ): Promise<ThemeTagModel> {
-        return this.tagService.findOne({id});
+        const themeTag = await this.tagService.findOne({id});
+        if (!themeTag) {
+            throw new PackNotFoundError();
+        }
+        return themeTag;
     }
 
     @Query(() => PaginatedThemeTags, {

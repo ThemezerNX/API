@@ -7,6 +7,7 @@ import {ItemSortArgs} from "../common/args/ItemSortArgs";
 import {PackModel} from "./Pack.model";
 import {PackEntity} from "./Pack.entity";
 import {PaginatedPacks} from "./PaginatedPacks.model";
+import {PackNotFoundError} from "../common/errors/PackNotFound.error";
 
 
 @ArgsType()
@@ -43,10 +44,14 @@ export class PackResolver {
     @Query(() => PackModel, {
         description: `Find a single pack`,
     })
-    pack(
+    async pack(
         @Args("id") id: string,
     ): Promise<PackModel> {
-        return this.packService.findOne({id});
+        const pack = await this.packService.findOne({id});
+        if (!pack) {
+            throw new PackNotFoundError();
+        }
+        return pack;
     }
 
     @Query(() => PaginatedPacks, {
