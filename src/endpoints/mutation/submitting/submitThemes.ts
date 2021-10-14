@@ -63,7 +63,8 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                 // If a valid jpeg
                                 const imagePath = `${path}/${file}`;
                                 const isJpeg = await isJpegPromisified(imagePath);
-                                const hasSwitchMetadata = (await exifr.parse(imagePath))?.Make.includes("Nintendo");
+                                const exif = await exifr.parse(imagePath);
+                                const hasSwitchMetadata = exif?.Make?.exif.includes("Nintendo");
                                 if (isJpeg) {
                                     if (hasSwitchMetadata) {
                                         sizeOf(imagePath, function (err, dimensions) {
