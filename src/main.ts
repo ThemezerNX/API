@@ -16,6 +16,8 @@ import {SessionEntity} from "./session/Session.entity";
 
 dotenv.config();
 
+process.env.TZ = "UTC";
+
 const locales = fs.readdirSync(path.resolve(__dirname, "../lang")).map((file) => {
     // isos: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
     return path.basename(file, ".json");
