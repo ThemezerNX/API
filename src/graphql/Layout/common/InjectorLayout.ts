@@ -4,7 +4,7 @@ import {patch} from "@themezernx/json-merger";
 
 const lengthenHexCode = (hex: string): string[] => {
     if (hex.length == 3) {
-        return [hex[0] + hex[0], hex[1] + hex[1], hex[2] + hex[2]];
+        return [hex[0] + hex[0], hex[1] + hex[1], hex[2] + hex[2], "FF"];
     } else if (hex.length == 4) {
         return [hex[0] + hex[0], hex[1] + hex[1], hex[2] + hex[2], hex[3] + hex[3]];
     } else {
@@ -41,20 +41,21 @@ export class InjectorLayout {
             return json.replace(/\?\?string\?\?/gmi, piece.stringValue.replace(/([\\"])/g, "\\$1"));
         } else if (piece.colorValue != null) {
             const hex = lengthenHexCode(piece.colorValue.replace(/^#/g, ""));
-            return json.replace(/\?\?{color:?((?:RR|GG|BB){3}|(?:RR|GG|BB|AA){4})}\?\?/gmi, (whole, colorPattern: string) => {
-                return colorPattern.match(/.{2}/g).map((block) => {
-                    switch (block.toUpperCase()) {
-                        case "RR":
-                            return hex[0];
-                        case "GG":
-                            return hex[1];
-                        case "BB":
-                            return hex[2];
-                        case "AA":
-                            return hex[3];
-                    }
-                }).join("");
-            });
+            return json.replace(/\?\?{color:?((?:RR|GG|BB|AA){4})}\?\?/gmi,
+                (whole, colorPattern: string) => {
+                    return colorPattern.match(/.{2}/g).map((block) => {
+                        switch (block.toUpperCase()) {
+                            case "RR":
+                                return hex[0];
+                            case "GG":
+                                return hex[1];
+                            case "BB":
+                                return hex[2];
+                            case "AA":
+                                return hex[3];
+                        }
+                    }).join("");
+                });
         } else if (piece.integerValue != null || piece.decimalValue != null) {
             return json.replace(/"?\?\?(.*?{(integer|decimal)}.*?)\?\?"?/gmi,
                 (whole, expression: string, type: string) => {
