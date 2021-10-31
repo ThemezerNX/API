@@ -9,7 +9,7 @@ export class HBThemesPreviewsRestController {
     }
 
     private async getFile(id: string, property: keyof HBThemePreviewsEntity): Promise<StreamableFile> {
-        const entity = await this.hbthemeService.findOne({id}, ["previews"], true);
+        const entity = await this.hbthemeService.findOne({id}, {relations: ["previews"], selectPreviews: [property]});
         const file = (entity?.previews[property] as Buffer);
         if (!entity || !file) {
             throw new NotFoundException();

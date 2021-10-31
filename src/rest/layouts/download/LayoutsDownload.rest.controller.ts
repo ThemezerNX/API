@@ -1,12 +1,12 @@
 import {Controller, Get, Header, NotFoundException, Param, Redirect, Res} from "@nestjs/common";
 import {Response} from "express";
 import {ClientIP} from "../../common/decorators/ClientIP.decorator";
-import {CurrentUser} from "../../../graphql/common/decorators/CurrentUser.gql.decorator";
 import {UserEntity} from "../../../graphql/User/User.entity";
 import {UserAgent} from "../../common/decorators/UserAgent.decorator";
 import {LayoutService} from "../../../graphql/Layout/Layout.service";
 import {LayoutEntity} from "../../../graphql/Layout/Layout.entity";
 import {LayoutDownloadService} from "../../../graphql/Layout/Download/LayoutDownload.service";
+import {CurrentUser} from "../../../graphql/Auth/decorators/CurrentUser.decorator";
 
 @Controller()
 export class LayoutsDownloadRestController {
@@ -15,7 +15,7 @@ export class LayoutsDownloadRestController {
     }
 
     private async exists(id: string): Promise<LayoutEntity> {
-        const entity = await this.layoutService.findOne({id}, []);
+        const entity = await this.layoutService.findOne({id});
         if (!entity) {
             throw new NotFoundException();
         }
