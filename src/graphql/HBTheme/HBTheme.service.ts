@@ -1,6 +1,6 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
-import {FindConditions, In, Repository} from "typeorm";
+import {FindConditions, In, Repository, SelectQueryBuilder} from "typeorm";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {SortOrder} from "../common/enums/SortOrder";
 import {HBThemeEntity} from "./HBTheme.entity";
@@ -29,7 +29,7 @@ export class HBThemeService implements IsOwner {
                     packId?: string
                 },
             options?: ServiceFindOptionsParameter<HBThemeEntity>): Promise<HBThemeEntity> {
-        let queryBuilder;
+        let queryBuilder: SelectQueryBuilder<HBThemeEntity>;
         if (options?.info) {
             queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info);
         } else {
