@@ -64,7 +64,7 @@ export class LayoutResolver {
     ): Promise<LayoutModel> {
         const layout = await this.layoutService.findOne({id}, {info});
         if (!layout) {
-            throw new PackNotFoundError();
+            throw new LayoutNotFoundError();
         }
         return layout;
     }

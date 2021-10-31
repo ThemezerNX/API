@@ -47,7 +47,7 @@ export class ThemeResolver {
     ): Promise<ThemeModel> {
         const theme = await this.themeService.findOne({id}, ["previews"]);
         if (!theme) {
-            throw new PackNotFoundError();
+            throw new ThemeNotFoundError();
         }
         return theme;
     }
@@ -110,10 +110,10 @@ export class ThemeResolver {
 
     @Mutation(() => Boolean)
     createTheme(): boolean {
-        throw new UnknownError();
         const theme = ThemeEntity.create();
         theme.target = Target.ResidentMenu;
         console.log(theme);
+        // todo
         return true;
     }
 

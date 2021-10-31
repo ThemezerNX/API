@@ -27,7 +27,7 @@ class ListArgs {
 @Resolver(HBThemeModel)
 export class HBThemeResolver {
 
-    constructor(private hbthemeService: HBThemeService, private userService: UserService) {
+    constructor(private hbthemeService: HBThemeService) {
     }
 
     @Query(() => HBThemeModel, {
@@ -38,7 +38,7 @@ export class HBThemeResolver {
     ): Promise<HBThemeModel> {
         const hbtheme = await this.hbthemeService.findOne({id});
         if (!hbtheme) {
-            throw new PackNotFoundError();
+            throw new HBThemeNotFoundError();
         }
         return hbtheme;
     }
