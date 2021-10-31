@@ -2,9 +2,15 @@ import {LayoutOptionType} from "../../LayoutOption/common/LayoutOptionType.enum"
 import {Parser} from "expr-eval";
 import {patch} from "@themezernx/json-merger";
 
-function reverseHex(s: string) {
-    return s.match(/.{2}/g).reverse().join("");
-}
+const lengthenHexCode = (hex: string): string[] => {
+    if (hex.length == 3) {
+        return [hex[0] + hex[0], hex[1] + hex[1], hex[2] + hex[2]];
+    } else if (hex.length == 4) {
+        return [hex[0] + hex[0], hex[1] + hex[1], hex[2] + hex[2], hex[3] + hex[3]];
+    } else {
+        return hex.match(/.{2}/g);
+    }
+};
 
 export class LoadedLayoutOption {
 
@@ -32,10 +38,23 @@ export class InjectorLayout {
         const json = piece.json;
 
         if (piece.stringValue != null) {
-            return json.replace(/\?\?string\?\?/gmi, piece.stringValue);
+            return json.replace(/\?\?string\?\?/gmi, piece.stringValue.replace(/([\\"])/g, "\\$1"));
         } else if (piece.colorValue != null) {
-            // TODO: replace AA, BB, GG, RR individually
-            return json.replace(/\?\?color\?\?/gmi, reverseHex(piece.colorValue.replace(/#/g, "")));
+            const hex = lengthenHexCode(piece.colorValue.replace(/^#/g, ""));
+            return json.replace(/\?\?{color:?((?:RR|GG|BB){3}|(?:RR|GG|BB|AA){4})}\?\?/gmi, (whole, colorPattern: string) => {
+                return colorPattern.match(/.{2}/g).map((block) => {
+                    switch (block.toUpperCase()) {
+                        case "RR":
+                            return hex[0];
+                        case "GG":
+                            return hex[1];
+                        case "BB":
+                            return hex[2];
+                        case "AA":
+                            return hex[3];
+                    }
+                }).join("");
+            });
         } else if (piece.integerValue != null || piece.decimalValue != null) {
             return json.replace(/"?\?\?(.*?{(integer|decimal)}.*?)\?\?"?/gmi,
                 (whole, expression: string, type: string) => {
