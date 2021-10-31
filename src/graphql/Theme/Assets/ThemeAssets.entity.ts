@@ -1,10 +1,10 @@
 import {Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {ThemeEntity} from "../Theme.entity";
 import {CDNMapper} from "../../common/CDNMapper";
-import {CachableEntityInterface} from "../../common/interfaces/Cachable.entity.interface";
+import {AssetsEntityInterface} from "../../common/interfaces/Assets.entity.interface";
 
 @Entity()
-export class ThemeAssetsEntity extends CachableEntityInterface {
+export class ThemeAssetsEntity extends AssetsEntityInterface {
 
     @OneToOne(() => ThemeEntity, theme => theme.assets, {onDelete: "CASCADE"})
     @JoinColumn({name: "themeId"})

@@ -30,7 +30,7 @@ import {LayoutOptionModule} from "./LayoutOption/LayoutOption.module";
         }),
         GraphQLModule.forRoot({
             introspection: true,
-            autoSchemaFile: true,
+            autoSchemaFile: process.env.NODE_ENV == "development" ? "schema.gql" : false,
             // https://github.com/nestjs/graphql/issues/901#issuecomment-780007582
             uploads: false,
             // authChecker,
@@ -86,6 +86,6 @@ import {LayoutOptionModule} from "./LayoutOption/LayoutOption.module";
 })
 export class GraphqlModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
-        consumer.apply(graphqlUploadExpress()).forRoutes("/"); // TODO: should this be /graphql?
+        consumer.apply(graphqlUploadExpress()).forRoutes("/graphql"); // TODO: should this be /graphql?
     }
 }

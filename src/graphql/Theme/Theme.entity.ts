@@ -7,10 +7,12 @@ import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
 import {PackEntity} from "../Pack/Pack.entity";
 import {LayoutEntity} from "../Layout/Layout.entity";
 import {CDNMapper} from "../common/CDNMapper";
+import {EntityWithPreviewsInterface} from "../common/interfaces/EntityWithPreviews.interface";
+import {EntityWithAssetsInterface} from "../common/interfaces/EntityWithAssets.interface";
 
 
 @Entity()
-export class ThemeEntity extends ItemEntityInterface {
+export class ThemeEntity extends ItemEntityInterface implements EntityWithPreviewsInterface, EntityWithAssetsInterface  {
 
     @ManyToOne(() => PackEntity, pack => pack.themes, {onDelete: "CASCADE"})
     @JoinColumn({name: "packId"})

@@ -4,7 +4,7 @@ import {UserModel} from "./User.model";
 import {PaginationArgs} from "../common/args/Pagination.args";
 import {SortInterface} from "../common/interfaces/Sort.interface";
 import {PaginatedUsers} from "./PaginatedUsers.model";
-import {PackNotFoundError} from "../common/errors/PackNotFound.error";
+import {UserNotFoundError} from "../common/errors/auth/UserNotFound.error";
 
 export enum UserSort {
     ID = "id",
@@ -49,7 +49,7 @@ export class UserResolver {
     ): Promise<UserModel> {
         const user = await this.userService.findOne({id});
         if (!user) {
-            throw new PackNotFoundError();
+            throw new UserNotFoundError();
         }
         return user;
     }
