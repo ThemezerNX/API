@@ -1,6 +1,7 @@
-import {Query, Resolver} from "@nestjs/graphql";
+import {Info, Query, Resolver} from "@nestjs/graphql";
 import {LayoutOptionService} from "./LayoutOption.service";
 import {LayoutOptionModel} from "./LayoutOption.model";
+import {GraphQLResolveInfo} from "graphql";
 
 
 @Resolver(LayoutOptionModel)
@@ -10,8 +11,8 @@ export class LayoutOptionResolver {
     }
 
     @Query(() => [LayoutOptionModel])
-    globalLayoutOptions(): Promise<LayoutOptionModel[]> {
-        return this.layoutOptionService.findAllOptions({layoutId: null});
+    globalLayoutOptions(@Info() info: GraphQLResolveInfo): Promise<LayoutOptionModel[]> {
+        return this.layoutOptionService.findAllOptions({layoutId: null}, {info});
     }
 
 }

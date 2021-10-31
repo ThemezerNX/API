@@ -5,10 +5,11 @@ import {UserEntity} from "../User/User.entity";
 import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
 import {LayoutPreviewsEntity} from "./Previews/LayoutPreviews.entity";
 import {CDNMapper} from "../common/CDNMapper";
+import {EntityWithPreviewsInterface} from "../common/interfaces/EntityWithPreviews.interface";
 
 
 @Entity()
-export class LayoutEntity extends ItemEntityInterface {
+export class LayoutEntity extends ItemEntityInterface implements EntityWithPreviewsInterface {
 
     @Column({type: "uuid", unique: true, update: false})
     uuid: string;

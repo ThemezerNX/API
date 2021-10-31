@@ -1,5 +1,5 @@
 import {LayoutEntity} from "./Layout.entity";
-import {FindConditions, In, Repository} from "typeorm";
+import {FindConditions, In, Repository, SelectQueryBuilder} from "typeorm";
 import {Injectable} from "@nestjs/common";
 import {Target} from "../common/enums/Target";
 import {InjectRepository} from "@nestjs/typeorm";
@@ -14,10 +14,14 @@ import {LayoutOptionService} from "../LayoutOption/LayoutOption.service";
 import {LayoutOptionType} from "../LayoutOption/common/LayoutOptionType.enum";
 import {InjectorLayout, LoadedLayoutOption} from "./common/InjectorLayout";
 import {PerchQueryBuilder} from "perch-query-builder";
-import {GraphQLResolveInfo} from "graphql";
+import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
+import {LayoutPreviewsEntity} from "./Previews/LayoutPreviews.entity";
+import {joinAndSelectRelations, selectPreviews} from "../common/functions/ServiceFunctions.js";
+import {IsOwner} from "../common/interfaces/IsOwner.interface";
+import {Exists} from "../common/findOperators/Exists";
 
 @Injectable()
-export class LayoutService {
+export class LayoutService implements IsOwner {
 
     constructor(
         @InjectRepository(LayoutEntity) private repository: Repository<LayoutEntity>,
@@ -25,30 +29,25 @@ export class LayoutService {
     ) {
     }
 
-    findOne({id}: { id: string }, relations: string[] = [], selectImageFiles: boolean = false): Promise<LayoutEntity> {
-        const queryBuilder = this.repository.createQueryBuilder("layout")
-            .where({id});
+    findOne(
+        {
+            id,
+        }: {
+            id: string
+        },
+        options?: ServiceFindOptionsParameter<LayoutEntity, LayoutPreviewsEntity>,
+    ): Promise<LayoutEntity> {
+        let queryBuilder: SelectQueryBuilder<LayoutEntity>;
+        if (options?.info) {
+            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info);
+        } else {
+            queryBuilder = this.repository.createQueryBuilder();
 
-        for (const relation of relations) {
-            queryBuilder.leftJoinAndSelect("layout." + relation, relation);
+            selectPreviews(queryBuilder, options);
+            joinAndSelectRelations(queryBuilder, options); // always last
         }
 
-        if (selectImageFiles) {
-            queryBuilder.addSelect([
-                "previews.image720File",
-                "previews.image360File",
-                "previews.image240File",
-                "previews.image180File",
-                "previews.imagePlaceholderFile",
-            ]);
-        }
-
-        return queryBuilder.getOne();
-    }
-
-    findOneDynamic({id}: { id: string }, info): Promise<LayoutEntity> {
-        const queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, info)
-            .where({id});
+        queryBuilder.where({id});
 
         return queryBuilder.getOne();
     }
@@ -70,9 +69,17 @@ export class LayoutService {
                 target?: Target,
                 creators?: string[],
             },
-        relations: string[] = [],
-        info: GraphQLResolveInfo,
-    ) {
+        options?: ServiceFindOptionsParameter<LayoutEntity>,
+    ): Promise<{ result: LayoutEntity[], count: number }> {
+        let queryBuilder;
+        if (options?.info) {
+            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info, {rootField: "nodes"});
+        } else {
+            queryBuilder = this.repository.createQueryBuilder();
+
+            selectPreviews(queryBuilder, options);
+            joinAndSelectRelations(queryBuilder, options); // always last
+        }
         const findConditions: FindConditions<LayoutEntity> = {};
 
         if (target != undefined) {
@@ -84,14 +91,8 @@ export class LayoutService {
             };
         }
 
-        const queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, info, {rootField: "nodes"});
-
         queryBuilder.where(findConditions)
             .orderBy({[queryBuilder.alias + "." + sort]: order});
-
-        for (const relation of relations) {
-            queryBuilder.leftJoinAndSelect(queryBuilder.alias + "." + relation, relation);
-        }
 
         if (query?.length > 0) {
             queryBuilder.andWhere(`to_tsquery(:query) @@ (
@@ -240,6 +241,13 @@ export class LayoutService {
             Buffer.from(JSON.stringify(injectorLayout)),
             "application/json",
         );
+    }
+
+    async isOwner(layoutId: string, userId: string): Promise<boolean> {
+        return !!(await Exists(
+            this.repository.createQueryBuilder()
+                .where({id: layoutId, creatorId: userId}),
+        ));
     }
 
 }

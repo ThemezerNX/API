@@ -1,19 +1,24 @@
 import {PackEntity} from "./Pack.entity";
-import {FindConditions, In, Repository} from "typeorm";
+import {FindConditions, In, Repository, SelectQueryBuilder} from "typeorm";
 import {Injectable} from "@nestjs/common";
 import {Target} from "../common/enums/Target";
 import {InjectRepository} from "@nestjs/typeorm";
 import {SortOrder} from "../common/enums/SortOrder";
-import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
+import {executeManyRawAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {ItemSort} from "../common/args/ItemSortArgs";
 import {ThemeService} from "../Theme/Theme.service";
 import {toTsQuery} from "../common/TsQueryCreator";
 import {HBThemeService} from "../HBTheme/HBTheme.service";
 import {ThemeEntity} from "../Theme/Theme.entity";
 import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
+import {PerchQueryBuilder} from "perch-query-builder";
+import {joinAndSelectRelations, selectPreviews} from "../common/functions/ServiceFunctions.js";
+import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
+import {IsOwner} from "../common/interfaces/IsOwner.interface";
+import {Exists} from "../common/findOperators/Exists";
 
 @Injectable()
-export class PackService {
+export class PackService implements IsOwner {
 
     constructor(
         @InjectRepository(PackEntity) private repository: Repository<PackEntity>,
@@ -37,28 +42,26 @@ export class PackService {
         return results.some((r) => r);
     }
 
-    findOne({id}: { id: string }, relations: string[] = [], selectImageFiles: boolean = false): Promise<PackEntity> {
-        const queryBuilder = this.repository.createQueryBuilder("pack")
-            .where({id});
+    findOne(
+        {id}: { id: string },
+        options?: ServiceFindOptionsParameter<PackEntity>,
+    ): Promise<PackEntity> {
+        let queryBuilder: SelectQueryBuilder<PackEntity>;
+        if (options?.info) {
+            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info);
+        } else {
+            queryBuilder = this.repository.createQueryBuilder();
 
-        for (const relation of relations) {
-            queryBuilder.leftJoinAndSelect("pack." + relation, relation);
+            selectPreviews(queryBuilder, options);
+            joinAndSelectRelations(queryBuilder, options); // always last
         }
 
-        if (selectImageFiles) {
-            queryBuilder.addSelect([
-                "previews.image720File",
-                "previews.image360File",
-                "previews.image240File",
-                "previews.image180File",
-                "previews.imagePlaceholderFile",
-            ]);
-        }
+        queryBuilder.where({id});
 
         return queryBuilder.getOne();
     }
 
-    findAll(
+    async findAll(
         {
             paginationArgs,
             sort = ItemSort.ADDED,
@@ -76,7 +79,17 @@ export class PackService {
                 creators?: string[],
                 includeNSFW?: boolean
             },
-    ) {
+        options?: ServiceFindOptionsParameter<PackEntity>,
+    ): Promise<{ result: PackEntity[], count: number }> {
+        let queryBuilder: SelectQueryBuilder<PackEntity>;
+        if (options?.info) {
+            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info, {rootField: "nodes"});
+        } else {
+            queryBuilder = this.repository.createQueryBuilder();
+
+            selectPreviews(queryBuilder, options);
+            joinAndSelectRelations(queryBuilder, options); // always last
+        }
         const findConditions: FindConditions<PackEntity> = {};
 
         if (creators?.length > 0) {
@@ -85,39 +98,46 @@ export class PackService {
             };
         }
 
-        const queryBuilder = this.repository.createQueryBuilder("pack")
-            .where(findConditions);
+        queryBuilder.where(findConditions);
+
+        queryBuilder.leftJoin((sq) =>
+                sq
+                    .subQuery()
+                    .select("pack2.id", "nsfwpackid")
+                    .from(PackEntity, "pack2")
+                    .where("theme2.\"isNSFW\" OR hbtheme2.\"isNSFW\"")
+                    .leftJoin(ThemeEntity, "theme2", "pack2.id = theme2.packId")
+                    .leftJoin(HBThemeEntity, "hbtheme2", "pack2.id = hbtheme2.packId"),
+            "nsfwtable",
+            `${queryBuilder.alias}.id = nsfwtable.nsfwpackid`,
+        );
+
+        const isNSFW = "CASE WHEN nsfwtable.nsfwpackid is NULL THEN FALSE ELSE TRUE END";
+        queryBuilder.addSelect(isNSFW, "isNSFW");
 
         if (includeNSFW != true) {
-            queryBuilder.andWhere(qb => {
-                const sub = qb.subQuery()
-                    .select("theme2.isNSFW OR hbtheme2.isNSFW")
-                    .from(PackEntity, "pack2")
-                    .where("pack2.id = pack.id")
-                    .leftJoin(ThemeEntity, "theme2", "pack2.id = theme2.packId")
-                    .leftJoin(HBThemeEntity, "hbtheme2", "pack2.id = hbtheme2.packId");
-                return "TRUE NOT IN" + sub.getQuery();
-            });
+            queryBuilder.andWhere("nsfwtable.nsfwpackid IS NULL");
         }
 
         if (query?.length > 0) {
             queryBuilder.andWhere(`to_tsquery(:query) @@ (
-                setweight(to_tsvector('pg_catalog.english', coalesce(pack.name, '')), 'A') ||
-                setweight(to_tsvector('pg_catalog.english', coalesce(pack.description, '')), 'C') ||
-                to_tsvector('pg_catalog.english', coalesce(CASE WHEN themes."isNSFW" OR hbthemes."isNSFW" THEN 'NSFW' END, ''))
+                setweight(to_tsvector('pg_catalog.english', coalesce("${queryBuilder.alias}".name, '')), 'A') ||
+                setweight(to_tsvector('pg_catalog.english', coalesce("${queryBuilder.alias}".description, '')), 'C') ||
+                to_tsvector('pg_catalog.english', coalesce(CASE WHEN (${isNSFW}) THEN 'NSFW' END, ''))
             )`, {query: toTsQuery(query)});
         }
 
-        queryBuilder
-            .leftJoinAndSelect("pack.themes", "themes")
-            .leftJoinAndSelect("pack.hbThemes", "hbthemes")
-            .leftJoinAndSelect("pack.previews", "previews")
-            .orderBy({["pack." + sort]: order});
+        queryBuilder.orderBy({[queryBuilder.alias + "." + sort]: order});
 
-        return executeAndPaginate(queryBuilder, paginationArgs);
+        const {result, count} = await executeManyRawAndPaginate(queryBuilder, paginationArgs);
+        // map the isNSFW field
+        result.entities.forEach((row, index) => {
+            row.isNSFW = result.raw[index].isNSFW;
+        });
+        return {result: result.entities, count};
     }
 
-    findRandom(
+    async findRandom(
         {
             limit,
             includeNSFW,
@@ -126,32 +146,60 @@ export class PackService {
                 limit?: number,
                 includeNSFW?: boolean
             },
+        options?: ServiceFindOptionsParameter<PackEntity>,
     ): Promise<PackEntity[]> {
-        const queryBuilder = this.repository.createQueryBuilder("pack");
+        let queryBuilder: SelectQueryBuilder<PackEntity>;
+        if (options?.info) {
+            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info);
+        } else {
+            queryBuilder = this.repository.createQueryBuilder();
+
+            selectPreviews(queryBuilder, options);
+            joinAndSelectRelations(queryBuilder, options); // always last
+        }
+        const findConditions: FindConditions<PackEntity> = {};
+
+        queryBuilder.where(findConditions);
+
+        queryBuilder.leftJoin((sq) =>
+                sq
+                    .subQuery()
+                    .select("pack2.id", "nsfwpackid")
+                    .from(PackEntity, "pack2")
+                    .where("theme2.\"isNSFW\" OR hbtheme2.\"isNSFW\"")
+                    .leftJoin(ThemeEntity, "theme2", "pack2.id = theme2.packId")
+                    .leftJoin(HBThemeEntity, "hbtheme2", "pack2.id = hbtheme2.packId"),
+            "nsfwtable",
+            `${queryBuilder.alias}.id = nsfwtable.nsfwpackid`,
+        );
+
+        const isNSFW = "CASE WHEN nsfwtable.nsfwpackid is NULL THEN FALSE ELSE TRUE END";
+        queryBuilder.addSelect(isNSFW, "isNSFW");
 
         if (includeNSFW != true) {
-            queryBuilder.andWhere(qb => {
-                const sub = qb.subQuery()
-                    .select("theme2.isNSFW OR hbtheme2.isNSFW")
-                    .from(PackEntity, "pack2")
-                    .where("pack2.id = pack.id")
-                    .leftJoin(ThemeEntity, "theme2", "pack2.id = theme2.packId")
-                    .leftJoin(HBThemeEntity, "hbtheme2", "pack2.id = hbtheme2.packId");
-                return "TRUE NOT IN" + sub.getQuery();
-            });
+            queryBuilder.andWhere("nsfwtable.nsfwpackid IS NULL");
         }
 
         if (limit != undefined) {
             queryBuilder.limit(limit);
         }
 
-        queryBuilder
-            .leftJoinAndSelect("pack.themes", "themes")
-            .leftJoinAndSelect("pack.hbThemes", "hbthemes")
-            .leftJoinAndSelect("pack.previews", "previews")
-            .orderBy("RANDOM()");
+        queryBuilder.orderBy("RANDOM()");
 
-        return queryBuilder.getMany();
+        const {raw, entities} = await queryBuilder.getRawAndEntities();
+        // map the isNSFW field
+        entities.forEach((row, index) => {
+            row.isNSFW = raw[index].isNSFW;
+        });
+        return entities;
+    }
+
+
+    async isOwner(packId: string, userId: string): Promise<boolean> {
+        return !!(await Exists(
+            this.repository.createQueryBuilder()
+                .where({id: packId, creatorId: userId}),
+        ));
     }
 
 }

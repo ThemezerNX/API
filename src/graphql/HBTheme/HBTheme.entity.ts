@@ -5,10 +5,12 @@ import {HBThemeAssetsEntity} from "./Assets/HBThemeAssets.entity";
 import {PackEntity} from "../Pack/Pack.entity";
 import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
 import {CDNMapper} from "../common/CDNMapper";
+import {EntityWithPreviewsInterface} from "../common/interfaces/EntityWithPreviews.interface";
+import {EntityWithAssetsInterface} from "../common/interfaces/EntityWithAssets.interface";
 
 
 @Entity()
-export class HBThemeEntity extends ItemEntityInterface {
+export class HBThemeEntity extends ItemEntityInterface implements EntityWithPreviewsInterface, EntityWithAssetsInterface {
 
     @ManyToOne(() => PackEntity, pack => pack.hbthemes, {onDelete: "CASCADE"})
     @JoinColumn({name: "packId"})

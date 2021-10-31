@@ -1,51 +1,14 @@
 import {AuthService} from "./Auth.service";
-import {Args, Context, Field, InputType, Mutation, Query, Resolver} from "@nestjs/graphql";
-import {IsEmail, MinLength} from "class-validator";
+import {Args, Context, Mutation, Query, Resolver} from "@nestjs/graphql";
 import {UseGuards} from "@nestjs/common";
 import {LocalLoginGuard} from "./Strategies/Local/strategy/LocalLogin.guard";
 import {UserModel} from "../User/User.model";
-import {GqlAuthGuard} from "./GqlAuth.guard";
-import {CurrentUser} from "../common/decorators/CurrentUser.gql.decorator";
 import {UserEntity} from "../User/User.entity";
-
-@InputType()
-class RegisterData {
-
-    @Field()
-    @IsEmail()
-    email: string;
-
-    @Field()
-    @MinLength(8)
-    password: string;
-
-    @Field()
-    @MinLength(4)
-    username: string;
-
-}
-
-@InputType()
-class LoginData {
-
-    @Field()
-    email: string;
-
-    @Field()
-    password: string;
-
-}
-
-@InputType()
-class VerificationData {
-
-    @Field()
-    userId: string;
-
-    @Field()
-    verificationToken: string;
-
-}
+import {RegisterData} from "./dto/Register.dto";
+import {VerificationData} from "./dto/Verification.dto";
+import {LoginData} from "./dto/Login.dto";
+import {CurrentUser} from "./decorators/CurrentUser.decorator";
+import {Auth} from "./decorators/Auth.decorator";
 
 
 @Resolver()
@@ -74,14 +37,12 @@ export class AuthResolver {
     logout(@Context() context): boolean {
         context.req.logout();
         context.req.session.destroy();
-        context.req.res.clearCookie('connect.sid')
-        // console.log(context.req.user)
-        // console.log(context.req.session)
+        context.req.res.clearCookie("connect.sid");
         return true;
     }
 
     @Query(() => UserModel)
-    @UseGuards(GqlAuthGuard)
+    @Auth()
     me(@CurrentUser() user: UserEntity): UserModel {
         return user;
     }

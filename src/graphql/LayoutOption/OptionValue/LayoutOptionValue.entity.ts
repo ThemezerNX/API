@@ -1,10 +1,11 @@
 import {BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn} from "typeorm";
 import {LayoutOptionValuePreviewsEntity} from "../OptionValuePreviews/LayoutOptionValuePreviews.entity";
 import {LayoutOptionEntity} from "../LayoutOption.entity";
+import {EntityWithPreviewsInterface} from "../../common/interfaces/EntityWithPreviews.interface";
 
 
 @Entity()
-export class LayoutOptionValueEntity extends BaseEntity {
+export class LayoutOptionValueEntity extends BaseEntity implements EntityWithPreviewsInterface {
 
     @ManyToOne(() => LayoutOptionEntity, layoutOption => layoutOption.values, {onDelete: "CASCADE"})
     @JoinColumn({name: "layoutOptionId"})

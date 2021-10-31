@@ -1,18 +1,15 @@
-import {Args, ArgsType, Field, Mutation, Parent, Query, ResolveField, Resolver} from "@nestjs/graphql";
+import {Args, ArgsType, Field, Mutation, Query, Resolver} from "@nestjs/graphql";
 import {Target} from "../common/enums/Target";
 import {ThemeModel} from "./Theme.model";
 import {ThemeService} from "./Theme.service";
 import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
 import {UserService} from "../User/User.service";
-import {UserModel} from "../User/User.model";
 import {ThemeEntity} from "./Theme.entity";
 import {ItemSortArgs} from "../common/args/ItemSortArgs";
 import {PaginatedThemes} from "./PaginatedThemes.model";
 import {FileUpload, GraphQLUpload} from "graphql-upload";
-import {UnknownError} from "../common/errors/Unknown.error";
-import {ThemeOptionModel} from "./ThemeOptions/ThemeOption.model";
 import {ThemeOptionService} from "./ThemeOptions/ThemeOption.service";
-import {PackNotFoundError} from "../common/errors/PackNotFound.error";
+import {ThemeNotFoundError} from "../common/errors/ThemeNotFound.error";
 
 
 @ArgsType()
@@ -37,15 +34,10 @@ export class ThemeResolver {
     constructor(private themeService: ThemeService, private userService: UserService, private optionService: ThemeOptionService) {
     }
 
-    @ResolveField(() => UserModel)
-    creator(@Parent() theme: ThemeEntity): Promise<UserModel> {
-        return this.userService.findOne({id: theme.creatorId});
-    }
-
-    @ResolveField(() => [ThemeOptionModel])
-    options(@Parent() theme: ThemeEntity): Promise<ThemeOptionModel[]> {
-        return this.optionService.findAll({themeId: theme.id});
-    }
+    // @ResolveField(() => [ThemeOptionModel])
+    // options(@Parent() theme: ThemeEntity): Promise<ThemeOptionModel[]> {
+    //     return this.optionService.findAll({themeId: theme.id});
+    // }
 
     @Query(() => ThemeModel, {
         description: `Find a single theme`,
@@ -53,7 +45,7 @@ export class ThemeResolver {
     async theme(
         @Args("id") id: string,
     ): Promise<ThemeModel> {
-        const theme = await this.themeService.findOne({id});
+        const theme = await this.themeService.findOne({id}, ["previews"]);
         if (!theme) {
             throw new PackNotFoundError();
         }

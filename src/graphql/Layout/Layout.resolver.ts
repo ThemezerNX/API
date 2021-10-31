@@ -3,14 +3,12 @@ import {Target} from "../common/enums/Target";
 import {LayoutModel} from "./Layout.model";
 import {LayoutService} from "./Layout.service";
 import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
-import {UserService} from "../User/User.service";
 import {ItemSortArgs} from "../common/args/ItemSortArgs";
 import {PaginatedLayouts} from "./PaginatedLayouts.model";
-import {LayoutOptionService} from "../LayoutOption/LayoutOption.service";
 import {FileModel} from "../common/models/File.model";
 import {IsDecimal, IsHexColor, IsInt, IsNotEmpty, IsUUID, Length} from "class-validator";
 import {GraphQLResolveInfo} from "graphql";
-import {PackNotFoundError} from "../common/errors/PackNotFound.error";
+import {LayoutNotFoundError} from "../common/errors/LayoutNotFound.error";
 
 
 @ArgsType()
@@ -54,19 +52,8 @@ export class ChosenLayoutOptionValue {
 @Resolver(LayoutModel)
 export class LayoutResolver {
 
-    constructor(private layoutService: LayoutService, private layoutOptionService: LayoutOptionService, private userService: UserService) {
+    constructor(private layoutService: LayoutService) {
     }
-
-    // @ResolveField(() => UserModel)
-    // creator(@Parent() layout: LayoutEntity): Promise<UserModel> {
-    //     return this.userService.findOne({id: layout.creatorId});
-    // }
-
-    // @ResolveField(() => [LayoutOptionModel])
-    // options(@Parent() layout: LayoutEntity): Promise<LayoutOptionModel[]> {
-    //     // this loads all options by priority asc, instead of randomly (typeorm relation can't be ordered by)
-    //     return this.layoutOptionService.findAllOptions({layoutId: layout.id});
-    // }
 
     @Query(() => LayoutModel, {
         description: `Find a single layout`,
@@ -95,7 +82,7 @@ export class LayoutResolver {
             paginationArgs,
             ...itemSortArgs,
             ...listArgs,
-        }, ["previews"], info);
+        }, {info});
 
         return new PaginatedLayouts(paginationArgs, result.count, result.result);
     }

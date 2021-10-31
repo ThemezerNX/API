@@ -1,14 +1,11 @@
-import {Args, ArgsType, Field, Parent, Query, ResolveField, Resolver} from "@nestjs/graphql";
+import {Args, ArgsType, Field, Query, Resolver} from "@nestjs/graphql";
 import {Target} from "../common/enums/Target";
 import {HBThemeModel} from "./HBTheme.model";
 import {HBThemeService} from "./HBTheme.service";
 import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
-import {UserService} from "../User/User.service";
-import {UserModel} from "../User/User.model";
-import {HBThemeEntity} from "./HBTheme.entity";
 import {ItemSortArgs} from "../common/args/ItemSortArgs";
 import {PaginatedHBThemes} from "./PaginatedHBThemes.model";
-import {PackNotFoundError} from "../common/errors/PackNotFound.error";
+import {HBThemeNotFoundError} from "../common/errors/HBThemeNotFound.error";
 
 
 @ArgsType()
@@ -31,11 +28,6 @@ class ListArgs {
 export class HBThemeResolver {
 
     constructor(private hbthemeService: HBThemeService, private userService: UserService) {
-    }
-
-    @ResolveField(() => UserModel)
-    creator(@Parent() hbtheme: HBThemeEntity): Promise<UserModel> {
-        return this.userService.findOne({id: hbtheme.creatorId});
     }
 
     @Query(() => HBThemeModel, {

@@ -60,7 +60,7 @@ export class NXInstallerResolver {
         } else if (packHexREGEX.exec(idLower)) {
             // Download pack
             const packId = idLower.substring(1);
-            const pack = await this.packService.findOne({id: packId}, ["themes"]);
+            const pack = await this.packService.findOne({id: packId}, {relations: ["themes"]});
 
             response.groupname = pack.name;
             response.themes = pack.themes.map(NXInstallerResolver.mapTheme);

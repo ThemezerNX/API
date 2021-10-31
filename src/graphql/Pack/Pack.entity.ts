@@ -4,13 +4,13 @@ import {PackPreviewsEntity} from "./Previews/PackPreviews.entity";
 import {ThemeEntity} from "../Theme/Theme.entity";
 import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
 import {CDNMapper} from "../common/CDNMapper";
+import {EntityWithPreviewsInterface} from "../common/interfaces/EntityWithPreviews.interface";
 
 @Entity()
-export class PackEntity extends ItemEntityInterface {
+export class PackEntity extends ItemEntityInterface implements EntityWithPreviewsInterface {
 
-    get isNSFW() {
-        return undefined;
-    }
+    // Virtual field
+    isNSFW: boolean;
 
     @OneToOne(() => PackPreviewsEntity, packPreviews => packPreviews.pack, {cascade: true, eager: true})
     previews: PackPreviewsEntity;
@@ -20,10 +20,6 @@ export class PackEntity extends ItemEntityInterface {
 
     @OneToMany(() => HBThemeEntity, hbtheme => hbtheme.pack, {onDelete: "CASCADE"})
     hbthemes: HBThemeEntity[];
-
-    get entries() {
-        return [...(this.themes || []), ...(this.hbthemes || [])];
-    }
 
     get downloadUrl(): string {
         return CDNMapper.packs.download(this.id);

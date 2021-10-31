@@ -62,3 +62,16 @@ export const executeAndPaginate = async <Entity>(queryBuilder: SelectQueryBuilde
     const countBuilder = queryBuilder.clone();
     return {result: await queryBuilder.getMany(), count: await countBuilder.getCount()};
 };
+
+export const executeManyRawAndPaginate = async <Entity>(queryBuilder: SelectQueryBuilder<Entity>, paginationArgs?: PaginationArgs): Promise<{ result: { raw: any[], entities: Entity[] }, count: number }> => {
+    if (!!paginationArgs) {
+        const {page, limit} = paginationArgs;
+
+        queryBuilder
+            .skip(skip(page, limit))
+            .limit(take(limit));
+    }
+
+    const countBuilder = queryBuilder.clone();
+    return {result: await queryBuilder.getRawAndEntities(), count: await countBuilder.getCount()};
+};

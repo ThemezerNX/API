@@ -20,7 +20,7 @@ export class PackCacheService {
     }
 
     async getFile(packId: string): Promise<{ data: Buffer, fileName: string }> {
-        const pack = await this.packService.findOne({id: packId}, ["creator", "themes", "hbthemes"]);
+        const pack = await this.packService.findOne({id: packId}, {relations: ["creator", "themes", "hbthemes"]});
         const existingCache = await this.cacheRepository.findOne({where: {packId}});
 
         let data: Buffer;

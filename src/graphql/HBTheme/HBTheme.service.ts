@@ -6,9 +6,14 @@ import {SortOrder} from "../common/enums/SortOrder";
 import {HBThemeEntity} from "./HBTheme.entity";
 import {ItemSort} from "../common/args/ItemSortArgs";
 import {toTsQuery} from "../common/TsQueryCreator";
+import {PerchQueryBuilder} from "perch-query-builder";
+import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
+import {joinAndSelectRelations, selectPreviews} from "../common/functions/ServiceFunctions.js";
+import {IsOwner} from "../common/interfaces/IsOwner.interface";
+import {Exists} from "../common/findOperators/Exists";
 
 @Injectable()
-export class HBThemeService {
+export class HBThemeService implements IsOwner {
 
     constructor(@InjectRepository(HBThemeEntity) private repository: Repository<HBThemeEntity>) {
     }
@@ -17,7 +22,22 @@ export class HBThemeService {
                 id,
                 isNSFW,
                 packId,
-            }: { id?: string, isNSFW?: boolean, packId?: string }, relations: string[] = [], selectImageFiles: boolean = false): Promise<HBThemeEntity> {
+            }:
+                {
+                    id?: string,
+                    isNSFW?: boolean,
+                    packId?: string
+                },
+            options?: ServiceFindOptionsParameter<HBThemeEntity>): Promise<HBThemeEntity> {
+        let queryBuilder;
+        if (options?.info) {
+            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info);
+        } else {
+            queryBuilder = this.repository.createQueryBuilder();
+
+            selectPreviews(queryBuilder, options);
+            joinAndSelectRelations(queryBuilder, options); // always last
+        }
         const findConditions: FindConditions<HBThemeEntity> = {};
 
         if (id != undefined) {
@@ -30,22 +50,9 @@ export class HBThemeService {
             findConditions.packId = packId;
         }
 
-        const queryBuilder = this.repository.createQueryBuilder("hbtheme")
+        queryBuilder
+            .leftJoinAndSelect(queryBuilder.alias + ".tags", "tags")
             .where(findConditions);
-
-        for (const relation of relations) {
-            queryBuilder.leftJoinAndSelect("hbtheme." + relation, relation);
-        }
-
-        if (selectImageFiles) {
-            queryBuilder.addSelect([
-                "previews.image720File",
-                "previews.image360File",
-                "previews.image240File",
-                "previews.image180File",
-                "previews.imagePlaceholderFile",
-            ]);
-        }
 
         return queryBuilder.getOne();
     }
@@ -69,7 +76,17 @@ export class HBThemeService {
                 creators?: string[],
                 includeNSFW?: boolean
             },
-    ) {
+        options?: ServiceFindOptionsParameter<HBThemeEntity>,
+    ): Promise<{ result: HBThemeEntity[], count: number }> {
+        let queryBuilder;
+        if (options?.info) {
+            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info, {rootField: "nodes"});
+        } else {
+            queryBuilder = this.repository.createQueryBuilder();
+
+            selectPreviews(queryBuilder, options);
+            joinAndSelectRelations(queryBuilder, options); // always last
+        }
         const findConditions: FindConditions<HBThemeEntity> = {};
 
         if (packId != undefined) {
@@ -84,18 +101,16 @@ export class HBThemeService {
             findConditions.isNSFW = false;
         }
 
-        const queryBuilder = this.repository.createQueryBuilder("hbtheme")
+        queryBuilder
             .where(findConditions)
-            .leftJoinAndSelect("hbtheme.previews", "previews")
-            .leftJoinAndSelect("hbtheme.assets", "assets")
-            .leftJoinAndSelect("hbtheme.tags", "tags")
-            .orderBy({["hbtheme." + sort]: order});
+            .leftJoinAndSelect(queryBuilder.alias + ".tags", "tags")
+            .orderBy({[queryBuilder.alias + "." + sort]: order});
 
         if (query?.length > 0) {
             queryBuilder.andWhere(`to_tsquery(:query) @@ (
-                setweight(to_tsvector('pg_catalog.english', coalesce(hbtheme.name, '')), 'A') ||
-                setweight(to_tsvector('pg_catalog.english', coalesce(hbtheme.description, '')), 'C') ||
-                to_tsvector('pg_catalog.english', coalesce(CASE WHEN hbtheme."isNSFW" THEN 'NSFW' END, '')) ||
+                setweight(to_tsvector('pg_catalog.english', coalesce(${queryBuilder.alias}.name, '')), 'A') ||
+                setweight(to_tsvector('pg_catalog.english', coalesce(${queryBuilder.alias}.description, '')), 'C') ||
+                to_tsvector('pg_catalog.english', coalesce(CASE WHEN ${queryBuilder.alias}."isNSFW" THEN 'NSFW' END, '')) ||
                 to_tsvector(tags.name)
             )`, {query: toTsQuery(query)});
         }
@@ -131,6 +146,13 @@ export class HBThemeService {
         }
 
         return queryBuilder.getMany();
+    }
+
+    async isOwner(hbthemeId: string, userId: string): Promise<boolean> {
+        return !!(await Exists(
+            this.repository.createQueryBuilder()
+                .where({id: hbthemeId, creatorId: userId}),
+        ));
     }
 
 }

@@ -7,9 +7,11 @@ import {Target} from "../common/enums/Target";
 import {SortOrder} from "../common/enums/SortOrder";
 import {ItemSort} from "../common/args/ItemSortArgs";
 import {toTsQuery} from "../common/TsQueryCreator";
+import {IsOwner} from "../common/interfaces/IsOwner.interface";
+import {Exists} from "../common/findOperators/Exists";
 
 @Injectable()
-export class ThemeService {
+export class ThemeService implements IsOwner {
 
     constructor(@InjectRepository(ThemeEntity) private repository: Repository<ThemeEntity>) {
     }
@@ -149,6 +151,13 @@ export class ThemeService {
         }
 
         return queryBuilder.getMany();
+    }
+
+    async isOwner(themeId: string, userId: string): Promise<boolean> {
+        return !!(await Exists(
+            this.repository.createQueryBuilder()
+                .where({id: themeId, creatorId: userId}),
+        ));
     }
 
 }
