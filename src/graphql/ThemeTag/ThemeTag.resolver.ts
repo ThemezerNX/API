@@ -1,36 +1,12 @@
-import {Args, ArgsType, Field, Query, registerEnumType, Resolver} from "@nestjs/graphql";
+import {Args, Query, Resolver} from "@nestjs/graphql";
 import {ThemeTagService} from "./ThemeTag.service";
 import {PaginationArgs} from "../common/args/Pagination.args";
 import {ThemeTagModel} from "./ThemeTag.model";
-import {SortInterface} from "../common/interfaces/Sort.interface";
 import {PaginatedThemeTags} from "./PaginatedThemeTags.model";
 import {ThemeTagNotFoundError} from "../common/errors/ThemeTagNotFound.error";
+import {SortArgs} from "./dto/Sort.args";
+import {ListArgs} from "./dto/List.args";
 
-
-export enum TagSort {
-    ID = "id",
-    NAME = "name",
-}
-
-registerEnumType(TagSort, {
-    name: "TagSort",
-});
-
-@ArgsType()
-class SortArgs extends SortInterface {
-
-    @Field(() => TagSort, {nullable: true})
-    sort?: TagSort = TagSort.ID;
-
-}
-
-@ArgsType()
-class ListArgs {
-
-    @Field({nullable: true})
-    query?: string;
-
-}
 
 @Resolver(ThemeTagModel)
 export class ThemeTagResolver {

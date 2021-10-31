@@ -1,28 +1,12 @@
-import {Args, ArgsType, Field, Query, Resolver} from "@nestjs/graphql";
-import {Target} from "../common/enums/Target";
+import {Args, Query, Resolver} from "@nestjs/graphql";
 import {HBThemeModel} from "./HBTheme.model";
 import {HBThemeService} from "./HBTheme.service";
 import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
-import {ItemSortArgs} from "../common/args/ItemSortArgs";
+import {ItemSortArgs} from "../common/args/ItemSort.args";
 import {PaginatedHBThemes} from "./PaginatedHBThemes.model";
 import {HBThemeNotFoundError} from "../common/errors/HBThemeNotFound.error";
+import {ListArgs} from "./dto/List.args";
 
-
-@ArgsType()
-class ListArgs {
-
-    @Field(() => Target, {nullable: true})
-    target?: Target;
-    @Field({nullable: true})
-    query?: string;
-    @Field(() => [String], {nullable: true})
-    creators?: string[];
-    @Field(() => [String], {nullable: true})
-    layouts?: string[];
-    @Field({defaultValue: false})
-    includeNSFW: boolean = false;
-
-}
 
 @Resolver(HBThemeModel)
 export class HBThemeResolver {

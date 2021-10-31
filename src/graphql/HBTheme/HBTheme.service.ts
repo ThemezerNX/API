@@ -4,7 +4,7 @@ import {FindConditions, In, Repository} from "typeorm";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {SortOrder} from "../common/enums/SortOrder";
 import {HBThemeEntity} from "./HBTheme.entity";
-import {ItemSort} from "../common/args/ItemSortArgs";
+import {ItemSort} from "../common/args/ItemSort.args";
 import {toTsQuery} from "../common/TsQueryCreator";
 import {PerchQueryBuilder} from "perch-query-builder";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";

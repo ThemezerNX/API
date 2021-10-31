@@ -5,7 +5,7 @@ import {ThemeEntity} from "./Theme.entity";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {Target} from "../common/enums/Target";
 import {SortOrder} from "../common/enums/SortOrder";
-import {ItemSort} from "../common/args/ItemSortArgs";
+import {ItemSort} from "../common/args/ItemSort.args";
 import {toTsQuery} from "../common/TsQueryCreator";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
 import {Exists} from "../common/findOperators/Exists";

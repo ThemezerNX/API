@@ -1,32 +1,17 @@
-import {Args, ArgsType, Field, Mutation, Query, Resolver} from "@nestjs/graphql";
+import {Args, Mutation, Query, Resolver} from "@nestjs/graphql";
 import {Target} from "../common/enums/Target";
 import {ThemeModel} from "./Theme.model";
 import {ThemeService} from "./Theme.service";
 import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
 import {UserService} from "../User/User.service";
 import {ThemeEntity} from "./Theme.entity";
-import {ItemSortArgs} from "../common/args/ItemSortArgs";
+import {ItemSortArgs} from "../common/args/ItemSort.args";
 import {PaginatedThemes} from "./PaginatedThemes.model";
 import {FileUpload, GraphQLUpload} from "graphql-upload";
 import {ThemeOptionService} from "./ThemeOptions/ThemeOption.service";
 import {ThemeNotFoundError} from "../common/errors/ThemeNotFound.error";
+import {ListArgs} from "./dto/List.args";
 
-
-@ArgsType()
-class ListArgs {
-
-    @Field(() => Target, {nullable: true})
-    target?: Target;
-    @Field({nullable: true})
-    query?: string;
-    @Field(() => [String], {nullable: true})
-    creators?: string[];
-    @Field(() => [String], {nullable: true})
-    layouts?: string[];
-    @Field({defaultValue: false})
-    includeNSFW?: boolean = false;
-
-}
 
 @Resolver(ThemeModel)
 export class ThemeResolver {

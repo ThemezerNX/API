@@ -1,25 +1,15 @@
-import {Args, ArgsType, Field, Query, Resolver} from "@nestjs/graphql";
+import {Args, Query, Resolver} from "@nestjs/graphql";
 import {NXInstallerModel, NXInstallerTheme} from "./NXInstaller.model";
 import {ThemeService} from "../Theme/Theme.service";
 import {PackService} from "../Pack/Pack.service";
 import {SortOrder} from "../common/enums/SortOrder";
-import {ItemSort} from "../common/args/ItemSortArgs";
+import {ItemSort} from "../common/args/ItemSort.args";
 import {PaginationArgs} from "../common/args/Pagination.args";
 import {ThemeEntity} from "../Theme/Theme.entity";
-import {MinLength} from "class-validator";
-import {SortInterface} from "../common/interfaces/Sort.interface";
+import {QueryArgs} from "./dto/Query.args";
 
 export const themeHexREGEX = /^t[0-9a-f]+$/;
 export const packHexREGEX = /^p[0-9a-f]+$/;
-
-@ArgsType()
-class QueryArgs extends SortInterface {
-
-    @Field()
-    @MinLength(1)
-    id: string;
-
-}
 
 @Resolver(NXInstallerModel)
 export class NXInstallerResolver {

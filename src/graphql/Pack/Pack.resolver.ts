@@ -1,27 +1,13 @@
-import {Args, ArgsType, Field, Info, Query, Resolver} from "@nestjs/graphql";
+import {Args, Info, Query, Resolver} from "@nestjs/graphql";
 import {PackService} from "./Pack.service";
 import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
-import {ItemSortArgs} from "../common/args/ItemSortArgs";
+import {ItemSortArgs} from "../common/args/ItemSort.args";
 import {PackModel} from "./Pack.model";
 import {PaginatedPacks} from "./PaginatedPacks.model";
 import {PackNotFoundError} from "../common/errors/PackNotFound.error";
 import {GraphQLResolveInfo} from "graphql";
+import {ListArgs} from "./dto/List.args";
 
-
-@ArgsType()
-class ListArgs {
-
-    @Field({nullable: true})
-    query?: string;
-    @Field(() => [String], {nullable: true})
-    creators?: string[];
-    @Field({
-        defaultValue: false,
-        description: "Whether to include NSFW results. If false, a pack will be excluded if any of the themes is NSFW.",
-    })
-    includeNSFW?: boolean = false;
-
-}
 
 @Resolver(PackModel)
 export class PackResolver {

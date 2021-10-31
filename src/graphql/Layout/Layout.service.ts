@@ -5,7 +5,7 @@ import {Target} from "../common/enums/Target";
 import {InjectRepository} from "@nestjs/typeorm";
 import {SortOrder} from "../common/enums/SortOrder";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
-import {ItemSort} from "../common/args/ItemSortArgs";
+import {ItemSort} from "../common/args/ItemSort.args";
 import {toTsQuery} from "../common/TsQueryCreator";
 import {FileModel} from "../common/models/File.model";
 import {stringifyID} from "@themezernx/layout-id-parser/dist";
