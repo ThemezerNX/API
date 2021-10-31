@@ -9,7 +9,6 @@ import {ItemSort} from "../common/args/ItemSort.args";
 import {toTsQuery} from "../common/TsQueryCreator";
 import {FileModel} from "../common/models/File.model";
 import {stringifyID} from "@themezernx/layout-id-parser/dist";
-import {ChosenLayoutOptionValue} from "./Layout.resolver";
 import {LayoutOptionService} from "../LayoutOption/LayoutOption.service";
 import {LayoutOptionType} from "../LayoutOption/common/LayoutOptionType.enum";
 import {InjectorLayout, LoadedLayoutOption} from "./common/InjectorLayout";
@@ -19,6 +18,7 @@ import {LayoutPreviewsEntity} from "./Previews/LayoutPreviews.entity";
 import {joinAndSelectRelations, selectPreviews} from "../common/functions/ServiceFunctions.js";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
 import {Exists} from "../common/findOperators/Exists";
+import {ChosenLayoutOptionValue} from "./dto/ChosenLayoutOptionValue.input";
 
 @Injectable()
 export class LayoutService implements IsOwner {

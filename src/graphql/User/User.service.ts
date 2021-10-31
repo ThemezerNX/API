@@ -5,12 +5,12 @@ import {UserEntity} from "./User.entity";
 import {StringContains} from "../common/findOperators/StringContains";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {SortOrder} from "../common/enums/SortOrder";
-import {UserSort} from "./User.resolver";
 import {UserConnectionsEntity} from "./Connections/UserConnections.entity";
 import {UserProfileEntity} from "./Profile/UserProfile.entity";
 import {EmailAlreadyRegisteredError} from "../common/errors/auth/EmailAlreadyRegistered.error";
 import {UnknownError} from "../common/errors/Unknown.error";
 import {UserPreferencesEntity} from "./Preferences/UserPreferences.entity";
+import {UserSort} from "./dto/Sort.args";
 
 @Injectable()
 export class UserService {

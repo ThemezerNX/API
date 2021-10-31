@@ -5,7 +5,7 @@ import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args
 import {SortOrder} from "../common/enums/SortOrder";
 import {StringContains} from "../common/findOperators/StringContains";
 import {ThemeTagEntity} from "./ThemeTag.entity";
-import {TagSort} from "./ThemeTag.resolver";
+import {TagSort} from "./dto/Sort.args";
 
 @Injectable()
 export class ThemeTagService {
