@@ -78,7 +78,7 @@ async function bootstrap() {
 
     const port = process.env.PORT;
     const host = process.env.HOST;
-    await app.listen(4100, () => {
+    await app.listen(4100, host, () => {
         console.log(`🚀 Server ready at http://${host}:${port}/`);
     });
 }
