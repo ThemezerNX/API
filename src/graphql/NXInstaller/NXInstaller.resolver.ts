@@ -6,7 +6,7 @@ import {SortOrder} from "../common/enums/SortOrder";
 import {ItemSort} from "../common/args/ItemSort.args";
 import {PaginationArgs} from "../common/args/Pagination.args";
 import {ThemeEntity} from "../Theme/Theme.entity";
-import {QueryArgs} from "./dto/Query.args";
+import {NXInstallerQueryArgs} from "./dto/NXInstallerQuery.args";
 
 export const themeHexREGEX = /^t[0-9a-f]+$/;
 export const packHexREGEX = /^p[0-9a-f]+$/;
@@ -36,7 +36,7 @@ export class NXInstallerResolver {
         description: `A special query that formats data specifically for the NXThemesInstaller HomeBrew Application`,
     })
     async nxinstaller(
-        @Args() {id}: QueryArgs,
+        @Args() {id}: NXInstallerQueryArgs,
     ): Promise<NXInstallerModel> {
         const idLower = id.toLowerCase();
         const response = new NXInstallerModel();

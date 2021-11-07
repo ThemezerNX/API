@@ -1,5 +1,15 @@
 import {ArgsType, Field, registerEnumType} from "@nestjs/graphql";
 import {SortInterface} from "../interfaces/Sort.interface";
+import {IsOptional} from "class-validator";
+
+@ArgsType()
+export class ItemSortArgs extends SortInterface {
+
+    @Field(() => ItemSort, {nullable: true})
+    @IsOptional()
+    sort?: ItemSort = ItemSort.ADDED;
+
+}
 
 export enum ItemSort {
     DOWNLOADS = "dlCount",
@@ -11,11 +21,3 @@ export enum ItemSort {
 registerEnumType(ItemSort, {
     name: "FilterSort",
 });
-
-@ArgsType()
-export class ItemSortArgs extends SortInterface {
-
-    @Field(() => ItemSort, {nullable: true})
-    sort?: ItemSort = ItemSort.ADDED;
-
-}

@@ -1,12 +1,12 @@
 import {ArgsType, Field} from "@nestjs/graphql";
 import {SortInterface} from "../../common/interfaces/Sort.interface";
-import {MinLength} from "class-validator";
+import {IsNotEmpty} from "class-validator";
 
 @ArgsType()
-export class QueryArgs extends SortInterface {
+export class NXInstallerQueryArgs extends SortInterface {
 
     @Field()
-    @MinLength(1)
+    @IsNotEmpty()
     id: string;
 
 }
