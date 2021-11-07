@@ -1,4 +1,4 @@
-import {Args, Query, Resolver} from "@nestjs/graphql";
+import {Args, Info, Query, Resolver} from "@nestjs/graphql";
 import {HBThemeModel} from "./HBTheme.model";
 import {HBThemeService} from "./HBTheme.service";
 import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
@@ -6,6 +6,7 @@ import {ItemSortArgs} from "../common/args/ItemSort.args";
 import {PaginatedHBThemes} from "./PaginatedHBThemes.model";
 import {HBThemeNotFoundError} from "../common/errors/HBThemeNotFound.error";
 import {ListArgs} from "./dto/List.args";
+import {GraphQLResolveInfo} from "graphql";
 
 
 @Resolver(HBThemeModel)
@@ -18,9 +19,10 @@ export class HBThemeResolver {
         description: `Find a single hbtheme`,
     })
     async hbtheme(
+        @Info() info: GraphQLResolveInfo,
         @Args("id") id: string,
     ): Promise<HBThemeModel> {
-        const hbtheme = await this.hbthemeService.findOne({id});
+        const hbtheme = await this.hbthemeService.findOne({id}, {info});
         if (!hbtheme) {
             throw new HBThemeNotFoundError();
         }
@@ -31,6 +33,7 @@ export class HBThemeResolver {
         description: `Find multiple hbthemes`,
     })
     async hbthemes(
+        @Info() info: GraphQLResolveInfo,
         @Args() paginationArgs: PaginationArgs,
         @Args() itemSortArgs: ItemSortArgs,
         @Args() listArgs?: ListArgs,
@@ -39,7 +42,7 @@ export class HBThemeResolver {
             paginationArgs,
             ...itemSortArgs,
             ...listArgs,
-        });
+        }, {info, rootField: "nodes"});
 
         return new PaginatedHBThemes(paginationArgs, result.count, result.result);
     }
@@ -48,13 +51,14 @@ export class HBThemeResolver {
         description: `Fetch random hbthemes`,
     })
     randomHBThemes(
+        @Info() info: GraphQLResolveInfo,
         @Args() limitArg?: LimitArg,
         @Args("includeNSFW", {defaultValue: false}) includeNSFW: boolean = false,
     ): Promise<HBThemeModel[]> {
         return this.hbthemeService.findRandom({
             ...limitArg,
             includeNSFW,
-        });
+        }, {info});
     }
 
 }

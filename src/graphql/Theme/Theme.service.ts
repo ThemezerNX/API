@@ -9,6 +9,20 @@ import {ItemSort} from "../common/args/ItemSort.args";
 import {toTsQuery} from "../common/TsQueryCreator";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
 import {Exists} from "../common/findOperators/Exists";
+import {ThemeData} from "./dto/ThemeData.input";
+import {PackData} from "./dto/PackData.input";
+import {ThemeTagEntity} from "../ThemeTag/ThemeTag.entity";
+import {ThemePreviewsEntity} from "./Previews/ThemePreviews.entity";
+import {ThemeAssetsEntity} from "./Assets/ThemeAssets.entity";
+import {InvalidThemeContentsError} from "../common/errors/InvalidThemeContents.error";
+import {streamToBuffer} from "@jorgeferrero/stream-to-buffer";
+import {ThemeOptionEntity} from "./ThemeOptions/ThemeOption.entity";
+import {LayoutOptionService} from "../LayoutOption/LayoutOption.service";
+import {LayoutOptionType} from "../LayoutOption/common/LayoutOptionType.enum";
+import {LayoutNotFoundError} from "../common/errors/LayoutNotFound.error";
+import {CreatorNotFoundError} from "../common/errors/CreatorNotFound.error";
+import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
+import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
 
 @Injectable()
 export class ThemeService implements IsOwner {
@@ -20,7 +34,14 @@ export class ThemeService implements IsOwner {
                 id,
                 isNSFW,
                 packId,
-            }: { id?: string, isNSFW?: boolean, packId?: string }, relations: string[] = [], selectImageFiles: boolean = false): Promise<ThemeEntity> {
+            }: {
+                id?: string,
+                isNSFW?: boolean,
+                packId?: string
+            },
+            options?: ServiceFindOptionsParameter<ThemeEntity, ThemePreviewsEntity, ThemeAssetsEntity>,
+    ): Promise<ThemeEntity> {
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true, hasAssets: true});
         const findConditions: FindConditions<ThemeEntity> = {};
 
         if (id != undefined) {
@@ -33,22 +54,8 @@ export class ThemeService implements IsOwner {
             findConditions.packId = packId;
         }
 
-        const queryBuilder = this.repository.createQueryBuilder("theme")
+        queryBuilder
             .where(findConditions);
-
-        for (const relation of relations) {
-            queryBuilder.leftJoinAndSelect("theme." + relation, relation);
-        }
-
-        if (selectImageFiles) {
-            queryBuilder.addSelect([
-                "previews.image720File",
-                "previews.image360File",
-                "previews.image240File",
-                "previews.image180File",
-                "previews.imagePlaceholderFile",
-            ]);
-        }
 
         return queryBuilder.getOne();
     }
@@ -76,7 +83,9 @@ export class ThemeService implements IsOwner {
                 layouts?: string[],
                 includeNSFW?: Boolean
             },
+        options?: ServiceFindOptionsParameter<ThemeEntity, ThemePreviewsEntity, ThemeAssetsEntity>,
     ) {
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true, hasAssets: true});
         const findConditions: FindConditions<ThemeEntity> = {};
 
         if (packId != undefined) {
@@ -99,18 +108,16 @@ export class ThemeService implements IsOwner {
             findConditions.isNSFW = false;
         }
 
-        const queryBuilder = this.repository.createQueryBuilder("theme")
+        queryBuilder
             .where(findConditions)
-            .leftJoinAndSelect("theme.previews", "previews")
-            .leftJoinAndSelect("theme.assets", "assets")
-            .leftJoinAndSelect("theme.tags", "tags")
-            .orderBy({["theme." + sort]: order});
+            .leftJoinAndSelect(queryBuilder.alias + ".tags", "tags")
+            .orderBy({[queryBuilder.alias + "." + sort]: order});
 
         if (query?.length > 0) {
             queryBuilder.andWhere(`to_tsquery(:query) @@ (
-                setweight(to_tsvector('pg_catalog.english', coalesce(theme.name, '')), 'A') ||
-                setweight(to_tsvector('pg_catalog.english', coalesce(theme.description, '')), 'C') ||
-                to_tsvector('pg_catalog.english', coalesce(CASE WHEN theme."isNSFW" THEN 'NSFW' END, '')) ||
+                setweight(to_tsvector('pg_catalog.english', coalesce(${queryBuilder.alias}.name, '')), 'A') ||
+                setweight(to_tsvector('pg_catalog.english', coalesce(${queryBuilder.alias}.description, '')), 'C') ||
+                to_tsvector('pg_catalog.english', coalesce(CASE WHEN ${queryBuilder.alias}."isNSFW" THEN 'NSFW' END, '')) ||
                 to_tsvector(tags.name)
             )`, {query: toTsQuery(query)});
         }
@@ -129,7 +136,9 @@ export class ThemeService implements IsOwner {
                 target?: Target,
                 includeNSFW?: boolean
             },
+        options?: ServiceFindOptionsParameter<ThemeEntity, ThemePreviewsEntity, ThemeAssetsEntity>,
     ): Promise<ThemeEntity[]> {
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true, hasAssets: true});
         const findConditions: FindConditions<ThemeEntity> = {};
 
         if (target != undefined) {
@@ -139,11 +148,8 @@ export class ThemeService implements IsOwner {
             findConditions.isNSFW = false;
         }
 
-        const queryBuilder = this.repository.createQueryBuilder("theme")
+        queryBuilder
             .where(findConditions)
-            .leftJoinAndSelect("theme.previews", "previews")
-            .leftJoinAndSelect("theme.assets", "assets")
-            .leftJoinAndSelect("theme.tags", "tags")
             .orderBy("RANDOM()");
 
         if (limit != undefined) {

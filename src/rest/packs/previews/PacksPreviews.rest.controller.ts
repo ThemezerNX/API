@@ -1,6 +1,6 @@
 import {Controller, Get, Header, NotFoundException, Param, StreamableFile} from "@nestjs/common";
-import {HBThemePreviewsEntity} from "../../../graphql/HBTheme/Previews/HBThemePreviews.entity";
 import {PackService} from "../../../graphql/Pack/Pack.service";
+import {PackPreviewsEntity} from "../../../graphql/Pack/Previews/PackPreviews.entity";
 
 @Controller()
 export class PacksPreviewsRestController {
@@ -8,8 +8,8 @@ export class PacksPreviewsRestController {
     constructor(private packService: PackService) {
     }
 
-    private async getFile(id: string, property: keyof HBThemePreviewsEntity): Promise<StreamableFile> {
-        const entity = await this.packService.findOne({id}, {selectPreviews: [property]});
+    private async getFile(id: string, property: keyof PackPreviewsEntity): Promise<StreamableFile> {
+        const entity = await this.packService.findOne({id}, {relations: ["previews"], selectPreviews: [property]});
         const file = (entity?.previews[property] as Buffer);
         if (!entity || !file) {
             throw new NotFoundException();

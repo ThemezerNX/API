@@ -1,16 +1,19 @@
-import {Args, Mutation, Query, Resolver} from "@nestjs/graphql";
+import {Args, Info, Mutation, Query, Resolver} from "@nestjs/graphql";
 import {Target} from "../common/enums/Target";
 import {ThemeModel} from "./Theme.model";
 import {ThemeService} from "./Theme.service";
 import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
-import {UserService} from "../User/User.service";
 import {ThemeEntity} from "./Theme.entity";
 import {ItemSortArgs} from "../common/args/ItemSort.args";
 import {PaginatedThemes} from "./PaginatedThemes.model";
-import {FileUpload, GraphQLUpload} from "graphql-upload";
-import {ThemeOptionService} from "./ThemeOptions/ThemeOption.service";
 import {ThemeNotFoundError} from "../common/errors/ThemeNotFound.error";
 import {ListArgs} from "./dto/List.args";
+import {SubmitThemesArgs} from "./dto/SubmitThemes.args";
+import {SubmitPackWithThemesArgs} from "./dto/SubmitPathWithThemes.args";
+import {CurrentUser} from "../Auth/decorators/CurrentUser.decorator";
+import {UserEntity} from "../User/User.entity";
+import {Auth} from "../Auth/decorators/Auth.decorator";
+import {GraphQLResolveInfo} from "graphql";
 
 
 @Resolver(ThemeModel)
@@ -28,9 +31,10 @@ export class ThemeResolver {
         description: `Find a single theme`,
     })
     async theme(
+        @Info() info: GraphQLResolveInfo,
         @Args("id") id: string,
     ): Promise<ThemeModel> {
-        const theme = await this.themeService.findOne({id}, ["previews"]);
+        const theme = await this.themeService.findOne({id}, {info});
         if (!theme) {
             throw new ThemeNotFoundError();
         }
@@ -41,6 +45,7 @@ export class ThemeResolver {
         description: `Find multiple themes`,
     })
     async themes(
+        @Info() info: GraphQLResolveInfo,
         @Args() paginationArgs: PaginationArgs,
         @Args() itemSortArgs: ItemSortArgs,
         @Args() listArgs?: ListArgs,
@@ -49,7 +54,7 @@ export class ThemeResolver {
             paginationArgs,
             ...itemSortArgs,
             ...listArgs,
-        });
+        }, {info, rootField: "nodes"});
 
         return new PaginatedThemes(paginationArgs, result.count, result.result);
     }
@@ -58,6 +63,7 @@ export class ThemeResolver {
         description: `Fetch random themes`,
     })
     randomThemes(
+        @Info() info: GraphQLResolveInfo,
         @Args() limitArg?: LimitArg,
         @Args("includeNSFW", {defaultValue: false}) includeNSFW: boolean = false,
         @Args("target", {nullable: true}) target?: Target,
@@ -66,7 +72,7 @@ export class ThemeResolver {
             ...limitArg,
             includeNSFW,
             target,
-        });
+        }, {info});
     }
 
     @Mutation(() => Boolean)

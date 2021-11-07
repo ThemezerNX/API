@@ -45,7 +45,7 @@ export class LayoutResolver {
             paginationArgs,
             ...itemSortArgs,
             ...listArgs,
-        }, {info});
+        }, {info, rootField: "nodes"});
 
         return new PaginatedLayouts(paginationArgs, result.count, result.result);
     }

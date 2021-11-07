@@ -16,7 +16,7 @@ export class ThemesDownloadRestController {
     }
 
     private async exists(id: string): Promise<ThemeEntity> {
-        const entity = await this.themeService.findOne({id}, ["layout", "creator"]);
+        const entity = await this.themeService.findOne({id}, {relations: ["layout", "creator"]});
         if (!entity) {
             throw new NotFoundException();
         }

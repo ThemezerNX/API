@@ -1,5 +1,5 @@
 import {LayoutEntity} from "./Layout.entity";
-import {FindConditions, In, Repository, SelectQueryBuilder} from "typeorm";
+import {FindConditions, In, Repository} from "typeorm";
 import {Injectable} from "@nestjs/common";
 import {Target} from "../common/enums/Target";
 import {InjectRepository} from "@nestjs/typeorm";
@@ -12,13 +12,12 @@ import {stringifyID} from "@themezernx/layout-id-parser/dist";
 import {LayoutOptionService} from "../LayoutOption/LayoutOption.service";
 import {LayoutOptionType} from "../LayoutOption/common/LayoutOptionType.enum";
 import {InjectorLayout, LoadedLayoutOption} from "./common/InjectorLayout";
-import {PerchQueryBuilder} from "perch-query-builder";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
 import {LayoutPreviewsEntity} from "./Previews/LayoutPreviews.entity";
-import {joinAndSelectRelations, selectPreviews} from "../common/functions/ServiceFunctions.js";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
 import {Exists} from "../common/findOperators/Exists";
 import {ChosenLayoutOptionValue} from "./dto/ChosenLayoutOptionValue.input";
+import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
 
 @Injectable()
 export class LayoutService implements IsOwner {
@@ -29,6 +28,7 @@ export class LayoutService implements IsOwner {
     ) {
     }
 
+
     findOne(
         {
             id,
@@ -37,19 +37,14 @@ export class LayoutService implements IsOwner {
         },
         options?: ServiceFindOptionsParameter<LayoutEntity, LayoutPreviewsEntity>,
     ): Promise<LayoutEntity> {
-        let queryBuilder: SelectQueryBuilder<LayoutEntity>;
-        if (options?.info) {
-            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info);
-        } else {
-            queryBuilder = this.repository.createQueryBuilder();
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
+        const findConditions: FindConditions<LayoutEntity> = {};
 
-            selectPreviews(queryBuilder, options);
-            joinAndSelectRelations(queryBuilder, options); // always last
+        if (id != undefined) {
+            findConditions.id = id;
         }
 
-        queryBuilder.where({id});
-
-        return queryBuilder.getOne();
+        return queryBuilder.where(findConditions).getOne();
     }
 
     findAll(
@@ -71,15 +66,7 @@ export class LayoutService implements IsOwner {
             },
         options?: ServiceFindOptionsParameter<LayoutEntity>,
     ): Promise<{ result: LayoutEntity[], count: number }> {
-        let queryBuilder;
-        if (options?.info) {
-            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info, {rootField: "nodes"});
-        } else {
-            queryBuilder = this.repository.createQueryBuilder();
-
-            selectPreviews(queryBuilder, options);
-            joinAndSelectRelations(queryBuilder, options); // always last
-        }
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
         const findConditions: FindConditions<LayoutEntity> = {};
 
         if (target != undefined) {
@@ -115,15 +102,7 @@ export class LayoutService implements IsOwner {
             },
         options?: ServiceFindOptionsParameter<LayoutEntity>,
     ): Promise<LayoutEntity[]> {
-        let queryBuilder;
-        if (options?.info) {
-            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info, {rootField: "nodes"});
-        } else {
-            queryBuilder = this.repository.createQueryBuilder();
-
-            selectPreviews(queryBuilder, options);
-            joinAndSelectRelations(queryBuilder, options); // always last
-        }
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
         const findConditions: FindConditions<LayoutEntity> = {};
 
         if (target != undefined) {

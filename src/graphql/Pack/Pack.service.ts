@@ -16,6 +16,9 @@ import {joinAndSelectRelations, selectPreviews} from "../common/functions/Servic
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
 import {Exists} from "../common/findOperators/Exists";
+import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
+import {PackPreviewsEntity} from "./Previews/PackPreviews.entity";
+import {LayoutEntity} from "../Layout/Layout.entity";
 
 @Injectable()
 export class PackService implements IsOwner {
@@ -44,21 +47,16 @@ export class PackService implements IsOwner {
 
     findOne(
         {id}: { id: string },
-        options?: ServiceFindOptionsParameter<PackEntity>,
+        options?: ServiceFindOptionsParameter<PackEntity, PackPreviewsEntity>,
     ): Promise<PackEntity> {
-        let queryBuilder: SelectQueryBuilder<PackEntity>;
-        if (options?.info) {
-            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info);
-        } else {
-            queryBuilder = this.repository.createQueryBuilder();
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
+        const findConditions: FindConditions<LayoutEntity> = {};
 
-            selectPreviews(queryBuilder, options);
-            joinAndSelectRelations(queryBuilder, options); // always last
+        if (id != undefined) {
+            findConditions.id = id;
         }
 
-        queryBuilder.where({id});
-
-        return queryBuilder.getOne();
+        return queryBuilder.where(findConditions).getOne();
     }
 
     async findAll(
@@ -79,17 +77,9 @@ export class PackService implements IsOwner {
                 creators?: string[],
                 includeNSFW?: boolean
             },
-        options?: ServiceFindOptionsParameter<PackEntity>,
+        options?: ServiceFindOptionsParameter<PackEntity, PackPreviewsEntity>,
     ): Promise<{ result: PackEntity[], count: number }> {
-        let queryBuilder: SelectQueryBuilder<PackEntity>;
-        if (options?.info) {
-            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info, {rootField: "nodes"});
-        } else {
-            queryBuilder = this.repository.createQueryBuilder();
-
-            selectPreviews(queryBuilder, options);
-            joinAndSelectRelations(queryBuilder, options); // always last
-        }
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
         const findConditions: FindConditions<PackEntity> = {};
 
         if (creators?.length > 0) {
@@ -146,17 +136,9 @@ export class PackService implements IsOwner {
                 limit?: number,
                 includeNSFW?: boolean
             },
-        options?: ServiceFindOptionsParameter<PackEntity>,
+        options?: ServiceFindOptionsParameter<PackEntity, PackPreviewsEntity>,
     ): Promise<PackEntity[]> {
-        let queryBuilder: SelectQueryBuilder<PackEntity>;
-        if (options?.info) {
-            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info);
-        } else {
-            queryBuilder = this.repository.createQueryBuilder();
-
-            selectPreviews(queryBuilder, options);
-            joinAndSelectRelations(queryBuilder, options); // always last
-        }
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
         const findConditions: FindConditions<PackEntity> = {};
 
         queryBuilder.where(findConditions);

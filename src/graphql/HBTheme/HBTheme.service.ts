@@ -11,6 +11,8 @@ import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptio
 import {joinAndSelectRelations, selectPreviews} from "../common/functions/ServiceFunctions.js";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
 import {Exists} from "../common/findOperators/Exists";
+import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
+import {HBThemePreviewsEntity} from "./Previews/HBThemePreviews.entity";
 
 @Injectable()
 export class HBThemeService implements IsOwner {
@@ -28,16 +30,9 @@ export class HBThemeService implements IsOwner {
                     isNSFW?: boolean,
                     packId?: string
                 },
-            options?: ServiceFindOptionsParameter<HBThemeEntity>): Promise<HBThemeEntity> {
-        let queryBuilder: SelectQueryBuilder<HBThemeEntity>;
-        if (options?.info) {
-            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info);
-        } else {
-            queryBuilder = this.repository.createQueryBuilder();
-
-            selectPreviews(queryBuilder, options);
-            joinAndSelectRelations(queryBuilder, options); // always last
-        }
+            options?: ServiceFindOptionsParameter<HBThemeEntity, HBThemePreviewsEntity>
+    ): Promise<HBThemeEntity> {
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
         const findConditions: FindConditions<HBThemeEntity> = {};
 
         if (id != undefined) {
@@ -76,17 +71,9 @@ export class HBThemeService implements IsOwner {
                 creators?: string[],
                 includeNSFW?: boolean
             },
-        options?: ServiceFindOptionsParameter<HBThemeEntity>,
+        options?: ServiceFindOptionsParameter<HBThemeEntity, HBThemePreviewsEntity>,
     ): Promise<{ result: HBThemeEntity[], count: number }> {
-        let queryBuilder;
-        if (options?.info) {
-            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info, {rootField: "nodes"});
-        } else {
-            queryBuilder = this.repository.createQueryBuilder();
-
-            selectPreviews(queryBuilder, options);
-            joinAndSelectRelations(queryBuilder, options); // always last
-        }
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
         const findConditions: FindConditions<HBThemeEntity> = {};
 
         if (packId != undefined) {
@@ -127,18 +114,17 @@ export class HBThemeService implements IsOwner {
                 limit?: number,
                 includeNSFW?: boolean
             },
+        options?: ServiceFindOptionsParameter<HBThemeEntity, HBThemePreviewsEntity>,
     ): Promise<HBThemeEntity[]> {
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
         const findConditions: FindConditions<HBThemeEntity> = {};
 
         if (includeNSFW != true) {
             findConditions.isNSFW = false;
         }
 
-        const queryBuilder = this.repository.createQueryBuilder("hbtheme")
+        queryBuilder
             .where(findConditions)
-            .leftJoinAndSelect("hbtheme.previews", "previews")
-            .leftJoinAndSelect("hbtheme.assets", "assets")
-            .leftJoinAndSelect("hbtheme.tags", "tags")
             .orderBy("RANDOM()");
 
         if (limit != undefined) {

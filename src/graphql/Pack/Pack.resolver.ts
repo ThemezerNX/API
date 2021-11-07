@@ -44,7 +44,7 @@ export class PackResolver {
             paginationArgs,
             ...itemSortArgs,
             ...listArgs,
-        }, {info});
+        }, {info, rootField: "nodes"});
 
         return new PaginatedPacks(paginationArgs, result.count, result.result);
     }
