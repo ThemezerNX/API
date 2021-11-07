@@ -3,6 +3,11 @@ import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 @Entity()
 export class ThemeTagEntity extends BaseEntity {
 
+    constructor(name: string) {
+        super();
+        this.name = name;
+    }
+
     @PrimaryGeneratedColumn()
     id: number;
 
