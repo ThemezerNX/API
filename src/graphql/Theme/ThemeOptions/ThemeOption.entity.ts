@@ -1,4 +1,4 @@
-import {Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn} from "typeorm";
+import {Column, Entity, JoinColumn, ManyToOne, PrimaryColumn} from "typeorm";
 import {LayoutOptionValueEntity} from "../../LayoutOption/OptionValue/LayoutOptionValue.entity";
 import {ThemeEntity} from "../Theme.entity";
 
