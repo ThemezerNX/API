@@ -70,4 +70,9 @@ export class UserEntity extends CachableEntityInterface {
     @OneToOne(() => UserConnectionsEntity, connections => connections.user, {cascade: true, eager: true})
     connections: UserConnectionsEntity;
 
+    toJSON() {
+        delete this.password;
+        return this;
+    }
+
 }
