@@ -29,60 +29,70 @@ export class GqlAuthGuard implements CanActivate {
     }
 
     canActivate(context: ExecutionContext) {
-        const checkAuth = this.reflector.get<boolean>("checkAuth", context.getHandler());
-        if (!checkAuth) return true;
+        // Serialize as no special group (this line resets the metadata every call!)
+        Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: []}, context.getHandler());
 
         const ctx = GqlExecutionContext.create(context);
         const req = ctx.getContext().req;
         const user = req.user as UserEntity;
 
         if (req.isAuthenticated()) {
-            // Allow admin all rights, without any further restrictions
+            // if the user is authenticated, we should still serialize depending on their permissions
             if (user.isAdmin) {
                 // user is admin. Set serializer to serialize as "admin"
                 Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: ["admin"]}, context.getHandler());
-                return true;
             }
+            // owner is not required, because "owner" is only possible when @Auth() is called (-> checkAuth == true)
+            // perhaps make it so that admin is not owner per-se (e.g. admins may not view email either (always run restrictOwner))
+        }
 
-            // If admin is required, the current user will be rejected
-            const restrictAdmin = this.reflector.get<boolean>("restrictAdmin", context.getHandler());
-            if (restrictAdmin) {
-                throw new UnauthorizedError("Restricted to admins");
-            }
+        const checkAuth = this.reflector.get<boolean>("checkAuth", context.getHandler());
+        if (checkAuth) {
+            if (req.isAuthenticated()) {
+                // Allow admin all rights, without any further restrictions
+                if (user.isAdmin) return true;
 
-            // If the operation should only be allowed by the owner
-            const restrictOwner = this.reflector.get<boolean>("restrictOwner", context.getHandler());
-            if (restrictOwner) {
-                let service;
-                switch (ctx.getClass()) {
-                    case ThemeResolver:
-                        service = this.themeService;
-                        break;
-                    case HBThemeResolver:
-                        service = this.hbthemeService;
-                        break;
-                    case PackResolver:
-                        service = this.packService;
-                        break;
-                    case LayoutResolver:
-                        service = this.layoutService;
-                        break;
+                // If admin is required, the current user will be rejected
+                const restrictAdmin = this.reflector.get<boolean>("restrictAdmin", context.getHandler());
+                if (restrictAdmin) {
+                    throw new UnauthorizedError("Restricted to admins");
                 }
 
-                const itemIdField = this.reflector.get<string>("itemIdField", context.getHandler()) || "id";
-                const args = ctx.getArgs();
-                assert(Object.keys(args).includes(itemIdField));
-                if (!service || service.isOwner(args[itemIdField], user.id)) {
-                    throw new UnauthorizedError("Restricted to the owner");
-                }
-                // user is owner. Set serializer to serialize as "owner"
-                Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: ["owner"]}, context.getHandler());
-            }
+                // If the operation should only be allowed by the owner
+                const restrictOwner = this.reflector.get<boolean>("restrictOwner", context.getHandler());
+                if (restrictOwner) {
+                    let service;
+                    switch (ctx.getClass()) {
+                        case ThemeResolver:
+                            service = this.themeService;
+                            break;
+                        case HBThemeResolver:
+                            service = this.hbthemeService;
+                            break;
+                        case PackResolver:
+                            service = this.packService;
+                            break;
+                        case LayoutResolver:
+                            service = this.layoutService;
+                            break;
+                    }
 
-            // otherwise session passed all checks: user is authorized. Serialize as no special group (this line resets the metadata every call!)
-            Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: []}, context.getHandler());
-            return true;
-        } else throw new UnauthenticatedError("User not logged in");
+                    const itemIdField = this.reflector.get<string>("itemIdField", context.getHandler()) || "id";
+                    const args = ctx.getArgs();
+                    assert(Object.keys(args).includes(itemIdField));
+                    if (!service || service.isOwner(args[itemIdField], user.id)) {
+                        throw new UnauthorizedError("Restricted to the owner");
+                    }
+                    // user is owner. Set serializer to serialize as "owner"
+                    Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: ["owner"]}, context.getHandler());
+                }
+
+                // otherwise session passed all checks: user is authorized.
+                Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: []}, context.getHandler());
+            } else throw new UnauthenticatedError("User not logged in");
+        }
+
+        return true;
     }
 
 }
