@@ -1,46 +1,33 @@
 import {IsEmail} from "class-validator";
 import {EmailAddressResolver} from "graphql-scalars";
-import {Field, ID, ObjectType} from "@nestjs/graphql";
-import {UserProfileModel} from "./Profile/UserProfile.model";
+import {Field, ObjectType} from "@nestjs/graphql";
 import {UserPreferencesModel} from "./Preferences/UserPreferences.model";
-import {UserConnectionsModel} from "./Connections/UserConnections.model";
+import {Expose} from "class-transformer";
+import {CreatorModel} from "./Creator.model";
 
 
 @ObjectType("User")
-export class UserModel {
+export class UserModel extends CreatorModel {
 
-    @Field(() => ID)
-    id: string;
+    constructor(instance) {
+        super();
+        Object.assign(this, instance);
+    }
 
     @Field(() => EmailAddressResolver, {nullable: true})
     @IsEmail()
+    @Expose({groups: ["owner", "admin"], toPlainOnly: true})
     email?: string;
-
-    @Field()
-    username: string;
-
-    @Field()
-    joinedTimestamp: Date;
 
     @Field()
     hasAccepted: boolean;
 
-    @Field()
-    isAdmin: boolean;
+    @Field({nullable: true})
+    @Expose({groups: ["admin"], toPlainOnly: true})
+    isBlocked?: boolean;
 
-    @Field()
-    isBlocked: boolean;
-
-    @Field(() => [String])
-    roles: string[];
-
-    @Field(() => UserProfileModel)
-    profile: UserProfileModel;
-
-    @Field(() => UserPreferencesModel)
-    preferences: UserPreferencesModel;
-
-    @Field(() => UserConnectionsModel)
-    connections: UserConnectionsModel;
+    @Field(() => UserPreferencesModel, {nullable: true})
+    @Expose({groups: ["admin", "owner"], toPlainOnly: true})
+    preferences?: UserPreferencesModel;
 
 }

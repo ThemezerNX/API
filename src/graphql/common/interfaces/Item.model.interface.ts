@@ -1,6 +1,6 @@
 import {Field, ID, Int, InterfaceType} from "@nestjs/graphql";
-import {UserModel} from "../../User/User.model";
 import {URLResolver} from "graphql-scalars";
+import {CreatorModel} from "../../User/Creator.model";
 
 
 @InterfaceType("ItemInterface")
@@ -10,7 +10,7 @@ export abstract class ItemModelInterface {
     id: string;
 
     @Field()
-    creator: UserModel;
+    creator: CreatorModel;
 
     @Field()
     name: string;
