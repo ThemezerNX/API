@@ -65,7 +65,7 @@ export class UserService {
                 .leftJoinAndSelect("user.profile", "profile")
                 .leftJoinAndSelect("user.preferences", "preferences")
                 .leftJoinAndSelect("user.connections", "connections")
-                .orderBy({[sort]: order}),
+                .orderBy({[`"user"."${sort}"`]: order}),
             paginationArgs,
         );
     }
