@@ -26,7 +26,7 @@
     "INVALID_TARGET_NAME_CHECK_LAYOUT": "'{param1}' invalid. Check the layout file",
     "TARGETS_DONT_MATCH": "The target of the theme and the detected layout don't match",
     "NO_COMMON_ALLOWED": "A common layout is not allowed in this NXTheme file",
-    "INVALID_NXTHEME_CONTENTS": "Invalid NXTheme contents",
+    "INVALID_THEME_CONTENTS": "Invalid NXTheme contents",
     "ZIP_READ_ERROR": "The zip could not be extracted",
     "NO_VALID_NXTHEMES": "No valid NXThemes were detected",
     "NO_NXTHEMES_IN_ZIP": "No NXThemes were detected in the zip",

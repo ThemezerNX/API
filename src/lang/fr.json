@@ -20,7 +20,7 @@
     "TARGETS_DONT_MATCH": "La destination et la disposition du th\u00e8me d\u00e9tect\u00e9e ne correspondent pas.",
     "NO_COMMON_ALLOWED": "Une mise en page commune n'est pas autoris\u00e9e dans ce fichier NXTheme.",
     "INVALID_CATEGORY_AMOUNT": "Le champ \"{param1}\" a un minimum de {min} et un maximum de {max}.",
-    "INVALID_NXTHEME_CONTENTS": "Contenu du NXTheme non valide",
+    "INVALID_THEME_CONTENTS": "Contenu du NXTheme non valide",
     "ZIP_READ_ERROR": "Le zip n'a pas pu \u00eatre extrait",
     "NO_VALID_NXTHEMES": "Aucun NXTheme valide n'a \u00e9t\u00e9 d\u00e9tect\u00e9",
     "NO_NXTHEMES_IN_ZIP": "Aucun NXThemes n'a \u00e9t\u00e9 d\u00e9tect\u00e9 dans le zip.",

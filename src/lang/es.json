@@ -20,7 +20,7 @@
     "TARGETS_DONT_MATCH": "El destino del tema y el dise\u00f1o detectado no coinciden",
     "NO_COMMON_ALLOWED": "No se permite un dise\u00f1o com\u00fan en este archivo NXTheme",
     "INVALID_CATEGORY_AMOUNT": "El campo '{param1}' tiene un m\u00ednimo de {min} y un m\u00e1ximo de {max}.",
-    "INVALID_NXTHEME_CONTENTS": "Contenidos de NXTheme no v\u00e1lidos",
+    "INVALID_THEME_CONTENTS": "Contenidos de NXTheme no v\u00e1lidos",
     "ZIP_READ_ERROR": "No se pudo extraer el zip",
     "NO_VALID_NXTHEMES": "No se detectaron NXThemes v\u00e1lidos",
     "NO_NXTHEMES_IN_ZIP": "No se detectaron NXThemes en el zip",

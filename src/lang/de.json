@@ -20,7 +20,7 @@
     "TARGETS_DONT_MATCH": "Das Ziel des Designs und das erkannte Layout stimmen nicht \u00fcberein",
     "NO_COMMON_ALLOWED": "Ein gemeinsames Layout ist in dieser NXTheme Datei nicht erlaubt",
     "INVALID_CATEGORY_AMOUNT": "Das Feld \"{param1}\" hat einen Mindestwert von {min} und einen H\u00f6chstwert von {max}.",
-    "INVALID_NXTHEME_CONTENTS": "Ung\u00fcltige NXTheme Inhalte",
+    "INVALID_THEME_CONTENTS": "Ung\u00fcltige NXTheme Inhalte",
     "ZIP_READ_ERROR": "Die Zip-Datei konnte nicht entpackt werden",
     "NO_VALID_NXTHEMES": "Es wurden keine g\u00fcltigen NXThemes erkannt",
     "NO_NXTHEMES_IN_ZIP": "In der Zip wurden keine NXThemes erkannt",

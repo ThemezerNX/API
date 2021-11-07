@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import {CanActivate, ExecutionContext, Injectable} from "@nestjs/common";
 import {GqlExecutionContext} from "@nestjs/graphql";
 import {UnauthenticatedError} from "../common/errors/auth/Unauthenticated.error";
@@ -13,6 +14,7 @@ import {HBThemeService} from "../HBTheme/HBTheme.service";
 import {PackService} from "../Pack/Pack.service";
 import {LayoutService} from "../Layout/Layout.service";
 import * as assert from "assert";
+import {CLASS_SERIALIZER_OPTIONS} from "@nestjs/common/serializer/class-serializer.constants";
 
 @Injectable()
 export class GqlAuthGuard implements CanActivate {
@@ -36,7 +38,11 @@ export class GqlAuthGuard implements CanActivate {
 
         if (req.isAuthenticated()) {
             // Allow admin all rights, without any further restrictions
-            if (user.isAdmin) return true;
+            if (user.isAdmin) {
+                // user is admin. Set serializer to serialize as "admin"
+                Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: ["admin"]}, context.getHandler());
+                return true;
+            }
 
             // If admin is required, the current user will be rejected
             const restrictAdmin = this.reflector.get<boolean>("restrictAdmin", context.getHandler());
@@ -69,9 +75,12 @@ export class GqlAuthGuard implements CanActivate {
                 if (!service || service.isOwner(args[itemIdField], user.id)) {
                     throw new UnauthorizedError("Restricted to the owner");
                 }
+                // user is owner. Set serializer to serialize as "owner"
+                Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: ["owner"]}, context.getHandler());
             }
 
-            // otherwise session passed all checks: user is authorized
+            // otherwise session passed all checks: user is authorized. Serialize as no special group (this line resets the metadata every call!)
+            Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: []}, context.getHandler());
             return true;
         } else throw new UnauthenticatedError("User not logged in");
     }

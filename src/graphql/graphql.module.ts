@@ -1,4 +1,4 @@
-import {MiddlewareConsumer, Module, NestModule} from "@nestjs/common";
+import {ClassSerializerInterceptor, MiddlewareConsumer, Module, NestModule} from "@nestjs/common";
 import {ConfigModule} from "@nestjs/config";
 import {I18nJsonParser, I18nModule} from "nestjs-i18n";
 import * as path from "path";
@@ -15,6 +15,7 @@ import {AuthModule} from "./Auth/Auth.module";
 import {NXInstallerModule} from "./NXInstaller/NXInstaller.module";
 import {getConnectionOptions} from "typeorm";
 import {LayoutOptionModule} from "./LayoutOption/LayoutOption.module";
+import {APP_INTERCEPTOR} from "@nestjs/core";
 
 @Module({
     imports: [
@@ -83,9 +84,15 @@ import {LayoutOptionModule} from "./LayoutOption/LayoutOption.module";
         NXInstallerModule,
         AuthModule,
     ],
+    providers: [
+        {
+            provide: APP_INTERCEPTOR,
+            useClass: ClassSerializerInterceptor,
+        },
+    ],
 })
 export class GraphqlModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
-        consumer.apply(graphqlUploadExpress()).forRoutes("/graphql"); // TODO: should this be /graphql?
+        consumer.apply(graphqlUploadExpress()).forRoutes("/graphql");
     }
 }

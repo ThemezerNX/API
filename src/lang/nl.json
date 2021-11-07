@@ -20,7 +20,7 @@
     "TARGETS_DONT_MATCH": "Het doel van het thema en de gedetecteerde lay-out komen niet overeen",
     "NO_COMMON_ALLOWED": "Een algemene lay-out is niet toegestaan in dit NXTheme-bestand",
     "INVALID_CATEGORY_AMOUNT": "'{param1}' veld heeft een minimum van {min} en een maximum van {max}.",
-    "INVALID_NXTHEME_CONTENTS": "Ongeldige NXTheme-inhoud",
+    "INVALID_THEME_CONTENTS": "Ongeldige NXTheme-inhoud",
     "ZIP_READ_ERROR": "De zip kon niet worden uitgepakt",
     "NO_VALID_NXTHEMES": "Er zijn geen geldige NXThemes gedetecteerd",
     "NO_NXTHEMES_IN_ZIP": "Er zijn geen NXThemes gedetecteerd in de zip",

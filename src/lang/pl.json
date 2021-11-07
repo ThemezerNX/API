@@ -20,7 +20,7 @@
     "TARGETS_DONT_MATCH": "Motyw i wykryty uk\u0142ad nie pasuj\u0105 do siebie",
     "NO_COMMON_ALLOWED": "Uk\u0142ad generalny nie jest dozwolony w tym pliku NXTheme.",
     "INVALID_CATEGORY_AMOUNT": "Pole '{param1}' ma warto\u015b\u0107 min r\u00f3wn\u0105 {min} i max r\u00f3wn\u0105 {max}.",
-    "INVALID_NXTHEME_CONTENTS": "Nieprawid\u0142owa zawarto\u015b\u0107 NXTheme",
+    "INVALID_THEME_CONTENTS": "Nieprawid\u0142owa zawarto\u015b\u0107 NXTheme",
     "ZIP_READ_ERROR": "Nie mo\u017cna rozpakowa\u0107 pliku zip",
     "NO_VALID_NXTHEMES": "Nie wykryto prawid\u0142owych NXThemes.",
     "NO_NXTHEMES_IN_ZIP": "W pliku zip nie wykryto \u017cadnych NXThemes.",
