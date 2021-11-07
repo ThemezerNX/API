@@ -113,16 +113,25 @@ export class LayoutService implements IsOwner {
                 limit?: number,
                 target?: Target,
             },
+        options?: ServiceFindOptionsParameter<LayoutEntity>,
     ): Promise<LayoutEntity[]> {
+        let queryBuilder;
+        if (options?.info) {
+            queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info, {rootField: "nodes"});
+        } else {
+            queryBuilder = this.repository.createQueryBuilder();
+
+            selectPreviews(queryBuilder, options);
+            joinAndSelectRelations(queryBuilder, options); // always last
+        }
         const findConditions: FindConditions<LayoutEntity> = {};
 
         if (target != undefined) {
             findConditions.target = target;
         }
 
-        const queryBuilder = this.repository.createQueryBuilder("layout")
+        queryBuilder
             .where(findConditions)
-            .leftJoinAndSelect("layout.previews", "previews")
             .orderBy("RANDOM()");
 
         if (limit != undefined) {

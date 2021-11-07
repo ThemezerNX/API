@@ -54,13 +54,14 @@ export class LayoutResolver {
         description: `Fetch random layouts`,
     })
     randomLayouts(
+        @Info() info: GraphQLResolveInfo,
         @Args() limitArg?: LimitArg,
         @Args("target", {nullable: true}) target?: Target,
     ): Promise<LayoutModel[]> {
         return this.layoutService.findRandom({
             ...limitArg,
             target,
-        });
+        }, {info});
     }
 
     @Query(() => FileModel, {
