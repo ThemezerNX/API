@@ -71,7 +71,7 @@ export class GqlAuthGuard implements CanActivate {
                 }
             }
 
-            // otherwise no extra restrictions are in place: just allow access
+            // otherwise session passed all checks: user is authorized
             return true;
         } else throw new UnauthenticatedError("User not logged in");
     }
