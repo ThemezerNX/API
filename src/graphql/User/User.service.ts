@@ -11,9 +11,10 @@ import {EmailAlreadyRegisteredError} from "../common/errors/auth/EmailAlreadyReg
 import {UnknownError} from "../common/errors/Unknown.error";
 import {UserPreferencesEntity} from "./Preferences/UserPreferences.entity";
 import {UserSort} from "./dto/Sort.args";
+import {IsOwner} from "../common/interfaces/IsOwner.interface";
 
 @Injectable()
-export class UserService {
+export class UserService implements IsOwner {
 
     constructor(@InjectRepository(UserEntity) private userRepository: Repository<UserEntity>) {
     }
@@ -82,6 +83,10 @@ export class UserService {
                 throw new EmailAlreadyRegisteredError();
             } else throw new UnknownError();
         }
+    }
+
+    async isOwner(userId: string, ownUserId: string): Promise<boolean> {
+        return userId == ownUserId;
     }
 
 }
