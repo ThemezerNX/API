@@ -1,4 +1,5 @@
 const {EntityNamingStrategy} = require("./dist/src/graphql/common/EntityNamingStrategy");
+const {TypeOrmLogger} = require("./dist/src/graphql/common/loggers/TypeOrmLogger");
 
 
 module.exports = {
@@ -9,7 +10,7 @@ module.exports = {
     username: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
     schema: process.env.POSTGRES_SCHEMA,
-    logging: process.env.NODE_ENV === "development",
+    logger: new TypeOrmLogger(process.env.NODE_ENV === "development"),
     synchronize: process.env.NODE_ENV === "development" && true,
     entities: ["./dist/**/*.entity.js"],
     migrations: ["./dist/migrations/*.js"],
