@@ -11,7 +11,7 @@ export class ThemeTagEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({update: true, length: 100})
+    @Column({update: true, length: 100, unique: true})
     name: string;
 
 }
