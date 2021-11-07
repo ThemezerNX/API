@@ -5,7 +5,7 @@ import {ThemeEntity} from "../Theme.entity";
 @Entity()
 export class ThemeOptionEntity {
 
-    @OneToOne(() => ThemeEntity, themeEntity => themeEntity.previews, {onDelete: "CASCADE"})
+    @ManyToOne(() => ThemeEntity, themeEntity => themeEntity.options, {onDelete: "CASCADE"})
     @JoinColumn({name: "themeId"})
     theme: ThemeEntity;
 
@@ -19,7 +19,10 @@ export class ThemeOptionEntity {
     @PrimaryColumn({update: false})
     layoutOptionValueUUID: string;
 
-    @Column({nullable: true, comment: "Use a single column for the variable value. Only parse it once building the layout to prevent issues when an option changed e.g. from Integer to Decimal"})
+    @Column({
+        nullable: true,
+        comment: "Use a single column for the variable value. Only parse it once building the layout to prevent issues when an option changed e.g. from Integer to Decimal",
+    })
     variable?: string;
 
 }

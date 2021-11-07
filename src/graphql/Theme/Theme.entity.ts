@@ -1,4 +1,4 @@
-import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne} from "typeorm";
+import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne} from "typeorm";
 import {Target} from "../common/enums/Target";
 import {ThemeTagEntity} from "../ThemeTag/ThemeTag.entity";
 import {ThemePreviewsEntity} from "./Previews/ThemePreviews.entity";
@@ -9,6 +9,7 @@ import {LayoutEntity} from "../Layout/Layout.entity";
 import {CDNMapper} from "../common/CDNMapper";
 import {EntityWithPreviewsInterface} from "../common/interfaces/EntityWithPreviews.interface";
 import {EntityWithAssetsInterface} from "../common/interfaces/EntityWithAssets.interface";
+import {ThemeOptionEntity} from "./ThemeOptions/ThemeOption.entity";
 
 
 @Entity()
@@ -48,9 +49,8 @@ export class ThemeEntity extends ItemEntityInterface implements EntityWithPrevie
     @OneToOne(() => ThemeAssetsEntity, themeAssets => themeAssets.theme, {cascade: true, eager: true})
     assets: ThemeAssetsEntity;
 
-    get options(): undefined {
-        return undefined;
-    }
+    @OneToMany(() => ThemeOptionEntity, themeOptions => themeOptions.theme, {cascade: true, eager: true})
+    options: ThemeOptionEntity[];
 
     get downloadUrl(): string {
         return CDNMapper.themes.download(this.id);
