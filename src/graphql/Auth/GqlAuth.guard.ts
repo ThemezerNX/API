@@ -15,12 +15,16 @@ import {PackService} from "../Pack/Pack.service";
 import {LayoutService} from "../Layout/Layout.service";
 import * as assert from "assert";
 import {CLASS_SERIALIZER_OPTIONS} from "@nestjs/common/serializer/class-serializer.constants";
+import {UserResolver} from "../User/User.resolver";
+import {UserService} from "../User/User.service";
+import {IsOwner} from "../common/interfaces/IsOwner.interface";
 
 @Injectable()
 export class GqlAuthGuard implements CanActivate {
 
     constructor(
         private reflector: Reflector,
+        private userService: UserService,
         private themeService: ThemeService,
         private hbthemeService: HBThemeService,
         private packService: PackService,
@@ -61,8 +65,11 @@ export class GqlAuthGuard implements CanActivate {
                 // If the operation should only be allowed by the owner
                 const restrictOwner = this.reflector.get<boolean>("restrictOwner", context.getHandler());
                 if (restrictOwner) {
-                    let service;
+                    let service: IsOwner;
                     switch (ctx.getClass()) {
+                        case UserResolver:
+                            service = this.userService;
+                            break;
                         case ThemeResolver:
                             service = this.themeService;
                             break;
@@ -80,7 +87,7 @@ export class GqlAuthGuard implements CanActivate {
                     const itemIdField = this.reflector.get<string>("itemIdField", context.getHandler()) || "id";
                     const args = ctx.getArgs();
                     assert(Object.keys(args).includes(itemIdField));
-                    if (!service || service.isOwner(args[itemIdField], user.id)) {
+                    if (!(service && service.isOwner(args[itemIdField], user.id))) {
                         throw new UnauthorizedError("Restricted to the owner");
                     }
                     // user is owner. Set serializer to serialize as "owner"
