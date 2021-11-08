@@ -1,6 +1,6 @@
 import {AuthService} from "./Auth.service";
 import {Args, Context, Mutation, Query, Resolver} from "@nestjs/graphql";
-import {UseGuards} from "@nestjs/common";
+import {SerializeOptions, UseGuards} from "@nestjs/common";
 import {LocalLoginGuard} from "./Strategies/Local/strategy/LocalLogin.guard";
 import {UserModel} from "../User/User.model";
 import {UserEntity} from "../User/User.entity";
@@ -42,7 +42,8 @@ export class AuthResolver {
     }
 
     @Query(() => UserModel)
-    @Auth()
+    @Auth({defineSerializeMetadata: false})
+    @SerializeOptions({groups: ["owner"]})
     me(@CurrentUser() user: UserEntity): UserModel {
         return user;
     }
