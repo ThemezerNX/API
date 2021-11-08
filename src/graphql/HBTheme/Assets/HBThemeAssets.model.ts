@@ -1,8 +1,9 @@
 import {Field, ObjectType} from "@nestjs/graphql";
 import {URLResolver} from "graphql-scalars";
+import {RootModelAbstract} from "../../common/interfaces/Root.model.abstract";
 
 @ObjectType("HBThemeAssets")
-export class HBThemeAssetsModel {
+export class HBThemeAssetsModel extends RootModelAbstract {
 
     @Field(() => URLResolver, {nullable: true})
     batteryIconUrl?: string;

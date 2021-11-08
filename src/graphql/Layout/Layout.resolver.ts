@@ -29,7 +29,7 @@ export class LayoutResolver {
         if (!layout) {
             throw new LayoutNotFoundError();
         }
-        return layout;
+        return new LayoutModel(layout);
     }
 
     @Query(() => PaginatedLayouts, {
@@ -47,21 +47,27 @@ export class LayoutResolver {
             ...listArgs,
         }, {info, rootField: "nodes"});
 
-        return new PaginatedLayouts(paginationArgs, result.count, result.result);
+        return new PaginatedLayouts(
+            paginationArgs,
+            result.count,
+            result.result.map((u) => new LayoutModel(u)),
+        );
     }
 
     @Query(() => [LayoutModel], {
         description: `Fetch random layouts`,
     })
-    randomLayouts(
+    async randomLayouts(
         @Info() info: GraphQLResolveInfo,
         @Args() limitArg?: LimitArg,
         @Args("target", {nullable: true}) target?: Target,
     ): Promise<LayoutModel[]> {
-        return this.layoutService.findRandom({
-            ...limitArg,
-            target,
-        }, {info});
+        return (
+            await this.layoutService.findRandom({
+                ...limitArg,
+                target,
+            }, {info})
+        ).map((u) => new LayoutModel(u));
     }
 
     @Query(() => FileModel, {

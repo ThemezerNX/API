@@ -11,8 +11,10 @@ export class LayoutOptionResolver {
     }
 
     @Query(() => [LayoutOptionModel])
-    globalLayoutOptions(@Info() info: GraphQLResolveInfo): Promise<LayoutOptionModel[]> {
-        return this.layoutOptionService.findAllOptions({layoutId: null}, {info});
+    async globalLayoutOptions(@Info() info: GraphQLResolveInfo): Promise<LayoutOptionModel[]> {
+        return (
+            await this.layoutOptionService.findAllOptions({layoutId: null}, {info})
+        ).map((u) => new LayoutOptionModel(u));
     }
 
 }

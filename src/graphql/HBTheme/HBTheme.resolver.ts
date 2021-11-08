@@ -26,7 +26,7 @@ export class HBThemeResolver {
         if (!hbtheme) {
             throw new HBThemeNotFoundError();
         }
-        return hbtheme;
+        return new HBThemeModel(hbtheme);
     }
 
     @Query(() => PaginatedHBThemes, {
@@ -44,21 +44,28 @@ export class HBThemeResolver {
             ...listArgs,
         }, {info, rootField: "nodes"});
 
-        return new PaginatedHBThemes(paginationArgs, result.count, result.result);
+        return new PaginatedHBThemes(
+            paginationArgs,
+            result.count,
+            result.result.map((u) => new HBThemeModel(u)),
+        );
     }
 
     @Query(() => [HBThemeModel], {
         description: `Fetch random hbthemes`,
     })
-    randomHBThemes(
+    async randomHBThemes(
         @Info() info: GraphQLResolveInfo,
         @Args() limitArg?: LimitArg,
         @Args("includeNSFW", {defaultValue: false}) includeNSFW: boolean = false,
     ): Promise<HBThemeModel[]> {
-        return this.hbthemeService.findRandom({
-            ...limitArg,
-            includeNSFW,
-        }, {info});
+        return (
+            await this.hbthemeService.findRandom({
+                ...limitArg,
+                includeNSFW,
+            }, {info})
+        )
+            .map((u) => new HBThemeModel(u));
     }
 
 }

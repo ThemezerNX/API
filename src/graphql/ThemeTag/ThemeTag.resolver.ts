@@ -24,7 +24,7 @@ export class ThemeTagResolver {
         if (!themeTag) {
             throw new ThemeTagNotFoundError();
         }
-        return themeTag;
+        return new ThemeTagModel(themeTag);
     }
 
     @Query(() => PaginatedThemeTags, {
@@ -41,7 +41,11 @@ export class ThemeTagResolver {
             ...listArgs,
         });
 
-        return new PaginatedThemeTags(paginationArgs, result.count, result.result);
+        return new PaginatedThemeTags(
+            paginationArgs,
+            result.count,
+            result.result.map((u) => new ThemeTagModel(u)),
+        );
     }
 
 }

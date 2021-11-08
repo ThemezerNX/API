@@ -34,13 +34,16 @@ export class GqlAuthGuard implements CanActivate {
 
     canActivate(context: ExecutionContext) {
         // Serialize as no special group (this line resets the metadata every call!)
-        Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: []}, context.getHandler());
+        const defineMetadata = this.reflector.get<boolean>("defineSerializeMetadata", context.getHandler());
+        if (defineMetadata) {
+            Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: []}, context.getHandler());
+        }
 
         const ctx = GqlExecutionContext.create(context);
         const req = ctx.getContext().req;
         const user = req.user as UserEntity;
 
-        if (req.isAuthenticated()) {
+        if (defineMetadata && req.isAuthenticated()) {
             // if the user is authenticated, we should still serialize depending on their permissions
             if (user.isAdmin) {
                 // user is admin. Set serializer to serialize as "admin"
@@ -91,11 +94,15 @@ export class GqlAuthGuard implements CanActivate {
                         throw new UnauthorizedError("Restricted to the owner");
                     }
                     // user is owner. Set serializer to serialize as "owner"
-                    Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: ["owner"]}, context.getHandler());
+                    if (defineMetadata) {
+                        Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: ["owner"]}, context.getHandler());
+                    }
                 }
 
                 // otherwise session passed all checks: user is authorized.
-                Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: []}, context.getHandler());
+                if (defineMetadata) {
+                    Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: []}, context.getHandler());
+                }
             } else throw new UnauthenticatedError("User not logged in");
         }
 

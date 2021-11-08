@@ -28,7 +28,7 @@ export class PackResolver {
         if (!pack) {
             throw new PackNotFoundError();
         }
-        return pack;
+        return new PackModel(pack);
     }
 
     @Query(() => PaginatedPacks, {
@@ -46,21 +46,27 @@ export class PackResolver {
             ...listArgs,
         }, {info, rootField: "nodes"});
 
-        return new PaginatedPacks(paginationArgs, result.count, result.result);
+        return new PaginatedPacks(
+            paginationArgs,
+            result.count,
+            result.result.map((u) => new PackModel(u)),
+        );
     }
 
     @Query(() => [PackModel], {
         description: `Fetch random packs`,
     })
-    randomPacks(
+    async randomPacks(
         @Info() info: GraphQLResolveInfo,
         @Args() limitArg?: LimitArg,
         @Args("includeNSFW", {defaultValue: false}) includeNSFW: boolean = false,
     ): Promise<PackModel[]> {
-        return this.packService.findRandom({
-            ...limitArg,
-            includeNSFW,
-        }, {info});
+        return (
+            await this.packService.findRandom({
+                ...limitArg,
+                includeNSFW,
+            }, {info})
+        ).map((u) => new PackModel(u));
     }
 
 }

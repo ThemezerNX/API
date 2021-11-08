@@ -1,8 +1,9 @@
 import {Field, ObjectType} from "@nestjs/graphql";
 import {LayoutOptionValueModel} from "../../LayoutOption/OptionValue/LayoutOptionValue.model";
+import {RootModelAbstract} from "../../common/interfaces/Root.model.abstract";
 
 @ObjectType("ThemeOptions")
-export class ThemeOptionModel {
+export class ThemeOptionModel extends RootModelAbstract {
 
     @Field(() => LayoutOptionValueModel)
     layoutOptionValue: LayoutOptionValueModel;

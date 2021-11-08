@@ -18,8 +18,9 @@ export class AuthResolver {
     }
 
     @Mutation(() => UserModel)
-    register(@Args("registerData") {email, password, username}: RegisterData): Promise<UserModel> {
-        return this.authService.register(email, password, username);
+    @SerializeOptions({groups: ["owner"]})
+    async register(@Args("registerData") {email, password, username}: RegisterData): Promise<UserModel> {
+        return new UserModel(await this.authService.register(email, password, username));
     }
 
     @Mutation(() => Boolean)
@@ -29,8 +30,9 @@ export class AuthResolver {
 
     @Mutation(() => UserModel)
     @UseGuards(LocalLoginGuard)
+    @SerializeOptions({groups: ["owner"]})
     login(@Args("loginData") loginData: LoginData, @CurrentUser() user: UserEntity): UserModel {
-        return user;
+        return new UserModel(user);
     }
 
     @Mutation(() => Boolean)
@@ -45,7 +47,7 @@ export class AuthResolver {
     @Auth({defineSerializeMetadata: false})
     @SerializeOptions({groups: ["owner"]})
     me(@CurrentUser() user: UserEntity): UserModel {
-        return user;
+        return new UserModel(user);
     }
 
 

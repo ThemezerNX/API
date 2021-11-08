@@ -24,7 +24,7 @@ export class UserResolver {
         if (!user) {
             throw new UserNotFoundError();
         }
-        return user;
+        return new UserModel(user);
     }
 
     @Query(() => PaginatedUsers, {
@@ -41,7 +41,11 @@ export class UserResolver {
             ...listArgs,
         });
 
-        return new PaginatedUsers(paginationArgs, result.count, result.result);
+        return new PaginatedUsers(
+            paginationArgs,
+            result.count,
+            result.result.map((u) => new UserModel(u)),
+        );
     }
 
 }

@@ -9,11 +9,6 @@ import {CreatorModel} from "./Creator.model";
 @ObjectType("User")
 export class UserModel extends CreatorModel {
 
-    constructor(instance) {
-        super();
-        Object.assign(this, instance);
-    }
-
     @Field(() => EmailAddressResolver, {nullable: true})
     @IsEmail()
     @Expose({groups: ["owner", "admin"], toPlainOnly: true})

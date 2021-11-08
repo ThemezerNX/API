@@ -1,10 +1,11 @@
 import {Field, ID, ObjectType} from "@nestjs/graphql";
 import {UserProfileModel} from "./Profile/UserProfile.model";
 import {UserConnectionsModel} from "./Connections/UserConnections.model";
+import {RootModelAbstract} from "../common/interfaces/Root.model.abstract";
 
 
 @ObjectType("Creator")
-export class CreatorModel {
+export class CreatorModel extends RootModelAbstract {
 
     @Field(() => ID)
     id: string;

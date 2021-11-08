@@ -1,8 +1,9 @@
 import {Field, ObjectType} from "@nestjs/graphql";
 import {JSONResolver, URLResolver} from "graphql-scalars";
+import {RootModelAbstract} from "../../common/interfaces/Root.model.abstract";
 
 @ObjectType("ThemeAssets")
-export class ThemeAssetsModel {
+export class ThemeAssetsModel extends RootModelAbstract {
 
     @Field(() => JSONResolver, {nullable: true})
     customLayoutJson?: string;

@@ -38,7 +38,7 @@ export class ThemeResolver {
         if (!theme) {
             throw new ThemeNotFoundError();
         }
-        return theme;
+        return new ThemeModel(theme);
     }
 
     @Query(() => PaginatedThemes, {
@@ -56,23 +56,29 @@ export class ThemeResolver {
             ...listArgs,
         }, {info, rootField: "nodes"});
 
-        return new PaginatedThemes(paginationArgs, result.count, result.result);
+        return new PaginatedThemes(
+            paginationArgs,
+            result.count,
+            result.result.map((u) => new ThemeModel(u)),
+        );
     }
 
     @Query(() => [ThemeModel], {
         description: `Fetch random themes`,
     })
-    randomThemes(
+    async randomThemes(
         @Info() info: GraphQLResolveInfo,
         @Args() limitArg?: LimitArg,
         @Args("includeNSFW", {defaultValue: false}) includeNSFW: boolean = false,
         @Args("target", {nullable: true}) target?: Target,
     ): Promise<ThemeModel[]> {
-        return this.themeService.findRandom({
-            ...limitArg,
-            includeNSFW,
-            target,
-        }, {info});
+        return (
+            await this.themeService.findRandom({
+                ...limitArg,
+                includeNSFW,
+                target,
+            }, {info})
+        ).map((u) => new ThemeModel(u));
     }
 
     @Mutation(() => Boolean)

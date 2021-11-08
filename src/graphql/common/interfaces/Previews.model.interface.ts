@@ -1,9 +1,10 @@
 import {Field, InterfaceType} from "@nestjs/graphql";
 import {URLResolver} from "graphql-scalars";
+import {RootModelAbstract} from "./Root.model.abstract";
 
 
 @InterfaceType("PreviewsInterface")
-export abstract class PreviewsModelInterface {
+export abstract class PreviewsModelInterface extends RootModelAbstract {
 
     @Field(() => URLResolver, {description: "WebP image, 1280x720"})
     image720Url: string;
