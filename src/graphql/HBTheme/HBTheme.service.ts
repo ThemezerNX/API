@@ -1,14 +1,12 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
-import {FindConditions, In, Repository, SelectQueryBuilder} from "typeorm";
+import {FindConditions, In, Repository} from "typeorm";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {SortOrder} from "../common/enums/SortOrder";
 import {HBThemeEntity} from "./HBTheme.entity";
 import {ItemSort} from "../common/args/ItemSort.args";
 import {toTsQuery} from "../common/TsQueryCreator";
-import {PerchQueryBuilder} from "perch-query-builder";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
-import {joinAndSelectRelations, selectPreviews} from "../common/functions/ServiceFunctions.js";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
 import {Exists} from "../common/findOperators/Exists";
 import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
@@ -30,7 +28,7 @@ export class HBThemeService implements IsOwner {
                     isNSFW?: boolean,
                     packId?: string
                 },
-            options?: ServiceFindOptionsParameter<HBThemeEntity, HBThemePreviewsEntity>
+            options?: ServiceFindOptionsParameter<HBThemeEntity, HBThemePreviewsEntity>,
     ): Promise<HBThemeEntity> {
         let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
         const findConditions: FindConditions<HBThemeEntity> = {};
@@ -139,6 +137,10 @@ export class HBThemeService implements IsOwner {
             this.repository.createQueryBuilder()
                 .where({id: hbthemeId, creatorId: userId}),
         ));
+    }
+
+    async getHash(id: string): Promise<string> {
+        return null;
     }
 
 }

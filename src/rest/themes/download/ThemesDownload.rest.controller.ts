@@ -15,28 +15,28 @@ export class ThemesDownloadRestController {
     constructor(private themeService: ThemeService, private themeDownloadService: ThemeDownloadService, private themeCacheService: ThemeCacheService) {
     }
 
-    private async exists(id: string): Promise<ThemeEntity> {
-        const entity = await this.themeService.findOne({id}, {relations: ["layout", "creator"]});
-        if (!entity) {
+    private async getHash(id: string): Promise<ThemeEntity> {
+        const hash = await this.themeService.getHash(id);
+        if (!hash) {
             throw new NotFoundException();
         }
-        return entity;
+        return hash;
     }
 
     @Get()
     @Redirect()
     async getDownload(@Param("id") id: string, @ClientIP() ip: string, @CurrentUser() user: UserEntity, @UserAgent() userAgent: string) {
-        const item = await this.exists(id);
+        const hash = await this.getHash(id);
 
         await this.themeDownloadService.increment(id, ip, userAgent, user ? user.id : undefined);
 
-        return {url: "download/theme.nxtheme?cache=" + item.cacheId + item.assets.cacheId + (item.layout ? item.layout.cacheId : 0) + item.creator.cacheId};
+        return {url: "download/theme.nxtheme?hash=" + hash};
     }
 
     @Get("theme.nxtheme")
     @Header("Content-type", "application/nxtheme")
     async getDownloadFile(@Param("id") id: string, @Res() res: Response) {
-        await this.exists(id);
+        await this.getHash(id);
 
         const {data, fileName} = await this.themeCacheService.getFile(id);
 

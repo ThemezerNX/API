@@ -15,40 +15,28 @@ export class PacksDownloadRestController {
     constructor(private packService: PackService, private packDownloadService: PackDownloadService, private packCacheService: PackCacheService) {
     }
 
-    private async exists(id: string): Promise<PackEntity> {
-        const entity = await this.packService.findOne({id}, {relations: ["creator", "themes", "hbthemes", "themes.layout"]});
-        if (!entity) {
+    private async getHash(id: string): Promise<string> {
+        const hash = await this.packService.getHash(id);
+        if (!hash) {
             throw new NotFoundException();
         }
-        return entity;
+        return hash;
     }
 
     @Get()
     @Redirect()
     async getDownload(@Param("id") id: string, @ClientIP() ip: string, @CurrentUser() user: UserEntity, @UserAgent() userAgent: string) {
-        const item = await this.exists(id);
+        const hash = await this.getHash(id);
 
         await this.packDownloadService.increment(id, ip, userAgent, user ? user.id : undefined);
 
-        let themesCacheId = 0;
-        if (item.themes) {
-            for (const theme of item.themes) {
-                themesCacheId += theme.cacheId + theme.assets.cacheId + (theme.layout ? theme.layout.cacheId : 0);
-            }
-        }
-        if (item.hbthemes) {
-            for (const hbtheme of item.hbthemes) {
-                themesCacheId += hbtheme.cacheId + hbtheme.assets.cacheId;
-            }
-        }
-
-        return {url: "download/pack.zip?cache=" + item.cacheId + item.creator.cacheId + themesCacheId};
+        return {url: "download/pack.zip?hash=" + hash};
     }
 
     @Get("pack.zip")
     @Header("Content-type", "application/zip")
     async getDownloadFile(@Param("id") id: string, @Res() res: Response) {
-        await this.exists(id);
+        await this.getHash(id);
 
         const {data, fileName} = await this.packCacheService.getFile(id);
 

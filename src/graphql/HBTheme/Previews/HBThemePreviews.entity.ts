@@ -14,23 +14,23 @@ export class HBThemePreviewsEntity extends PreviewsEntityInterface {
     hbthemeId: string;
 
     get image720Url() {
-        return CDNMapper.hbthemes.previews(this.hbthemeId, "720", "webp", this.cacheId);
+        return CDNMapper.hbthemes.previews(this.hbthemeId, "720", "webp", this.image720Hash);
     }
 
     get image360Url() {
-        return CDNMapper.hbthemes.previews(this.hbthemeId, "360", "webp", this.cacheId);
+        return CDNMapper.hbthemes.previews(this.hbthemeId, "360", "webp", this.image360Hash);
     }
 
     get image240Url() {
-        return CDNMapper.hbthemes.previews(this.hbthemeId, "240", "webp", this.cacheId);
+        return CDNMapper.hbthemes.previews(this.hbthemeId, "240", "webp", this.image240Hash);
     }
 
     get image180Url() {
-        return CDNMapper.hbthemes.previews(this.hbthemeId, "180", "webp", this.cacheId);
+        return CDNMapper.hbthemes.previews(this.hbthemeId, "180", "webp", this.image180Hash);
     }
 
     get imagePlaceholderUrl() {
-        return CDNMapper.hbthemes.previews(this.hbthemeId, "placeholder", "webp", this.cacheId);
+        return CDNMapper.hbthemes.previews(this.hbthemeId, "placeholder", "webp", this.imagePlaceholderHash);
     }
 
 }

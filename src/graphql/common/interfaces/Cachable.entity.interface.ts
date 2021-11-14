@@ -1,8 +1,5 @@
-import {BaseEntity, VersionColumn} from "typeorm";
+import {BaseEntity} from "typeorm";
 
 export abstract class CachableEntityInterface extends BaseEntity {
-
-    @VersionColumn({default: 1})
-    cacheId: number;
 
 }

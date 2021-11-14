@@ -166,4 +166,8 @@ export class ThemeService implements IsOwner {
         ));
     }
 
+    async getHash(id: string): Promise<string> {
+        return null;
+    }
+
 }

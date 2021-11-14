@@ -22,16 +22,20 @@ export class UserProfileEntity extends CachableEntityInterface {
 
     @Column("bytea", {nullable: true})
     avatarFile?: Buffer;
-
     @Column("bytea", {nullable: true})
     bannerFile?: Buffer;
 
+    @Column("bytea", {nullable: true})
+    avatarHash?: Buffer;
+    @Column("bytea", {nullable: true})
+    bannerHash?: Buffer;
+
     get avatarUrl(): string {
-        return !!this.avatarFile ? CDNMapper.users.avatar(this.userId, "webp", this.cacheId) : null;
+        return !!this.avatarFile ? CDNMapper.users.avatar(this.userId, "webp", this.avatarHash) : null;
     };
 
     get bannerUrl(): string {
-        return !!this.bannerFile ? CDNMapper.users.banner(this.userId, "webp", this.cacheId) : null;
+        return !!this.bannerFile ? CDNMapper.users.banner(this.userId, "webp", this.bannerHash) : null;
     }
 
 }

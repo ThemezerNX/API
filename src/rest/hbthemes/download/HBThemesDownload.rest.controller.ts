@@ -6,7 +6,6 @@ import {UserAgent} from "../../common/decorators/UserAgent.decorator";
 import {HBThemeService} from "../../../graphql/HBTheme/HBTheme.service";
 import {HBThemeDownloadService} from "../../../graphql/HBTheme/Download/HBThemeDownload.service";
 import {HBThemeCacheService} from "../../../graphql/Cache/HBTheme/HBThemeCache.service";
-import {HBThemeEntity} from "../../../graphql/HBTheme/HBTheme.entity";
 import {CurrentUser} from "../../../graphql/Auth/decorators/CurrentUser.decorator";
 
 @Controller()
@@ -15,28 +14,28 @@ export class HBThemesDownloadRestController {
     constructor(private hbthemeService: HBThemeService, private hbthemeDownloadService: HBThemeDownloadService, private hbthemeCacheService: HBThemeCacheService) {
     }
 
-    private async exists(id: string): Promise<HBThemeEntity> {
-        const entity = await this.hbthemeService.findOne({id}, {relations: ["creator"]});
-        if (!entity) {
+    private async getHash(id: string): Promise<string> {
+        const hash = await this.hbthemeService.getHash(id);
+        if (!hash) {
             throw new NotFoundException();
         }
-        return entity;
+        return hash;
     }
 
     @Get()
     @Redirect()
     async getDownload(@Param("id") id: string, @ClientIP() ip: string, @CurrentUser() user: UserEntity, @UserAgent() userAgent: string) {
-        const item = await this.exists(id);
+        const hash = await this.getHash(id);
 
         await this.hbthemeDownloadService.increment(id, ip, userAgent, user ? user.id : undefined);
 
-        return {url: "download/theme.romfs?cache=" + item.cacheId + item.assets.cacheId + item.creator.cacheId};
+        return {url: "download/theme.romfs?hash=" + hash};
     }
 
     @Get("theme.romfs")
     @Header("Content-type", "application/romfs")
     async getDownloadFile(@Param("id") id: string, @Res() res: Response) {
-        await this.exists(id);
+        await this.getHash(id);
 
         const {data, fileName} = await this.hbthemeCacheService.getFile(id);
 

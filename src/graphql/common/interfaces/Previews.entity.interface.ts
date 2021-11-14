@@ -25,4 +25,15 @@ export abstract class PreviewsEntityInterface extends CachableEntityInterface {
 
     abstract get imagePlaceholderUrl(): string;
 
+    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"image720File\")"})
+    readonly image720Hash: Buffer;
+    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"image360File\")"})
+    readonly image360Hash: Buffer;
+    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"image240File\")"})
+    readonly image240Hash: Buffer;
+    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"image180File\")"})
+    readonly image180Hash: Buffer;
+    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"imagePlaceholderFile\")"})
+    readonly imagePlaceholderHash: Buffer;
+
 }

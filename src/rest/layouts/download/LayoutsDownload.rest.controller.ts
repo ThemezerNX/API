@@ -29,8 +29,8 @@ export class LayoutsDownloadRestController {
 
         await this.layoutDownloadService.increment(id, ip, userAgent, user ? user.id : undefined);
 
-        // use cache=false because layout.assets is not a thing -> no cache id is tracked
-        return {url: "download/layout.json?cache=false"};
+        // use hash=false because layout.assets is not a thing -> no cache id is tracked
+        return {url: "download/layout.json?hash=false"};
     }
 
     @Get("layout.json")
@@ -47,8 +47,8 @@ export class LayoutsDownloadRestController {
     async getDownloadCommon(@Param("id") id: string, @ClientIP() ip: string, @CurrentUser() user: UserEntity, @UserAgent() userAgent: string) {
         await this.exists(id);
 
-        // use cache=false because layout.assets is not a thing -> no cache id is tracked
-        return {url: "download/commonLayout.json?cache=false"};
+        // use hash=false because layout.assets is not a thing -> no cache id is tracked
+        return {url: "download/commonLayout.json?hash=false"};
     }
 
     @Get("commonLayout.json")
