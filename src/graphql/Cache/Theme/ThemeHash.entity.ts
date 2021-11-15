@@ -35,14 +35,13 @@ import {LayoutOptionEntity} from "../../LayoutOption/LayoutOption.entity";
         .leftJoin(UserEntity, "lu", "tl.\"creatorId\" = lu.id")
         .groupBy("t.id"),
 })
+@Index(["packId", "themeId"], {unique: true})
 export class ThemeHashEntity extends ItemHashEntityInterface {
 
     @ViewColumn()
-    @Index()
     packId: string;
 
     @ViewColumn()
-    @Index()
     themeId: string;
 
 }

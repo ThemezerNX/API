@@ -26,7 +26,7 @@ import {ItemHashEntityInterface} from "../ItemHash.entity.interface";
 export class PackHashEntity extends ItemHashEntityInterface {
 
     @ViewColumn()
-    @Index()
+    @Index({unique: true})
     packId: string;
 
 }

@@ -21,14 +21,13 @@ import {ItemHashEntityInterface} from "../ItemHash.entity.interface";
         .leftJoin(HBThemeAssetsEntity, "hbta", "hbt.id = hbta.\"hbthemeId\"")
         .groupBy("hbt.id"),
 })
+@Index(["packId", "hbthemeId"], {unique: true})
 export class HBThemeHashEntity extends ItemHashEntityInterface {
 
     @ViewColumn()
-    @Index()
-    hbthemeId: string;
+    packId: string;
 
     @ViewColumn()
-    @Index()
-    packId: string;
+    hbthemeId: string;
 
 }
