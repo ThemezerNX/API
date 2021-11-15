@@ -1,4 +1,4 @@
-import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne} from "typeorm";
+import {AfterLoad, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne} from "typeorm";
 import {ThemeTagEntity} from "../ThemeTag/ThemeTag.entity";
 import {HBThemePreviewsEntity} from "./Previews/HBThemePreviews.entity";
 import {HBThemeAssetsEntity} from "./Assets/HBThemeAssets.entity";
@@ -32,8 +32,11 @@ export class HBThemeEntity extends ItemEntityInterface implements EntityWithPrev
     @OneToOne(() => HBThemeAssetsEntity, hbthemeAssets => hbthemeAssets.hbtheme, {cascade: true, eager: true})
     assets: HBThemeAssetsEntity;
 
-    get downloadUrl(): string {
-        return CDNMapper.hbthemes.download(this.id);
+    downloadUrl: string;
+
+    @AfterLoad()
+    setUrls() {
+        this.downloadUrl = CDNMapper.hbthemes.download(this.id);
     }
 
 }

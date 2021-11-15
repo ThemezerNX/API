@@ -1,4 +1,4 @@
-import {Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {AfterLoad, Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {HBThemeEntity} from "../HBTheme.entity";
 import {CDNMapper} from "../../common/CDNMapper";
 import {AssetsEntityInterface} from "../../common/interfaces/Assets.entity.interface";
@@ -68,92 +68,71 @@ export class HBThemeAssetsEntity extends AssetsEntityInterface {
     readonly backgroundImageHash?: Buffer;
 
 
-    get batteryIconUrl(): string {
-        return !!this.batteryIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
+    batteryIconUrl: string;
+    chargingIconUrl: string;
+    folderIconUrl: string;
+    invalidIconUrl: string;
+    themeIconDarkUrl: string;
+    themeIconLightUrl: string;
+    airplaneIconUrl: string;
+    wifiNoneIconUrl: string;
+    wifi1IconUrl: string;
+    wifi2IconUrl: string;
+    wifi3IconUrl: string;
+    ethIconUrl: string;
+    backgroundImageUrl: string;
+
+    @AfterLoad()
+    setUrls() {
+        this.batteryIconUrl = !!this.batteryIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "batteryIcon",
             "png",
             this.batteryIconHash) : null;
-    }
-
-    get chargingIconUrl(): string {
-        return !!this.chargingIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
+        this.chargingIconUrl = !!this.chargingIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "chargingIcon",
             "png",
             this.chargingIconHash) : null;
-    }
-
-    get folderIconUrl(): string {
-        return !!this.folderIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
+        this.folderIconUrl = !!this.folderIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "folderIcon",
             "jpg",
             this.folderIconHash) : null;
-    }
-
-    get invalidIconUrl(): string {
-        return !!this.invalidIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
+        this.invalidIconUrl = !!this.invalidIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "invalidIcon",
             "jpg",
             this.invalidIconHash) : null;
-    }
-
-    get themeIconDarkUrl(): string {
-        return !!this.themeIconDarkFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
+        this.themeIconDarkUrl = !!this.themeIconDarkFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "themeIconDark",
             "jpg",
             this.themeIconDarkHash) : null;
-    }
-
-    get themeIconLightUrl(): string {
-        return !!this.themeIconLightFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
+        this.themeIconLightUrl = !!this.themeIconLightFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "themeIconLight",
             "jpg",
             this.themeIconLightHash) : null;
-    }
-
-    get airplaneIconUrl(): string {
-        return !!this.airplaneIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
+        this.airplaneIconUrl = !!this.airplaneIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "airplaneIcon",
             "png",
             this.airplaneIconHash) : null;
-    }
-
-    get wifiNoneIconUrl(): string {
-        return !!this.wifiNoneIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
+        this.wifiNoneIconUrl = !!this.wifiNoneIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "wifiNoneIcon",
             "png",
             this.wifiNoneIconHash) : null;
-    }
-
-    get wifi1IconUrl(): string {
-        return !!this.wifi1IconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
+        this.wifi1IconUrl = !!this.wifi1IconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "wifi1Icon",
             "png",
             this.wifi1IconHash) : null;
-    }
-
-    get wifi2IconUrl(): string {
-        return !!this.wifi2IconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
+        this.wifi2IconUrl = !!this.wifi2IconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "wifi2Icon",
             "png",
             this.wifi2IconHash) : null;
-    }
-
-    get wifi3IconUrl(): string {
-        return !!this.wifi3IconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
+        this.wifi3IconUrl = !!this.wifi3IconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "wifi3Icon",
             "png",
             this.wifi3IconHash) : null;
-    }
-
-    get ethIconUrl(): string {
-        return !!this.ethIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
+        this.ethIconUrl = !!this.ethIconFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "ethIcon",
             "png",
             this.ethIconHash) : null;
-    }
-
-    get backgroundImageUrl(): string {
-        return !!this.backgroundImageFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
+        this.backgroundImageUrl = !!this.backgroundImageFile ? CDNMapper.hbthemes.assets(this.hbthemeId,
             "backgroundImage",
             "jpg",
             this.backgroundImageHash) : null;

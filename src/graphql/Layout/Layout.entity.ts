@@ -1,4 +1,4 @@
-import {Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne} from "typeorm";
+import {AfterLoad, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne} from "typeorm";
 import {Target} from "../common/enums/Target";
 import {LayoutOptionEntity} from "../LayoutOption/LayoutOption.entity";
 import {UserEntity} from "../User/User.entity";
@@ -43,12 +43,13 @@ export class LayoutEntity extends ItemEntityInterface implements EntityWithPrevi
     @Column({type: "char", length: 32})
     insertionMD5: string;
 
-    get downloadUrl(): string {
-        return CDNMapper.layouts.download(this.id);
-    }
+    downloadUrl: string;
+    downloadCommonUrl: string;
 
-    get downloadCommonUrl(): string {
-        return CDNMapper.layouts.downloadCommon(this.id);
+    @AfterLoad()
+    setUrls() {
+        this.downloadUrl = CDNMapper.layouts.download(this.id);
+        this.downloadCommonUrl = CDNMapper.layouts.downloadCommon(this.id);
     }
 
 }

@@ -1,4 +1,4 @@
-import {Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {AfterLoad, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {ThemeEntity} from "../Theme.entity";
 import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
@@ -13,24 +13,28 @@ export class ThemePreviewsEntity extends PreviewsEntityInterface {
     @PrimaryColumn({update: false})
     themeId: string;
 
-    get image720Url() {
-        return CDNMapper.themes.previews(this.themeId, "720", "webp", this.image720Hash);
-    }
-
-    get image360Url() {
-        return CDNMapper.themes.previews(this.themeId, "360", "webp", this.image360Hash);
-    }
-
-    get image240Url() {
-        return CDNMapper.themes.previews(this.themeId, "240", "jpg", this.image240Hash);
-    }
-
-    get image180Url() {
-        return CDNMapper.themes.previews(this.themeId, "180", "webp", this.image180Hash);
-    }
-
-    get imagePlaceholderUrl() {
-        return CDNMapper.themes.previews(this.themeId, "placeholder", "webp", this.imagePlaceholderHash);
+    @AfterLoad()
+    setUrls() {
+        this.image720Url = CDNMapper.themes.previews(this.themeId,
+            "720",
+            "webp",
+            this.image720Hash);
+        this.image360Url = CDNMapper.themes.previews(this.themeId,
+            "360",
+            "webp",
+            this.image360Hash);
+        this.image240Url = CDNMapper.themes.previews(this.themeId,
+            "240",
+            "jpg",
+            this.image240Hash);
+        this.image180Url = CDNMapper.themes.previews(this.themeId,
+            "180",
+            "webp",
+            this.image180Hash);
+        this.imagePlaceholderUrl = CDNMapper.themes.previews(this.themeId,
+            "placeholder",
+            "webp",
+            this.imagePlaceholderHash);
     }
 
 }

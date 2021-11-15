@@ -1,4 +1,4 @@
-import {BaseEntity, Column, CreateDateColumn, ViewColumn} from "typeorm";
+import {AfterLoad, BaseEntity, ViewColumn} from "typeorm";
 
 
 export class ItemHashEntityInterface extends BaseEntity {
@@ -6,8 +6,11 @@ export class ItemHashEntityInterface extends BaseEntity {
     @ViewColumn()
     hash: Buffer;
 
-    get hashString() {
-        return this.hash?.toString("hex");
+    hashString: string;
+
+    @AfterLoad()
+    setUrls() {
+        this.hashString = this.hash?.toString("hex");
     }
 
 }

@@ -1,4 +1,4 @@
-import {Entity, OneToMany, OneToOne} from "typeorm";
+import {AfterLoad, Entity, OneToMany, OneToOne} from "typeorm";
 import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
 import {PackPreviewsEntity} from "./Previews/PackPreviews.entity";
 import {ThemeEntity} from "../Theme/Theme.entity";
@@ -21,8 +21,11 @@ export class PackEntity extends ItemEntityInterface implements EntityWithPreview
     @OneToMany(() => HBThemeEntity, hbtheme => hbtheme.pack, {onDelete: "CASCADE"})
     hbthemes: HBThemeEntity[];
 
-    get downloadUrl(): string {
-        return CDNMapper.packs.download(this.id);
+    downloadUrl: string;
+
+    @AfterLoad()
+    setUrls() {
+        this.downloadUrl = CDNMapper.packs.download(this.id);
     }
 
 }

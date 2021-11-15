@@ -1,4 +1,4 @@
-import {Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {AfterLoad, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
 import {PackEntity} from "../Pack.entity";
@@ -13,24 +13,25 @@ export class PackPreviewsEntity extends PreviewsEntityInterface {
     @PrimaryColumn({update: false})
     packId: string;
 
-    get image720Url() {
-        return !!this.image720File ? CDNMapper.packs.previews(this.packId, "720", "webp", this.image720Hash) : null;
-    }
-
-    get image360Url() {
-        return !!this.image360File ? CDNMapper.packs.previews(this.packId, "360", "webp", this.image360Hash) : null;
-    }
-
-    get image240Url() {
-        return !!this.image240File ? CDNMapper.packs.previews(this.packId, "240", "webp", this.image240Hash) : null;
-    }
-
-    get image180Url() {
-        return !!this.image180File ? CDNMapper.packs.previews(this.packId, "180", "webp", this.image180Hash) : null;
-    }
-
-    get imagePlaceholderUrl() {
-        return !!this.imagePlaceholderFile ? CDNMapper.packs.previews(this.packId,
+    @AfterLoad()
+    setUrls() {
+        this.image720Url = !!this.image720Hash ? CDNMapper.packs.previews(this.packId,
+            "720",
+            "webp",
+            this.image720Hash) : null;
+        this.image360Url = !!this.image360Hash ? CDNMapper.packs.previews(this.packId,
+            "360",
+            "webp",
+            this.image360Hash) : null;
+        this.image240Url = !!this.image240Hash ? CDNMapper.packs.previews(this.packId,
+            "240",
+            "webp",
+            this.image240Hash) : null;
+        this.image180Url = !!this.image180Hash ? CDNMapper.packs.previews(this.packId,
+            "180",
+            "webp",
+            this.image180Hash) : null;
+        this.imagePlaceholderUrl = !!this.imagePlaceholderHash ? CDNMapper.packs.previews(this.packId,
             "placeholder",
             "webp",
             this.imagePlaceholderHash) : null;
