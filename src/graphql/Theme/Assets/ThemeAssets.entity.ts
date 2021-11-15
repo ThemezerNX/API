@@ -4,6 +4,7 @@ import {CDNMapper} from "../../common/CDNMapper";
 import {AssetsEntityInterface} from "../../common/interfaces/Assets.entity.interface";
 import {ReadStream} from "fs";
 import {generateBackground} from "../../common/processors/ScreenshotProcessor";
+import {SelectAlways} from "perch-query-builder";
 
 @Entity()
 export class ThemeAssetsEntity extends AssetsEntityInterface {
@@ -39,20 +40,28 @@ export class ThemeAssetsEntity extends AssetsEntityInterface {
     homeIconFile?: Buffer;
 
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"imageFile\")"})
+    @SelectAlways()
     imageHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"albumIconFile\")"})
+    @SelectAlways()
     albumIconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"newsIconFile\")"})
+    @SelectAlways()
     newsIconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"shopIconFile\")"})
+    @SelectAlways()
     shopIconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"controllerIconFile\")"})
+    @SelectAlways()
     controllerIconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"settingsIconFile\")"})
+    @SelectAlways()
     settingsIconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"powerIconFile\")"})
+    @SelectAlways()
     powerIconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"homeIconFile\")"})
+    @SelectAlways()
     homeIconHash?: Buffer;
 
     imageUrl: string;

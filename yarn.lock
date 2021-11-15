@@ -5720,7 +5720,7 @@ peek-readable@^4.0.1:
 
 "perch-query-builder@https://github.com/Migushthe2nd/perch-query-builder":
   version "1.3.2"
-  resolved "https://github.com/Migushthe2nd/perch-query-builder#ab5ce0ea4bb57689c9b28812168c4aa01208f396"
+  resolved "https://github.com/Migushthe2nd/perch-query-builder#75657fcd540a95b6167d924f1e553eb35f04f008"
   dependencies:
     "@nestjs/graphql" "^7.0.0"
     graphql "^15.0.0"

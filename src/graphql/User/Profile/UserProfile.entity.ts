@@ -2,6 +2,7 @@ import {AfterLoad, Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "ty
 import {UserEntity} from "../User.entity";
 import {CDNMapper} from "../../common/CDNMapper";
 import {CachableEntityInterface} from "../../common/interfaces/Cachable.entity.interface";
+import {SelectAlways} from "perch-query-builder";
 
 
 @Entity()
@@ -26,8 +27,10 @@ export class UserProfileEntity extends CachableEntityInterface {
     bannerFile?: Buffer;
 
     @Column("bytea", {nullable: true})
+    @SelectAlways()
     avatarHash?: Buffer;
     @Column("bytea", {nullable: true})
+    @SelectAlways()
     bannerHash?: Buffer;
 
     avatarUrl: string;

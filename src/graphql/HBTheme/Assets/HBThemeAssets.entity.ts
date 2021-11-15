@@ -2,6 +2,7 @@ import {AfterLoad, Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "ty
 import {HBThemeEntity} from "../HBTheme.entity";
 import {CDNMapper} from "../../common/CDNMapper";
 import {AssetsEntityInterface} from "../../common/interfaces/Assets.entity.interface";
+import {SelectAlways} from "perch-query-builder";
 
 @Entity()
 export class HBThemeAssetsEntity extends AssetsEntityInterface {
@@ -41,30 +42,43 @@ export class HBThemeAssetsEntity extends AssetsEntityInterface {
     backgroundImageFile?: Buffer;
 
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"batteryIconFile\")"})
+    @SelectAlways()
     readonly batteryIconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"chargingIconFile\")"})
+    @SelectAlways()
     readonly chargingIconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"folderIconFile\")"})
+    @SelectAlways()
     readonly folderIconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"invalidIconFile\")"})
+    @SelectAlways()
     readonly invalidIconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"themeIconDarkFile\")"})
+    @SelectAlways()
     readonly themeIconDarkHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"themeIconLightFile\")"})
+    @SelectAlways()
     readonly themeIconLightHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"airplaneIconFile\")"})
+    @SelectAlways()
     readonly airplaneIconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"wifiNoneIconFile\")"})
+    @SelectAlways()
     readonly wifiNoneIconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"wifi1IconFile\")"})
+    @SelectAlways()
     readonly wifi1IconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"wifi2IconFile\")"})
+    @SelectAlways()
     readonly wifi2IconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"wifi3IconFile\")"})
+    @SelectAlways()
     readonly wifi3IconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"ethIconFile\")"})
+    @SelectAlways()
     readonly ethIconHash?: Buffer;
     @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"backgroundImageFile\")"})
+    @SelectAlways()
     readonly backgroundImageHash?: Buffer;
 
 
