@@ -11,7 +11,6 @@ module.exports = {
     password: process.env.POSTGRES_PASSWORD,
     schema: process.env.POSTGRES_SCHEMA,
     logger: new TypeOrmLogger(process.env.NODE_ENV === "development"),
-    synchronize: process.env.NODE_ENV === "development" && true,
     entities: ["./dist/**/*.entity.js"],
     migrations: ["./dist/migrations/*.js"],
     namingStrategy: new EntityNamingStrategy(),

@@ -13,9 +13,23 @@ import {HBThemeModule} from "./HBTheme/HBTheme.module";
 import {ThemeTagModule} from "./ThemeTag/ThemeTag.module";
 import {AuthModule} from "./Auth/Auth.module";
 import {NXInstallerModule} from "./NXInstaller/NXInstaller.module";
-import {getConnectionOptions} from "typeorm";
+import {createConnection, getConnectionOptions, QueryRunner} from "typeorm";
 import {LayoutOptionModule} from "./LayoutOption/LayoutOption.module";
 import {APP_INTERCEPTOR} from "@nestjs/core";
+import {ThemeHashEntity} from "./Cache/Theme/ThemeHash.entity";
+import {HBThemeHashEntity} from "./Cache/HBTheme/HBThemeHash.entity";
+import {PackHashEntity} from "./Cache/Pack/PackHash.entity";
+
+async function dropViews(queryRunner: QueryRunner) {
+    const phm = PackHashEntity.getRepository().metadata;
+    if (await queryRunner.getView(phm.tableName)) await queryRunner.dropView(phm.tableName);
+
+    const thm = ThemeHashEntity.getRepository().metadata;
+    if (await queryRunner.getView(thm.tableName)) await queryRunner.dropView(thm.tableName);
+
+    const hbthm = HBThemeHashEntity.getRepository().metadata;
+    if (await queryRunner.getTable(hbthm.tableName)) await queryRunner.dropView(hbthm.tableName);
+}
 
 @Module({
     imports: [
@@ -73,6 +87,21 @@ import {APP_INTERCEPTOR} from "@nestjs/core";
                     autoLoadEntities: true,
                     keepConnectionAlive: true,
                 }),
+            connectionFactory: async (options) => {
+                const connection = await createConnection(options);
+
+                // 1. drop all views/mviews, as typeorm cannot drop them in correct order nor does cascade drop.
+                const queryRunner = await connection.createQueryRunner();
+                await dropViews(queryRunner);
+
+                if (process.env.NODE_ENV == "development" && true) {
+                    await connection.synchronize(false);
+                } else {
+                    await connection.runMigrations();
+                }
+
+                return connection;
+            },
         }),
         UserModule,
         ThemeModule,
