@@ -3,6 +3,7 @@ import {UserEntity} from "../../User/User.entity";
 import {PackEntity} from "../../Pack/Pack.entity";
 import {HBThemeHashEntity} from "../HBTheme/HBThemeHash.entity";
 import {ThemeHashEntity} from "../Theme/ThemeHash.entity";
+import {ItemHashEntityInterface} from "../ItemHash.entity.interface";
 
 
 @ViewEntity({
@@ -22,13 +23,10 @@ import {ThemeHashEntity} from "../Theme/ThemeHash.entity";
         .leftJoin(HBThemeHashEntity, "hbth", "p.id = hbth.\"packId\"")
         .groupBy("p.id"),
 })
-export class PackHashEntity {
+export class PackHashEntity extends ItemHashEntityInterface {
 
     @ViewColumn()
     @Index()
     packId: string;
-
-    @ViewColumn()
-    hash: Buffer;
 
 }

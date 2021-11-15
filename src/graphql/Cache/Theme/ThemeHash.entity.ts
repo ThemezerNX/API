@@ -5,6 +5,7 @@ import {ThemeAssetsEntity} from "../../Theme/Assets/ThemeAssets.entity";
 import {ThemeOptionEntity} from "../../Theme/ThemeOptions/ThemeOption.entity";
 import {LayoutOptionValueEntity} from "../../LayoutOption/OptionValue/LayoutOptionValue.entity";
 import {LayoutEntity} from "../../Layout/Layout.entity";
+import {ItemHashEntityInterface} from "../ItemHash.entity.interface";
 
 
 @ViewEntity({
@@ -31,7 +32,7 @@ import {LayoutEntity} from "../../Layout/Layout.entity";
         .leftJoin(UserEntity, "lu", "tl.\"creatorId\" = lu.id")
         .groupBy("t.id"),
 })
-export class ThemeHashEntity {
+export class ThemeHashEntity extends ItemHashEntityInterface {
 
     @ViewColumn()
     @Index()
@@ -40,8 +41,5 @@ export class ThemeHashEntity {
     @ViewColumn()
     @Index()
     themeId: string;
-
-    @ViewColumn()
-    hash: Buffer;
 
 }

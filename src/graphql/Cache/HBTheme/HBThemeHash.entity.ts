@@ -2,6 +2,7 @@ import {Connection, Index, ViewColumn, ViewEntity} from "typeorm";
 import {HBThemeEntity} from "../../HBTheme/HBTheme.entity";
 import {UserEntity} from "../../User/User.entity";
 import {HBThemeAssetsEntity} from "../../HBTheme/Assets/HBThemeAssets.entity";
+import {ItemHashEntityInterface} from "../ItemHash.entity.interface";
 
 
 @ViewEntity({
@@ -20,7 +21,7 @@ import {HBThemeAssetsEntity} from "../../HBTheme/Assets/HBThemeAssets.entity";
         .leftJoin(HBThemeAssetsEntity, "hbta", "hbt.id = hbta.\"hbthemeId\"")
         .groupBy("hbt.id"),
 })
-export class HBThemeHashEntity {
+export class HBThemeHashEntity extends ItemHashEntityInterface {
 
     @ViewColumn()
     @Index()
@@ -29,8 +30,5 @@ export class HBThemeHashEntity {
     @ViewColumn()
     @Index()
     packId: string;
-
-    @ViewColumn()
-    hash: Buffer;
 
 }
