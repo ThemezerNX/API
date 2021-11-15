@@ -6,7 +6,6 @@ import {UserEntity} from "../../../graphql/User/User.entity";
 import {UserAgent} from "../../common/decorators/UserAgent.decorator";
 import {ThemeDownloadService} from "../../../graphql/Theme/Download/ThemeDownload.service";
 import {ThemeCacheService} from "../../../graphql/Cache/Theme/ThemeCache.service";
-import {ThemeEntity} from "../../../graphql/Theme/Theme.entity";
 import {CurrentUser} from "../../../graphql/Auth/decorators/CurrentUser.decorator";
 
 @Controller()
@@ -15,7 +14,7 @@ export class ThemesDownloadRestController {
     constructor(private themeService: ThemeService, private themeDownloadService: ThemeDownloadService, private themeCacheService: ThemeCacheService) {
     }
 
-    private async getHash(id: string): Promise<ThemeEntity> {
+    private async getHash(id: string): Promise<string> {
         const hash = await this.themeService.getHash(id);
         if (!hash) {
             throw new NotFoundException();

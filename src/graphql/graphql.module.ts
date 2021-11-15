@@ -86,6 +86,7 @@ async function dropViews(queryRunner: QueryRunner) {
                 Object.assign(await getConnectionOptions(), {
                     autoLoadEntities: true,
                     keepConnectionAlive: true,
+                    synchronize: false,
                 }),
             connectionFactory: async (options) => {
                 const connection = await createConnection(options);
