@@ -40,31 +40,31 @@ export class HBThemeAssetsEntity extends AssetsEntityInterface {
     @Column("bytea", {nullable: true})
     backgroundImageFile?: Buffer;
 
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"batteryIconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"batteryIconFile\")"})
     readonly batteryIconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"chargingIconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"chargingIconFile\")"})
     readonly chargingIconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"folderIconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"folderIconFile\")"})
     readonly folderIconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"invalidIconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"invalidIconFile\")"})
     readonly invalidIconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"themeIconDarkFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"themeIconDarkFile\")"})
     readonly themeIconDarkHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"themeIconLightFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"themeIconLightFile\")"})
     readonly themeIconLightHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"airplaneIconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"airplaneIconFile\")"})
     readonly airplaneIconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"wifiNoneIconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"wifiNoneIconFile\")"})
     readonly wifiNoneIconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"wifi1IconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"wifi1IconFile\")"})
     readonly wifi1IconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"wifi2IconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"wifi2IconFile\")"})
     readonly wifi2IconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"wifi3IconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"wifi3IconFile\")"})
     readonly wifi3IconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"ethIconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"ethIconFile\")"})
     readonly ethIconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"backgroundImageFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"backgroundImageFile\")"})
     readonly backgroundImageHash?: Buffer;
 
 

@@ -38,21 +38,21 @@ export class ThemeAssetsEntity extends AssetsEntityInterface {
     @Column("bytea", {nullable: true})
     homeIconFile?: Buffer;
 
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"imageFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"imageFile\")"})
     imageHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"albumIconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"albumIconFile\")"})
     albumIconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"newsIconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"newsIconFile\")"})
     newsIconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"shopIconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"shopIconFile\")"})
     shopIconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"controllerIconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"controllerIconFile\")"})
     controllerIconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"settingsIconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"settingsIconFile\")"})
     settingsIconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"powerIconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"powerIconFile\")"})
     powerIconHash?: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"homeIconFile\")"})
+    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"homeIconFile\")"})
     homeIconHash?: Buffer;
 
     imageUrl: string;
@@ -98,6 +98,10 @@ export class ThemeAssetsEntity extends AssetsEntityInterface {
             "homeIcon",
             "png",
             this.homeIconHash) : null;
+    }
+
+    async setImage(createReadStream: () => ReadStream) {
+        this.imageFile = await generateBackground(createReadStream);
     }
 
 }
