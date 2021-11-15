@@ -23,11 +23,17 @@ import {LayoutNotFoundError} from "../common/errors/LayoutNotFound.error";
 import {CreatorNotFoundError} from "../common/errors/CreatorNotFound.error";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
 import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
+import {ThemeHashEntity} from "../Cache/Theme/ThemeHash.entity";
+import {GetHash} from "../common/interfaces/GetHash.interface";
 
 @Injectable()
-export class ThemeService implements IsOwner {
+export class ThemeService implements IsOwner, GetHash {
 
-    constructor(@InjectRepository(ThemeEntity) private repository: Repository<ThemeEntity>) {
+    constructor(
+        @InjectRepository(ThemeEntity) private repository: Repository<ThemeEntity>,
+        @InjectRepository(ThemeHashEntity) private hashRepository: Repository<ThemeHashEntity>,
+        private layoutOptionService: LayoutOptionService,
+    ) {
     }
 
     findOne({
@@ -166,8 +172,11 @@ export class ThemeService implements IsOwner {
         ));
     }
 
-    async getHash(id: string): Promise<string> {
-        return null;
+    async getHash(themeId: string): Promise<string> {
+        const hashEntity = await this.hashRepository.createQueryBuilder()
+            .where({id: themeId})
+            .getOne();
+        return hashEntity.hashString;
     }
 
 }

@@ -5,10 +5,12 @@ import {PackEntity} from "../Pack/Pack.entity";
 import {PackService} from "../Pack/Pack.service";
 import {ThemeModule} from "../Theme/Theme.module";
 import {HBThemeModule} from "../HBTheme/HBTheme.module";
+import {PackHashEntity} from "../Cache/Pack/PackHash.entity";
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([PackEntity]),
+        TypeOrmModule.forFeature([PackHashEntity]),
         ThemeModule,
         HBThemeModule,
     ],

@@ -1,5 +1,5 @@
 import {PackEntity} from "./Pack.entity";
-import {FindConditions, In, Repository, SelectQueryBuilder} from "typeorm";
+import {FindConditions, In, Repository} from "typeorm";
 import {Injectable} from "@nestjs/common";
 import {Target} from "../common/enums/Target";
 import {InjectRepository} from "@nestjs/typeorm";
@@ -11,20 +11,21 @@ import {toTsQuery} from "../common/TsQueryCreator";
 import {HBThemeService} from "../HBTheme/HBTheme.service";
 import {ThemeEntity} from "../Theme/Theme.entity";
 import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
-import {PerchQueryBuilder} from "perch-query-builder";
-import {joinAndSelectRelations, selectPreviews} from "../common/functions/ServiceFunctions.js";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
 import {Exists} from "../common/findOperators/Exists";
 import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
 import {PackPreviewsEntity} from "./Previews/PackPreviews.entity";
 import {LayoutEntity} from "../Layout/Layout.entity";
+import {PackHashEntity} from "../Cache/Pack/PackHash.entity";
+import {GetHash} from "../common/interfaces/GetHash.interface";
 
 @Injectable()
-export class PackService implements IsOwner {
+export class PackService implements IsOwner, GetHash {
 
     constructor(
         @InjectRepository(PackEntity) private repository: Repository<PackEntity>,
+        @InjectRepository(PackHashEntity) private hashRepository: Repository<PackHashEntity>,
         private themeService: ThemeService,
         private hbthemeService: HBThemeService,
     ) {
@@ -182,6 +183,13 @@ export class PackService implements IsOwner {
             this.repository.createQueryBuilder()
                 .where({id: packId, creatorId: userId}),
         ));
+    }
+
+    async getHash(packId: string): Promise<string> {
+        const hashEntity = await this.hashRepository.createQueryBuilder()
+            .where({id: packId})
+            .getOne();
+        return hashEntity.hashString;
     }
 
 }

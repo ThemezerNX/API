@@ -9,6 +9,7 @@ import {HBThemeDownloadModule} from "./Download/HBThemeDownload.module";
 @Module({
     imports: [
         TypeOrmModule.forFeature([HBThemeEntity]),
+        TypeOrmModule.forFeature([HBThemeHashEntity]),
         UserModule,
         HBThemeDownloadModule,
     ],

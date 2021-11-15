@@ -11,11 +11,16 @@ import {IsOwner} from "../common/interfaces/IsOwner.interface";
 import {Exists} from "../common/findOperators/Exists";
 import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
 import {HBThemePreviewsEntity} from "./Previews/HBThemePreviews.entity";
+import {HBThemeHashEntity} from "../Cache/HBTheme/HBThemeHash.entity";
+import {GetHash} from "../common/interfaces/GetHash.interface";
 
 @Injectable()
-export class HBThemeService implements IsOwner {
+export class HBThemeService implements IsOwner, GetHash {
 
-    constructor(@InjectRepository(HBThemeEntity) private repository: Repository<HBThemeEntity>) {
+    constructor(
+        @InjectRepository(HBThemeEntity) private repository: Repository<HBThemeEntity>,
+        @InjectRepository(HBThemeHashEntity) private hashRepository: Repository<HBThemeHashEntity>,
+    ) {
     }
 
     findOne({
@@ -139,8 +144,11 @@ export class HBThemeService implements IsOwner {
         ));
     }
 
-    async getHash(id: string): Promise<string> {
-        return null;
+    async getHash(hbthemeId: string): Promise<string> {
+        const hashEntity = await this.hashRepository.createQueryBuilder()
+            .where({id: hbthemeId})
+            .getOne();
+        return hashEntity.hashString;
     }
 
 }

@@ -7,10 +7,12 @@ import {UserModule} from "../User/User.module";
 import {ThemeModule} from "../Theme/Theme.module";
 import {HBThemeModule} from "../HBTheme/HBTheme.module";
 import {PackDownloadModule} from "./Download/PackDownload.module";
+import {PackHashEntity} from "../Cache/Pack/PackHash.entity";
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([PackEntity]),
+        TypeOrmModule.forFeature([PackHashEntity]),
         HBThemeModule,
         ThemeModule,
         UserModule,
