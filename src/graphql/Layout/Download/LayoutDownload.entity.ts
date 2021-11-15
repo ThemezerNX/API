@@ -16,7 +16,7 @@ export class LayoutDownloadEntity extends ItemDownloadEntityInterface {
     async addCount() {
         await getConnection()
             .getRepository(LayoutEntity)
-            .increment({id: this.layoutId}, "dlCount", 1);
+            .increment({id: this.layoutId}, "downloadCount", 1);
     }
 
 }

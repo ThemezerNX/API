@@ -5,7 +5,7 @@ import {CachableEntityInterface} from "./Cachable.entity.interface";
 
 export abstract class ItemEntityInterface extends CachableEntityInterface {
 
-    @Column({type: "int", update: false})
+    @Column({type: "int", update: false, select: false})
     @Generated("increment")
     readonly counter: number;
 
@@ -28,10 +28,11 @@ export abstract class ItemEntityInterface extends CachableEntityInterface {
     @CreateDateColumn({type: "timestamp", update: false})
     addedTimestamp: Date;
 
+    // TODO: is this updated when downloadCount is incremented
     @UpdateDateColumn({type: "timestamp"})
     updatedTimestamp: Date;
 
     @Column("int", {default: 0})
-    dlCount: number;
+    downloadCount: number;
 
 }

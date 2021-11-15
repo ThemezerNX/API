@@ -16,7 +16,7 @@ export class HBThemeDownloadEntity extends ItemDownloadEntityInterface {
     async addCount() {
         await getConnection()
             .getRepository(HBThemeEntity)
-            .increment({id: this.hbthemeId}, "dlCount", 1);
+            .increment({id: this.hbthemeId}, "downloadCount", 1);
     }
 
 }

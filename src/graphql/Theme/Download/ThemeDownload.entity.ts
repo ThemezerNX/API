@@ -16,7 +16,7 @@ export class ThemeDownloadEntity extends ItemDownloadEntityInterface {
     async addCount() {
         await getConnection()
             .getRepository(ThemeEntity)
-            .increment({id: this.themeId}, "dlCount", 1);
+            .increment({id: this.themeId}, "downloadCount", 1);
     }
 
 }

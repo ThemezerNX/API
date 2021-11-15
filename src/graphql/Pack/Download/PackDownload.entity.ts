@@ -16,7 +16,7 @@ export class PackDownloadEntity extends ItemDownloadEntityInterface {
     async addCount() {
         await getConnection()
             .getRepository(PackEntity)
-            .increment({id: this.packId}, "dlCount", 1);
+            .increment({id: this.packId}, "downloadCount", 1);
     }
 
 }

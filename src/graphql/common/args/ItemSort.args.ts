@@ -12,7 +12,7 @@ export class ItemSortArgs extends SortInterface {
 }
 
 export enum ItemSort {
-    DOWNLOADS = "dlCount",
+    DOWNLOADS = "downloadCount",
     // LIKES = "likes",
     UPDATED = "updatedTimestamp",
     ADDED = "id",

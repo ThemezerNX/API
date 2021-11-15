@@ -26,7 +26,7 @@ export abstract class ItemModelInterface extends RootModelAbstract {
     updatedTimestamp: Date;
 
     @Field(() => Int)
-    dlCount: number;
+    downloadCount: number;
 
     @Field(() => URLResolver)
     downloadUrl: string;
