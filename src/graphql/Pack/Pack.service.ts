@@ -187,7 +187,7 @@ export class PackService implements IsOwner, GetHash {
 
     async getHash(packId: string): Promise<string> {
         const hashEntity = await this.hashRepository.createQueryBuilder()
-            .where({id: packId})
+            .where({packId})
             .getOne();
         return hashEntity.hashString;
     }

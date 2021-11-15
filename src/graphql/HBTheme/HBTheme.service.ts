@@ -146,7 +146,7 @@ export class HBThemeService implements IsOwner, GetHash {
 
     async getHash(hbthemeId: string): Promise<string> {
         const hashEntity = await this.hashRepository.createQueryBuilder()
-            .where({id: hbthemeId})
+            .where({hbthemeId})
             .getOne();
         return hashEntity.hashString;
     }

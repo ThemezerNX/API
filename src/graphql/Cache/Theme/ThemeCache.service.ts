@@ -46,37 +46,37 @@ export class ThemeCacheService {
                     sarc.addRawFile(Buffer.from(theme.layout.json), "common.json");
                 }
             } else {
-                if (assets.customLayoutJson) {
+                if (assets?.customLayoutJson) {
                     const parsed = JSON.parse(assets.customLayoutJson);
                     layoutInfo = `${parsed.PatchName} by ${parsed.AuthorName}`;
                     sarc.addRawFile(Buffer.from(assets.customLayoutJson), "layout.json");
                 }
-                if (assets.customCommonLayoutJson) {
+                if (assets?.customCommonLayoutJson) {
                     sarc.addRawFile(Buffer.from(assets.customCommonLayoutJson), "common.json");
                 }
             }
-            if (assets.imageFile) {
+            if (assets?.imageFile) {
                 sarc.addRawFile(assets.imageFile, "image.jpg");
             }
-            if (assets.albumIconFile) {
+            if (assets?.albumIconFile) {
                 sarc.addRawFile(assets.imageFile, "album.png");
             }
-            if (assets.newsIconFile) {
+            if (assets?.newsIconFile) {
                 sarc.addRawFile(assets.imageFile, "news.png");
             }
-            if (assets.shopIconFile) {
+            if (assets?.shopIconFile) {
                 sarc.addRawFile(assets.imageFile, "shop.png");
             }
-            if (assets.controllerIconFile) {
+            if (assets?.controllerIconFile) {
                 sarc.addRawFile(assets.imageFile, "controller.png");
             }
-            if (assets.settingsIconFile) {
+            if (assets?.settingsIconFile) {
                 sarc.addRawFile(assets.imageFile, "settings.png");
             }
-            if (assets.powerIconFile) {
+            if (assets?.powerIconFile) {
                 sarc.addRawFile(assets.imageFile, "power.png");
             }
-            if (assets.homeIconFile) {
+            if (assets?.homeIconFile) {
                 sarc.addRawFile(assets.imageFile, "lock.png");
             }
             // create info.json

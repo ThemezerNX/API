@@ -174,7 +174,7 @@ export class ThemeService implements IsOwner, GetHash {
 
     async getHash(themeId: string): Promise<string> {
         const hashEntity = await this.hashRepository.createQueryBuilder()
-            .where({id: themeId})
+            .where({themeId})
             .getOne();
         return hashEntity.hashString;
     }
