@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import {CanActivate, ExecutionContext, Injectable} from "@nestjs/common";
+import {CanActivate, Injectable} from "@nestjs/common";
 import {GqlExecutionContext} from "@nestjs/graphql";
 import {UnauthenticatedError} from "../common/errors/auth/Unauthenticated.error";
 import {UserEntity} from "../User/User.entity";
@@ -20,7 +20,7 @@ import {UserService} from "../User/User.service";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
 
 @Injectable()
-export class GqlAuthGuard implements CanActivate {
+export class AuthGuard implements CanActivate {
 
     constructor(
         private reflector: Reflector,
@@ -32,7 +32,7 @@ export class GqlAuthGuard implements CanActivate {
     ) {
     }
 
-    canActivate(context: ExecutionContext) {
+    canActivate(context: any) {
         // Serialize as no special group (this line resets the metadata every call!)
         const defineMetadata = this.reflector.get<boolean>("defineSerializeMetadata", context.getHandler());
         if (defineMetadata) {
@@ -40,7 +40,13 @@ export class GqlAuthGuard implements CanActivate {
         }
 
         const ctx = GqlExecutionContext.create(context);
-        const req = ctx.getContext().req;
+        let req;
+        if (context.contextType == "graphql") {
+            const ctx = GqlExecutionContext.create(context);
+            req = ctx.getContext().req;
+        } else {
+            req = context.switchToHttp().getRequest();
+        }
         const user = req.user as UserEntity;
 
         if (defineMetadata && req.isAuthenticated()) {

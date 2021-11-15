@@ -6,7 +6,7 @@ import {LocalLoginGuard} from "./Strategies/Local/strategy/LocalLogin.guard";
 import {SessionSerializer} from "./Session.serializer";
 import {PassportModule} from "@nestjs/passport";
 import {UserModule} from "../User/User.module";
-import {GqlAuthGuard} from "./GqlAuth.guard";
+import {AuthGuard} from "./Auth.guard";
 import {MailModule} from "../../mail/mail.module";
 import {ThemeModule} from "../Theme/Theme.module";
 import {HBThemeModule} from "../HBTheme/HBTheme.module";
@@ -35,7 +35,7 @@ import {APP_GUARD} from "@nestjs/core";
         LocalLoginGuard,
         {
             provide: APP_GUARD,
-            useClass: GqlAuthGuard,
+            useClass: AuthGuard,
         },
     ],
 })
