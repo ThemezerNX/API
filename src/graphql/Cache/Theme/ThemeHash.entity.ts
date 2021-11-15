@@ -6,6 +6,7 @@ import {ThemeOptionEntity} from "../../Theme/ThemeOptions/ThemeOption.entity";
 import {LayoutOptionValueEntity} from "../../LayoutOption/OptionValue/LayoutOptionValue.entity";
 import {LayoutEntity} from "../../Layout/Layout.entity";
 import {ItemHashEntityInterface} from "../ItemHash.entity.interface";
+import {LayoutOptionEntity} from "../../LayoutOption/LayoutOption.entity";
 
 
 @ViewEntity({
@@ -17,6 +18,7 @@ import {ItemHashEntityInterface} from "../ItemHash.entity.interface";
                 (ta."customLayoutJson", ta."customCommonLayoutJson", ta."imageHash", ta."albumIconHash", ta."newsIconHash", ta."shopIconHash", ta."controllerIconHash", ta."settingsIconHash", ta."powerIconHash", ta."homeIconHash")::TEXT,
                 ("to".variable)::TEXT,
                 (tolov.name, tolov.json)::TEXT,
+                (lov.type, lov.priority)::TEXT,
                 (tl.id, tl.name, tl.target, tl.json, tl."commonJson")::TEXT,
                 (lu.username)::TEXT
             )), '')::BYTEA)
@@ -28,6 +30,7 @@ import {ItemHashEntityInterface} from "../ItemHash.entity.interface";
         .leftJoin(ThemeAssetsEntity, "ta", "t.id = ta.\"themeId\"")
         .leftJoin(ThemeOptionEntity, "to", "t.id = \"to\".\"themeId\"")
         .leftJoin(LayoutOptionValueEntity, "tolov", "\"to\".\"layoutOptionValueUUID\" = tolov.uuid")
+        .leftJoin(LayoutOptionEntity, "lov", "tolov.\"layoutOptionId\" = lov.id")
         .leftJoin(LayoutEntity, "tl", "t.\"layoutId\" = tl.id")
         .leftJoin(UserEntity, "lu", "tl.\"creatorId\" = lu.id")
         .groupBy("t.id"),
