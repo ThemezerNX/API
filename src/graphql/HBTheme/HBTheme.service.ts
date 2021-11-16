@@ -10,7 +10,6 @@ import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptio
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
 import {Exists} from "../common/findOperators/Exists";
 import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
-import {HBThemePreviewsEntity} from "./Previews/HBThemePreviews.entity";
 import {HBThemeHashEntity} from "../Cache/HBTheme/HBThemeHash.entity";
 import {GetHash} from "../common/interfaces/GetHash.interface";
 
@@ -33,9 +32,9 @@ export class HBThemeService implements IsOwner, GetHash {
                     isNSFW?: boolean,
                     packId?: string
                 },
-            options?: ServiceFindOptionsParameter<HBThemeEntity, HBThemePreviewsEntity>,
+            options?: ServiceFindOptionsParameter<HBThemeEntity>,
     ): Promise<HBThemeEntity> {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<HBThemeEntity> = {};
 
         if (id != undefined) {
@@ -74,9 +73,9 @@ export class HBThemeService implements IsOwner, GetHash {
                 creators?: string[],
                 includeNSFW?: boolean
             },
-        options?: ServiceFindOptionsParameter<HBThemeEntity, HBThemePreviewsEntity>,
+        options?: ServiceFindOptionsParameter<HBThemeEntity>,
     ): Promise<{ result: HBThemeEntity[], count: number }> {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<HBThemeEntity> = {};
 
         if (packId != undefined) {
@@ -98,9 +97,9 @@ export class HBThemeService implements IsOwner, GetHash {
 
         if (query?.length > 0) {
             queryBuilder.andWhere(`to_tsquery(:query) @@ (
-                setweight(to_tsvector('pg_catalog.english', coalesce(${queryBuilder.alias}.name, '')), 'A') ||
-                setweight(to_tsvector('pg_catalog.english', coalesce(${queryBuilder.alias}.description, '')), 'C') ||
-                to_tsvector('pg_catalog.english', coalesce(CASE WHEN ${queryBuilder.alias}."isNSFW" THEN 'NSFW' END, '')) ||
+                setweight(to_tsvector('pg_catalog.english', coalesce("${queryBuilder.alias}".name, '')), 'A') ||
+                setweight(to_tsvector('pg_catalog.english', coalesce("${queryBuilder.alias}".description, '')), 'C') ||
+                to_tsvector('pg_catalog.english', coalesce(CASE WHEN "${queryBuilder.alias}"."isNSFW" THEN 'NSFW' END, '')) ||
                 to_tsvector(tags.name)
             )`, {query: toTsQuery(query)});
         }
@@ -117,9 +116,9 @@ export class HBThemeService implements IsOwner, GetHash {
                 limit?: number,
                 includeNSFW?: boolean
             },
-        options?: ServiceFindOptionsParameter<HBThemeEntity, HBThemePreviewsEntity>,
+        options?: ServiceFindOptionsParameter<HBThemeEntity>,
     ): Promise<HBThemeEntity[]> {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<HBThemeEntity> = {};
 
         if (includeNSFW != true) {

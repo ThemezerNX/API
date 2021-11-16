@@ -26,7 +26,11 @@ export class ThemeCacheService {
     }
 
     async getFile(themeId: string): Promise<{ data: Buffer, fileName: string }> {
-        const theme = await this.themeService.findOne({id: themeId}, {relations: ["creator"]});
+        const theme = await this.themeService.findOne({id: themeId}, {
+            relations: {
+                creator: true,
+            },
+        });
         const existingCache = await this.cacheRepository.findOne({where: {themeId}});
 
         let data: Buffer;

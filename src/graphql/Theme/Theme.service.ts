@@ -45,9 +45,9 @@ export class ThemeService implements IsOwner, GetHash {
                 isNSFW?: boolean,
                 packId?: string
             },
-            options?: ServiceFindOptionsParameter<ThemeEntity, ThemePreviewsEntity, ThemeAssetsEntity>,
+            options?: ServiceFindOptionsParameter<ThemeEntity>,
     ): Promise<ThemeEntity> {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true, hasAssets: true});
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<ThemeEntity> = {};
 
         if (id != undefined) {
@@ -89,9 +89,9 @@ export class ThemeService implements IsOwner, GetHash {
                 layouts?: string[],
                 includeNSFW?: Boolean
             },
-        options?: ServiceFindOptionsParameter<ThemeEntity, ThemePreviewsEntity, ThemeAssetsEntity>,
+        options?: ServiceFindOptionsParameter<ThemeEntity>,
     ) {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true, hasAssets: true});
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<ThemeEntity> = {};
 
         if (packId != undefined) {
@@ -121,9 +121,9 @@ export class ThemeService implements IsOwner, GetHash {
 
         if (query?.length > 0) {
             queryBuilder.andWhere(`to_tsquery(:query) @@ (
-                setweight(to_tsvector('pg_catalog.english', coalesce(${queryBuilder.alias}.name, '')), 'A') ||
-                setweight(to_tsvector('pg_catalog.english', coalesce(${queryBuilder.alias}.description, '')), 'C') ||
-                to_tsvector('pg_catalog.english', coalesce(CASE WHEN ${queryBuilder.alias}."isNSFW" THEN 'NSFW' END, '')) ||
+                setweight(to_tsvector('pg_catalog.english', coalesce("${queryBuilder.alias}".name, '')), 'A') ||
+                setweight(to_tsvector('pg_catalog.english', coalesce("${queryBuilder.alias}".description, '')), 'C') ||
+                to_tsvector('pg_catalog.english', coalesce(CASE WHEN "${queryBuilder.alias}"."isNSFW" THEN 'NSFW' END, '')) ||
                 to_tsvector(tags.name)
             )`, {query: toTsQuery(query)});
         }
@@ -142,9 +142,9 @@ export class ThemeService implements IsOwner, GetHash {
                 target?: Target,
                 includeNSFW?: boolean
             },
-        options?: ServiceFindOptionsParameter<ThemeEntity, ThemePreviewsEntity, ThemeAssetsEntity>,
+        options?: ServiceFindOptionsParameter<ThemeEntity>,
     ): Promise<ThemeEntity[]> {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true, hasAssets: true});
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<ThemeEntity> = {};
 
         if (target != undefined) {

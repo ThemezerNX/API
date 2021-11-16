@@ -9,7 +9,11 @@ export class UsersController {
     }
 
     private async getFile(id: string, property: keyof UserProfileEntity) {
-        const entity = await this.userService.findOne({id});
+        const entity = await this.userService.findOne({id}, {
+            relations: {
+                profile: [property],
+            },
+        });
         const file = (entity?.profile[property] as Buffer);
         if (!entity || !file) {
             throw new NotFoundException();
@@ -18,13 +22,13 @@ export class UsersController {
     }
 
     @Get("banner.webp")
-    @Header('Content-Type', 'image/webp')
+    @Header("Content-Type", "image/webp")
     getBanner(@Param("id") id: string): Promise<StreamableFile> {
         return this.getFile(id, "bannerFile");
     }
 
     @Get("avatar.webp")
-    @Header('Content-Type', 'image/webp')
+    @Header("Content-Type", "image/webp")
     getAvatar(@Param("id") id: string): Promise<StreamableFile> {
         return this.getFile(id, "avatarFile");
     }

@@ -44,13 +44,26 @@ export class NXInstallerResolver {
         if (themeHexREGEX.exec(idLower)) {
             // Download theme
             const themeId = idLower.substring(1);
-            const theme = await this.themeService.findOne({id: themeId});
+            const theme = await this.themeService.findOne({id: themeId}, {
+                relations: {
+                    previews: true,
+                },
+            });
 
             response.themes = [NXInstallerResolver.mapTheme(theme)];
         } else if (packHexREGEX.exec(idLower)) {
             // Download pack
             const packId = idLower.substring(1);
-            const pack = await this.packService.findOne({id: packId}, {relations: ["themes"]});
+            const pack = await this.packService.findOne({id: packId}, {
+                relations: {
+                    themes: {
+                        previews: true,
+                        creator: {
+                            connections: true
+                        }
+                    },
+                },
+            });
 
             response.groupname = pack.name;
             response.themes = pack.themes.map(NXInstallerResolver.mapTheme);
@@ -65,6 +78,10 @@ export class NXInstallerResolver {
                 paginationArgs: new PaginationArgs(12),
                 order: SortOrder.DESC,
                 sort: ItemSort.ADDED,
+            }, {
+                relations: {
+                    previews: true,
+                },
             });
 
             response.themes = themes.map(NXInstallerResolver.mapTheme);
@@ -73,6 +90,10 @@ export class NXInstallerResolver {
             const {result: themes} = await this.themeService.findAll({
                 paginationArgs: new PaginationArgs(12),
                 query: idLower,
+            }, {
+                relations: {
+                    previews: true,
+                },
             });
 
             response.themes = themes.map(NXInstallerResolver.mapTheme);

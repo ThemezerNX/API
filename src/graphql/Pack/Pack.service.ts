@@ -15,7 +15,6 @@ import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptio
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
 import {Exists} from "../common/findOperators/Exists";
 import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
-import {PackPreviewsEntity} from "./Previews/PackPreviews.entity";
 import {LayoutEntity} from "../Layout/Layout.entity";
 import {PackHashEntity} from "../Cache/Pack/PackHash.entity";
 import {GetHash} from "../common/interfaces/GetHash.interface";
@@ -48,9 +47,9 @@ export class PackService implements IsOwner, GetHash {
 
     findOne(
         {id}: { id: string },
-        options?: ServiceFindOptionsParameter<PackEntity, PackPreviewsEntity>,
+        options?: ServiceFindOptionsParameter<PackEntity>,
     ): Promise<PackEntity> {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<LayoutEntity> = {};
 
         if (id != undefined) {
@@ -78,9 +77,9 @@ export class PackService implements IsOwner, GetHash {
                 creators?: string[],
                 includeNSFW?: boolean
             },
-        options?: ServiceFindOptionsParameter<PackEntity, PackPreviewsEntity>,
+        options?: ServiceFindOptionsParameter<PackEntity>,
     ): Promise<{ result: PackEntity[], count: number }> {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<PackEntity> = {};
 
         if (creators?.length > 0) {
@@ -137,9 +136,9 @@ export class PackService implements IsOwner, GetHash {
                 limit?: number,
                 includeNSFW?: boolean
             },
-        options?: ServiceFindOptionsParameter<PackEntity, PackPreviewsEntity>,
+        options?: ServiceFindOptionsParameter<PackEntity>,
     ): Promise<PackEntity[]> {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<PackEntity> = {};
 
         queryBuilder.where(findConditions);

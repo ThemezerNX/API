@@ -4,9 +4,8 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {LayoutOptionValueEntity} from "./OptionValue/LayoutOptionValue.entity";
 import {LayoutOptionEntity} from "./LayoutOption.entity";
 import {PerchQueryBuilder} from "perch-query-builder";
-import {LayoutOptionValuePreviewsEntity} from "./OptionValuePreviews/LayoutOptionValuePreviews.entity";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
-import {joinAndSelectRelations, selectPreviews} from "../common/functions/ServiceFunctions.js";
+import {joinAndSelectRelations} from "../common/functions/ServiceFunctions.js";
 
 @Injectable()
 export class LayoutOptionService {
@@ -19,16 +18,14 @@ export class LayoutOptionService {
 
     findValue(
         {uuid}: { uuid: string },
-        options?: ServiceFindOptionsParameter<LayoutOptionValueEntity, LayoutOptionValuePreviewsEntity>,
+        options?: ServiceFindOptionsParameter<LayoutOptionValueEntity>,
     ): Promise<LayoutOptionValueEntity> {
         let queryBuilder;
         if (options?.info) {
             queryBuilder = PerchQueryBuilder.generateQueryBuilder(this.repository, options.info);
         } else {
             queryBuilder = this.valueRepository.createQueryBuilder();
-
-            selectPreviews(queryBuilder, options);
-            joinAndSelectRelations(queryBuilder, options); // always last
+            joinAndSelectRelations(queryBuilder, options);
         }
 
         return queryBuilder.getOne();
@@ -44,7 +41,7 @@ export class LayoutOptionService {
 
     findAllOptions(
         {layoutId}: { layoutId: string },
-        options?: ServiceFindOptionsParameter<LayoutOptionValueEntity, LayoutOptionValuePreviewsEntity>,
+        options?: ServiceFindOptionsParameter<LayoutOptionValueEntity>,
     ): Promise<LayoutOptionEntity[]> {
         let queryBuilder;
         if (options?.info) {

@@ -1,11 +1,17 @@
 import {GraphQLResolveInfo} from "graphql";
-import {PreviewsEntityInterface} from "./Previews.entity.interface";
-import {AssetsEntityInterface} from "./Assets.entity.interface";
 
-export interface ServiceFindOptionsParameter<Entity, PreviewsEntity extends PreviewsEntityInterface = any, AssetsEntity extends AssetsEntityInterface = any> {
+// TODO: make this more recursive
+export interface ServiceFindOptionsParameter<Entity> {
     info?: GraphQLResolveInfo;
     rootField?: string;
-    relations?: string[];
-    selectPreviews?: (keyof PreviewsEntity)[];
-    selectAssets?: (keyof AssetsEntity)[];
+    relations?: Nested<Entity>;
+}
+
+type Nested<Entity> = {
+    [K in keyof Entity]?:
+    (Entity[K] extends Array<infer U>
+        ? Nested<U>
+        : (keyof Entity[K])[])
+    | Nested<Entity[K]>
+    | true
 }

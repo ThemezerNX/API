@@ -1,15 +1,9 @@
 import {Repository, SelectQueryBuilder} from "typeorm";
 import {ServiceFindOptionsParameter} from "../interfaces/ServiceFindOptions.parameter";
-import {PreviewsEntityInterface} from "../interfaces/Previews.entity.interface";
-import {AssetsEntityInterface} from "../interfaces/Assets.entity.interface";
 import {PerchQueryBuilder} from "perch-query-builder";
-import {joinAndSelectRelations, selectAssets, selectPreviews} from "./ServiceFunctions";
+import {joinAndSelectRelations} from "./ServiceFunctions";
 
-export function createInfoSelectQueryBuilder<E, PE extends PreviewsEntityInterface, AE extends AssetsEntityInterface>
-(options: ServiceFindOptionsParameter<E, PE, AE>, repository: Repository<E>, {
-    hasPreviews = false,
-    hasAssets = false,
-}): SelectQueryBuilder<E> {
+export function createInfoSelectQueryBuilder<E>(options: ServiceFindOptionsParameter<E>, repository: Repository<E>): SelectQueryBuilder<E> {
     let queryBuilder;
     if (options?.info) {
         queryBuilder = PerchQueryBuilder.generateQueryBuilder(
@@ -19,14 +13,7 @@ export function createInfoSelectQueryBuilder<E, PE extends PreviewsEntityInterfa
         );
     } else {
         queryBuilder = repository.createQueryBuilder();
-
-        if (hasPreviews) {
-            selectPreviews(queryBuilder, options);
-        }
-        if (hasAssets) {
-            selectAssets(queryBuilder, options);
-        }
-        joinAndSelectRelations(queryBuilder, options); // always last
+        joinAndSelectRelations(queryBuilder, options);
     }
     return queryBuilder;
 }

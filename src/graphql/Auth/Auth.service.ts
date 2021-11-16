@@ -39,7 +39,13 @@ export class AuthService {
     }
 
     async validateUser(email: string, password: string): Promise<UserEntity> {
-        const user = await this.userService.findOne({email});
+        const user = await this.userService.findOne({email}, {
+            relations: {
+                profile: true,
+                preferences: true,
+                connections: true,
+            },
+        });
 
         if (!user) {
             throw new EmailNotRegisteredError();

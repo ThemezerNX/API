@@ -13,7 +13,6 @@ import {LayoutOptionService} from "../LayoutOption/LayoutOption.service";
 import {LayoutOptionType} from "../LayoutOption/common/LayoutOptionType.enum";
 import {InjectorLayout, LoadedLayoutOption} from "./common/InjectorLayout";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
-import {LayoutPreviewsEntity} from "./Previews/LayoutPreviews.entity";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
 import {Exists} from "../common/findOperators/Exists";
 import {ChosenLayoutOptionValue} from "./dto/ChosenLayoutOptionValue.input";
@@ -35,9 +34,9 @@ export class LayoutService implements IsOwner {
         }: {
             id: string
         },
-        options?: ServiceFindOptionsParameter<LayoutEntity, LayoutPreviewsEntity>,
+        options?: ServiceFindOptionsParameter<LayoutEntity>,
     ): Promise<LayoutEntity> {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<LayoutEntity> = {};
 
         if (id != undefined) {
@@ -66,7 +65,7 @@ export class LayoutService implements IsOwner {
             },
         options?: ServiceFindOptionsParameter<LayoutEntity>,
     ): Promise<{ result: LayoutEntity[], count: number }> {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<LayoutEntity> = {};
 
         if (target != undefined) {
@@ -102,7 +101,7 @@ export class LayoutService implements IsOwner {
             },
         options?: ServiceFindOptionsParameter<LayoutEntity>,
     ): Promise<LayoutEntity[]> {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository, {hasPreviews: true});
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<LayoutEntity> = {};
 
         if (target != undefined) {
