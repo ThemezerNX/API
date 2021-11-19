@@ -14,8 +14,9 @@ export class UserModel extends CreatorModel {
     @Expose({groups: ["owner", "admin"], toPlainOnly: true})
     email?: string;
 
-    @Field()
-    hasAccepted: boolean;
+    @Field({nullable: true})
+    @Expose({groups: ["admin"], toPlainOnly: true})
+    hasAccepted?: boolean;
 
     @Field({nullable: true})
     @Expose({groups: ["admin"], toPlainOnly: true})
