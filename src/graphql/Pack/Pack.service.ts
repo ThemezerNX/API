@@ -88,36 +88,21 @@ export class PackService implements IsOwner, GetHash {
             };
         }
 
-        queryBuilder.where(findConditions);
-
-        queryBuilder.leftJoin((sq) =>
-                sq
-                    .subQuery()
-                    .select("pack2.id", "nsfwpackid")
-                    .from(PackEntity, "pack2")
-                    .where("theme2.\"isNSFW\" OR hbtheme2.\"isNSFW\"")
-                    .leftJoin(ThemeEntity, "theme2", "pack2.id = theme2.packId")
-                    .leftJoin(HBThemeEntity, "hbtheme2", "pack2.id = hbtheme2.packId"),
-            "nsfwtable",
-            `${queryBuilder.alias}.id = nsfwtable.nsfwpackid`,
-        );
-
-        const isNSFW = "CASE WHEN nsfwtable.nsfwpackid is NULL THEN FALSE ELSE TRUE END";
-        queryBuilder.addSelect(isNSFW, "isNSFW");
-
         if (includeNSFW != true) {
-            queryBuilder.andWhere("nsfwtable.nsfwpackid IS NULL");
+            findConditions.isNSFW = false;
         }
+
+        queryBuilder.where(findConditions);
 
         if (query?.length > 0) {
             queryBuilder.andWhere(`to_tsquery(:query) @@ (
                 setweight(to_tsvector('pg_catalog.english', coalesce("${queryBuilder.alias}".name, '')), 'A') ||
                 setweight(to_tsvector('pg_catalog.english', coalesce("${queryBuilder.alias}".description, '')), 'C') ||
-                to_tsvector('pg_catalog.english', coalesce(CASE WHEN (${isNSFW}) THEN 'NSFW' END, ''))
+                to_tsvector('pg_catalog.english', coalesce(CASE WHEN "${queryBuilder.alias}"."isNSFW" THEN 'NSFW' END, ''))
             )`, {query: toTsQuery(query)});
         }
 
-        queryBuilder.orderBy({[queryBuilder.alias + "." + sort]: order});
+        queryBuilder.orderBy({[queryBuilder.alias + `."${sort}"`]: order});
 
         const {result, count} = await executeManyRawAndPaginate(queryBuilder, paginationArgs);
         // map the isNSFW field

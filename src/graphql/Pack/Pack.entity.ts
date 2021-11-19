@@ -1,4 +1,4 @@
-import {AfterLoad, Entity, OneToMany, OneToOne} from "typeorm";
+import {AfterLoad, Column, Entity, OneToMany, OneToOne} from "typeorm";
 import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
 import {PackPreviewsEntity} from "./Previews/PackPreviews.entity";
 import {ThemeEntity} from "../Theme/Theme.entity";
@@ -9,7 +9,7 @@ import {EntityWithPreviewsInterface} from "../common/interfaces/EntityWithPrevie
 @Entity()
 export class PackEntity extends ItemEntityInterface implements EntityWithPreviewsInterface {
 
-    // Virtual field
+    @Column({type: "boolean"})
     isNSFW: boolean;
 
     @OneToOne(() => PackPreviewsEntity, packPreviews => packPreviews.pack, {cascade: true, eager: true})
