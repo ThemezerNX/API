@@ -78,7 +78,7 @@ export class LayoutService implements IsOwner {
         }
 
         queryBuilder.where(findConditions)
-            .orderBy({[queryBuilder.alias + "." + sort]: order});
+            .orderBy({[queryBuilder.alias + `."${sort}"`]: order});
 
         if (query?.length > 0) {
             queryBuilder.andWhere(`to_tsquery(:query) @@ (

@@ -93,7 +93,7 @@ export class HBThemeService implements IsOwner, GetHash {
         queryBuilder
             .where(findConditions)
             .leftJoinAndSelect(queryBuilder.alias + ".tags", "tags")
-            .orderBy({[queryBuilder.alias + "." + sort]: order});
+            .orderBy({[queryBuilder.alias + `."${sort}"`]: order});
 
         if (query?.length > 0) {
             queryBuilder.andWhere(`to_tsquery(:query) @@ (
