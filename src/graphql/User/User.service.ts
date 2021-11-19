@@ -12,15 +12,34 @@ import {UnknownError} from "../common/errors/Unknown.error";
 import {UserPreferencesEntity} from "./Preferences/UserPreferences.entity";
 import {UserSort} from "./dto/Sort.args";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
+import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
+import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
 
 @Injectable()
 export class UserService implements IsOwner {
 
-    constructor(@InjectRepository(UserEntity) private userRepository: Repository<UserEntity>) {
+    constructor(@InjectRepository(UserEntity) private repository: Repository<UserEntity>) {
     }
 
-    findOne({id, email}: { id?: string, email?: string }, relations: string[] = []): Promise<UserEntity> {
+    findOne({
+                id,
+                email,
+                activatedOnly = true,
+            }: {
+                id?: string,
+                email?: string,
+                activatedOnly?: boolean,
+            },
+            options?: ServiceFindOptionsParameter<UserEntity>,
+    ): Promise<UserEntity> {
+        // infoselect builder
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<UserEntity> = {};
+
+        if (activatedOnly) {
+            findConditions.hasAccepted = true;
+            findConditions.isVerified = true;
+        }
 
         if (id != undefined) {
             findConditions.id = id;
@@ -29,10 +48,10 @@ export class UserService implements IsOwner {
             findConditions.email = email;
         }
 
-        return this.userRepository.findOne({
-            where: findConditions,
-            relations,
-        });
+        queryBuilder
+            .where(findConditions);
+
+        return queryBuilder.getOne();
     }
 
     findAll(
@@ -42,6 +61,7 @@ export class UserService implements IsOwner {
             order = SortOrder.ASC,
             query,
             isAdmin,
+            activatedOnly = true,
         }:
             {
                 paginationArgs?: PaginationArgs
@@ -49,9 +69,17 @@ export class UserService implements IsOwner {
                 order?: SortOrder,
                 query?: string
                 isAdmin?: boolean
+                activatedOnly?: boolean,
             },
+        options,
     ) {
+        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<UserEntity> = {};
+
+        if (activatedOnly) {
+            findConditions.hasAccepted = true;
+            findConditions.isVerified = true;
+        }
 
         if (query?.length > 0) {
             findConditions.username = StringContains(query);
@@ -60,15 +88,11 @@ export class UserService implements IsOwner {
             findConditions.isAdmin = isAdmin;
         }
 
-        return executeAndPaginate(
-            this.userRepository.createQueryBuilder("user")
-                .where(findConditions)
-                .leftJoinAndSelect("user.profile", "profile")
-                .leftJoinAndSelect("user.preferences", "preferences")
-                .leftJoinAndSelect("user.connections", "connections")
-                .orderBy({[`"user"."${sort}"`]: order}),
-            paginationArgs,
-        );
+        queryBuilder
+            .where(findConditions)
+            .orderBy({[queryBuilder.alias + `."${sort}"`]: order})
+
+        return executeAndPaginate(queryBuilder, paginationArgs);
     }
 
     async create(email: string, password: string, username: string): Promise<UserEntity> {
