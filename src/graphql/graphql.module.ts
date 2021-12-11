@@ -48,6 +48,7 @@ async function insertDefaults(connection: Connection) {
 
     await connection.createQueryBuilder()
         .insert()
+        // .into(UserEntity, ["counter", "username", "isVerified", "roles"])
         .into(UserEntity)
         .values([unknownUser, nintendoUser])
         .orIgnore()
@@ -118,12 +119,14 @@ async function insertDefaults(connection: Connection) {
                 // 1. drop all views/mviews, as typeorm cannot drop them in correct order nor does cascade drop.
                 const queryRunner = await connection.createQueryRunner();
 
-                if (process.env.NODE_ENV == "development") {
-                    await dropViews(queryRunner);
-                    await connection.synchronize(false);
-                    await insertDefaults(connection);
-                } else {
-                    await connection.runMigrations();
+                if (true) {
+                    if (process.env.NODE_ENV == "development") {
+                        await dropViews(queryRunner);
+                        await connection.synchronize(false);
+                        await insertDefaults(connection);
+                    } else {
+                        await connection.runMigrations();
+                    }
                 }
 
                 return connection;
