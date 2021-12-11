@@ -39,6 +39,10 @@ export class LayoutOptionService {
             .getMany();
     }
 
+    findOption({valueUuid}: { valueUuid: string }): Promise<LayoutOptionEntity> {
+        return this.repository.createQueryBuilder().where({valueUuid}).getOne();
+    }
+
     findAllOptions(
         {layoutId}: { layoutId: string },
         options?: ServiceFindOptionsParameter<LayoutOptionValueEntity>,

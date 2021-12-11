@@ -38,4 +38,7 @@ export class LayoutOptionEntity extends BaseEntity {
         {cascade: true, eager: true})
     values: LayoutOptionValueEntity[];
 
+    @Column({type: "char", length: 32})
+    insertionMD5: string;
+
 }
