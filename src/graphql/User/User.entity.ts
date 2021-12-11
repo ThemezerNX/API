@@ -12,6 +12,19 @@ export class UserEntity extends CachableEntityInterface {
     @Generated("increment")
     counter: number;
 
+    // special case here: if a counter number is < 1, the ID is simply the number, but positive. E.g. -5 > 5, 0 > 0
+    // @PrimaryColumn("varchar", {
+    //     length: 19,
+    //     generatedType: "STORED",
+    //     asExpression: `
+    //         CASE WHEN counter < 1 THEN (-(counter))::varchar ELSE lpad(
+    //             ('x' || substr(md5((counter)::VARCHAR), 1, 16))::BIT(63)::BIGINT::VARCHAR,
+    //             19,
+    //             '0'
+    //         ) END
+    //     `,
+    //     update: false,
+    // })
     @PrimaryColumn("varchar", {
         length: 19,
         default: () => `

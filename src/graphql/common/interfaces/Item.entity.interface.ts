@@ -9,6 +9,7 @@ export abstract class ItemEntityInterface extends CachableEntityInterface {
     @Generated("increment")
     readonly counter: number;
 
+    // @PrimaryColumn({type: "varchar", update: false, generatedType: "STORED", asExpression: "to_hex(counter)"})
     @PrimaryColumn("varchar", {default: () => "to_hex(lastval())", update: false})
     id: string;
 
