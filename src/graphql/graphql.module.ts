@@ -13,12 +13,16 @@ import {HBThemeModule} from "./HBTheme/HBTheme.module";
 import {ThemeTagModule} from "./ThemeTag/ThemeTag.module";
 import {AuthModule} from "./Auth/Auth.module";
 import {NXInstallerModule} from "./NXInstaller/NXInstaller.module";
-import {createConnection, getConnectionOptions, QueryRunner} from "typeorm";
+import {Connection, createConnection, getConnectionOptions, QueryRunner} from "typeorm";
 import {LayoutOptionModule} from "./LayoutOption/LayoutOption.module";
 import {APP_INTERCEPTOR} from "@nestjs/core";
 import {ThemeHashEntity} from "./Cache/Theme/ThemeHash.entity";
 import {HBThemeHashEntity} from "./Cache/HBTheme/HBThemeHash.entity";
 import {PackHashEntity} from "./Cache/Pack/PackHash.entity";
+import {UserEntity} from "./User/User.entity";
+import {UserConnectionsEntity} from "./User/Connections/UserConnections.entity";
+import {UserPreferencesEntity} from "./User/Preferences/UserPreferences.entity";
+import {UserProfileEntity} from "./User/Profile/UserProfile.entity";
 
 async function dropViews(queryRunner: QueryRunner) {
     const phm = PackHashEntity.getRepository().metadata;
@@ -30,6 +34,26 @@ async function dropViews(queryRunner: QueryRunner) {
     const hbthm = HBThemeHashEntity.getRepository().metadata;
     if (await queryRunner.getTable(hbthm.tableName)) await queryRunner.dropView(hbthm.tableName);
 }
+
+async function insertDefaults(connection: Connection) {
+    const unknownUser = UserEntity.create({counter: -0, username: "unknown", isVerified: true, roles: ["system"]});
+    unknownUser.connections = new UserConnectionsEntity();
+    unknownUser.preferences = new UserPreferencesEntity();
+    unknownUser.profile = new UserProfileEntity();
+
+    const nintendoUser = UserEntity.create({counter: -1, username: "Nintendo", isVerified: true, roles: ["system"]});
+    nintendoUser.connections = new UserConnectionsEntity();
+    nintendoUser.preferences = new UserPreferencesEntity();
+    nintendoUser.profile = new UserProfileEntity();
+
+    await connection.createQueryBuilder()
+        .insert()
+        .into(UserEntity)
+        .values([unknownUser, nintendoUser])
+        .orIgnore()
+        .execute()
+}
+
 
 @Module({
     imports: [
@@ -93,10 +117,11 @@ async function dropViews(queryRunner: QueryRunner) {
 
                 // 1. drop all views/mviews, as typeorm cannot drop them in correct order nor does cascade drop.
                 const queryRunner = await connection.createQueryRunner();
-                await dropViews(queryRunner);
 
-                if (process.env.NODE_ENV == "development" && true) {
+                if (process.env.NODE_ENV == "development") {
+                    await dropViews(queryRunner);
                     await connection.synchronize(false);
+                    await insertDefaults(connection);
                 } else {
                     await connection.runMigrations();
                 }
