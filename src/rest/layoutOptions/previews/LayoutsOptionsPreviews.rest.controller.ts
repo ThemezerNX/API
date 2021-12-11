@@ -9,7 +9,11 @@ export class LayoutsOptionsPreviewsRestController {
     }
 
     private async getFile(uuid: string, property: keyof LayoutOptionValuePreviewsEntity): Promise<StreamableFile> {
-        const entity = await this.layoutOptionService.findValue({uuid}, {selectPreviews: [property]});
+        const entity = await this.layoutOptionService.findValue({uuid}, {
+            relations: {
+                previews: [property],
+            },
+        });
         const file = (entity?.previews[property] as Buffer);
         if (!entity || !file) {
             throw new NotFoundException();

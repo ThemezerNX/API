@@ -9,7 +9,11 @@ export class PacksPreviewsRestController {
     }
 
     private async getFile(id: string, property: keyof PackPreviewsEntity): Promise<StreamableFile> {
-        const entity = await this.packService.findOne({id}, {relations: ["previews"], selectPreviews: [property]});
+        const entity = await this.packService.findOne({id}, {
+            relations: {
+                previews: [property],
+            },
+        });
         const file = (entity?.previews[property] as Buffer);
         if (!entity || !file) {
             throw new NotFoundException();
