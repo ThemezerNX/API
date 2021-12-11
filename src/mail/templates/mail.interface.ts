@@ -21,7 +21,7 @@ export abstract class MailInterface implements Mail.Options {
                 <tr>
                     <td dir=ltr valign=top>
                         <a href="https://themezer.net/">
-                            <img src="https://cdn.themezer.net/resources/mail/banners/banner_848x208.jpeg" width="100%" alt="banner">
+                            <img src="https://cdn.themezer.net/resources/mail/banners/banner_848x208.webp" width="100%" alt="banner" style="border-radius: 10px">
                         </a>
                         <h1>${title}</h1>
                         ${content}
