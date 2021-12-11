@@ -39,7 +39,7 @@ export class AuthService {
     }
 
     async validateUser(email: string, password: string): Promise<UserEntity> {
-        const user = await this.userService.findOne({email}, {
+        const user = await this.userService.findOne({email, acceptedAndVerified: false}, {
             relations: {
                 profile: true,
                 preferences: true,
@@ -69,7 +69,7 @@ export class AuthService {
     }
 
     async verifyEmail(userId: string, verificationToken: string): Promise<boolean> {
-        const user = await this.userService.findOne({id: userId});
+        const user = await this.userService.findOne({id: userId, acceptedAndVerified: false});
 
         if (!user) {
             throw new UserNotFoundError();

@@ -24,11 +24,11 @@ export class UserService implements IsOwner {
     findOne({
                 id,
                 email,
-                activatedOnly = true,
+                acceptedAndVerified = true,
             }: {
                 id?: string,
                 email?: string,
-                activatedOnly?: boolean,
+                acceptedAndVerified?: boolean,
             },
             options?: ServiceFindOptionsParameter<UserEntity>,
     ): Promise<UserEntity> {
@@ -36,7 +36,7 @@ export class UserService implements IsOwner {
         let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<UserEntity> = {};
 
-        if (activatedOnly) {
+        if (acceptedAndVerified) {
             findConditions.hasAccepted = true;
             findConditions.isVerified = true;
         }
@@ -90,7 +90,7 @@ export class UserService implements IsOwner {
 
         queryBuilder
             .where(findConditions)
-            .orderBy({[queryBuilder.alias + `."${sort}"`]: order})
+            .orderBy({[queryBuilder.alias + `."${sort}"`]: order});
 
         return executeAndPaginate(queryBuilder, paginationArgs);
     }
