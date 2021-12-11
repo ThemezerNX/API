@@ -14,8 +14,7 @@ export class LayoutEntity extends ItemEntityInterface implements EntityWithPrevi
     @Column({type: "uuid", unique: true, update: false})
     uuid: string;
 
-    @ManyToOne(() => UserEntity, {onDelete: "SET NULL"})
-    @JoinColumn()
+    @ManyToOne(() => UserEntity, {onDelete: "NO ACTION"})
     creator: UserEntity;
 
     @Column({
