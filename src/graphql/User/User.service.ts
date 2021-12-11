@@ -101,7 +101,7 @@ export class UserService implements IsOwner {
             user.connections = new UserConnectionsEntity();
             user.preferences = new UserPreferencesEntity();
             user.profile = new UserProfileEntity();
-            return user.save();
+            return await user.save();
         } catch (err) {
             if (err.message.includes("UQ")) {
                 throw new EmailAlreadyRegisteredError();
