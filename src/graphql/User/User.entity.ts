@@ -8,9 +8,9 @@ import {CachableEntityInterface} from "../common/interfaces/Cachable.entity.inte
 @Entity()
 export class UserEntity extends CachableEntityInterface {
 
-    @Column({type: "int", select: false, update: false})
+    @Column({type: "int", select: false, update: false, unique: true})
     @Generated("increment")
-    readonly counter: number;
+    counter: number;
 
     @PrimaryColumn("varchar", {
         length: 19,
