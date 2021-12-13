@@ -1,6 +1,5 @@
 import {GraphQLResolveInfo} from "graphql";
 
-// TODO: make this more recursive
 export interface ServiceFindOptionsParameter<Entity> {
     info?: GraphQLResolveInfo;
     rootField?: string;

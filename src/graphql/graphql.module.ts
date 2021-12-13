@@ -48,8 +48,7 @@ async function insertDefaults(connection: Connection) {
 
     await connection.createQueryBuilder()
         .insert()
-        // .into(UserEntity, ["counter", "username", "isVerified", "roles"])
-        .into(UserEntity)
+        .into(UserEntity, ["counter", "username", "isVerified", "roles"])
         .values([unknownUser, nintendoUser])
         .orIgnore()
         .execute()
@@ -123,7 +122,7 @@ async function insertDefaults(connection: Connection) {
                     if (process.env.NODE_ENV == "development") {
                         await dropViews(queryRunner);
                         await connection.synchronize(false);
-                        await insertDefaults(connection);
+                        // await insertDefaults(connection);
                     } else {
                         await connection.runMigrations();
                     }

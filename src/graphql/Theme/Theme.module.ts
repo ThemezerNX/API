@@ -15,6 +15,7 @@ import {ThemeHashEntity} from "../Cache/Theme/ThemeHash.entity";
         TypeOrmModule.forFeature([ThemeEntity]),
         TypeOrmModule.forFeature([ThemeHashEntity]),
         TypeOrmModule.forFeature([ThemeOptionEntity]),
+        TypeOrmModule.forFeature([ThemeOptionEntity]),
         UserModule,
         ThemeDownloadModule,
         LayoutOptionModule,
