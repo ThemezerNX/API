@@ -1,26 +1,21 @@
-import {AfterLoad, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne} from "typeorm";
+import {AfterLoad, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne} from "typeorm";
 import {Target} from "../common/enums/Target";
-import {ThemeTagEntity} from "../ThemeTag/ThemeTag.entity";
 import {ThemePreviewsEntity} from "./Previews/ThemePreviews.entity";
 import {ThemeAssetsEntity} from "./Assets/ThemeAssets.entity";
-import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
 import {PackEntity} from "../Pack/Pack.entity";
 import {LayoutEntity} from "../Layout/Layout.entity";
 import {CDNMapper} from "../common/CDNMapper";
 import {EntityWithPreviewsInterface} from "../common/interfaces/EntityWithPreviews.interface";
 import {EntityWithAssetsInterface} from "../common/interfaces/EntityWithAssets.interface";
 import {ThemeOptionEntity} from "./ThemeOptions/ThemeOption.entity";
+import {ThemeItemEntityInterface} from "../common/interfaces/ThemeItem.entity.interface";
 
 
 @Entity()
-export class ThemeEntity extends ItemEntityInterface implements EntityWithPreviewsInterface, EntityWithAssetsInterface {
+export class ThemeEntity extends ThemeItemEntityInterface implements EntityWithPreviewsInterface, EntityWithAssetsInterface {
 
     @ManyToOne(() => PackEntity, pack => pack.themes, {onDelete: "CASCADE"})
-    @JoinColumn({name: "packId"})
     pack?: PackEntity;
-
-    @Column({nullable: true})
-    packId?: string;
 
     @Column({
         type: "enum",
@@ -29,19 +24,12 @@ export class ThemeEntity extends ItemEntityInterface implements EntityWithPrevie
     })
     target: Target;
 
-    @Column()
-    isNSFW: boolean;
-
     @ManyToOne(() => LayoutEntity, {onDelete: "RESTRICT"})
     @JoinColumn({name: "layoutId"})
     layout?: LayoutEntity;
 
     @Column({nullable: true})
     layoutId?: string;
-
-    @ManyToMany(() => ThemeTagEntity, {onDelete: "CASCADE", cascade: true, eager: true})
-    @JoinTable()
-    tags: ThemeTagEntity[];
 
     @OneToOne(() => ThemePreviewsEntity, themePreviews => themePreviews.theme, {cascade: true, eager: true})
     previews: ThemePreviewsEntity;
@@ -51,8 +39,6 @@ export class ThemeEntity extends ItemEntityInterface implements EntityWithPrevie
 
     @OneToMany(() => ThemeOptionEntity, themeOptions => themeOptions.theme, {cascade: true, eager: true})
     options: ThemeOptionEntity[];
-
-    downloadUrl: string;
 
     @AfterLoad()
     setUrls() {

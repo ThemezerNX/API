@@ -6,9 +6,7 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {SortOrder} from "../common/enums/SortOrder";
 import {executeManyRawAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {ItemSort} from "../common/args/ItemSort.args";
-import {ThemeService} from "../Theme/Theme.service";
 import {toTsQuery} from "../common/TsQueryCreator";
-import {HBThemeService} from "../HBTheme/HBTheme.service";
 import {ThemeEntity} from "../Theme/Theme.entity";
 import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
@@ -25,24 +23,7 @@ export class PackService implements IsOwner, GetHash {
     constructor(
         @InjectRepository(PackEntity) private repository: Repository<PackEntity>,
         @InjectRepository(PackHashEntity) private hashRepository: Repository<PackHashEntity>,
-        private themeService: ThemeService,
-        private hbthemeService: HBThemeService,
     ) {
-    }
-
-    async isNSFW(packId: string): Promise<boolean> {
-        const results = await Promise.all([
-            await this.themeService.findOne({
-                packId,
-                isNSFW: true,
-            }),
-            await this.hbthemeService.findOne({
-                packId,
-                isNSFW: true,
-            }),
-        ]);
-
-        return results.some((r) => r);
     }
 
     findOne(

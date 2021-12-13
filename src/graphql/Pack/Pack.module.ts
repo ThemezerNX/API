@@ -4,8 +4,6 @@ import {PackService} from "./Pack.service";
 import {PackResolver} from "./Pack.resolver";
 import {PackEntity} from "./Pack.entity";
 import {UserModule} from "../User/User.module";
-import {ThemeModule} from "../Theme/Theme.module";
-import {HBThemeModule} from "../HBTheme/HBTheme.module";
 import {PackDownloadModule} from "./Download/PackDownload.module";
 import {PackHashEntity} from "../Cache/Pack/PackHash.entity";
 
@@ -13,8 +11,6 @@ import {PackHashEntity} from "../Cache/Pack/PackHash.entity";
     imports: [
         TypeOrmModule.forFeature([PackEntity]),
         TypeOrmModule.forFeature([PackHashEntity]),
-        HBThemeModule,
-        ThemeModule,
         UserModule,
         PackDownloadModule,
     ],
