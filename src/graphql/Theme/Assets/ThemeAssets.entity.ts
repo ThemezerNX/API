@@ -39,28 +39,28 @@ export class ThemeAssetsEntity extends AssetsEntityInterface {
     @Column("bytea", {nullable: true})
     homeIconFile?: Buffer;
 
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"imageFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"imageFile\")"})
     @SelectAlways()
     imageHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"albumIconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"albumIconFile\")"})
     @SelectAlways()
     albumIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"newsIconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"newsIconFile\")"})
     @SelectAlways()
     newsIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"shopIconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"shopIconFile\")"})
     @SelectAlways()
     shopIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"controllerIconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"controllerIconFile\")"})
     @SelectAlways()
     controllerIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"settingsIconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"settingsIconFile\")"})
     @SelectAlways()
     settingsIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"powerIconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"powerIconFile\")"})
     @SelectAlways()
     powerIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"homeIconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"homeIconFile\")"})
     @SelectAlways()
     homeIconHash?: Buffer;
 

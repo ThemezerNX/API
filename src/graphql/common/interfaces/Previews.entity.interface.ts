@@ -24,19 +24,19 @@ export abstract class PreviewsEntityInterface extends CachableEntityInterface {
     image180Url: string;
     imagePlaceholderUrl: string;
 
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"image720File\")"})
+    @Column({type: "bytea", update: false, generatedType: "STORED", asExpression: "sha256(\"image720File\")"})
     @SelectAlways()
     readonly image720Hash: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"image360File\")"})
+    @Column({type: "bytea", update: false, generatedType: "STORED", asExpression: "sha256(\"image360File\")"})
     @SelectAlways()
     readonly image360Hash: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"image240File\")"})
+    @Column({type: "bytea", update: false, generatedType: "STORED", asExpression: "sha256(\"image240File\")"})
     @SelectAlways()
     readonly image240Hash: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"image180File\")"})
+    @Column({type: "bytea", update: false, generatedType: "STORED", asExpression: "sha256(\"image180File\")"})
     @SelectAlways()
     readonly image180Hash: Buffer;
-    @Column({type: "bytea", generatedType: "STORED", asExpression: "sha256(\"imagePlaceholderFile\")"})
+    @Column({type: "bytea", update: false, generatedType: "STORED", asExpression: "sha256(\"imagePlaceholderFile\")"})
     @SelectAlways()
     readonly imagePlaceholderHash: Buffer;
 

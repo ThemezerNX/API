@@ -41,43 +41,43 @@ export class HBThemeAssetsEntity extends AssetsEntityInterface {
     @Column("bytea", {nullable: true})
     backgroundImageFile?: Buffer;
 
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"batteryIconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"batteryIconFile\")"})
     @SelectAlways()
     readonly batteryIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"chargingIconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"chargingIconFile\")"})
     @SelectAlways()
     readonly chargingIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"folderIconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"folderIconFile\")"})
     @SelectAlways()
     readonly folderIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"invalidIconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"invalidIconFile\")"})
     @SelectAlways()
     readonly invalidIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"themeIconDarkFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"themeIconDarkFile\")"})
     @SelectAlways()
     readonly themeIconDarkHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"themeIconLightFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"themeIconLightFile\")"})
     @SelectAlways()
     readonly themeIconLightHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"airplaneIconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"airplaneIconFile\")"})
     @SelectAlways()
     readonly airplaneIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"wifiNoneIconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"wifiNoneIconFile\")"})
     @SelectAlways()
     readonly wifiNoneIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"wifi1IconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"wifi1IconFile\")"})
     @SelectAlways()
     readonly wifi1IconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"wifi2IconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"wifi2IconFile\")"})
     @SelectAlways()
     readonly wifi2IconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"wifi3IconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"wifi3IconFile\")"})
     @SelectAlways()
     readonly wifi3IconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"ethIconFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"ethIconFile\")"})
     @SelectAlways()
     readonly ethIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, generatedType: "STORED", asExpression: "sha256(\"backgroundImageFile\")"})
+    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"backgroundImageFile\")"})
     @SelectAlways()
     readonly backgroundImageHash?: Buffer;
 
