@@ -8,7 +8,7 @@ import {SortOrder} from "../common/enums/SortOrder";
 import {ItemSort} from "../common/args/ItemSort.args";
 import {toTsQuery} from "../common/TsQueryCreator";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
-import {Exists} from "../common/findOperators/Exists";
+import {exists} from "../common/functions/exists";
 import {ThemeData} from "./dto/ThemeData.input";
 import {PackData} from "./dto/PackData.input";
 import {ThemeTagEntity} from "../ThemeTag/ThemeTag.entity";
@@ -22,7 +22,7 @@ import {LayoutOptionType} from "../LayoutOption/common/LayoutOptionType.enum";
 import {LayoutNotFoundError} from "../common/errors/LayoutNotFound.error";
 import {CreatorNotFoundError} from "../common/errors/CreatorNotFound.error";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
-import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
+import {createInfoSelectQueryBuilder} from "../common/functions/createInfoSelectQueryBuilder";
 import {ThemeHashEntity} from "../Cache/Theme/ThemeHash.entity";
 import {GetHash} from "../common/interfaces/GetHash.interface";
 
@@ -166,7 +166,7 @@ export class ThemeService implements IsOwner, GetHash {
     }
 
     async isOwner(themeId: string, userId: string): Promise<boolean> {
-        return !!(await Exists(
+        return !!(await exists(
             this.repository.createQueryBuilder()
                 .where({id: themeId, creatorId: userId}),
         ));

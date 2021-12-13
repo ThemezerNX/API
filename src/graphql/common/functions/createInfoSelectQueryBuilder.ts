@@ -1,7 +1,7 @@
 import {Repository, SelectQueryBuilder} from "typeorm";
 import {ServiceFindOptionsParameter} from "../interfaces/ServiceFindOptions.parameter";
 import {PerchQueryBuilder} from "perch-query-builder";
-import {joinAndSelectRelations} from "./ServiceFunctions";
+import {joinAndSelectRelations} from "./serviceFunctions";
 
 export function createInfoSelectQueryBuilder<E>(options: ServiceFindOptionsParameter<E>, repository: Repository<E>): SelectQueryBuilder<E> {
     let queryBuilder;

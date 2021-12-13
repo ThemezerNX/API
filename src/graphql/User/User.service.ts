@@ -12,7 +12,7 @@ import {UnknownError} from "../common/errors/Unknown.error";
 import {UserPreferencesEntity} from "./Preferences/UserPreferences.entity";
 import {UserSort} from "./dto/Sort.args";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
-import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
+import {createInfoSelectQueryBuilder} from "../common/functions/createInfoSelectQueryBuilder";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
 
 @Injectable()

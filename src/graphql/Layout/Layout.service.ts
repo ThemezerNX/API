@@ -14,9 +14,9 @@ import {LayoutOptionType} from "../LayoutOption/common/LayoutOptionType.enum";
 import {InjectorLayout, LoadedLayoutOption} from "./common/InjectorLayout";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
-import {Exists} from "../common/findOperators/Exists";
+import {exists} from "../common/functions/exists";
 import {ChosenLayoutOptionValue} from "./dto/ChosenLayoutOptionValue.input";
-import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
+import {createInfoSelectQueryBuilder} from "../common/functions/createInfoSelectQueryBuilder";
 
 @Injectable()
 export class LayoutService implements IsOwner {
@@ -231,7 +231,7 @@ export class LayoutService implements IsOwner {
     }
 
     async isOwner(layoutId: string, userId: string): Promise<boolean> {
-        return !!(await Exists(
+        return !!(await exists(
             this.repository.createQueryBuilder()
                 .where({id: layoutId, creatorId: userId}),
         ));

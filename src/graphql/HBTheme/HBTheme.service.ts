@@ -8,8 +8,8 @@ import {ItemSort} from "../common/args/ItemSort.args";
 import {toTsQuery} from "../common/TsQueryCreator";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
-import {Exists} from "../common/findOperators/Exists";
-import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
+import {exists} from "../common/functions/exists";
+import {createInfoSelectQueryBuilder} from "../common/functions/createInfoSelectQueryBuilder";
 import {HBThemeHashEntity} from "../Cache/HBTheme/HBThemeHash.entity";
 import {GetHash} from "../common/interfaces/GetHash.interface";
 
@@ -137,7 +137,7 @@ export class HBThemeService implements IsOwner, GetHash {
     }
 
     async isOwner(hbthemeId: string, userId: string): Promise<boolean> {
-        return !!(await Exists(
+        return !!(await exists(
             this.repository.createQueryBuilder()
                 .where({id: hbthemeId, creatorId: userId}),
         ));

@@ -13,8 +13,8 @@ import {ThemeEntity} from "../Theme/Theme.entity";
 import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
-import {Exists} from "../common/findOperators/Exists";
-import {createInfoSelectQueryBuilder} from "../common/functions/CreateInfoSelectQueryBuilder";
+import {exists} from "../common/functions/exists";
+import {createInfoSelectQueryBuilder} from "../common/functions/createInfoSelectQueryBuilder";
 import {LayoutEntity} from "../Layout/Layout.entity";
 import {PackHashEntity} from "../Cache/Pack/PackHash.entity";
 import {GetHash} from "../common/interfaces/GetHash.interface";
@@ -161,9 +161,8 @@ export class PackService implements IsOwner, GetHash {
         return entities;
     }
 
-
     async isOwner(packId: string, userId: string): Promise<boolean> {
-        return !!(await Exists(
+        return !!(await exists(
             this.repository.createQueryBuilder()
                 .where({id: packId, creatorId: userId}),
         ));

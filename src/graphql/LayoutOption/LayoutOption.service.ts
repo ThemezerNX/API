@@ -5,7 +5,7 @@ import {LayoutOptionValueEntity} from "./OptionValue/LayoutOptionValue.entity";
 import {LayoutOptionEntity} from "./LayoutOption.entity";
 import {PerchQueryBuilder} from "perch-query-builder";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
-import {joinAndSelectRelations} from "../common/functions/ServiceFunctions.js";
+import {joinAndSelectRelations} from "../common/functions/serviceFunctions.js";
 
 @Injectable()
 export class LayoutOptionService {
