@@ -9,7 +9,7 @@ export class TypeOrmLogger extends AdvancedConsoleLogger implements Logger {
     logQuery(query: string, parameters?: any[], queryRunner?: QueryRunner) {
         const shortParameters = parameters?.map((p) => {
             if (p instanceof Buffer) {
-                return new Buffer(0);
+                return Buffer.alloc(0);
             }
             else return p;
         });
