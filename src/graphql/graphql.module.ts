@@ -37,14 +37,14 @@ async function dropViews(queryRunner: QueryRunner) {
 
 async function insertDefaults(connection: Connection) {
     const unknownUser = UserEntity.create({counter: -0, username: "unknown", isVerified: true, roles: ["system"]});
-    unknownUser.connections = new UserConnectionsEntity();
-    unknownUser.preferences = new UserPreferencesEntity();
-    unknownUser.profile = new UserProfileEntity();
+    unknownUser.connections = new UserConnectionsEntity({user: unknownUser});
+    unknownUser.preferences = new UserPreferencesEntity({user: unknownUser});
+    unknownUser.profile = new UserProfileEntity({user: unknownUser});
 
     const nintendoUser = UserEntity.create({counter: -1, username: "Nintendo", isVerified: true, roles: ["system"]});
-    nintendoUser.connections = new UserConnectionsEntity();
-    nintendoUser.preferences = new UserPreferencesEntity();
-    nintendoUser.profile = new UserProfileEntity();
+    nintendoUser.connections = new UserConnectionsEntity({user: nintendoUser});
+    nintendoUser.preferences = new UserPreferencesEntity({user: nintendoUser});
+    nintendoUser.profile = new UserProfileEntity({user: nintendoUser});
 
     await connection.createQueryBuilder()
         .insert()
@@ -52,6 +52,28 @@ async function insertDefaults(connection: Connection) {
         .values([unknownUser, nintendoUser])
         .orIgnore()
         .execute()
+
+    // TODO: https://github.com/typeorm/typeorm/pull/ 8472
+    // await connection.createQueryBuilder()
+    //     .insert()
+    //     .into(UserConnectionsEntity)
+    //     .values([unknownUser.connections, nintendoUser.connections])
+    //     .orIgnore()
+    //     .execute()
+    //
+    // await connection.createQueryBuilder()
+    //     .insert()
+    //     .into(UserPreferencesEntity)
+    //     .values([unknownUser.preferences, nintendoUser.preferences])
+    //     .orIgnore()
+    //     .execute()
+    //
+    // await connection.createQueryBuilder()
+    //     .insert()
+    //     .into(UserProfileEntity)
+    //     .values([unknownUser.profile, nintendoUser.profile])
+    //     .orIgnore()
+    //     .execute()
 }
 
 
@@ -118,11 +140,11 @@ async function insertDefaults(connection: Connection) {
                 // 1. drop all views/mviews, as typeorm cannot drop them in correct order nor does cascade drop.
                 const queryRunner = await connection.createQueryRunner();
 
-                if (true) {
+                if (false) {
                     if (process.env.NODE_ENV == "development") {
                         await dropViews(queryRunner);
                         await connection.synchronize(false);
-                        // await insertDefaults(connection);
+                        await insertDefaults(connection);
                     } else {
                         await connection.runMigrations();
                     }
