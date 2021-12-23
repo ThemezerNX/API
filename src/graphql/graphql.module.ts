@@ -36,44 +36,55 @@ async function dropViews(queryRunner: QueryRunner) {
 }
 
 async function insertDefaults(connection: Connection) {
-    const unknownUser = UserEntity.create({counter: -0, username: "unknown", isVerified: true, roles: ["system"]});
-    unknownUser.connections = new UserConnectionsEntity({user: unknownUser});
-    unknownUser.preferences = new UserPreferencesEntity({user: unknownUser});
-    unknownUser.profile = new UserProfileEntity({user: unknownUser});
+    await connection.manager.transaction(async entityManager => {
+        const unknownUser = UserEntity.create({
+            counter: -0,
+            username: "unknown",
+            isVerified: true,
+            roles: ["system"],
+            connections: new UserConnectionsEntity({userId: "0"}),
+            preferences: new UserPreferencesEntity({userId: "0"}),
+            profile: new UserProfileEntity({userId: "0"}),
+        });
 
-    const nintendoUser = UserEntity.create({counter: -1, username: "Nintendo", isVerified: true, roles: ["system"]});
-    nintendoUser.connections = new UserConnectionsEntity({user: nintendoUser});
-    nintendoUser.preferences = new UserPreferencesEntity({user: nintendoUser});
-    nintendoUser.profile = new UserProfileEntity({user: nintendoUser});
+        const nintendoUser = UserEntity.create({
+            counter: -1,
+            username: "Nintendo",
+            isVerified: true,
+            roles: ["system"],
+            connections: new UserConnectionsEntity({userId: "1"}),
+            preferences: new UserPreferencesEntity({userId: "1"}),
+            profile: new UserProfileEntity({userId: "1"}),
+        });
 
-    await connection.createQueryBuilder()
-        .insert()
-        .into(UserEntity, ["counter", "username", "isVerified", "roles"])
-        .values([unknownUser, nintendoUser])
-        .orIgnore()
-        .execute()
+        await entityManager.createQueryBuilder()
+            .insert()
+            .into(UserEntity, ["counter", "username", "isVerified", "roles"])
+            .values([unknownUser, nintendoUser])
+            .orIgnore()
+            .execute();
 
-    // TODO: https://github.com/typeorm/typeorm/pull/ 8472
-    // await connection.createQueryBuilder()
-    //     .insert()
-    //     .into(UserConnectionsEntity)
-    //     .values([unknownUser.connections, nintendoUser.connections])
-    //     .orIgnore()
-    //     .execute()
-    //
-    // await connection.createQueryBuilder()
-    //     .insert()
-    //     .into(UserPreferencesEntity)
-    //     .values([unknownUser.preferences, nintendoUser.preferences])
-    //     .orIgnore()
-    //     .execute()
-    //
-    // await connection.createQueryBuilder()
-    //     .insert()
-    //     .into(UserProfileEntity)
-    //     .values([unknownUser.profile, nintendoUser.profile])
-    //     .orIgnore()
-    //     .execute()
+        await entityManager.createQueryBuilder()
+            .insert()
+            .into(UserConnectionsEntity)
+            .values([unknownUser.connections, nintendoUser.connections])
+            .orIgnore()
+            .execute();
+
+        await entityManager.createQueryBuilder()
+            .insert()
+            .into(UserPreferencesEntity)
+            .values([unknownUser.preferences, nintendoUser.preferences])
+            .orIgnore()
+            .execute();
+
+        await entityManager.createQueryBuilder()
+            .insert()
+            .into(UserProfileEntity)
+            .values([unknownUser.profile, nintendoUser.profile])
+            .orIgnore()
+            .execute();
+    });
 }
 
 
@@ -140,7 +151,7 @@ async function insertDefaults(connection: Connection) {
                 // 1. drop all views/mviews, as typeorm cannot drop them in correct order nor does cascade drop.
                 const queryRunner = await connection.createQueryRunner();
 
-                if (false) {
+                if (true) {
                     if (process.env.NODE_ENV == "development") {
                         await dropViews(queryRunner);
                         await connection.synchronize(false);

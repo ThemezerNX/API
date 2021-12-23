@@ -1,4 +1,4 @@
-import {AfterLoad, Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {AfterLoad, Column, DeepPartial, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {UserEntity} from "../User.entity";
 import {CDNMapper} from "../../common/CDNMapper";
 import {CachableEntityInterface} from "../../common/interfaces/Cachable.entity.interface";
@@ -8,11 +8,16 @@ import {SelectAlways} from "perch-query-builder";
 @Entity()
 export class UserProfileEntity extends CachableEntityInterface {
 
+    constructor(entityLike?: DeepPartial<UserProfileEntity>) {
+        super();
+        Object.assign(this, entityLike);
+    }
+
     @OneToOne(() => UserEntity, user => user.profile, {onDelete: "CASCADE"})
     @JoinColumn({name: "userId"})
     user: UserEntity;
 
-    @PrimaryColumn("char", {length: 19})
+    @PrimaryColumn("varchar", {length: 19})
     userId: string;
 
     @Column({length: 10000, nullable: true})

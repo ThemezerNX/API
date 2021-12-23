@@ -97,15 +97,20 @@ export class UserService implements IsOwner {
 
     async create(email: string, password: string, username: string): Promise<UserEntity> {
         try {
-            const user = UserEntity.create({email, password, username});
-            user.connections = new UserConnectionsEntity();
-            user.preferences = new UserPreferencesEntity();
-            user.profile = new UserProfileEntity();
-            return await user.save();
+            const user = UserEntity.create({
+                email,
+                password,
+                username,
+                connections: new UserConnectionsEntity(),
+                preferences: new UserPreferencesEntity(),
+                profile: new UserProfileEntity(),
+            });
+            await user.save();
+            return user;
         } catch (err) {
             if (err.message.includes("UQ")) {
                 throw new EmailAlreadyRegisteredError();
-            } else throw new UnknownError();
+            } else throw new UnknownError(err.message);
         }
     }
 
