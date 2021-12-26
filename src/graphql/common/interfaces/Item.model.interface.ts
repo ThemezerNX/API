@@ -11,6 +11,9 @@ export abstract class ItemModelInterface extends RootModelAbstract {
     id: string;
 
     @Field()
+    slug: string;
+
+    @Field()
     creator: CreatorModel;
 
     @Field()
