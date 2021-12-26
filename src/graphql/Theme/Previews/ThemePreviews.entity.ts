@@ -2,6 +2,8 @@ import {AfterLoad, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {ThemeEntity} from "../Theme.entity";
 import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
+import {ReadStream} from "fs";
+import {generateImages} from "../../common/processors/ScreenshotProcessor";
 
 @Entity()
 export class ThemePreviewsEntity extends PreviewsEntityInterface {
@@ -35,6 +37,10 @@ export class ThemePreviewsEntity extends PreviewsEntityInterface {
             "placeholder",
             "webp",
             this.imagePlaceholderHash);
+    }
+
+    async generateFromStream(createReadStream: () => ReadStream) {
+        this.assignImages(await generateImages(createReadStream, true));
     }
 
 }

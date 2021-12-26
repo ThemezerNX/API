@@ -10,6 +10,12 @@ export enum Target {
     Notification = "Notification",
 }
 
+const TargetOrder = Object.values(Target);
+
+export const compareTargetFn = (a: Target, b: Target) => {
+    return TargetOrder.indexOf(a) - TargetOrder.indexOf(b)
+};
+
 registerEnumType(Target, {
     name: "Target",
 });

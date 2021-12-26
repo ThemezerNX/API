@@ -9,8 +9,8 @@ import {EntityWithPreviewsInterface} from "../common/interfaces/EntityWithPrevie
 @Entity()
 export class PackEntity extends ItemEntityInterface implements EntityWithPreviewsInterface {
 
-    @Column({type: "boolean"})
-    isNSFW: boolean;
+    @Column({type: "boolean", default: false})
+    isNSFW: boolean = false;
 
     @OneToOne(() => PackPreviewsEntity, packPreviews => packPreviews.pack, {cascade: true, eager: true})
     previews: PackPreviewsEntity;

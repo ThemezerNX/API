@@ -8,26 +8,28 @@ import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
 // There aren't any circular dependencies at all, but I've been struggling with this for a while, so I'm just gonna do it in a separate file.
 // These would otherwise have been in PackService as static methods.
 
-export async function recomputeNSFW(packId: string) {
-    if (packId) {
+export async function recomputeNSFW({packId, pack}: {packId: string, pack: PackEntity}) {
+    if (packId || pack) {
+        const id = packId || pack.id
         // TODO: run in same transaction as update, insert, remove
+        // UPDATE: ^ this is done by default, however, the selects in the update still select the old values
         // This query is not nice, but it works.
         await getConnection().createQueryBuilder()
             .update(PackEntity)
             .set({isNSFW: true})
-            .where("id = :packId", {packId})
+            .where("id = :packId", {packId: id})
             .andWhere((qb) =>
                 `(EXISTS (${
                     qb.createQueryBuilder().select("1")
                         .from(ThemeEntity, "theme")
                         .where("theme.\"packId\" = :packId")
-                        .andWhere("theme.\"isNSFW\" = true")
+                        .andWhere("theme.\"isNSFW\" = true", {packId: id})
                         .getQuery()
                 })` + " OR " +
                 `EXISTS (${
                     qb.createQueryBuilder().select("1")
                         .from(HBThemeEntity, "hbtheme")
-                        .where("hbtheme.\"packId\" = :packId")
+                        .where("hbtheme.\"packId\" = :packId", {packId: id})
                         .andWhere("hbtheme.\"isNSFW\" = true")
                         .getQuery()
                 }))`,

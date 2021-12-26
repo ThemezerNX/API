@@ -40,4 +40,16 @@ export abstract class PreviewsEntityInterface extends CachableEntityInterface {
     @SelectAlways()
     readonly imagePlaceholderHash: Buffer;
 
+    protected assignImages(images) {
+        this.imagePlaceholderFile = images.imagePlaceholderFile;
+        this.image180File = images.image180File;
+        this.image240File = images.image240File;
+        this.image360File = images.image360File;
+        this.image720File = images.image720File;
+    }
+
+    async generateFromStream(file: (() => ReadStream) | Buffer) {
+        this.assignImages(await generateImages(file));
+    }
+
 }

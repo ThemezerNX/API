@@ -1,9 +1,10 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
-import {FindConditions, In, Repository} from "typeorm";
+import {titleCase} from "title-case";
+import {FindConditions, getConnection, In, Repository} from "typeorm";
 import {ThemeEntity} from "./Theme.entity";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
-import {Target} from "../common/enums/Target";
+import {compareTargetFn, Target} from "../common/enums/Target";
 import {SortOrder} from "../common/enums/SortOrder";
 import {ItemSort} from "../common/args/ItemSort.args";
 import {toTsQuery} from "../common/TsQueryCreator";
@@ -25,6 +26,12 @@ import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptio
 import {createInfoSelectQueryBuilder} from "../common/functions/createInfoSelectQueryBuilder";
 import {ThemeHashEntity} from "../Cache/Theme/ThemeHash.entity";
 import {GetHash} from "../common/interfaces/GetHash.interface";
+import {ThemeAssetsData} from "./dto/ThemeAssetsData.input";
+import * as sharp from "sharp";
+import {propertyToTitleCase} from "../common/functions/propertyToTitleCase";
+import {PackEntity} from "../Pack/Pack.entity";
+import {PackPreviewsEntity} from "../Pack/Previews/PackPreviews.entity";
+import {InvalidIconError} from "../common/errors/InvalidIcon.error";
 
 @Injectable()
 export class ThemeService implements IsOwner, GetHash {
@@ -163,6 +170,153 @@ export class ThemeService implements IsOwner, GetHash {
         }
 
         return queryBuilder.getMany();
+    }
+
+    async insertMultiple(creatorId: string, themeData: ThemeData[], packData: PackData) {
+        try {
+            await getConnection().manager.transaction(async entityManager => {
+                let pack: PackEntity = null;
+                if (packData) {
+                    pack = PackEntity.create({
+                        creatorId,
+                        name: packData.name,
+                        description: packData.description,
+                        previews: new PackPreviewsEntity(),
+                        isNSFW: themeData.some(theme => theme.isNSFW),
+                    });
+                }
+                const insertThemes = [];
+                const insertTags = [];
+                for (const submittedTheme of themeData) {
+                    const theme = ThemeEntity.create({
+                        name: submittedTheme.name,
+                        description: submittedTheme.description,
+                        target: submittedTheme.target,
+                        isNSFW: submittedTheme.isNSFW,
+                        creatorId,
+                        layoutId: submittedTheme.layoutId || null,
+                        tags: submittedTheme.tags.map((tag) => new ThemeTagEntity(titleCase(tag))),
+                        previews: new ThemePreviewsEntity(),
+                        assets: new ThemeAssetsEntity(),
+                    });
+
+                    // previews
+                    await theme.previews.generateFromStream((await submittedTheme.screenshot).createReadStream);
+
+                    // assets
+                    if (!(submittedTheme.assets?.image || submittedTheme.layoutId || submittedTheme.assets?.customLayoutJson || submittedTheme.assets?.customCommonLayoutJson)) {
+                        // theme require at least either image or layout
+                        throw new InvalidThemeContentsError("themes require an image, a layout, or both");
+                    }
+                    if (!!submittedTheme.layoutId && !!(submittedTheme.assets?.customLayoutJson || submittedTheme.assets?.customCommonLayoutJson)) {
+                        // can't have custom layout AND layoutId
+                        throw new InvalidThemeContentsError(
+                            "layoutId cannot be combined with customLayoutJson or customCommonLayoutJson",
+                        );
+                    } else {
+                        theme.assets.customLayoutJson = submittedTheme.assets?.customLayoutJson;
+                        theme.assets.customCommonLayoutJson = submittedTheme.assets?.customCommonLayoutJson;
+                    }
+
+                    if (submittedTheme.assets?.homeIcon)
+                        theme.assets.homeIconFile = await ThemeService.readIcon(submittedTheme.assets, "homeIcon");
+                    if (submittedTheme.assets?.albumIcon)
+                        theme.assets.albumIconFile = await ThemeService.readIcon(submittedTheme.assets, "albumIcon");
+                    if (submittedTheme.assets?.newsIcon)
+                        theme.assets.newsIconFile = await ThemeService.readIcon(submittedTheme.assets, "newsIcon");
+                    if (submittedTheme.assets?.shopIcon)
+                        theme.assets.shopIconFile = await ThemeService.readIcon(submittedTheme.assets, "shopIcon");
+                    if (submittedTheme.assets?.controllerIcon)
+                        theme.assets.controllerIconFile = await ThemeService.readIcon(submittedTheme.assets,
+                            "controllerIcon");
+                    if (submittedTheme.assets?.settingsIcon)
+                        theme.assets.settingsIconFile = await ThemeService.readIcon(submittedTheme.assets,
+                            "settingsIcon");
+                    if (submittedTheme.assets?.powerIcon)
+                        theme.assets.powerIconFile = await ThemeService.readIcon(submittedTheme.assets, "powerIcon");
+                    if (submittedTheme.assets?.image) {
+                        await theme.assets.setImage((await submittedTheme.assets.image).createReadStream);
+                    }
+
+                    // Options
+                    if ((submittedTheme.assets?.customLayoutJson || submittedTheme.assets?.customCommonLayoutJson) && submittedTheme.options?.length > 0) {
+                        // themes don't support options for custom layouts
+                        throw new InvalidThemeContentsError("cannot combine layout options with a custom layout");
+                    }
+                    const options = submittedTheme.options.map(async (o) => {
+                        const option = new ThemeOptionEntity();
+                        option.layoutOptionValueUUID = o.uuid;
+                        // determine which type the layoutOption expects, verify
+                        const layoutOption = await this.layoutOptionService.findOption({valueUuid: o.uuid});
+                        const type = layoutOption.type;
+                        if (type === LayoutOptionType.INTEGER) {
+                            if (!o.integerValue) throw new InvalidThemeContentsError(`missing option integerValue for ${o.uuid}`);
+                            option.variable = o.integerValue.toString();
+                        } else if (type === LayoutOptionType.DECIMAL) {
+                            if (!o.decimalValue) throw new InvalidThemeContentsError(`missing option decimalValue for ${o.uuid}`);
+                            option.variable = o.decimalValue.toPrecision(8).toString();
+                        } else if (type === LayoutOptionType.STRING) {
+                            if (!o.stringValue) throw new InvalidThemeContentsError(`missing option stringValue for ${o.uuid}`);
+                            option.variable = o.stringValue;
+                        } else if (type === LayoutOptionType.COLOR) {
+                            if (!o.colorValue) throw new InvalidThemeContentsError(`missing option colorValue for ${o.uuid}`);
+                            option.variable = o.colorValue;
+                        }
+
+                        return option;
+                    });
+                    theme.options = await Promise.all(options);
+
+                    for (const tag of theme.tags) {
+                        if (!insertTags.map((t: ThemeTagEntity) => t.name).includes(tag.name)) {
+                            insertTags.push(tag);
+                        }
+                    }
+                    insertThemes.push(theme);
+                }
+
+                if (pack) {
+                    if (packData.preview) {
+                        await pack.previews.generateFromStream((await packData.preview).createReadStream);
+                    } else {
+                        // generate collage (design 2)
+                        const orderedThemes = insertThemes.sort((a, b) => compareTargetFn(a.target, b.target));
+                        const firstBackground = orderedThemes.find((theme: ThemeEntity) => !!theme.assets?.imageFile)?.assets.imageFile;
+                        const themePreviews = orderedThemes.map((theme: ThemeEntity) => theme.previews.image720File);
+                        await pack.previews.generateFromThemes(firstBackground, themePreviews);
+                    }
+                    pack = await pack.save();
+                    // set as pack on all themes
+                    for (const theme of insertThemes) {
+                        theme.pack = pack;
+                    }
+                }
+
+                await entityManager
+                    .createQueryBuilder()
+                    .insert()
+                    .into(ThemeTagEntity)
+                    .values(insertTags)
+                    .orUpdate(["name"], ["name"])
+                    .execute();
+
+                await entityManager.save(ThemeEntity, insertThemes);
+            });
+        } catch (e) {
+            if ((e.detail as string)?.includes("layoutId")) {
+                throw new LayoutNotFoundError("Referenced layout does not exist");
+            } else if ((e.detail as string)?.includes("creatorId")) {
+                throw new CreatorNotFoundError("Referenced creator does not exist");
+            } else throw e;
+        }
+    }
+
+    private static async readIcon(assets, fileName: keyof ThemeAssetsData) {
+        const buffer = await streamToBuffer((await assets[fileName]).createReadStream());
+        const image = sharp(buffer);
+        const {width, height} = await image.metadata();
+        if (width !== 64 || height !== 56) throw new InvalidIconError(`${propertyToTitleCase(fileName)} must be 64x56`);
+        return buffer;
     }
 
     async isOwner(themeId: string, userId: string): Promise<boolean> {

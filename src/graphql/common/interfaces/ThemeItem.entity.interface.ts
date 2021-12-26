@@ -1,10 +1,10 @@
 import {ItemEntityInterface} from "./Item.entity.interface";
-import {AfterInsert, AfterRemove, AfterUpdate, Column, JoinColumn, JoinTable, ManyToMany, ManyToOne} from "typeorm";
+import {AfterRemove, AfterUpdate, Column, JoinColumn, JoinTable, ManyToMany, ManyToOne} from "typeorm";
 import {PackEntity} from "../../Pack/Pack.entity";
 import {ThemeTagEntity} from "../../ThemeTag/ThemeTag.entity";
 import {PreviewsEntityInterface} from "./Previews.entity.interface";
 import {AssetsEntityInterface} from "./Assets.entity.interface";
-import {deleteIfEmpty, recomputeNSFW} from "../../Pack/Pack.checkers";
+import {deleteIfEmpty, recomputeNSFW} from "../../Pack/Pack.constraints";
 
 
 export abstract class ThemeItemEntityInterface extends ItemEntityInterface {
@@ -19,7 +19,8 @@ export abstract class ThemeItemEntityInterface extends ItemEntityInterface {
     @Column()
     isNSFW: boolean;
 
-    @ManyToMany(() => ThemeTagEntity, {onDelete: "CASCADE", cascade: true, eager: true})
+    // Tags should not be cascade save. Otherwise, 1) custom insert tags and then 2) save theme will result in duplicate key error
+    @ManyToMany(() => ThemeTagEntity, {onDelete: "CASCADE", cascade: false, eager: true})
     @JoinTable()
     tags: ThemeTagEntity[];
 
@@ -30,18 +31,13 @@ export abstract class ThemeItemEntityInterface extends ItemEntityInterface {
 
     abstract setUrls(): void;
 
-    @AfterInsert()
-    async recomputeNSFW() {
-        await recomputeNSFW(this.packId);
-    }
-
     // if there are less than 2 items left in the pack, delete the pack
     @AfterRemove()
     @AfterUpdate()
     async deletePackIfEmpty() {
         const wasDeleted = await deleteIfEmpty(this.packId);
         if (!wasDeleted) {
-            await recomputeNSFW(this.packId);
+            await recomputeNSFW({packId: this.packId, pack: this.pack});
         }
     }
 
