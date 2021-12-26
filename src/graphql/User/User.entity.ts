@@ -61,13 +61,13 @@ export class UserEntity extends CachableEntityInterface {
     @Column("varchar", {array: true, default: []})
     roles: string[] = [];
 
-    @OneToOne(() => UserProfileEntity, profile => profile.user, {eager: true})
+    @OneToOne(() => UserProfileEntity, profile => profile.user, {eager: true, cascade: true})
     profile: UserProfileEntity;
 
-    @OneToOne(() => UserPreferencesEntity, preferences => preferences.user, {eager: true})
+    @OneToOne(() => UserPreferencesEntity, preferences => preferences.user, {eager: true, cascade: true})
     preferences: UserPreferencesEntity;
 
-    @OneToOne(() => UserConnectionsEntity, connections => connections.user, {eager: true})
+    @OneToOne(() => UserConnectionsEntity, connections => connections.user, {eager: true, cascade: true})
     connections: UserConnectionsEntity;
 
     toJSON() {

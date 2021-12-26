@@ -37,9 +37,9 @@ export class AuthResolver {
 
     @Mutation(() => Boolean)
     logout(@Context() context): boolean {
-        context.req.logout();
-        context.req.session.destroy();
         context.req.res.clearCookie("connect.sid");
+        context.req.session.destroy();
+        context.req.logout();
         return true;
     }
 
