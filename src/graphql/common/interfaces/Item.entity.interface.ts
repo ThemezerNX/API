@@ -28,7 +28,6 @@ export abstract class ItemEntityInterface extends CachableEntityInterface {
     @CreateDateColumn({type: "timestamp", update: false})
     addedTimestamp: Date;
 
-    // TODO: is this updated when downloadCount is incremented
     @UpdateDateColumn({type: "timestamp"})
     updatedTimestamp: Date;
 

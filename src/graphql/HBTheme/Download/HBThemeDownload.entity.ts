@@ -16,7 +16,10 @@ export class HBThemeDownloadEntity extends ItemDownloadEntityInterface {
     async addCount() {
         await getConnection()
             .getRepository(HBThemeEntity)
-            .increment({id: this.hbthemeId}, "downloadCount", 1);
+            .update({id: this.hbthemeId}, {
+                downloadCount: () => "\"downloadCount\" + 1",
+                updatedTimestamp: () => "\"updatedTimestamp\"",
+            });
     }
 
 }
