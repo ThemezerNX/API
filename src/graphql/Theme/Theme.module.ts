@@ -9,6 +9,7 @@ import {ThemeOptionEntity} from "./ThemeOptions/ThemeOption.entity";
 import {ThemeOptionService} from "./ThemeOptions/ThemeOption.service";
 import {LayoutOptionModule} from "../LayoutOption/LayoutOption.module";
 import {ThemeHashEntity} from "../Cache/Theme/ThemeHash.entity";
+import {WebhookModule} from "../../webhook/Webhook.module";
 
 @Module({
     imports: [
@@ -19,6 +20,7 @@ import {ThemeHashEntity} from "../Cache/Theme/ThemeHash.entity";
         UserModule,
         ThemeDownloadModule,
         LayoutOptionModule,
+        WebhookModule,
     ],
     providers: [ThemeResolver, ThemeService, ThemeOptionService],
     exports: [ThemeService, ThemeDownloadModule],

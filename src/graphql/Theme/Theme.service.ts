@@ -32,6 +32,9 @@ import {propertyToTitleCase} from "../common/functions/propertyToTitleCase";
 import {PackEntity} from "../Pack/Pack.entity";
 import {PackPreviewsEntity} from "../Pack/Previews/PackPreviews.entity";
 import {InvalidIconError} from "../common/errors/InvalidIcon.error";
+import {WebhookService} from "../../webhook/Webhook.service";
+import {UserEntity} from "../User/User.entity";
+import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
 
 @Injectable()
 export class ThemeService implements IsOwner, GetHash {
@@ -40,6 +43,7 @@ export class ThemeService implements IsOwner, GetHash {
         @InjectRepository(ThemeEntity) private repository: Repository<ThemeEntity>,
         @InjectRepository(ThemeHashEntity) private hashRepository: Repository<ThemeHashEntity>,
         private layoutOptionService: LayoutOptionService,
+        private webhookService: WebhookService,
     ) {
     }
 
@@ -172,20 +176,21 @@ export class ThemeService implements IsOwner, GetHash {
         return queryBuilder.getMany();
     }
 
-    async insertMultiple(creatorId: string, themeData: ThemeData[], packData: PackData) {
+    async insertMultiple(creator: UserEntity, themeData: ThemeData[], packData: PackData) {
         try {
+            let insertedPack: PackEntity = null;
+            const insertedThemes: ThemeEntity[] = [];
+            const insertedHbthemes: HBThemeEntity[] = [];
             await getConnection().manager.transaction(async entityManager => {
-                let pack: PackEntity = null;
                 if (packData) {
-                    pack = PackEntity.create({
-                        creatorId,
+                    insertedPack = PackEntity.create({
+                        creator: creator,
                         name: packData.name,
                         description: packData.description,
                         previews: new PackPreviewsEntity(),
                         isNSFW: themeData.some(theme => theme.isNSFW),
                     });
                 }
-                const insertThemes = [];
                 const insertTags = [];
                 for (const submittedTheme of themeData) {
                     const theme = ThemeEntity.create({
@@ -193,7 +198,7 @@ export class ThemeService implements IsOwner, GetHash {
                         description: submittedTheme.description,
                         target: submittedTheme.target,
                         isNSFW: submittedTheme.isNSFW,
-                        creatorId,
+                        creator: creator,
                         layoutId: submittedTheme.layoutId || null,
                         tags: submittedTheme.tags.map((tag) => new ThemeTagEntity(titleCase(tag))),
                         previews: new ThemePreviewsEntity(),
@@ -272,23 +277,23 @@ export class ThemeService implements IsOwner, GetHash {
                             insertTags.push(tag);
                         }
                     }
-                    insertThemes.push(theme);
+                    insertedThemes.push(theme);
                 }
 
-                if (pack) {
+                if (insertedPack) {
                     if (packData.preview) {
-                        await pack.previews.generateFromStream((await packData.preview).createReadStream);
+                        await insertedPack.previews.generateFromStream((await packData.preview).createReadStream);
                     } else {
                         // generate collage (design 2)
-                        const orderedThemes = insertThemes.sort((a, b) => compareTargetFn(a.target, b.target));
+                        const orderedThemes = insertedThemes.sort((a, b) => compareTargetFn(a.target, b.target));
                         const firstBackground = orderedThemes.find((theme: ThemeEntity) => !!theme.assets?.imageFile)?.assets.imageFile;
                         const themePreviews = orderedThemes.map((theme: ThemeEntity) => theme.previews.image720File);
-                        await pack.previews.generateFromThemes(firstBackground, themePreviews);
+                        await insertedPack.previews.generateFromThemes(firstBackground, themePreviews);
                     }
-                    pack = await pack.save();
+                    insertedPack = await insertedPack.save();
                     // set as pack on all themes
-                    for (const theme of insertThemes) {
-                        theme.pack = pack;
+                    for (const theme of insertedThemes) {
+                        theme.pack = insertedPack;
                     }
                 }
 
@@ -300,8 +305,18 @@ export class ThemeService implements IsOwner, GetHash {
                     .orUpdate(["name"], ["name"])
                     .execute();
 
-                await entityManager.save(ThemeEntity, insertThemes);
+                await entityManager.save(ThemeEntity, insertedThemes);
+                console.log(insertedThemes);
             });
+
+            // send webhook message
+            if (insertedPack) {
+                // pack submission
+                await this.webhookService.newPack(insertedPack, insertedThemes, insertedHbthemes);
+            } else {
+                // theme submission
+                await this.webhookService.newThemes(insertedThemes, insertedHbthemes);
+            }
         } catch (e) {
             if ((e.detail as string)?.includes("layoutId")) {
                 throw new LayoutNotFoundError("Referenced layout does not exist");
