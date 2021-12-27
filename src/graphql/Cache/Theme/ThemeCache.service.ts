@@ -63,25 +63,25 @@ export class ThemeCacheService {
                 sarc.addRawFile(assets.imageFile, "image.jpg");
             }
             if (assets?.albumIconFile) {
-                sarc.addRawFile(assets.imageFile, "album.png");
+                sarc.addRawFile(assets.albumIconFile, "album.png");
             }
             if (assets?.newsIconFile) {
-                sarc.addRawFile(assets.imageFile, "news.png");
+                sarc.addRawFile(assets.newsIconFile, "news.png");
             }
             if (assets?.shopIconFile) {
-                sarc.addRawFile(assets.imageFile, "shop.png");
+                sarc.addRawFile(assets.shopIconFile, "shop.png");
             }
             if (assets?.controllerIconFile) {
-                sarc.addRawFile(assets.imageFile, "controller.png");
+                sarc.addRawFile(assets.controllerIconFile, "controller.png");
             }
             if (assets?.settingsIconFile) {
-                sarc.addRawFile(assets.imageFile, "settings.png");
+                sarc.addRawFile(assets.settingsIconFile, "settings.png");
             }
             if (assets?.powerIconFile) {
-                sarc.addRawFile(assets.imageFile, "power.png");
+                sarc.addRawFile(assets.powerIconFile, "power.png");
             }
             if (assets?.homeIconFile) {
-                sarc.addRawFile(assets.imageFile, "lock.png");
+                sarc.addRawFile(assets.homeIconFile, "lock.png");
             }
             // create info.json
             const info = {
