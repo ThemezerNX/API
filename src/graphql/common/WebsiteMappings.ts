@@ -17,16 +17,16 @@ export const WebsiteMappings = {
     user: (userId: string) => {
         return url(`creators/${userId}`);
     },
-    theme: (themeId: string, slug: string = "") => {
-        return url(`themes/${slug}-${themeId}`);
+    theme: (themeId: string, name: string = "") => {
+        return url(`themes/${slugify(name)}-${themeId}`);
     },
-    hbtheme: (hbthemeId: string, slug: string = "") => {
-        return url(`hbthemes/${slug}-${hbthemeId}`);
+    hbtheme: (hbthemeId: string, name: string = "") => {
+        return url(`hbthemes/${slugify(name)}-${hbthemeId}`);
     },
-    pack: (packId: string, slug: string = "") => {
-        return url(`packs/${slug}-${packId}`);
+    pack: (packId: string, name: string = "") => {
+        return url(`packs/${slugify(name)}-${packId}`);
     },
-    layout: (layoutId: string, slug: string = "") => {
-        return url(`layouts/${slug}-${layoutId}`);
+    layout: (layoutId: string, name: string = "") => {
+        return url(`layouts/${slugify(name)}-${layoutId}`);
     },
 };
