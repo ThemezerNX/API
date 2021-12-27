@@ -19,7 +19,7 @@ export abstract class ItemEntityInterface extends CachableEntityInterface {
     @Generated("increment")
     readonly counter: number;
 
-    @PrimaryColumn({type: "varchar", update: false, generatedType: "STORED", asExpression: "to_hex(counter)"})
+    @PrimaryColumn({type: "varchar", update: false, generatedType: "STORED", asExpression: "upper(to_hex(counter))"})
     id: string;
 
     slug: string;
@@ -47,7 +47,7 @@ export abstract class ItemEntityInterface extends CachableEntityInterface {
     downloadCount: number;
 
     @AfterLoad()
-    setUrls() {
+    setSlug() {
         this.slug = slugify(this.name);
     }
 
