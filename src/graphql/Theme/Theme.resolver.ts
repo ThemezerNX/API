@@ -3,7 +3,6 @@ import {Target} from "../common/enums/Target";
 import {ThemeModel} from "./Theme.model";
 import {ThemeService} from "./Theme.service";
 import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
-import {ThemeEntity} from "./Theme.entity";
 import {ItemSortArgs} from "../common/args/ItemSort.args";
 import {PaginatedThemes} from "./PaginatedThemes.model";
 import {ThemeNotFoundError} from "../common/errors/ThemeNotFound.error";
@@ -19,13 +18,8 @@ import {GraphQLResolveInfo} from "graphql";
 @Resolver(ThemeModel)
 export class ThemeResolver {
 
-    constructor(private themeService: ThemeService, private userService: UserService, private optionService: ThemeOptionService) {
+    constructor(private themeService: ThemeService) {
     }
-
-    // @ResolveField(() => [ThemeOptionModel])
-    // options(@Parent() theme: ThemeEntity): Promise<ThemeOptionModel[]> {
-    //     return this.optionService.findAll({themeId: theme.id});
-    // }
 
     @Query(() => ThemeModel, {
         description: `Find a single theme`,
@@ -82,35 +76,19 @@ export class ThemeResolver {
     }
 
     @Mutation(() => Boolean)
-    async uploadThemes(@Args("files", {type: () => [GraphQLUpload]}) files: Promise<FileUpload>[]): Promise<boolean> {
-        let zipCount = 0;
-        let nxthemeCount = 0;
-        const filteredFiles = (await Promise.all(files)).filter(({mimetype}) => {
-            if (mimetype == "application/zip") {
-                zipCount++;
-                return true;
-            } else if (mimetype == "application/nxtheme") {
-                nxthemeCount++;
-                return true;
-            } else return false;
-        });
-
-        if (zipCount == 1 && nxthemeCount == 0) {
-            // Process as zip
-
-        } else if (zipCount == 0 && nxthemeCount > 0) {
-            // Process as nxtheme
-        } else throw Error("HELLO");
-
+    @Auth()
+    async submitPackWithThemes(@CurrentUser() user: UserEntity, @Args() {
+        themesData,
+        packData,
+    }: SubmitPackWithThemesArgs): Promise<boolean> {
+        await this.themeService.insertMultiple(user, themesData, packData);
         return true;
     }
 
     @Mutation(() => Boolean)
-    createTheme(): boolean {
-        const theme = ThemeEntity.create();
-        theme.target = Target.ResidentMenu;
-        console.log(theme);
-        // todo
+    @Auth()
+    async submitThemes(@CurrentUser() user: UserEntity, @Args() {themesData}: SubmitThemesArgs): Promise<boolean> {
+        await this.themeService.insertMultiple(user, themesData, null);
         return true;
     }
 
