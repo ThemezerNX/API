@@ -19,6 +19,7 @@ export class ThemeDownloadService {
                 id: userId,
             };
         }
+        findConditions.themeId = id;
         findConditions.ip = ip;
         findConditions.timestamp = Raw((alias) => `${alias} > (NOW() - '1 hour'::INTERVAL)`);
 

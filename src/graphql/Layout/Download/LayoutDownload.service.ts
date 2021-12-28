@@ -19,6 +19,7 @@ export class LayoutDownloadService {
                 id: userId,
             };
         }
+        findConditions.layoutId = id;
         findConditions.ip = ip;
         findConditions.timestamp = Raw((alias) => `${alias} > (NOW() - '1 hour'::INTERVAL)`);
 

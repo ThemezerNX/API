@@ -19,6 +19,7 @@ export class PackDownloadService {
                 id: userId,
             };
         }
+        findConditions.packId = id;
         findConditions.ip = ip;
         findConditions.timestamp = Raw((alias) => `${alias} > (NOW() - '1 hour'::INTERVAL)`);
 

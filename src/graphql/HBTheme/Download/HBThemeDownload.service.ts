@@ -10,7 +10,7 @@ export class HBThemeDownloadService {
     constructor(@InjectRepository(HBThemeDownloadEntity) private repository: Repository<HBThemeDownloadEntity>, private downloadClientService: DownloadClientService) {
     }
 
-    async increment(id: string, ip: string, userAgent: string, userId?: string) {
+    async increment(id: string, ip: string, userAgent: string, userId?: string){
         const findConditions: FindConditions<HBThemeDownloadEntity> = {};
 
         // Try to find an entry made within the last hour
@@ -19,6 +19,7 @@ export class HBThemeDownloadService {
                 id: userId,
             };
         }
+        findConditions.hbthemeId = id;
         findConditions.ip = ip;
         findConditions.timestamp = Raw((alias) => `${alias} > (NOW() - '1 hour'::INTERVAL)`);
 
