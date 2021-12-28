@@ -1,5 +1,6 @@
 import {Field, InputType} from "@nestjs/graphql";
 import {IsDecimal, IsHexColor, IsInt, IsNotEmpty, IsOptional, IsUUID, Length} from "class-validator";
+import {HexColorCodeResolver} from "graphql-scalars";
 
 @InputType()
 export class ChosenLayoutOptionValue {
@@ -25,7 +26,7 @@ export class ChosenLayoutOptionValue {
     @IsOptional()
     stringValue?: string;
 
-    @Field({nullable: true, description: ChosenLayoutOptionValue.ONLY_APPLICCABLE})
+    @Field(() => HexColorCodeResolver, {nullable: true, description: ChosenLayoutOptionValue.ONLY_APPLICCABLE})
     @IsHexColor()
     @Length(8, 8) // TODO: check if this works
     @IsOptional()
