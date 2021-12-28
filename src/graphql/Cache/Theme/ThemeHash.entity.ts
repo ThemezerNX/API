@@ -15,7 +15,7 @@ import {LayoutOptionEntity} from "../../LayoutOption/LayoutOption.entity";
             sha256(array_to_string(array_agg(concat(
                 (t.id, t.name, t."isNSFW", t.target)::TEXT,
                 (tu.username)::TEXT,
-                (ta."customLayoutJson", ta."customCommonLayoutJson", ta."imageHash", ta."albumIconHash", ta."newsIconHash", ta."shopIconHash", ta."controllerIconHash", ta."settingsIconHash", ta."powerIconHash", ta."homeIconHash")::TEXT,
+                (ta."customLayoutJson", ta."customCommonLayoutJson", ta."backgroundImageHash", ta."albumIconHash", ta."newsIconHash", ta."shopIconHash", ta."controllerIconHash", ta."settingsIconHash", ta."powerIconHash", ta."homeIconHash")::TEXT,
                 ("to".variable)::TEXT,
                 (tolov.name, tolov.json)::TEXT,
                 (lov.type, lov.priority)::TEXT,

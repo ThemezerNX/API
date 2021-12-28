@@ -37,7 +37,7 @@ export class ThemeAssetsEntity extends AssetsEntityInterface {
     customCommonLayoutJson?: string;
 
     @Column("bytea", {nullable: true})
-    imageFile?: Buffer;
+    backgroundImageFile?: Buffer;
     @Column("bytea", {nullable: true})
     albumIconFile?: Buffer;
     @Column("bytea", {nullable: true})
@@ -58,10 +58,10 @@ export class ThemeAssetsEntity extends AssetsEntityInterface {
         nullable: true,
         update: false,
         generatedType: "STORED",
-        asExpression: "sha256(\"imageFile\")",
+        asExpression: "sha256(\"backgroundImageFile\")",
     })
     @SelectAlways()
-    imageHash?: Buffer;
+    backgroundImageHash?: Buffer;
     @Column({
         type: "bytea",
         nullable: true,
