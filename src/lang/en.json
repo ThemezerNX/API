@@ -2,6 +2,7 @@
     "UNKNOWN": "An unknown error occurred",
     "SUBMISSIONS_DISABLED": "Due to issues submissions are temporarily disabled",
     "UNAUTHORIZED": "User not authorized to perform this action",
+    "RESTRICTED": "Action is restricted to {roles}",
     "UNAUTHENTICATED": "Authentication is required",
     "SUBMITTING_BLOCKED": "You have been blocked from submitting. Join the Discord to appeal.",
     "ALREADY_AUTHENTICATED": "Already authenticated",
@@ -20,6 +21,7 @@
     "MAX_50_NXTHEMES": "A maximum of 50 NXThemes is allowed",
     "INVALID_FILE_TYPE": "Invalid file type detected",
     "INVALID_SCREENSHOT": "You must use actual screenshots for submissions",
+    "INVALID_ICON_ASSET": "{propertyName} must be {requiredWidth}x{requiredHeight}",
     "INVALID_TMP": "Invalid tmp argument",
     "INVALID_ID": "Invalid Themezer Layout ID",
     "INVALID_TARGET_NAME": "'{param1}' invalid. Try recreating the theme",
@@ -37,5 +39,7 @@
     "PIECE_NOT_FOUND": "One or more of the requested pieces could not be found",
     "THEME_NOT_FOUND": "The requested theme does not exist",
     "PACK_NOT_FOUND": "The requested pack does not exist",
-    "DB_SAVE_ERROR": "Failed saving data to DB"
+    "DB_SAVE_ERROR": "Failed saving data to DB",
+    "PACK_MIN_THEMES": "A Pack must contain at least {amount} themes",
+    "NO_THEMES": "You did not provide any themes"
 }

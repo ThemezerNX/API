@@ -97,7 +97,7 @@ async function insertDefaults(connection: Connection) {
             fallbackLanguage: "en",
             parser: I18nJsonParser,
             parserOptions: {
-                path: path.join(__dirname, "/../lang/"),
+                path: path.join(__dirname, "../../lang"),
             },
         }),
         GraphQLModule.forRoot({
@@ -119,10 +119,15 @@ async function insertDefaults(connection: Connection) {
                         const ex = err.extensions.exception;
 
                         if (ex?.isTranslatable) {
+                            const translation = $t(ex.langKey, ex.i18nParams);
+                            console.log(translation);
+
                             const newError = {
                                 statusCode: ex.statusCode,
                                 ...err,
-                                message: $t(ex.langKey, ex.i18nParams),
+                                message: translation == ex.langKey
+                                    ? $t(err.message, ex.i18nParams) || translation
+                                    : translation,
                             };
 
                             delete ex.isTranslatable;

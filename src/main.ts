@@ -6,7 +6,6 @@ import {AppModule} from "./app.module";
 import {NestExpressApplication} from "@nestjs/platform-express";
 import {ValidationPipe} from "@nestjs/common";
 import {I18n} from "i18n";
-import * as fs from "fs";
 import * as path from "path";
 import * as cookieparser from "cookie-parser";
 import * as expressSession from "express-session";
@@ -18,15 +17,9 @@ dotenv.config();
 
 process.env.TZ = "UTC";
 
-const locales = fs.readdirSync(path.resolve(__dirname, "../lang")).map((file) => {
-    // isos: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
-    return path.basename(file, ".json");
-});
-
 const i18n = new I18n();
 i18n.configure({
-    locales,
-    directory: path.resolve(__dirname, "lang"),
+    directory: path.resolve(__dirname, "../lang"),
     defaultLocale: "en",
     retryInDefaultLocale: true,
     mustacheConfig: {
