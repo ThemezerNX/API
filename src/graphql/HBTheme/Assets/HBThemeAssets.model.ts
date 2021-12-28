@@ -5,6 +5,9 @@ import {RootModelAbstract} from "../../common/interfaces/Root.model.abstract";
 @ObjectType("HBThemeAssets")
 export class HBThemeAssetsModel extends RootModelAbstract {
 
+    @Field({nullable: true})
+    layout?: string;
+
     @Field(() => URLResolver, {nullable: true})
     batteryIconUrl?: string;
 

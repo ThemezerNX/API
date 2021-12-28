@@ -8,22 +8,22 @@ import {SelectAlways} from "perch-query-builder";
 export class HBThemeAssetsEntity extends AssetsEntityInterface {
 
     static CFG_FILENAME = "theme.cfg";
-    static ICON_FILENAME = "icon.jpg";
+    static ICON_FILE = {name: "icon.jpg", width: 256, height: 256};
 
-    static BATTERY_ICON_FILENAME = "battery_icon.png";
-    static CHARGING_ICON_FILENAME = "charging_icon.png";
-    static FOLDER_ICON_FILENAME = "folder_icon.jpg";
-    static INVALID_ICON_FILENAME = "invalid_icon.jpg";
-    static THEME_ICON_DARK_FILENAME = "theme_icon_dark.jpg";
-    static THEME_ICON_LIGHT_FILENAME = "theme_icon_light.jpg";
-    static AIRPLANE_ICON_FILENAME = "airplane_icon.png";
-    static WIFI_NONE_ICON_FILENAME = "wifi_none_icon.png";
-    static WIFI1_ICON_FILENAME = "wifi1_icon.png";
-    static WIFI2_ICON_FILENAME = "wifi2_icon.png";
-    static WIFI3_ICON_FILENAME = "wifi3_icon.png";
-    static ETH_ICON_FILENAME = "eth_icon.png";
-    static ETH_NONE_ICON_FILENAME = "eth_none_icon.png";
-    static BACKGROUND_IMAGE_FILENAME = "background_image.jpg";
+    static BATTERY_ICON_FILE = {name: "battery_icon.png", width: 50, height: 50};
+    static CHARGING_ICON_FILE = {name: "charging_icon.png", width: 50, height: 50};
+    static FOLDER_ICON_FILE = {name: "folder_icon.jpg", width: 256, height: 256};
+    static INVALID_ICON_FILE = {name: "invalid_icon.jpg", width: 50, height: 256};
+    static THEME_ICON_DARK_FILE = {name: "theme_icon_dark.jpg", width: 256, height: 256};
+    static THEME_ICON_LIGHT_FILE = {name: "theme_icon_light.jpg", width: 256, height: 256};
+    static AIRPLANE_ICON_FILE = {name: "airplane_icon.png", width: 50, height: 50};
+    static WIFI_NONE_ICON_FILE = {name: "wifi_none_icon.png", width: 50, height: 50};
+    static WIFI1_ICON_FILE = {name: "wifi1_icon.png", width: 50, height: 50};
+    static WIFI2_ICON_FILE = {name: "wifi2_icon.png", width: 50, height: 50};
+    static WIFI3_ICON_FILE = {name: "wifi3_icon.png", width: 50, height: 50};
+    static ETH_ICON_FILE = {name: "eth_icon.png", width: 50, height: 50};
+    static ETH_NONE_ICON_FILE = {name: "eth_none_icon.png", width: 50, height: 50};
+    static BACKGROUND_IMAGE_FILE = {name: "background_image.jpg", width: 1280, height: 720};
 
     @OneToOne(() => HBThemeEntity, hbthemeEntity => hbthemeEntity.assets, {onDelete: "CASCADE"})
     @JoinColumn({name: "hbthemeId"})
@@ -32,34 +32,49 @@ export class HBThemeAssetsEntity extends AssetsEntityInterface {
     @PrimaryColumn({update: false})
     hbthemeId: string;
 
-    @Column("bytea", {nullable: true})
+    @Column({type: "varchar", nullable: true})
+    layout?: string;
+    @Column({type: "bytea", nullable: true})
+    iconFile?: Buffer;
+
+    @Column({type: "bytea", nullable: true})
     batteryIconFile?: Buffer;
-    @Column("bytea", {nullable: true})
+    @Column({type: "bytea", nullable: true})
     chargingIconFile?: Buffer;
-    @Column("bytea", {nullable: true})
+    @Column({type: "bytea", nullable: true})
     folderIconFile?: Buffer;
-    @Column("bytea", {nullable: true})
+    @Column({type: "bytea", nullable: true})
     invalidIconFile?: Buffer;
-    @Column("bytea", {nullable: true})
+    @Column({type: "bytea", nullable: true})
     themeIconDarkFile?: Buffer;
-    @Column("bytea", {nullable: true})
+    @Column({type: "bytea", nullable: true})
     themeIconLightFile?: Buffer;
-    @Column("bytea", {nullable: true})
+    @Column({type: "bytea", nullable: true})
     airplaneIconFile?: Buffer;
-    @Column("bytea", {nullable: true})
+    @Column({type: "bytea", nullable: true})
     wifiNoneIconFile?: Buffer;
-    @Column("bytea", {nullable: true})
+    @Column({type: "bytea", nullable: true})
     wifi1IconFile?: Buffer;
-    @Column("bytea", {nullable: true})
+    @Column({type: "bytea", nullable: true})
     wifi2IconFile?: Buffer;
-    @Column("bytea", {nullable: true})
+    @Column({type: "bytea", nullable: true})
     wifi3IconFile?: Buffer;
-    @Column("bytea", {nullable: true})
+    @Column({type: "bytea", nullable: true})
     ethIconFile?: Buffer;
-    @Column("bytea", {nullable: true})
+    @Column({type: "bytea", nullable: true})
     ethNoneIconFile?: Buffer;
-    @Column("bytea", {nullable: true})
+    @Column({type: "bytea", nullable: true})
     backgroundImageFile?: Buffer;
+
+    @Column({
+        type: "bytea",
+        nullable: true,
+        update: false,
+        generatedType: "STORED",
+        asExpression: "sha256(\"iconFile\")",
+    })
+    @SelectAlways()
+    readonly iconHash?: Buffer;
 
     @Column({
         type: "bytea",
@@ -207,46 +222,46 @@ export class HBThemeAssetsEntity extends AssetsEntityInterface {
     @AfterLoad()
     setUrls() {
         this.batteryIconUrl = !!this.batteryIconHash ? CDNMapper.hbthemes.assets(this.hbthemeId,
-            HBThemeAssetsEntity.BATTERY_ICON_FILENAME,
+            HBThemeAssetsEntity.BATTERY_ICON_FILE.name,
             this.batteryIconHash) : null;
         this.chargingIconUrl = !!this.chargingIconHash ? CDNMapper.hbthemes.assets(this.hbthemeId,
-            HBThemeAssetsEntity.CHARGING_ICON_FILENAME,
+            HBThemeAssetsEntity.CHARGING_ICON_FILE.name,
             this.chargingIconHash) : null;
         this.folderIconUrl = !!this.folderIconHash ? CDNMapper.hbthemes.assets(this.hbthemeId,
-            HBThemeAssetsEntity.FOLDER_ICON_FILENAME,
+            HBThemeAssetsEntity.FOLDER_ICON_FILE.name,
             this.folderIconHash) : null;
         this.invalidIconUrl = !!this.invalidIconHash ? CDNMapper.hbthemes.assets(this.hbthemeId,
-            HBThemeAssetsEntity.INVALID_ICON_FILENAME,
+            HBThemeAssetsEntity.INVALID_ICON_FILE.name,
             this.invalidIconHash) : null;
         this.themeIconDarkUrl = !!this.themeIconDarkHash ? CDNMapper.hbthemes.assets(this.hbthemeId,
-            HBThemeAssetsEntity.THEME_ICON_DARK_FILENAME,
+            HBThemeAssetsEntity.THEME_ICON_DARK_FILE.name,
             this.themeIconDarkHash) : null;
         this.themeIconLightUrl = !!this.themeIconLightHash ? CDNMapper.hbthemes.assets(this.hbthemeId,
-            HBThemeAssetsEntity.THEME_ICON_LIGHT_FILENAME,
+            HBThemeAssetsEntity.THEME_ICON_LIGHT_FILE.name,
             this.themeIconLightHash) : null;
         this.airplaneIconUrl = !!this.airplaneIconHash ? CDNMapper.hbthemes.assets(this.hbthemeId,
-            HBThemeAssetsEntity.AIRPLANE_ICON_FILENAME,
+            HBThemeAssetsEntity.AIRPLANE_ICON_FILE.name,
             this.airplaneIconHash) : null;
         this.wifiNoneIconUrl = !!this.wifiNoneIconHash ? CDNMapper.hbthemes.assets(this.hbthemeId,
-            HBThemeAssetsEntity.WIFI_NONE_ICON_FILENAME,
+            HBThemeAssetsEntity.WIFI_NONE_ICON_FILE.name,
             this.wifiNoneIconHash) : null;
         this.wifi1IconUrl = !!this.wifi1IconHash ? CDNMapper.hbthemes.assets(this.hbthemeId,
-            HBThemeAssetsEntity.WIFI1_ICON_FILENAME,
+            HBThemeAssetsEntity.WIFI1_ICON_FILE.name,
             this.wifi1IconHash) : null;
         this.wifi2IconUrl = !!this.wifi2IconHash ? CDNMapper.hbthemes.assets(this.hbthemeId,
-            HBThemeAssetsEntity.WIFI2_ICON_FILENAME,
+            HBThemeAssetsEntity.WIFI2_ICON_FILE.name,
             this.wifi2IconHash) : null;
         this.wifi3IconUrl = !!this.wifi3IconHash ? CDNMapper.hbthemes.assets(this.hbthemeId,
-            HBThemeAssetsEntity.WIFI3_ICON_FILENAME,
+            HBThemeAssetsEntity.WIFI3_ICON_FILE.name,
             this.wifi3IconHash) : null;
         this.ethIconUrl = !!this.ethIconHash ? CDNMapper.hbthemes.assets(this.hbthemeId,
-            HBThemeAssetsEntity.ETH_ICON_FILENAME,
+            HBThemeAssetsEntity.ETH_ICON_FILE.name,
             this.ethIconHash) : null;
         this.ethNoneIconUrl = !!this.ethNoneIconHash ? CDNMapper.hbthemes.assets(this.hbthemeId,
-            HBThemeAssetsEntity.ETH_NONE_ICON_FILENAME,
+            HBThemeAssetsEntity.ETH_NONE_ICON_FILE.name,
             this.ethNoneIconHash) : null;
         this.backgroundImageUrl = !!this.backgroundImageHash ? CDNMapper.hbthemes.assets(this.hbthemeId,
-            HBThemeAssetsEntity.BACKGROUND_IMAGE_FILENAME,
+            HBThemeAssetsEntity.BACKGROUND_IMAGE_FILE.name,
             this.backgroundImageHash) : null;
     }
 

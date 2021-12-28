@@ -9,14 +9,19 @@ import {SelectAlways} from "perch-query-builder";
 @Entity()
 export class ThemeAssetsEntity extends AssetsEntityInterface {
 
-    static IMAGE_FILENAME = "image.jpg";
-    static ALBUM_ICON_FILENAME = "albumIcon.png";
-    static NEWS_ICON_FILENAME = "newsIcon.png";
-    static SHOP_ICON_FILENAME = "shopIcon.png";
-    static CONTROLLER_ICON_FILENAME = "controllerIcon.png";
-    static SETTINGS_ICON_FILENAME = "settingsIcon.png";
-    static POWER_ICON_FILENAME = "powerIcon.png";
-    static HOME_ICON_FILENAME = "homeIcon.png";
+    static INFO_FILENAME = "info.json";
+    static LAYOUT_FILENAME = "layout.json";
+    static COMMON_FILENAME = "common.json";
+
+    static BACKGROUND_IMAGE_FILE = {name: "image.jpg", width: 1280, height: 720};
+    static ALBUM_ICON_FILE = {name: "album.png", width: 64, height: 56};
+    static NEWS_ICON_FILE = {name: "news.png", width: 64, height: 56};
+    static SHOP_ICON_FILE = {name: "shop.png", width: 64, height: 56};
+    static CONTROLLER_ICON_FILE = {name: "controller.png", width: 64, height: 56};
+    static SETTINGS_ICON_FILE = {name: "settings.png", width: 64, height: 56};
+    static POWER_ICON_FILE = {name: "power.png", width: 64, height: 56};
+    // home aka lock icon
+    static HOME_ICON_FILE = {name: "lock.png", width: 64, height: 56};
 
     @OneToOne(() => ThemeEntity, theme => theme.assets, {onDelete: "CASCADE"})
     @JoinColumn({name: "themeId"})
@@ -132,34 +137,34 @@ export class ThemeAssetsEntity extends AssetsEntityInterface {
 
     @AfterLoad()
     setUrls() {
-        this.imageUrl = !!this.imageHash ? CDNMapper.themes.assets(this.themeId,
-            ThemeAssetsEntity.IMAGE_FILENAME,
-            this.imageHash) : null;
+        this.imageUrl = !!this.backgroundImageHash ? CDNMapper.themes.assets(this.themeId,
+            ThemeAssetsEntity.BACKGROUND_IMAGE_FILE.name,
+            this.backgroundImageHash) : null;
         this.albumIconUrl = !!this.albumIconHash ? CDNMapper.themes.assets(this.themeId,
-            ThemeAssetsEntity.ALBUM_ICON_FILENAME,
+            ThemeAssetsEntity.ALBUM_ICON_FILE.name,
             this.albumIconHash) : null;
         this.newsIconUrl = !!this.newsIconHash ? CDNMapper.themes.assets(this.themeId,
-            ThemeAssetsEntity.NEWS_ICON_FILENAME,
+            ThemeAssetsEntity.NEWS_ICON_FILE.name,
             this.newsIconHash) : null;
         this.shopIconUrl = !!this.shopIconHash ? CDNMapper.themes.assets(this.themeId,
-            ThemeAssetsEntity.SHOP_ICON_FILENAME,
+            ThemeAssetsEntity.SHOP_ICON_FILE.name,
             this.shopIconHash) : null;
         this.controllerIconUrl = !!this.controllerIconHash ? CDNMapper.themes.assets(this.themeId,
-            ThemeAssetsEntity.CONTROLLER_ICON_FILENAME,
+            ThemeAssetsEntity.CONTROLLER_ICON_FILE.name,
             this.controllerIconHash) : null;
         this.settingsIconUrl = !!this.settingsIconHash ? CDNMapper.themes.assets(this.themeId,
-            ThemeAssetsEntity.SETTINGS_ICON_FILENAME,
+            ThemeAssetsEntity.SETTINGS_ICON_FILE.name,
             this.settingsIconHash) : null;
         this.powerIconUrl = !!this.powerIconHash ? CDNMapper.themes.assets(this.themeId,
-            ThemeAssetsEntity.POWER_ICON_FILENAME,
+            ThemeAssetsEntity.POWER_ICON_FILE.name,
             this.powerIconHash) : null;
         this.homeIconUrl = !!this.homeIconHash ? CDNMapper.themes.assets(this.themeId,
-            ThemeAssetsEntity.HOME_ICON_FILENAME,
+            ThemeAssetsEntity.HOME_ICON_FILE.name,
             this.homeIconHash) : null;
     }
 
     async setImage(createReadStream: () => ReadStream) {
-        this.imageFile = await generateBackground(createReadStream);
+        this.backgroundImageFile = await generateBackground(createReadStream);
     }
 
 }
