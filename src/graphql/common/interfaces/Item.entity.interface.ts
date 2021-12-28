@@ -11,6 +11,7 @@ import {
 import {UserEntity} from "../../User/User.entity";
 import {CachableEntityInterface} from "./Cachable.entity.interface";
 import {slugify} from "../WebsiteMappings";
+import {SelectAlways} from "perch-query-builder";
 
 
 export abstract class ItemEntityInterface extends CachableEntityInterface {
@@ -32,6 +33,7 @@ export abstract class ItemEntityInterface extends CachableEntityInterface {
     creatorId: string;
 
     @Column({length: 100})
+    @SelectAlways()
     name: string;
 
     @Column({nullable: true, length: 1000})

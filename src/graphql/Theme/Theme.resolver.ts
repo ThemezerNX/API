@@ -8,7 +8,7 @@ import {PaginatedThemes} from "./PaginatedThemes.model";
 import {ThemeNotFoundError} from "../common/errors/ThemeNotFound.error";
 import {ListArgs} from "./dto/List.args";
 import {SubmitThemesArgs} from "./dto/SubmitThemes.args";
-import {SubmitPackWithThemesArgs} from "./dto/SubmitPathWithThemes.args";
+import {SubmitPackWithThemesArgs} from "./dto/SubmitPatkWithThemes.args";
 import {CurrentUser} from "../Auth/decorators/CurrentUser.decorator";
 import {UserEntity} from "../User/User.entity";
 import {Auth} from "../Auth/decorators/Auth.decorator";
@@ -79,16 +79,17 @@ export class ThemeResolver {
     @Auth()
     async submitPackWithThemes(@CurrentUser() user: UserEntity, @Args() {
         themesData,
+        hbthemesData,
         packData,
     }: SubmitPackWithThemesArgs): Promise<boolean> {
-        await this.themeService.insertMultiple(user, themesData, packData);
+        await this.themeService.insertMultiple(user, themesData, hbthemesData, packData);
         return true;
     }
 
     @Mutation(() => Boolean)
     @Auth()
-    async submitThemes(@CurrentUser() user: UserEntity, @Args() {themesData}: SubmitThemesArgs): Promise<boolean> {
-        await this.themeService.insertMultiple(user, themesData, null);
+    async submitThemes(@CurrentUser() user: UserEntity, @Args() {themesData, hbthemesData}: SubmitThemesArgs): Promise<boolean> {
+        await this.themeService.insertMultiple(user, themesData, hbthemesData, null);
         return true;
     }
 

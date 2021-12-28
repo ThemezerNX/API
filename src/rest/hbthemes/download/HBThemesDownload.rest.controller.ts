@@ -29,11 +29,11 @@ export class HBThemesDownloadRestController {
 
         await this.hbthemeDownloadService.increment(id, ip, userAgent, user ? user.id : undefined);
 
-        return {url: "download/theme.romfs?hash=" + hash};
+        return {url: "download/theme.zip?hash=" + hash};
     }
 
-    @Get("theme.romfs")
-    @Header("Content-type", "application/romfs")
+    @Get("theme.zip")
+    @Header("Content-type", "application/zip")
     async getDownloadFile(@Param("id") id: string, @Res() res: Response) {
         await this.getHash(id);
 

@@ -4,7 +4,7 @@ import {FileUpload, GraphQLUpload} from "graphql-upload";
 import {Exclude} from "class-transformer";
 
 @InputType()
-export class PackData {
+export class PackDataInput {
 
     @Field()
     @Length(3, 100)
