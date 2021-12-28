@@ -104,6 +104,7 @@ export class UserService implements IsOwner {
                 connections: new UserConnectionsEntity(),
                 preferences: new UserPreferencesEntity(),
                 profile: new UserProfileEntity(),
+                isVerified: process.env.NODE_ENV === "development",
             });
             await user.save();
             return user;
