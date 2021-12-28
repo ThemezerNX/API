@@ -18,24 +18,19 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
     @AfterLoad()
     setUrls() {
         this.image720Url = CDNMapper.layoutOptions.previews(this.layoutOptionValueUUID,
-            "720",
-            "webp",
+            LayoutOptionValuePreviewsEntity.IMAGE_720_FILENAME,
             this.image720Hash);
         this.image360Url = CDNMapper.layoutOptions.previews(this.layoutOptionValueUUID,
-            "360",
-            "webp",
+            LayoutOptionValuePreviewsEntity.IMAGE_720_FILENAME,
             this.image360Hash);
         this.image240Url = CDNMapper.layoutOptions.previews(this.layoutOptionValueUUID,
-            "240",
-            "webp",
+            LayoutOptionValuePreviewsEntity.IMAGE_720_FILENAME,
             this.image240Hash);
         this.image180Url = CDNMapper.layoutOptions.previews(this.layoutOptionValueUUID,
-            "180",
-            "webp",
+            LayoutOptionValuePreviewsEntity.IMAGE_720_FILENAME,
             this.image180Hash);
         this.imagePlaceholderUrl = CDNMapper.layoutOptions.previews(this.layoutOptionValueUUID,
-            "placeholder",
-            "webp",
+            LayoutOptionValuePreviewsEntity.IMAGE_720_FILENAME,
             this.imagePlaceholderHash);
     }
 

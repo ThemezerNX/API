@@ -96,24 +96,19 @@ export class PackPreviewsEntity extends PreviewsEntityInterface {
     @AfterLoad()
     setUrls() {
         this.image720Url = !!this.image720Hash ? CDNMapper.packs.previews(this.packId,
-            "720",
-            "webp",
+            PackPreviewsEntity.IMAGE_720_FILENAME,
             this.image720Hash) : null;
         this.image360Url = !!this.image360Hash ? CDNMapper.packs.previews(this.packId,
-            "360",
-            "webp",
+            PackPreviewsEntity.IMAGE_720_FILENAME,
             this.image360Hash) : null;
         this.image240Url = !!this.image240Hash ? CDNMapper.packs.previews(this.packId,
-            "240",
-            "webp",
+            PackPreviewsEntity.IMAGE_720_FILENAME,
             this.image240Hash) : null;
         this.image180Url = !!this.image180Hash ? CDNMapper.packs.previews(this.packId,
-            "180",
-            "webp",
+            PackPreviewsEntity.IMAGE_720_FILENAME,
             this.image180Hash) : null;
         this.imagePlaceholderUrl = !!this.imagePlaceholderHash ? CDNMapper.packs.previews(this.packId,
-            "placeholder",
-            "webp",
+            PackPreviewsEntity.IMAGE_720_FILENAME,
             this.imagePlaceholderHash) : null;
     }
 

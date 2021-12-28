@@ -17,42 +17,42 @@ export class ThemesAssetsRestController {
         return new StreamableFile(file);
     }
 
-    @Get("image.jpg")
+    @Get(ThemeAssetsEntity.IMAGE_FILENAME)
     getImage(@Param("id") id: string) {
         return this.getFile(id, "imageFile");
     }
 
-    @Get("albumIcon.png")
+    @Get(ThemeAssetsEntity.ALBUM_ICON_FILENAME)
     getAlbumIcon(@Param("id") id: string) {
         return this.getFile(id, "albumIconFile");
     }
 
-    @Get("newsIcon.png")
+    @Get(ThemeAssetsEntity.NEWS_ICON_FILENAME)
     getNewsIcon(@Param("id") id: string) {
         return this.getFile(id, "newsIconFile");
     }
 
-    @Get("shopIcon.png")
+    @Get(ThemeAssetsEntity.SHOP_ICON_FILENAME)
     getShopIcon(@Param("id") id: string) {
         return this.getFile(id, "shopIconFile");
     }
 
-    @Get("controllerIcon.png")
+    @Get(ThemeAssetsEntity.CONTROLLER_ICON_FILENAME)
     getControllerIcon(@Param("id") id: string) {
         return this.getFile(id, "controllerIconFile");
     }
 
-    @Get("settingsIcon.png")
+    @Get(ThemeAssetsEntity.SETTINGS_ICON_FILENAME)
     getSettingsIcon(@Param("id") id: string) {
         return this.getFile(id, "settingsIconFile");
     }
 
-    @Get("powerIcon.png")
+    @Get(ThemeAssetsEntity.POWER_ICON_FILENAME)
     getPowerIcon(@Param("id") id: string) {
         return this.getFile(id, "powerIconFile");
     }
 
-    @Get("homeIcon.png")
+    @Get(ThemeAssetsEntity.HOME_ICON_FILENAME)
     getHomeIcon(@Param("id") id: string) {
         return this.getFile(id, "homeIconFile");
     }

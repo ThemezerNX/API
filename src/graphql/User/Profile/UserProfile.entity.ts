@@ -8,6 +8,9 @@ import {SelectAlways} from "perch-query-builder";
 @Entity()
 export class UserProfileEntity extends CachableEntityInterface {
 
+    static BANNER_FILENAME = "banner.webp";
+    static AVATAR_FILENAME = "avatar.webp";
+
     constructor(entityLike?: DeepPartial<UserProfileEntity>) {
         super();
         Object.assign(this, entityLike);
@@ -43,8 +46,12 @@ export class UserProfileEntity extends CachableEntityInterface {
 
     @AfterLoad()
     setUrls() {
-        this.avatarUrl = !!this.avatarHash ? CDNMapper.users.avatar(this.userId, "webp", this.avatarHash) : null;
-        this.bannerUrl = !!this.bannerHash ? CDNMapper.users.banner(this.userId, "webp", this.bannerHash) : null;
+        this.avatarUrl = !!this.avatarHash ? CDNMapper.users.assets(this.userId,
+            UserProfileEntity.AVATAR_FILENAME,
+            this.avatarHash) : null;
+        this.bannerUrl = !!this.bannerHash ? CDNMapper.users.assets(this.userId,
+            UserProfileEntity.BANNER_FILENAME,
+            this.bannerHash) : null;
     }
 
 }

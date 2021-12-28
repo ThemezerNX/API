@@ -7,6 +7,12 @@ import {SelectAlways} from "perch-query-builder";
 
 export abstract class PreviewsEntityInterface extends CachableEntityInterface {
 
+    static IMAGE_720_FILENAME = "720.webp";
+    static IMAGE_360_FILENAME = "360.webp";
+    static IMAGE_240_FILENAME = "240.webp";
+    static IMAGE_180_FILENAME = "180.webp";
+    static IMAGE_PLACEHOLDER_FILENAME = "placeholder.webp";
+
     @Column("bytea", {select: false})
     image720File: Buffer;
     @Column("bytea", {select: false})

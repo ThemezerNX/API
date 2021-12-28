@@ -21,31 +21,31 @@ export class LayoutsOptionsPreviewsRestController {
         return new StreamableFile(file);
     }
 
-    @Get("720.webp")
+    @Get(LayoutOptionValuePreviewsEntity.IMAGE_720_FILENAME)
     @Header("Content-Type", "image/webp")
     getImage720(@Param("uuid") uuid: string) {
         return this.getFile(uuid, "image720File");
     }
 
-    @Get("360.webp")
+    @Get(LayoutOptionValuePreviewsEntity.IMAGE_360_FILENAME)
     @Header("Content-Type", "image/webp")
     getImage360(@Param("uuid") uuid: string) {
         return this.getFile(uuid, "image360File");
     }
 
-    @Get("240.webp")
+    @Get(LayoutOptionValuePreviewsEntity.IMAGE_240_FILENAME)
     @Header("Content-Type", "image/webp")
     getImage240(@Param("uuid") uuid: string) {
         return this.getFile(uuid, "image240File");
     }
 
-    @Get("180.webp")
+    @Get(LayoutOptionValuePreviewsEntity.IMAGE_180_FILENAME)
     @Header("Content-Type", "image/webp")
     getImage180(@Param("uuid") uuid: string) {
         return this.getFile(uuid, "image180File");
     }
 
-    @Get("placeholder.webp")
+    @Get(LayoutOptionValuePreviewsEntity.IMAGE_PLACEHOLDER_FILENAME)
     @Header("Content-Type", "image/webp")
     getImagePlaceholder(@Param("uuid") uuid: string) {
         return this.getFile(uuid, "imagePlaceholderFile");

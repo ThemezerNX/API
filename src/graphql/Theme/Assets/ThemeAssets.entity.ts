@@ -9,6 +9,15 @@ import {SelectAlways} from "perch-query-builder";
 @Entity()
 export class ThemeAssetsEntity extends AssetsEntityInterface {
 
+    static IMAGE_FILENAME = "image.jpg";
+    static ALBUM_ICON_FILENAME = "albumIcon.png";
+    static NEWS_ICON_FILENAME = "newsIcon.png";
+    static SHOP_ICON_FILENAME = "shopIcon.png";
+    static CONTROLLER_ICON_FILENAME = "controllerIcon.png";
+    static SETTINGS_ICON_FILENAME = "settingsIcon.png";
+    static POWER_ICON_FILENAME = "powerIcon.png";
+    static HOME_ICON_FILENAME = "homeIcon.png";
+
     @OneToOne(() => ThemeEntity, theme => theme.assets, {onDelete: "CASCADE"})
     @JoinColumn({name: "themeId"})
     theme: ThemeEntity;
@@ -39,28 +48,76 @@ export class ThemeAssetsEntity extends AssetsEntityInterface {
     @Column("bytea", {nullable: true})
     homeIconFile?: Buffer;
 
-    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"imageFile\")"})
+    @Column({
+        type: "bytea",
+        nullable: true,
+        update: false,
+        generatedType: "STORED",
+        asExpression: "sha256(\"imageFile\")",
+    })
     @SelectAlways()
     imageHash?: Buffer;
-    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"albumIconFile\")"})
+    @Column({
+        type: "bytea",
+        nullable: true,
+        update: false,
+        generatedType: "STORED",
+        asExpression: "sha256(\"albumIconFile\")",
+    })
     @SelectAlways()
     albumIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"newsIconFile\")"})
+    @Column({
+        type: "bytea",
+        nullable: true,
+        update: false,
+        generatedType: "STORED",
+        asExpression: "sha256(\"newsIconFile\")",
+    })
     @SelectAlways()
     newsIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"shopIconFile\")"})
+    @Column({
+        type: "bytea",
+        nullable: true,
+        update: false,
+        generatedType: "STORED",
+        asExpression: "sha256(\"shopIconFile\")",
+    })
     @SelectAlways()
     shopIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"controllerIconFile\")"})
+    @Column({
+        type: "bytea",
+        nullable: true,
+        update: false,
+        generatedType: "STORED",
+        asExpression: "sha256(\"controllerIconFile\")",
+    })
     @SelectAlways()
     controllerIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"settingsIconFile\")"})
+    @Column({
+        type: "bytea",
+        nullable: true,
+        update: false,
+        generatedType: "STORED",
+        asExpression: "sha256(\"settingsIconFile\")",
+    })
     @SelectAlways()
     settingsIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"powerIconFile\")"})
+    @Column({
+        type: "bytea",
+        nullable: true,
+        update: false,
+        generatedType: "STORED",
+        asExpression: "sha256(\"powerIconFile\")",
+    })
     @SelectAlways()
     powerIconHash?: Buffer;
-    @Column({type: "bytea", nullable: true, update: false, generatedType: "STORED", asExpression: "sha256(\"homeIconFile\")"})
+    @Column({
+        type: "bytea",
+        nullable: true,
+        update: false,
+        generatedType: "STORED",
+        asExpression: "sha256(\"homeIconFile\")",
+    })
     @SelectAlways()
     homeIconHash?: Buffer;
 
@@ -76,36 +133,28 @@ export class ThemeAssetsEntity extends AssetsEntityInterface {
     @AfterLoad()
     setUrls() {
         this.imageUrl = !!this.imageHash ? CDNMapper.themes.assets(this.themeId,
-            "image",
-            "jpg",
+            ThemeAssetsEntity.IMAGE_FILENAME,
             this.imageHash) : null;
         this.albumIconUrl = !!this.albumIconHash ? CDNMapper.themes.assets(this.themeId,
-            "albumIcon",
-            "png",
+            ThemeAssetsEntity.ALBUM_ICON_FILENAME,
             this.albumIconHash) : null;
         this.newsIconUrl = !!this.newsIconHash ? CDNMapper.themes.assets(this.themeId,
-            "newsIcon",
-            "png",
+            ThemeAssetsEntity.NEWS_ICON_FILENAME,
             this.newsIconHash) : null;
         this.shopIconUrl = !!this.shopIconHash ? CDNMapper.themes.assets(this.themeId,
-            "shopIcon",
-            "png",
+            ThemeAssetsEntity.SHOP_ICON_FILENAME,
             this.shopIconHash) : null;
         this.controllerIconUrl = !!this.controllerIconHash ? CDNMapper.themes.assets(this.themeId,
-            "controllerIcon",
-            "png",
+            ThemeAssetsEntity.CONTROLLER_ICON_FILENAME,
             this.controllerIconHash) : null;
         this.settingsIconUrl = !!this.settingsIconHash ? CDNMapper.themes.assets(this.themeId,
-            "settingsIcon",
-            "png",
+            ThemeAssetsEntity.SETTINGS_ICON_FILENAME,
             this.settingsIconHash) : null;
         this.powerIconUrl = !!this.powerIconHash ? CDNMapper.themes.assets(this.themeId,
-            "powerIcon",
-            "png",
+            ThemeAssetsEntity.POWER_ICON_FILENAME,
             this.powerIconHash) : null;
         this.homeIconUrl = !!this.homeIconHash ? CDNMapper.themes.assets(this.themeId,
-            "homeIcon",
-            "png",
+            ThemeAssetsEntity.HOME_ICON_FILENAME,
             this.homeIconHash) : null;
     }
 

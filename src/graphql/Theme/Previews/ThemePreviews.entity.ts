@@ -8,6 +8,8 @@ import {generateImages} from "../../common/processors/ScreenshotProcessor";
 @Entity()
 export class ThemePreviewsEntity extends PreviewsEntityInterface {
 
+    static IMAGE_240_FILENAME = "240.jpg";
+
     @OneToOne(() => ThemeEntity, themeEntity => themeEntity.previews, {onDelete: "CASCADE"})
     @JoinColumn({name: "themeId"})
     theme: ThemeEntity;
@@ -18,24 +20,19 @@ export class ThemePreviewsEntity extends PreviewsEntityInterface {
     @AfterLoad()
     setUrls() {
         this.image720Url = CDNMapper.themes.previews(this.themeId,
-            "720",
-            "webp",
+            ThemePreviewsEntity.IMAGE_720_FILENAME,
             this.image720Hash);
         this.image360Url = CDNMapper.themes.previews(this.themeId,
-            "360",
-            "webp",
+            ThemePreviewsEntity.IMAGE_360_FILENAME,
             this.image360Hash);
         this.image240Url = CDNMapper.themes.previews(this.themeId,
-            "240",
-            "jpg",
+            ThemePreviewsEntity.IMAGE_240_FILENAME,
             this.image240Hash);
         this.image180Url = CDNMapper.themes.previews(this.themeId,
-            "180",
-            "webp",
+            ThemePreviewsEntity.IMAGE_180_FILENAME,
             this.image180Hash);
         this.imagePlaceholderUrl = CDNMapper.themes.previews(this.themeId,
-            "placeholder",
-            "webp",
+            ThemePreviewsEntity.IMAGE_PLACEHOLDER_FILENAME,
             this.imagePlaceholderHash);
     }
 

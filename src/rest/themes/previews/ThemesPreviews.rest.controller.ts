@@ -21,31 +21,31 @@ export class ThemesPreviewsRestController {
         return new StreamableFile(file);
     }
 
-    @Get("720.webp")
+    @Get(ThemePreviewsEntity.IMAGE_720_FILENAME)
     @Header("Content-Type", "image/webp")
     getImage720(@Param("id") id: string) {
         return this.getFile(id, "image720File");
     }
 
-    @Get("360.webp")
+    @Get(ThemePreviewsEntity.IMAGE_360_FILENAME)
     @Header("Content-Type", "image/webp")
     getImage360(@Param("id") id: string) {
         return this.getFile(id, "image360File");
     }
 
-    @Get("240.jpg")
+    @Get(ThemePreviewsEntity.IMAGE_240_FILENAME)
     @Header("Content-Type", "image/jpeg")
     getImage240(@Param("id") id: string) {
         return this.getFile(id, "image240File");
     }
 
-    @Get("180.webp")
+    @Get(ThemePreviewsEntity.IMAGE_180_FILENAME)
     @Header("Content-Type", "image/webp")
     getImage180(@Param("id") id: string) {
         return this.getFile(id, "image180File");
     }
 
-    @Get("placeholder.webp")
+    @Get(ThemePreviewsEntity.IMAGE_PLACEHOLDER_FILENAME)
     @Header("Content-Type", "image/webp")
     getImagePlaceholder(@Param("id") id: string) {
         return this.getFile(id, "imagePlaceholderFile");

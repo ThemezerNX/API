@@ -17,67 +17,72 @@ export class HBThemesAssetsRestController {
         return new StreamableFile(file);
     }
 
-    @Get("batteryIcon.png")
+    @Get(HBThemeAssetsEntity.BATTERY_ICON_FILENAME)
     getBatteryIcon(@Param("id") id: string) {
         return this.getFile(id, "batteryIconFile");
     }
 
-    @Get("chargingIcon.png")
+    @Get(HBThemeAssetsEntity.CHARGING_ICON_FILENAME)
     getChargingIcon(@Param("id") id: string) {
         return this.getFile(id, "chargingIconFile");
     }
 
-    @Get("folderIcon.jpg")
+    @Get(HBThemeAssetsEntity.FOLDER_ICON_FILENAME)
     getFolderIcon(@Param("id") id: string) {
         return this.getFile(id, "folderIconFile");
     }
 
-    @Get("invalidIcon.jpg")
+    @Get(HBThemeAssetsEntity.INVALID_ICON_FILENAME)
     getInvalidIcon(@Param("id") id: string) {
         return this.getFile(id, "invalidIconFile");
     }
 
-    @Get("themeIconDark.jpg")
+    @Get(HBThemeAssetsEntity.THEME_ICON_DARK_FILENAME)
     getThemeIconDark(@Param("id") id: string) {
         return this.getFile(id, "themeIconDarkFile");
     }
 
-    @Get("themeIconLight.jpg")
+    @Get(HBThemeAssetsEntity.THEME_ICON_LIGHT_FILENAME)
     getThemeIconLight(@Param("id") id: string) {
         return this.getFile(id, "themeIconLightFile");
     }
 
-    @Get("airplaneIcon.png")
+    @Get(HBThemeAssetsEntity.AIRPLANE_ICON_FILENAME)
     getAirplaneIcon(@Param("id") id: string) {
         return this.getFile(id, "airplaneIconFile");
     }
 
-    @Get("wifiNoneIcon.png")
+    @Get(HBThemeAssetsEntity.WIFI_NONE_ICON_FILENAME)
     getWifiNoneIcon(@Param("id") id: string) {
         return this.getFile(id, "wifiNoneIconFile");
     }
 
-    @Get("wifi1Icon.png")
+    @Get(HBThemeAssetsEntity.WIFI1_ICON_FILENAME)
     getWifi1Icon(@Param("id") id: string) {
         return this.getFile(id, "wifi1IconFile");
     }
 
-    @Get("wifi2Icon.png")
+    @Get(HBThemeAssetsEntity.WIFI2_ICON_FILENAME)
     getWifi2Icon(@Param("id") id: string) {
         return this.getFile(id, "wifi2IconFile");
     }
 
-    @Get("wifi3Icon.png")
+    @Get(HBThemeAssetsEntity.WIFI3_ICON_FILENAME)
     getWifi3Icon(@Param("id") id: string) {
         return this.getFile(id, "wifi3IconFile");
     }
 
-    @Get("ethIcon.png")
+    @Get(HBThemeAssetsEntity.ETH_ICON_FILENAME)
     getEthIcon(@Param("id") id: string) {
         return this.getFile(id, "ethIconFile");
     }
 
-    @Get("backgroundImage.jpg")
+    @Get(HBThemeAssetsEntity.ETH_NONE_ICON_FILENAME)
+    getEthNoneIcon(@Param("id") id: string) {
+        return this.getFile(id, "ethNoneIconFile");
+    }
+
+    @Get(HBThemeAssetsEntity.BACKGROUND_IMAGE_FILENAME)
     getBackgroundImage(@Param("id") id: string) {
         return this.getFile(id, "backgroundImageFile");
     }
