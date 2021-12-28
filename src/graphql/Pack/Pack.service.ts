@@ -83,7 +83,7 @@ export class PackService implements IsOwner, GetHash {
             )`, {query: toTsQuery(query)});
         }
 
-        queryBuilder.orderBy({[queryBuilder.alias + `."${sort}"`]: order});
+        queryBuilder.orderBy({[`"${queryBuilder.alias}"."${sort}"`]: order});
 
         const {result, count} = await executeManyRawAndPaginate(queryBuilder, paginationArgs);
         // map the isNSFW field

@@ -78,12 +78,12 @@ export class LayoutService implements IsOwner {
         }
 
         queryBuilder.where(findConditions)
-            .orderBy({[queryBuilder.alias + `."${sort}"`]: order});
+            .orderBy({[`"${queryBuilder.alias}"."${sort}"`]: order});
 
         if (query?.length > 0) {
             queryBuilder.andWhere(`to_tsquery(:query) @@ (
-                setweight(to_tsvector('pg_catalog.english', coalesce(${queryBuilder.alias}.name, '')), 'A') ||
-                setweight(to_tsvector('pg_catalog.english', coalesce(${queryBuilder.alias}.description, '')), 'C')
+                setweight(to_tsvector('pg_catalog.english', coalesce("${queryBuilder.alias}".name, '')), 'A') ||
+                setweight(to_tsvector('pg_catalog.english', coalesce("${queryBuilder.alias}".description, '')), 'C')
             )`, {query: toTsQuery(query)});
         }
 

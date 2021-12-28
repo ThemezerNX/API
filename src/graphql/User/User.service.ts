@@ -90,7 +90,7 @@ export class UserService implements IsOwner {
 
         queryBuilder
             .where(findConditions)
-            .orderBy({[queryBuilder.alias + `."${sort}"`]: order});
+            .orderBy({[`"${queryBuilder.alias}"."${sort}"`]: order});
 
         return executeAndPaginate(queryBuilder, paginationArgs);
     }

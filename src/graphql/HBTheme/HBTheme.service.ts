@@ -93,9 +93,10 @@ export class HBThemeService implements IsOwner, GetHash {
         queryBuilder
             .where(findConditions)
             .leftJoinAndSelect(queryBuilder.alias + ".tags", "tags")
-            .orderBy({[queryBuilder.alias + `."${sort}"`]: order});
+            .orderBy({[`"${queryBuilder.alias}"."${sort}"`]: order})
 
         if (query?.length > 0) {
+            // TODO: this only selects the tags that match the query. there is a double join caused by perch and the manual 'left join' above
             queryBuilder.andWhere(`to_tsquery(:query) @@ (
                 setweight(to_tsvector('pg_catalog.english', coalesce("${queryBuilder.alias}".name, '')), 'A') ||
                 setweight(to_tsvector('pg_catalog.english', coalesce("${queryBuilder.alias}".description, '')), 'C') ||
