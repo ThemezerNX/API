@@ -7,7 +7,6 @@ import {ThemeResolver} from "../Theme/Theme.resolver";
 import {HBThemeResolver} from "../HBTheme/HBTheme.resolver";
 import {PackResolver} from "../Pack/Pack.resolver";
 import {LayoutResolver} from "../Layout/Layout.resolver";
-import {UnauthorizedError} from "../common/errors/auth/Unauthorized.error";
 import {Reflector} from "@nestjs/core";
 import {ThemeService} from "../Theme/Theme.service";
 import {HBThemeService} from "../HBTheme/HBTheme.service";
@@ -18,6 +17,7 @@ import {CLASS_SERIALIZER_OPTIONS} from "@nestjs/common/serializer/class-serializ
 import {UserResolver} from "../User/User.resolver";
 import {UserService} from "../User/User.service";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
+import {RestrictedError} from "../common/errors/auth/Restricted.error";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -68,7 +68,7 @@ export class AuthGuard implements CanActivate {
                 // If admin is required, the current user will be rejected
                 const restrictAdmin = this.reflector.get<boolean>("restrictAdmin", context.getHandler());
                 if (restrictAdmin) {
-                    throw new UnauthorizedError("Restricted to admins");
+                    throw new RestrictedError({roles: "admins"});
                 }
 
                 // If the operation should only be allowed by the owner
@@ -97,7 +97,7 @@ export class AuthGuard implements CanActivate {
                     const args = ctx.getArgs();
                     assert(Object.keys(args).includes(itemIdField));
                     if (!(service && service.isOwner(args[itemIdField], user.id))) {
-                        throw new UnauthorizedError("Restricted to the owner");
+                        throw new RestrictedError({roles: "owners"});
                     }
                     // user is owner. Set serializer to serialize as "owner"
                     if (defineMetadata) {
@@ -109,7 +109,9 @@ export class AuthGuard implements CanActivate {
                 if (defineMetadata) {
                     Reflect.defineMetadata(CLASS_SERIALIZER_OPTIONS, {groups: []}, context.getHandler());
                 }
-            } else throw new UnauthenticatedError("User not logged in");
+            } else {
+                throw new UnauthenticatedError();
+            }
         }
 
         return true;

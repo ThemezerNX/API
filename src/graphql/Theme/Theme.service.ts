@@ -21,17 +21,16 @@ import {ThemeOptionEntity} from "./ThemeOptions/ThemeOption.entity";
 import {LayoutOptionService} from "../LayoutOption/LayoutOption.service";
 import {LayoutOptionType} from "../LayoutOption/common/LayoutOptionType.enum";
 import {LayoutNotFoundError} from "../common/errors/LayoutNotFound.error";
-import {CreatorNotFoundError} from "../common/errors/CreatorNotFound.error";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
 import {createInfoSelectQueryBuilder} from "../common/functions/createInfoSelectQueryBuilder";
 import {ThemeHashEntity} from "../Cache/Theme/ThemeHash.entity";
 import {GetHash} from "../common/interfaces/GetHash.interface";
-import {ThemeAssetsData} from "./dto/ThemeAssetsData.input";
+import {ThemeAssetsDataInput} from "./dto/ThemeAssetsData.input";
 import * as sharp from "sharp";
 import {propertyToTitleCase} from "../common/functions/propertyToTitleCase";
 import {PackEntity} from "../Pack/Pack.entity";
 import {PackPreviewsEntity} from "../Pack/Previews/PackPreviews.entity";
-import {InvalidIconError} from "../common/errors/InvalidIcon.error";
+import {InvalidIconAssetError} from "../common/errors/InvalidIconAsset.error";
 import {WebhookService} from "../../webhook/Webhook.service";
 import {UserEntity} from "../User/User.entity";
 import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
@@ -319,18 +318,24 @@ export class ThemeService implements IsOwner, GetHash {
             }
         } catch (e) {
             if ((e.detail as string)?.includes("layoutId")) {
-                throw new LayoutNotFoundError("Referenced layout does not exist");
-            } else if ((e.detail as string)?.includes("creatorId")) {
-                throw new CreatorNotFoundError("Referenced creator does not exist");
+                throw new LayoutNotFoundError({}, "Referenced layout does not exist");
             } else throw e;
         }
     }
 
-    private static async readIcon(assets, fileName: keyof ThemeAssetsData) {
+    private static async readIcon(assets, fileName: keyof ThemeAssetsDataInput | keyof HBThemeAssetsDataInput, {
+        width: requiredWidth,
+        height: requiredHeight,
+    }) {
         const buffer = await streamToBuffer((await assets[fileName]).createReadStream());
         const image = sharp(buffer);
         const {width, height} = await image.metadata();
-        if (width !== 64 || height !== 56) throw new InvalidIconError(`${propertyToTitleCase(fileName)} must be 64x56`);
+        if (width !== requiredWidth || height !== requiredHeight)
+            throw new InvalidIconAssetError({
+                propertyName: propertyToTitleCase(fileName),
+                requiredWidth,
+                requiredHeight,
+            });
         return buffer;
     }
 

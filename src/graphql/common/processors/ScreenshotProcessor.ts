@@ -35,7 +35,7 @@ export const generateBackground = async (createReadStream: () => ReadStream) => 
     // if not min 720p, throw error
     if (metadata) {
         if (metadata.width < 1280 || metadata.height < 720) {
-            throw new InvalidImageError("Background Image should be at least 1280x720");
+            throw new InvalidImageError({}, "Background Image should be at least 1280x720");
         }
     }
 
