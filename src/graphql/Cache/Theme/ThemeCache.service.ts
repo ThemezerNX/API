@@ -7,11 +7,15 @@ import {SarcFile} from "@themezernx/sarclib/dist";
 import {Target} from "../../common/enums/Target";
 import {toNice, toTheme} from "@themezernx/target-parser/dist";
 import {invalidFilenameCharsREGEX} from "../../common/Constants";
+import {ThemeAssetsEntity} from "../../Theme/Assets/ThemeAssets.entity";
 
 @Injectable()
 export class ThemeCacheService {
 
-    constructor(@InjectRepository(ThemeCacheEntity) private cacheRepository: Repository<ThemeCacheEntity>, private themeService: ThemeService) {
+    constructor(
+        @InjectRepository(ThemeCacheEntity) private cacheRepository: Repository<ThemeCacheEntity>,
+        private themeService: ThemeService,
+    ) {
     }
 
     private static getName(themeName: string, authorName: string, target: Target, themeId: string, layoutInfo?: string) {
@@ -44,44 +48,44 @@ export class ThemeCacheService {
             const assets = theme.assets;
             let layoutInfo: string = "";
             if (theme.layout) {
-                sarc.addRawFile(Buffer.from(theme.layout.json), "layout.json");
+                sarc.addRawFile(Buffer.from(theme.layout.json), ThemeAssetsEntity.LAYOUT_FILENAME);
                 layoutInfo = `${theme.layout.name} by ${theme.layout.creator.username}`;
                 if (theme.layout.commonJson) {
-                    sarc.addRawFile(Buffer.from(theme.layout.json), "common.json");
+                    sarc.addRawFile(Buffer.from(theme.layout.json), ThemeAssetsEntity.COMMON_FILENAME);
                 }
             } else {
                 if (assets?.customLayoutJson) {
                     const parsed = JSON.parse(assets.customLayoutJson);
                     layoutInfo = `${parsed.PatchName} by ${parsed.AuthorName}`;
-                    sarc.addRawFile(Buffer.from(assets.customLayoutJson), "layout.json");
+                    sarc.addRawFile(Buffer.from(assets.customLayoutJson), ThemeAssetsEntity.LAYOUT_FILENAME);
                 }
                 if (assets?.customCommonLayoutJson) {
-                    sarc.addRawFile(Buffer.from(assets.customCommonLayoutJson), "common.json");
+                    sarc.addRawFile(Buffer.from(assets.customCommonLayoutJson), ThemeAssetsEntity.COMMON_FILENAME);
                 }
             }
-            if (assets?.imageFile) {
-                sarc.addRawFile(assets.imageFile, "image.jpg");
+            if (assets?.backgroundImageFile) {
+                sarc.addRawFile(assets.backgroundImageFile, ThemeAssetsEntity.BACKGROUND_IMAGE_FILE.name);
             }
             if (assets?.albumIconFile) {
-                sarc.addRawFile(assets.albumIconFile, "album.png");
+                sarc.addRawFile(assets.albumIconFile, ThemeAssetsEntity.ALBUM_ICON_FILE.name);
             }
             if (assets?.newsIconFile) {
-                sarc.addRawFile(assets.newsIconFile, "news.png");
+                sarc.addRawFile(assets.newsIconFile, ThemeAssetsEntity.NEWS_ICON_FILE.name);
             }
             if (assets?.shopIconFile) {
-                sarc.addRawFile(assets.shopIconFile, "shop.png");
+                sarc.addRawFile(assets.shopIconFile, ThemeAssetsEntity.SHOP_ICON_FILE.name);
             }
             if (assets?.controllerIconFile) {
-                sarc.addRawFile(assets.controllerIconFile, "controller.png");
+                sarc.addRawFile(assets.controllerIconFile, ThemeAssetsEntity.CONTROLLER_ICON_FILE.name);
             }
             if (assets?.settingsIconFile) {
-                sarc.addRawFile(assets.settingsIconFile, "settings.png");
+                sarc.addRawFile(assets.settingsIconFile, ThemeAssetsEntity.SETTINGS_ICON_FILE.name);
             }
             if (assets?.powerIconFile) {
-                sarc.addRawFile(assets.powerIconFile, "power.png");
+                sarc.addRawFile(assets.powerIconFile, ThemeAssetsEntity.POWER_ICON_FILE.name);
             }
             if (assets?.homeIconFile) {
-                sarc.addRawFile(assets.homeIconFile, "lock.png");
+                sarc.addRawFile(assets.homeIconFile, ThemeAssetsEntity.HOME_ICON_FILE.name);
             }
             // create info.json
             const info = {
@@ -91,7 +95,7 @@ export class ThemeCacheService {
                 Target: toTheme(theme.target),
                 LayoutInfo: layoutInfo || "",
             };
-            sarc.addRawFile(Buffer.from(JSON.stringify(info, null, 4)), "info.json");
+            sarc.addRawFile(Buffer.from(JSON.stringify(info, null, 4)), ThemeAssetsEntity.INFO_FILENAME);
 
             data = sarc.save(2);
             fileName = ThemeCacheService.getName(theme.name,
