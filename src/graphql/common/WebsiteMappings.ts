@@ -4,13 +4,10 @@ const url = (path: string) => {
 
 export const slugify = (text: string) => {
     return text
-        .toString()
         .toLowerCase()
-        .replace(/\s+/g, "-") // Replace spaces with -
+        .replace(/[\s\-]+/g, "-") // Replace spaces with -, // Replace multiple - with single -
         .replace(/[^\w\-]+/g, "") // Remove all non-word chars
-        .replace(/--+/g, "-") // Replace multiple - with single -
-        .replace(/^-+/, "") // Trim - from start of text
-        .replace(/-+$/, ""); // Trim - from end of text
+        .replace(/^-+|-+$/g, "") // Trim - from start and end of text
 };
 
 export const WebsiteMappings = {
