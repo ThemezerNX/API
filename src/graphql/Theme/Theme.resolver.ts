@@ -9,10 +9,10 @@ import {ThemeNotFoundError} from "../common/errors/ThemeNotFound.error";
 import {ListArgs} from "./dto/List.args";
 import {SubmitThemesArgs} from "./dto/SubmitThemes.args";
 import {SubmitPackWithThemesArgs} from "./dto/SubmitPatkWithThemes.args";
-import {CurrentUser} from "../Auth/decorators/CurrentUser.decorator";
 import {UserEntity} from "../User/User.entity";
-import {Auth} from "../Auth/decorators/Auth.decorator";
 import {GraphQLResolveInfo} from "graphql";
+import {CurrentUser} from "../../common/decorators/CurrentUser.decorator";
+import {Auth} from "../../common/decorators/Auth.decorator";
 
 
 @Resolver(ThemeModel)

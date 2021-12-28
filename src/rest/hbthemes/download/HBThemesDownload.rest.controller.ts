@@ -1,12 +1,12 @@
 import {Controller, Get, Header, NotFoundException, Param, Redirect, Res} from "@nestjs/common";
 import {Response} from "express";
-import {ClientIP} from "../../common/decorators/ClientIP.decorator";
 import {UserEntity} from "../../../graphql/User/User.entity";
-import {UserAgent} from "../../common/decorators/UserAgent.decorator";
 import {HBThemeService} from "../../../graphql/HBTheme/HBTheme.service";
 import {HBThemeDownloadService} from "../../../graphql/HBTheme/Download/HBThemeDownload.service";
 import {HBThemeCacheService} from "../../../graphql/Cache/HBTheme/HBThemeCache.service";
-import {CurrentUser} from "../../../graphql/Auth/decorators/CurrentUser.decorator";
+import {ClientIP} from "../../../common/decorators/ClientIP.decorator";
+import {CurrentUser} from "../../../common/decorators/CurrentUser.decorator";
+import {UserAgent} from "../../../common/decorators/UserAgent.decorator";
 
 @Controller()
 export class HBThemesDownloadRestController {

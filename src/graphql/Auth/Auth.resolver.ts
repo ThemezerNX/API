@@ -7,8 +7,8 @@ import {UserEntity} from "../User/User.entity";
 import {RegisterData} from "./dto/Register.dto";
 import {VerificationData} from "./dto/Verification.dto";
 import {LoginData} from "./dto/Login.dto";
-import {CurrentUser} from "./decorators/CurrentUser.decorator";
-import {Auth} from "./decorators/Auth.decorator";
+import {CurrentUser} from "../../common/decorators/CurrentUser.decorator";
+import {Auth} from "../../common/decorators/Auth.decorator";
 
 
 @Resolver()

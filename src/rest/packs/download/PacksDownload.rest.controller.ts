@@ -1,13 +1,12 @@
 import {Controller, Get, Header, NotFoundException, Param, Redirect, Res} from "@nestjs/common";
 import {Response} from "express";
-import {ClientIP} from "../../common/decorators/ClientIP.decorator";
 import {UserEntity} from "../../../graphql/User/User.entity";
-import {UserAgent} from "../../common/decorators/UserAgent.decorator";
 import {PackService} from "../../../graphql/Pack/Pack.service";
 import {PackCacheService} from "../../../graphql/Cache/Pack/PackCache.service";
 import {PackDownloadService} from "../../../graphql/Pack/Download/PackDownload.service";
-import {PackEntity} from "../../../graphql/Pack/Pack.entity";
-import {CurrentUser} from "../../../graphql/Auth/decorators/CurrentUser.decorator";
+import {ClientIP} from "../../../common/decorators/ClientIP.decorator";
+import {CurrentUser} from "../../../common/decorators/CurrentUser.decorator";
+import {UserAgent} from "../../../common/decorators/UserAgent.decorator";
 
 @Controller()
 export class PacksDownloadRestController {
@@ -42,7 +41,7 @@ export class PacksDownloadRestController {
 
         res.attachment(fileName);
         res.end(data, "binary");
-        res.end(null)
+        res.end(null);
     }
 
 }
