@@ -6,6 +6,8 @@ import {CDNMapper} from "../common/CDNMapper";
 import {EntityWithPreviewsInterface} from "../common/interfaces/EntityWithPreviews.interface";
 import {EntityWithAssetsInterface} from "../common/interfaces/EntityWithAssets.interface";
 import {ThemeItemEntityInterface} from "../common/interfaces/ThemeItem.entity.interface";
+import {HBThemeLightColorSchemeEntity} from "./ColorScheme/HBThemeLightColorScheme.entity";
+import {HBThemeDarkColorSchemeEntity} from "./ColorScheme/HBThemeDarkColorScheme.entity";
 
 
 @Entity()
@@ -19,6 +21,18 @@ export class HBThemeEntity extends ThemeItemEntityInterface implements EntityWit
 
     @OneToOne(() => HBThemeAssetsEntity, hbthemeAssets => hbthemeAssets.hbtheme, {cascade: true, eager: true})
     assets: HBThemeAssetsEntity;
+
+    @OneToOne(() => HBThemeLightColorSchemeEntity, hbthemeColorScheme => hbthemeColorScheme.hbtheme, {
+        cascade: true,
+        eager: true,
+    })
+    lightTheme: HBThemeLightColorSchemeEntity;
+
+    @OneToOne(() => HBThemeDarkColorSchemeEntity, hbthemeColorScheme => hbthemeColorScheme.hbtheme, {
+        cascade: true,
+        eager: true,
+    })
+    darkTheme: HBThemeDarkColorSchemeEntity;
 
     @AfterLoad()
     setUrls() {
