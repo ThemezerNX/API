@@ -34,7 +34,7 @@ export class HBThemeService implements IsOwner, GetHash {
                 },
             options?: ServiceFindOptionsParameter<HBThemeEntity>,
     ): Promise<HBThemeEntity> {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
+        const queryBuilder = this.repository.createQueryBuilder()
         const findConditions: FindConditions<HBThemeEntity> = {};
 
         if (id != undefined) {
@@ -50,6 +50,8 @@ export class HBThemeService implements IsOwner, GetHash {
         queryBuilder
             .leftJoinAndSelect(queryBuilder.alias + ".tags", "tags")
             .where(findConditions);
+
+        createInfoSelectQueryBuilder(options, this.repository);
 
         return queryBuilder.getOne();
     }
@@ -75,7 +77,7 @@ export class HBThemeService implements IsOwner, GetHash {
             },
         options?: ServiceFindOptionsParameter<HBThemeEntity>,
     ): Promise<{ result: HBThemeEntity[], count: number }> {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
+        const queryBuilder = this.repository.createQueryBuilder();
         const findConditions: FindConditions<HBThemeEntity> = {};
 
         if (packId != undefined) {
@@ -105,6 +107,8 @@ export class HBThemeService implements IsOwner, GetHash {
             )`, {query: toTsQuery(query)});
         }
 
+        createInfoSelectQueryBuilder(options, this.repository, queryBuilder);
+
         return executeAndPaginate(queryBuilder, paginationArgs);
     }
 
@@ -119,7 +123,7 @@ export class HBThemeService implements IsOwner, GetHash {
             },
         options?: ServiceFindOptionsParameter<HBThemeEntity>,
     ): Promise<HBThemeEntity[]> {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
+        const queryBuilder = this.repository.createQueryBuilder();
         const findConditions: FindConditions<HBThemeEntity> = {};
 
         if (includeNSFW != true) {
@@ -133,6 +137,8 @@ export class HBThemeService implements IsOwner, GetHash {
         if (limit != undefined) {
             queryBuilder.limit(limit);
         }
+
+        createInfoSelectQueryBuilder(options, this.repository);
 
         return queryBuilder.getMany();
     }

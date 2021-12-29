@@ -3,17 +3,17 @@ import {ServiceFindOptionsParameter} from "../interfaces/ServiceFindOptions.para
 import {PerchQueryBuilder} from "perch-query-builder";
 import {joinAndSelectRelations} from "./serviceFunctions";
 
-export function createInfoSelectQueryBuilder<E>(options: ServiceFindOptionsParameter<E>, repository: Repository<E>): SelectQueryBuilder<E> {
-    let queryBuilder;
+export function createInfoSelectQueryBuilder<E>(options: ServiceFindOptionsParameter<E>, repository: Repository<E>, queryBuilder?: SelectQueryBuilder<E>): SelectQueryBuilder<E> {
+    let qb;
     if (options?.info) {
-        queryBuilder = PerchQueryBuilder.generateQueryBuilder(
+        qb = PerchQueryBuilder.generateQueryBuilder(
             repository,
             options.info,
-            {rootField: options.rootField},
+            {rootField: options.rootField, qb: queryBuilder}
         );
     } else {
-        queryBuilder = repository.createQueryBuilder();
-        joinAndSelectRelations(queryBuilder, options);
+        qb = repository.createQueryBuilder();
+        joinAndSelectRelations(qb, options);
     }
-    return queryBuilder;
+    return qb;
 }

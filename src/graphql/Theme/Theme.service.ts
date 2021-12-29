@@ -109,7 +109,7 @@ export class ThemeService implements IsOwner, GetHash {
             },
         options?: ServiceFindOptionsParameter<ThemeEntity>,
     ) {
-        let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
+        const queryBuilder = this.repository.createQueryBuilder()
         const findConditions: FindConditions<ThemeEntity> = {};
 
         if (packId != undefined) {
@@ -145,6 +145,8 @@ export class ThemeService implements IsOwner, GetHash {
                 to_tsvector(tags.name)
             )`, {query: toTsQuery(query)});
         }
+
+        createInfoSelectQueryBuilder(options, this.repository);
 
         return executeAndPaginate(queryBuilder, paginationArgs);
     }
