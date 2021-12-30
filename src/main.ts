@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import "./common/patches"
 import * as dotenv from "dotenv";
 import * as express from "express";
 import {NestFactory} from "@nestjs/core";
