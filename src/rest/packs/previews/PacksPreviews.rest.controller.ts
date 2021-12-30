@@ -45,10 +45,4 @@ export class PacksPreviewsRestController {
         return this.getFile(id, "image180File");
     }
 
-    @Get(PackPreviewsEntity.IMAGE_PLACEHOLDER_FILENAME)
-    @Header("Content-Type", "image/webp")
-    getImagePlaceholder(@Param("id") id: string) {
-        return this.getFile(id, "imagePlaceholderFile");
-    }
-
 }

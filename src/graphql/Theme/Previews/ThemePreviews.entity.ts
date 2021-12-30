@@ -31,9 +31,6 @@ export class ThemePreviewsEntity extends PreviewsEntityInterface {
         this.image180Url = CDNMapper.themes.previews(this.themeId,
             ThemePreviewsEntity.IMAGE_180_FILENAME,
             this.image180Hash);
-        this.imagePlaceholderUrl = CDNMapper.themes.previews(this.themeId,
-            ThemePreviewsEntity.IMAGE_PLACEHOLDER_FILENAME,
-            this.imagePlaceholderHash);
     }
 
     async generateFromStream(createReadStream: () => ReadStream) {

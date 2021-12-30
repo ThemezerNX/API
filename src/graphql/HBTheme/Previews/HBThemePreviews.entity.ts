@@ -27,9 +27,6 @@ export class HBThemePreviewsEntity extends PreviewsEntityInterface {
         this.image180Url = CDNMapper.hbthemes.previews(this.hbthemeId,
             HBThemePreviewsEntity.IMAGE_180_FILENAME,
             this.image180Hash);
-        this.imagePlaceholderUrl = CDNMapper.hbthemes.previews(this.hbthemeId,
-            HBThemePreviewsEntity.IMAGE_720_FILENAME,
-            this.imagePlaceholderHash);
     }
 
 }

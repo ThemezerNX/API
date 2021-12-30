@@ -38,6 +38,7 @@
         "apollo-server-express": "^2",
         "apollo-server-plugin-response-cache": "^3.1.1",
         "bcrypt": "^5.0.1",
+        "blurhash": "^1.1.4",
         "class-transformer": "^0.4.0",
         "class-validator": "^0.13.1",
         "connect-typeorm": "^1.1.4",

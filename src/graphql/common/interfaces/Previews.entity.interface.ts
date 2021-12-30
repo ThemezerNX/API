@@ -11,7 +11,6 @@ export abstract class PreviewsEntityInterface extends CachableEntityInterface {
     static IMAGE_360_FILENAME = "360.webp";
     static IMAGE_240_FILENAME = "240.webp";
     static IMAGE_180_FILENAME = "180.webp";
-    static IMAGE_PLACEHOLDER_FILENAME = "placeholder.webp";
 
     @Column("bytea", {select: false})
     image720File: Buffer;
@@ -21,14 +20,13 @@ export abstract class PreviewsEntityInterface extends CachableEntityInterface {
     image240File: Buffer;
     @Column("bytea", {select: false})
     image180File: Buffer;
-    @Column("bytea", {select: false})
-    imagePlaceholderFile: Buffer;
+    @Column("varchar")
+    imageBlurHash: string;
 
     image720Url: string;
     image360Url: string;
     image240Url: string;
     image180Url: string;
-    imagePlaceholderUrl: string;
 
     @Column({type: "bytea", update: false, generatedType: "STORED", asExpression: "sha256(\"image720File\")"})
     @SelectAlways()
@@ -42,16 +40,13 @@ export abstract class PreviewsEntityInterface extends CachableEntityInterface {
     @Column({type: "bytea", update: false, generatedType: "STORED", asExpression: "sha256(\"image180File\")"})
     @SelectAlways()
     readonly image180Hash: Buffer;
-    @Column({type: "bytea", update: false, generatedType: "STORED", asExpression: "sha256(\"imagePlaceholderFile\")"})
-    @SelectAlways()
-    readonly imagePlaceholderHash: Buffer;
 
     protected assignImages(images) {
-        this.imagePlaceholderFile = images.imagePlaceholderFile;
-        this.image180File = images.image180File;
-        this.image240File = images.image240File;
-        this.image360File = images.image360File;
         this.image720File = images.image720File;
+        this.image360File = images.image360File;
+        this.image240File = images.image240File;
+        this.image180File = images.image180File;
+        this.imageBlurHash = images.imageBlurHash;
     }
 
     async generateFromStream(file: (() => ReadStream) | Buffer) {

@@ -107,9 +107,6 @@ export class PackPreviewsEntity extends PreviewsEntityInterface {
         this.image180Url = !!this.image180Hash ? CDNMapper.packs.previews(this.packId,
             PackPreviewsEntity.IMAGE_180_FILENAME,
             this.image180Hash) : null;
-        this.imagePlaceholderUrl = !!this.imagePlaceholderHash ? CDNMapper.packs.previews(this.packId,
-            PackPreviewsEntity.IMAGE_720_FILENAME,
-            this.imagePlaceholderHash) : null;
     }
 
     async generateFromThemes(background: Buffer | null, images: Buffer[]) {

@@ -29,9 +29,6 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
         this.image180Url = CDNMapper.layoutOptions.previews(this.layoutOptionValueUUID,
             LayoutOptionValuePreviewsEntity.IMAGE_180_FILENAME,
             this.image180Hash);
-        this.imagePlaceholderUrl = CDNMapper.layoutOptions.previews(this.layoutOptionValueUUID,
-            LayoutOptionValuePreviewsEntity.IMAGE_720_FILENAME,
-            this.imagePlaceholderHash);
     }
 
 }

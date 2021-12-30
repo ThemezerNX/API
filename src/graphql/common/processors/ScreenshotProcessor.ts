@@ -1,8 +1,9 @@
 import * as sharp from "sharp";
 import {ReadStream} from "fs";
 import {InvalidImageError} from "../errors/InvalidImage.error";
+import {encode} from "blurhash";
 
-const resizeImage = async (file: ReadStream | Buffer, width: number, height: number, jpeg: boolean = false): Promise<Buffer> => {
+const resizeImage = async (file: ReadStream | Buffer, width: number, height: number, options?: { jpeg?: boolean }): Promise<Buffer> => {
     let sharpInstance;
     if (file instanceof Buffer) {
         sharpInstance = sharp(file);
@@ -12,7 +13,7 @@ const resizeImage = async (file: ReadStream | Buffer, width: number, height: num
     }
     sharpInstance
         .resize(width, height, {fit: sharp.fit.cover})
-        .toFormat(jpeg ? "jpeg" : "webp");
+        .toFormat(options.jpeg ? "jpeg" : "webp");
     return sharpInstance.toBuffer();
 };
 
@@ -21,9 +22,11 @@ export const generateImages = async (file: (() => ReadStream) | Buffer, jpeg240 
     return {
         image720File: await resizeImage(isFunction ? file() : file, 1280, 720),
         image360File: await resizeImage(isFunction ? file() : file, 640, 360),
-        image240File: await resizeImage(isFunction ? file() : file, 426, 240, jpeg240),
+        image240File: await resizeImage(isFunction ? file() : file, 426, 240, {jpeg: jpeg240}),
         image180File: await resizeImage(isFunction ? file() : file, 320, 180),
-        imagePlaceholderFile: await resizeImage(isFunction ? file() : file, 80, 45),
+        imageBlurHash: encode(new Uint8ClampedArray(
+            await resizeImage(isFunction ? file() : file, 80, 45),
+        ), 80, 45, 5, 4),
     };
 };
 

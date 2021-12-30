@@ -45,10 +45,4 @@ export class LayoutsOptionsPreviewsRestController {
         return this.getFile(uuid, "image180File");
     }
 
-    @Get(LayoutOptionValuePreviewsEntity.IMAGE_PLACEHOLDER_FILENAME)
-    @Header("Content-Type", "image/webp")
-    getImagePlaceholder(@Param("uuid") uuid: string) {
-        return this.getFile(uuid, "imagePlaceholderFile");
-    }
-
 }
