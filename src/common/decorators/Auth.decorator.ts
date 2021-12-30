@@ -16,7 +16,7 @@ class AuthDecoratorConfig {
     /**
      * Whether the serialize metadata should be set based on user permissions.
      */
-    defineSerializeMetadata: boolean = true;
+    defineSerializeMetadata?: boolean = true;
 }
 
 export function Auth(restrictions: AuthDecoratorConfig = new AuthDecoratorConfig()) {
