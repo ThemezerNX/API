@@ -20,7 +20,7 @@ export abstract class PreviewsEntityInterface extends CachableEntityInterface {
     image240File: Buffer;
     @Column("bytea", {select: false})
     image180File: Buffer;
-    @Column("varchar")
+    @Column()
     imageBlurHash: string;
 
     image720Url: string;
@@ -50,7 +50,7 @@ export abstract class PreviewsEntityInterface extends CachableEntityInterface {
     }
 
     async generateFromStream(file: (() => ReadStream) | Buffer) {
-        this.assignImages(await generateImages(file));
+        this.assignImages(await generateImages(file, {requireNintendoExif: false}));
     }
 
 }

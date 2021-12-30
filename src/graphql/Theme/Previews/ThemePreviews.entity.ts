@@ -34,7 +34,7 @@ export class ThemePreviewsEntity extends PreviewsEntityInterface {
     }
 
     async generateFromStream(createReadStream: () => ReadStream) {
-        this.assignImages(await generateImages(createReadStream, true));
+        this.assignImages(await generateImages(createReadStream, {jpeg240: true}));
     }
 
 }
