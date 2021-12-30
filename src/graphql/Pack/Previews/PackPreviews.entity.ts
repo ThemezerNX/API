@@ -99,13 +99,13 @@ export class PackPreviewsEntity extends PreviewsEntityInterface {
             PackPreviewsEntity.IMAGE_720_FILENAME,
             this.image720Hash) : null;
         this.image360Url = !!this.image360Hash ? CDNMapper.packs.previews(this.packId,
-            PackPreviewsEntity.IMAGE_720_FILENAME,
+            PackPreviewsEntity.IMAGE_360_FILENAME,
             this.image360Hash) : null;
         this.image240Url = !!this.image240Hash ? CDNMapper.packs.previews(this.packId,
-            PackPreviewsEntity.IMAGE_720_FILENAME,
+            PackPreviewsEntity.IMAGE_240_FILENAME,
             this.image240Hash) : null;
         this.image180Url = !!this.image180Hash ? CDNMapper.packs.previews(this.packId,
-            PackPreviewsEntity.IMAGE_720_FILENAME,
+            PackPreviewsEntity.IMAGE_180_FILENAME,
             this.image180Hash) : null;
         this.imagePlaceholderUrl = !!this.imagePlaceholderHash ? CDNMapper.packs.previews(this.packId,
             PackPreviewsEntity.IMAGE_720_FILENAME,

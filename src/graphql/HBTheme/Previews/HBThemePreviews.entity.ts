@@ -19,13 +19,13 @@ export class HBThemePreviewsEntity extends PreviewsEntityInterface {
             HBThemePreviewsEntity.IMAGE_720_FILENAME,
             this.image720Hash);
         this.image360Url = CDNMapper.hbthemes.previews(this.hbthemeId,
-            HBThemePreviewsEntity.IMAGE_720_FILENAME,
+            HBThemePreviewsEntity.IMAGE_360_FILENAME,
             this.image360Hash);
         this.image240Url = CDNMapper.hbthemes.previews(this.hbthemeId,
-            HBThemePreviewsEntity.IMAGE_720_FILENAME,
+            HBThemePreviewsEntity.IMAGE_240_FILENAME,
             this.image240Hash);
         this.image180Url = CDNMapper.hbthemes.previews(this.hbthemeId,
-            HBThemePreviewsEntity.IMAGE_720_FILENAME,
+            HBThemePreviewsEntity.IMAGE_180_FILENAME,
             this.image180Hash);
         this.imagePlaceholderUrl = CDNMapper.hbthemes.previews(this.hbthemeId,
             HBThemePreviewsEntity.IMAGE_720_FILENAME,

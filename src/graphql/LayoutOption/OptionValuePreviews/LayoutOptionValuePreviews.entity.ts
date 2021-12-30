@@ -21,13 +21,13 @@ export class LayoutOptionValuePreviewsEntity extends PreviewsEntityInterface {
             LayoutOptionValuePreviewsEntity.IMAGE_720_FILENAME,
             this.image720Hash);
         this.image360Url = CDNMapper.layoutOptions.previews(this.layoutOptionValueUUID,
-            LayoutOptionValuePreviewsEntity.IMAGE_720_FILENAME,
+            LayoutOptionValuePreviewsEntity.IMAGE_360_FILENAME,
             this.image360Hash);
         this.image240Url = CDNMapper.layoutOptions.previews(this.layoutOptionValueUUID,
-            LayoutOptionValuePreviewsEntity.IMAGE_720_FILENAME,
+            LayoutOptionValuePreviewsEntity.IMAGE_240_FILENAME,
             this.image240Hash);
         this.image180Url = CDNMapper.layoutOptions.previews(this.layoutOptionValueUUID,
-            LayoutOptionValuePreviewsEntity.IMAGE_720_FILENAME,
+            LayoutOptionValuePreviewsEntity.IMAGE_180_FILENAME,
             this.image180Hash);
         this.imagePlaceholderUrl = CDNMapper.layoutOptions.previews(this.layoutOptionValueUUID,
             LayoutOptionValuePreviewsEntity.IMAGE_720_FILENAME,

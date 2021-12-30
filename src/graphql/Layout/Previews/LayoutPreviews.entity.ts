@@ -19,13 +19,13 @@ export class LayoutPreviewsEntity extends PreviewsEntityInterface {
             LayoutPreviewsEntity.IMAGE_720_FILENAME,
             this.image720Hash);
         this.image360Url = CDNMapper.layouts.previews(this.layoutId,
-            LayoutPreviewsEntity.IMAGE_720_FILENAME,
+            LayoutPreviewsEntity.IMAGE_360_FILENAME,
             this.image360Hash);
         this.image240Url = CDNMapper.layouts.previews(this.layoutId,
-            LayoutPreviewsEntity.IMAGE_720_FILENAME,
+            LayoutPreviewsEntity.IMAGE_240_FILENAME,
             this.image240Hash);
         this.image180Url = CDNMapper.layouts.previews(this.layoutId,
-            LayoutPreviewsEntity.IMAGE_720_FILENAME,
+            LayoutPreviewsEntity.IMAGE_180_FILENAME,
             this.image180Hash);
         this.imagePlaceholderUrl = CDNMapper.layouts.previews(this.layoutId,
             LayoutPreviewsEntity.IMAGE_720_FILENAME,
