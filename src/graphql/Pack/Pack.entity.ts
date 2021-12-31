@@ -5,6 +5,7 @@ import {ThemeEntity} from "../Theme/Theme.entity";
 import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
 import {CDNMapper} from "../common/CDNMapper";
 import {EntityWithPreviewsInterface} from "../common/interfaces/EntityWithPreviews.interface";
+import {WebsiteMappings} from "../common/WebsiteMappings";
 
 @Entity()
 export class PackEntity extends ItemEntityInterface implements EntityWithPreviewsInterface {
@@ -21,11 +22,10 @@ export class PackEntity extends ItemEntityInterface implements EntityWithPreview
     @OneToMany(() => HBThemeEntity, hbtheme => hbtheme.pack, {onDelete: "CASCADE"})
     hbthemes: HBThemeEntity[];
 
-    downloadUrl: string;
-
     @AfterLoad()
     setUrls() {
         this.downloadUrl = CDNMapper.packs.download(this.id);
+        this.pageUrl = WebsiteMappings.pack(this.id);
     }
 
 }

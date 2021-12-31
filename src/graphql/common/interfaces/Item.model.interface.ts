@@ -2,6 +2,7 @@ import {Field, ID, Int, InterfaceType} from "@nestjs/graphql";
 import {URLResolver} from "graphql-scalars";
 import {CreatorModel} from "../../User/Creator.model";
 import {RootModelAbstract} from "./Root.model.abstract";
+import {PreviewsModelInterface} from "./Previews.model.interface";
 
 
 @InterfaceType("ItemInterface")
@@ -33,5 +34,13 @@ export abstract class ItemModelInterface extends RootModelAbstract {
 
     @Field(() => URLResolver)
     downloadUrl: string;
+
+    @Field(() => URLResolver)
+    pageUrl: string;
+
+    @Field()
+    isPrivate: boolean;
+
+    abstract previews: PreviewsModelInterface;
 
 }

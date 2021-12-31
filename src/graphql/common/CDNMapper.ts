@@ -3,7 +3,7 @@ const url = (path: string) => {
 };
 
 const cacheUrl = (path: string, hash: Buffer, alreadyHasQueryParameters: boolean = false) => {
-    return url(path + (alreadyHasQueryParameters ? "&" : "?") + "hash=" + hash.toString("hex"));
+    return url(path + (alreadyHasQueryParameters ? "&" : "?") + "hash=" + (hash ? hash.toString("hex") : "false"));
 };
 
 const itemRoute = (itemType: string, itemId: string, itemProperty: string, fileName: string, extension: string, hash: Buffer) => {
@@ -11,10 +11,10 @@ const itemRoute = (itemType: string, itemId: string, itemProperty: string, fileN
 };
 
 const itemRoutes = {
-    previews: (itemType: string, itemId: string, fileName: string, hash: Buffer) => {
+    previews: (itemType: string, itemId: string, fileName: string, hash?: Buffer) => {
         return itemRoute(itemType, itemId, "previews", fileName, null, hash);
     },
-    assets: (itemType: string, itemId: string, fileName: string, hash: Buffer) => {
+    assets: (itemType: string, itemId: string, fileName: string, hash?: Buffer) => {
         return itemRoute(itemType, itemId, "assets", fileName, null, hash);
     },
     download: (itemType: string, itemId: string, asset?: string) => {

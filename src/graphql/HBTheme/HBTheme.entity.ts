@@ -8,6 +8,7 @@ import {EntityWithAssetsInterface} from "../common/interfaces/EntityWithAssets.i
 import {ThemeItemEntityInterface} from "../common/interfaces/ThemeItem.entity.interface";
 import {HBThemeLightColorSchemeEntity} from "./ColorScheme/HBThemeLightColorScheme.entity";
 import {HBThemeDarkColorSchemeEntity} from "./ColorScheme/HBThemeDarkColorScheme.entity";
+import {WebsiteMappings} from "../common/WebsiteMappings";
 
 
 @Entity()
@@ -37,6 +38,7 @@ export class HBThemeEntity extends ThemeItemEntityInterface implements EntityWit
     @AfterLoad()
     setUrls() {
         this.downloadUrl = CDNMapper.hbthemes.download(this.id);
+        this.pageUrl = WebsiteMappings.hbtheme(this.id);
     }
 
 }

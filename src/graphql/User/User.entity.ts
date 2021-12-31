@@ -1,8 +1,9 @@
-import {Column, CreateDateColumn, Entity, Generated, OneToOne, PrimaryColumn} from "typeorm";
+import {AfterLoad, Column, CreateDateColumn, Entity, Generated, OneToOne, PrimaryColumn} from "typeorm";
 import {UserPreferencesEntity} from "./Preferences/UserPreferences.entity";
 import {UserConnectionsEntity} from "./Connections/UserConnections.entity";
 import {UserProfileEntity} from "./Profile/UserProfile.entity";
 import {CachableEntityInterface} from "../common/interfaces/Cachable.entity.interface";
+import {WebsiteMappings} from "../common/WebsiteMappings";
 
 
 @Entity()
@@ -69,6 +70,13 @@ export class UserEntity extends CachableEntityInterface {
 
     @OneToOne(() => UserConnectionsEntity, connections => connections.user, {eager: true, cascade: true})
     connections: UserConnectionsEntity;
+
+    pageUrl: string;
+
+    @AfterLoad()
+    setUrls() {
+        this.pageUrl = WebsiteMappings.user(this.id);
+    }
 
     toJSON() {
         delete this.password;

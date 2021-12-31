@@ -2,6 +2,7 @@ import {Field, ID, ObjectType} from "@nestjs/graphql";
 import {UserProfileModel} from "./Profile/UserProfile.model";
 import {UserConnectionsModel} from "./Connections/UserConnections.model";
 import {RootModelAbstract} from "../common/interfaces/Root.model.abstract";
+import {URLResolver} from "graphql-scalars";
 
 
 @ObjectType("Creator")
@@ -27,5 +28,8 @@ export class CreatorModel extends RootModelAbstract {
 
     @Field(() => UserConnectionsModel)
     connections: UserConnectionsModel;
+
+    @Field(() => URLResolver)
+    pageUrl: string;
 
 }

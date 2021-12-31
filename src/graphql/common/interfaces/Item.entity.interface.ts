@@ -12,6 +12,7 @@ import {UserEntity} from "../../User/User.entity";
 import {CachableEntityInterface} from "./Cachable.entity.interface";
 import {slugify} from "../WebsiteMappings";
 import {SelectAlways} from "perch-query-builder";
+import {PreviewsEntityInterface} from "./Previews.entity.interface";
 
 
 export abstract class ItemEntityInterface extends CachableEntityInterface {
@@ -47,6 +48,15 @@ export abstract class ItemEntityInterface extends CachableEntityInterface {
 
     @Column("int", {default: 0})
     downloadCount: number;
+
+    @Column()
+    isPrivate: boolean;
+
+    downloadUrl: string;
+
+    pageUrl: string;
+
+    abstract previews: PreviewsEntityInterface;
 
     @AfterLoad()
     setSlug() {

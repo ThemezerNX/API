@@ -1,4 +1,4 @@
-import {AfterLoad, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne} from "typeorm";
+import {AfterLoad, Column, Entity, ManyToOne, OneToMany, OneToOne} from "typeorm";
 import {Target} from "../common/enums/Target";
 import {LayoutOptionEntity} from "../LayoutOption/LayoutOption.entity";
 import {UserEntity} from "../User/User.entity";
@@ -6,6 +6,7 @@ import {ItemEntityInterface} from "../common/interfaces/Item.entity.interface";
 import {LayoutPreviewsEntity} from "./Previews/LayoutPreviews.entity";
 import {CDNMapper} from "../common/CDNMapper";
 import {EntityWithPreviewsInterface} from "../common/interfaces/EntityWithPreviews.interface";
+import {WebsiteMappings} from "../common/WebsiteMappings";
 
 
 @Entity()
@@ -42,13 +43,13 @@ export class LayoutEntity extends ItemEntityInterface implements EntityWithPrevi
     @Column({type: "char", length: 32})
     insertionMD5: string;
 
-    downloadUrl: string;
     downloadCommonUrl: string;
 
     @AfterLoad()
     setUrls() {
         this.downloadUrl = CDNMapper.layouts.download(this.id);
         this.downloadCommonUrl = CDNMapper.layouts.downloadCommon(this.id);
+        this.pageUrl = WebsiteMappings.layout(this.id);
     }
 
 }

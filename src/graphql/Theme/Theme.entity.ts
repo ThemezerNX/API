@@ -9,6 +9,7 @@ import {EntityWithPreviewsInterface} from "../common/interfaces/EntityWithPrevie
 import {EntityWithAssetsInterface} from "../common/interfaces/EntityWithAssets.interface";
 import {ThemeOptionEntity} from "./ThemeOptions/ThemeOption.entity";
 import {ThemeItemEntityInterface} from "../common/interfaces/ThemeItem.entity.interface";
+import {WebsiteMappings} from "../common/WebsiteMappings";
 
 
 @Entity()
@@ -43,6 +44,7 @@ export class ThemeEntity extends ThemeItemEntityInterface implements EntityWithP
     @AfterLoad()
     setUrls() {
         this.downloadUrl = CDNMapper.themes.download(this.id);
+        this.pageUrl = WebsiteMappings.theme(this.id);
     }
 
 }

@@ -27,8 +27,6 @@ export abstract class ThemeItemEntityInterface extends ItemEntityInterface {
     abstract previews: PreviewsEntityInterface;
     abstract assets: AssetsEntityInterface;
 
-    downloadUrl: string;
-
     abstract setUrls(): void;
 
     // if there are less than 2 items left in the pack, delete the pack
