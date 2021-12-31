@@ -23,7 +23,7 @@ import {LayoutOptionEntity} from "../../LayoutOption/LayoutOption.entity";
                 (lu.username)::TEXT
             )), '')::BYTEA)
         `, "hash")
-        .addSelect("t.id", "themeId")
+        .addSelect("t.id", "id")
         .addSelect("t.\"packId\"", "packId")
         .from(ThemeEntity, "t")
         .leftJoin(UserEntity, "tu", "t.\"creatorId\" = tu.id")
@@ -35,13 +35,10 @@ import {LayoutOptionEntity} from "../../LayoutOption/LayoutOption.entity";
         .leftJoin(UserEntity, "lu", "tl.\"creatorId\" = lu.id")
         .groupBy("t.id"),
 })
-@Index(["packId", "themeId"], {unique: true})
+@Index(["packId", "id"], {unique: true})
 export class ThemeHashEntity extends ItemHashEntityInterface {
 
     @ViewColumn()
     packId: string;
-
-    @ViewColumn()
-    themeId: string;
 
 }

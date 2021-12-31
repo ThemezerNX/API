@@ -562,16 +562,16 @@ export class ThemeService implements IsOwner, GetHash {
         return buffer;
     }
 
-    async isOwner(themeId: string, userId: string): Promise<boolean> {
+    async isOwner(id: string, userId: string): Promise<boolean> {
         return !!(await exists(
             this.repository.createQueryBuilder()
-                .where({id: themeId, creatorId: userId}),
+                .where({id, creatorId: userId}),
         ));
     }
 
-    async getHash(themeId: string): Promise<string> {
+    async getHash(id: string): Promise<string> {
         const hashEntity = await this.hashRepository.createQueryBuilder()
-            .where({themeId})
+            .where({id})
             .getOne();
         return hashEntity.hashString;
     }

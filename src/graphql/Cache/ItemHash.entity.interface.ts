@@ -1,7 +1,11 @@
-import {AfterLoad, BaseEntity, ViewColumn} from "typeorm";
+import {AfterLoad, BaseEntity, Index, ViewColumn} from "typeorm";
 
 
 export class ItemHashEntityInterface extends BaseEntity {
+
+    @ViewColumn()
+    @Index({unique: true})
+    id: string;
 
     @ViewColumn()
     hash: Buffer;

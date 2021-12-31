@@ -1,4 +1,4 @@
-import {Connection, Index, ViewColumn, ViewEntity} from "typeorm";
+import {Connection, ViewEntity} from "typeorm";
 import {UserEntity} from "../../User/User.entity";
 import {PackEntity} from "../../Pack/Pack.entity";
 import {HBThemeHashEntity} from "../HBTheme/HBThemeHash.entity";
@@ -16,7 +16,7 @@ import {ItemHashEntityInterface} from "../ItemHash.entity.interface";
                 encode(hbth.hash, 'hex')::TEXT
             )), '')::BYTEA)
         `, "hash")
-        .addSelect("p.id", "packId")
+        .addSelect("p.id", "id")
         .from(PackEntity, "p")
         .leftJoin(UserEntity, "u", "p.\"creatorId\" = u.id")
         .leftJoin(ThemeHashEntity, "th", "p.id = th.\"packId\"")
@@ -24,9 +24,4 @@ import {ItemHashEntityInterface} from "../ItemHash.entity.interface";
         .groupBy("p.id"),
 })
 export class PackHashEntity extends ItemHashEntityInterface {
-
-    @ViewColumn()
-    @Index({unique: true})
-    packId: string;
-
 }

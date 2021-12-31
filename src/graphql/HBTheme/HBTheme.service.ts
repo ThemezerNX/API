@@ -143,16 +143,16 @@ export class HBThemeService implements IsOwner, GetHash {
         return queryBuilder.getMany();
     }
 
-    async isOwner(hbthemeId: string, userId: string): Promise<boolean> {
+    async isOwner(id: string, userId: string): Promise<boolean> {
         return !!(await exists(
             this.repository.createQueryBuilder()
-                .where({id: hbthemeId, creatorId: userId}),
+                .where({id, creatorId: userId}),
         ));
     }
 
-    async getHash(hbthemeId: string): Promise<string> {
+    async getHash(id: string): Promise<string> {
         const hashEntity = await this.hashRepository.createQueryBuilder()
-            .where({hbthemeId})
+            .where({id})
             .getOne();
         return hashEntity.hashString;
     }

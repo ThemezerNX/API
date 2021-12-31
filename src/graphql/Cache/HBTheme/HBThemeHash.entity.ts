@@ -34,7 +34,7 @@ import {HBThemeDarkColorSchemeEntity} from "../../HBTheme/ColorScheme/HBThemeDar
                 (hbtcsd.*)::TEXT
             )), '')::BYTEA)
         `, "hash")
-        .addSelect("hbt.id", "hbthemeId")
+        .addSelect("hbt.id", "id")
         .addSelect("hbt.\"packId\"", "packId")
         .from(HBThemeEntity, "hbt")
         .leftJoin(UserEntity, "hbtu", "hbt.\"creatorId\" = hbtu.id")
@@ -43,13 +43,10 @@ import {HBThemeDarkColorSchemeEntity} from "../../HBTheme/ColorScheme/HBThemeDar
         .leftJoin(HBThemeDarkColorSchemeEntity, "hbtcsd", "hbt.id = hbtcsd.\"hbthemeId\"")
         .groupBy("hbt.id"),
 })
-@Index(["packId", "hbthemeId"], {unique: true})
+@Index(["packId", "id"], {unique: true})
 export class HBThemeHashEntity extends ItemHashEntityInterface {
 
     @ViewColumn()
     packId: string;
-
-    @ViewColumn()
-    hbthemeId: string;
 
 }
