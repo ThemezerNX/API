@@ -25,7 +25,7 @@ export class AuthService {
         });
     }
 
-    private static validatePassword(inputPassword, actualPassword): Promise<boolean> {
+    static validatePassword(inputPassword, actualPassword): Promise<boolean> {
         return new Promise((resolve, reject) => {
             bcrypt.compare(inputPassword, actualPassword, function (err, isMatch) {
                 if (err) return reject(err);

@@ -77,19 +77,45 @@ export class ThemeResolver {
 
     @Mutation(() => Boolean)
     @Auth()
-    async submitPackWithThemes(@CurrentUser() user: UserEntity, @Args() {
-        themesData,
-        hbthemesData,
-        packData,
-    }: SubmitPackWithThemesArgs): Promise<boolean> {
-        await this.themeService.insertMultiple(user, themesData, hbthemesData, packData);
+    async submitPackWithThemes(
+        @CurrentUser() user: UserEntity,
+        @Args() {
+            makePrivate,
+            themesData,
+            hbthemesData,
+            packData,
+        }: SubmitPackWithThemesArgs,
+    ): Promise<boolean> {
+        await this.themeService.insertMultiple(user, makePrivate, themesData, hbthemesData, packData);
         return true;
     }
 
     @Mutation(() => Boolean)
     @Auth()
-    async submitThemes(@CurrentUser() user: UserEntity, @Args() {themesData, hbthemesData}: SubmitThemesArgs): Promise<boolean> {
-        await this.themeService.insertMultiple(user, themesData, hbthemesData, null);
+    async submitThemes(@CurrentUser() user: UserEntity, @Args() {
+        makePrivate,
+        themesData,
+        hbthemesData,
+    }: SubmitThemesArgs): Promise<boolean> {
+        await this.themeService.insertMultiple(user, makePrivate, themesData, hbthemesData, null);
+        return true;
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Delete a theme.",
+    })
+    @Auth({ownerOnly: true})
+    async deleteTheme(@Args("id") id: string): Promise<boolean> {
+        await this.themeService.delete({ids: [id]});
+        return true;
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Make a theme private/public. The creator is sent an email with the reason.",
+    })
+    @Auth({ownerOnly: true})
+    async setThemeVisibility(@Args("id") id: string, @Args("makePrivate") makePrivate: boolean, @Args("reason") reason: string): Promise<boolean> {
+        await this.themeService.setVisibility({id}, makePrivate, reason);
         return true;
     }
 

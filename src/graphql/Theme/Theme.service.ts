@@ -42,6 +42,11 @@ import {PackMinThemesError} from "../common/errors/submissions/PackMinThemes.err
 import {NoThemesError} from "../common/errors/submissions/NoThemes.error";
 import {HBThemeLightColorSchemeEntity} from "../HBTheme/ColorScheme/HBThemeLightColorScheme.entity";
 import {HBThemeDarkColorSchemeEntity} from "../HBTheme/ColorScheme/HBThemeDarkColorScheme.entity";
+import {ItemVisibility} from "../common/enums/ItemVisibility";
+import {addPrivateCondition} from "../common/functions/addPrivateCondition";
+import {OtherError} from "../common/errors/Other.error";
+import {MailService} from "../../mail/mail.service";
+import {ThemeNotFoundError} from "../common/errors/ThemeNotFound.error";
 
 @Injectable()
 export class ThemeService implements IsOwner, GetHash {
@@ -49,6 +54,7 @@ export class ThemeService implements IsOwner, GetHash {
     constructor(
         @InjectRepository(ThemeEntity) private repository: Repository<ThemeEntity>,
         @InjectRepository(ThemeHashEntity) private hashRepository: Repository<ThemeHashEntity>,
+        private mailService: MailService,
         private layoutOptionService: LayoutOptionService,
         private webhookService: WebhookService,
     ) {
@@ -574,6 +580,53 @@ export class ThemeService implements IsOwner, GetHash {
             .where({id})
             .getOne();
         return hashEntity.hashString;
+    }
+
+    async delete({ids, packIds}: { ids?: string[], packIds?: string[] } = {}) {
+        const findConditions: FindConditions<ThemeEntity> = {};
+
+        if (ids) {
+            findConditions.id = In(ids);
+        }
+        if (packIds) {
+            findConditions.packId = In(packIds);
+        }
+
+        await this.repository.delete(findConditions);
+    }
+
+    async setVisibility({id, packId}: { id?: string, packId?: string }, makePrivate: boolean, reason: string) {
+        if (packId) {
+            // this is called from PackService, so force set the visibility and don't send any emails or whatever
+            await this.repository.update({packId}, {
+                isPrivate: makePrivate,
+                updatedTimestamp: () => "\"updatedTimestamp\"",
+            });
+        } else {
+            await this.repository.manager.transaction(async () => {
+                const theme = await this.repository.findOne({
+                    where: {id},
+                    relations: ["creator", "previews"],
+                });
+
+                if (!theme) {
+                    throw new ThemeNotFoundError();
+                }
+                if (theme.packId) {
+                    throw new OtherError("Cannot set visibility of a theme that is part of a pack");
+                }
+
+                theme.isPrivate = makePrivate;
+                await theme.save();
+                try {
+                    if (reason) {
+                        await this.mailService.sendThemePrivatedByAdmin(theme, reason);
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+        }
     }
 
 }

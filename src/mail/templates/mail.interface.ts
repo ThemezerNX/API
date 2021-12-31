@@ -25,6 +25,12 @@ export abstract class MailInterface implements Mail.Options {
                         </a>
                         <h1>${title}</h1>
                         ${content}
+                        <br>
+                        <br>
+                        If you have any questions or remarks, <a href="https://discord.gg/nnm8wyM">join our Discord server</a> or email to <a href="mailto:contact@themezer.net">contact@themezer.net</a>.
+                        <br>
+                        <br>
+                        <i>If you do not know why you received this email, it was sent in error. Please ignore it.</i>
                     </td>
                 </tr>
             </table>

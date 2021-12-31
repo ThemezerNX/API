@@ -1,4 +1,4 @@
-import {Args, Info, Query, Resolver} from "@nestjs/graphql";
+import {Args, Info, Mutation, Query, Resolver} from "@nestjs/graphql";
 import {HBThemeModel} from "./HBTheme.model";
 import {HBThemeService} from "./HBTheme.service";
 import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
@@ -7,6 +7,7 @@ import {PaginatedHBThemes} from "./PaginatedHBThemes.model";
 import {HBThemeNotFoundError} from "../common/errors/HBThemeNotFound.error";
 import {ListArgs} from "./dto/List.args";
 import {GraphQLResolveInfo} from "graphql";
+import {Auth} from "../../common/decorators/Auth.decorator";
 
 
 @Resolver(HBThemeModel)
@@ -66,6 +67,24 @@ export class HBThemeResolver {
             }, {info})
         )
             .map((u) => new HBThemeModel(u));
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Delete a hbtheme.",
+    })
+    @Auth({ownerOnly: true})
+    async deleteHbtheme(@Args("id") id: string): Promise<boolean> {
+        await this.hbthemeService.delete({ids: [id]});
+        return true;
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Make a hbtheme private/public. The creator is sent an email with the reason.",
+    })
+    @Auth({ownerOnly: true})
+    async setHbthemeVisibility(@Args("id") id: string, @Args("makePrivate") makePrivate: boolean, @Args("reason") reason: string): Promise<boolean> {
+        await this.hbthemeService.setVisibility({id}, makePrivate, reason);
+        return true;
     }
 
 }

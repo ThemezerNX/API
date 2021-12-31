@@ -14,11 +14,15 @@ import {UserSort} from "./dto/Sort.args";
 import {IsOwner} from "../common/interfaces/IsOwner.interface";
 import {createInfoSelectQueryBuilder} from "../common/functions/createInfoSelectQueryBuilder";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
+import {LayoutService} from "../Layout/Layout.service";
 
 @Injectable()
 export class UserService implements IsOwner {
 
-    constructor(@InjectRepository(UserEntity) private repository: Repository<UserEntity>) {
+    constructor(
+        @InjectRepository(UserEntity) private repository: Repository<UserEntity>,
+        private layoutService: LayoutService,
+    ) {
     }
 
     findOne({
@@ -119,4 +123,12 @@ export class UserService implements IsOwner {
         return userId == ownUserId;
     }
 
+    async delete(id: string) {
+        await this.repository.manager.transaction(async () => {
+            // transfer layouts to user 'unknown' with id '0'
+            await this.layoutService.transfer(id, "0");
+            // delete user and cascade with all related entities
+            await this.repository.delete({id});
+        });
+    }
 }

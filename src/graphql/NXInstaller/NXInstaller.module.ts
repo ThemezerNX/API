@@ -6,6 +6,7 @@ import {PackService} from "../Pack/Pack.service";
 import {ThemeModule} from "../Theme/Theme.module";
 import {HBThemeModule} from "../HBTheme/HBTheme.module";
 import {PackHashEntity} from "../Cache/Pack/PackHash.entity";
+import {MailModule} from "../../mail/mail.module";
 
 @Module({
     imports: [
@@ -13,6 +14,7 @@ import {PackHashEntity} from "../Cache/Pack/PackHash.entity";
         TypeOrmModule.forFeature([PackHashEntity]),
         ThemeModule,
         HBThemeModule,
+        MailModule,
     ],
     providers: [NXInstallerResolver, PackService],
 })

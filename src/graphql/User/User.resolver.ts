@@ -1,4 +1,4 @@
-import {Args, Info, Query, Resolver} from "@nestjs/graphql";
+import {Args, Info, Mutation, Query, Resolver} from "@nestjs/graphql";
 import {UserService} from "./User.service";
 import {UserModel} from "./User.model";
 import {PaginationArgs} from "../common/args/Pagination.args";
@@ -7,6 +7,9 @@ import {UserNotFoundError} from "../common/errors/auth/UserNotFound.error";
 import {ListArgs} from "./dto/List.args";
 import {SortArgs} from "./dto/Sort.args";
 import {GraphQLResolveInfo} from "graphql";
+import {Auth} from "../../common/decorators/Auth.decorator";
+import {AuthService} from "../Auth/Auth.service";
+import {PasswordIncorrectError} from "../common/errors/auth/PasswordIncorrect.error";
 
 
 @Resolver(UserModel)
@@ -49,6 +52,22 @@ export class UserResolver {
             result.count,
             result.result.map((u) => new UserModel(u)),
         );
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Delete a user. This will delete all of the user's data, including all of their submissions. All layouts will be transfered the 'unknown' user.",
+    })
+    @Auth({ownerOnly: true})
+    async deleteUser(
+        @Args("id") id: string,
+        @Args("password") password: string,
+    ): Promise<boolean> {
+        const userToDelete = await this.userService.findOne({id});
+        if (!await AuthService.validatePassword(password, userToDelete.password)) {
+            throw new PasswordIncorrectError();
+        }
+        await this.userService.delete(id);
+        return true;
     }
 
 }

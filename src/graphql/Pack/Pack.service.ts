@@ -16,6 +16,10 @@ import {createInfoSelectQueryBuilder} from "../common/functions/createInfoSelect
 import {LayoutEntity} from "../Layout/Layout.entity";
 import {PackHashEntity} from "../Cache/Pack/PackHash.entity";
 import {GetHash} from "../common/interfaces/GetHash.interface";
+import {ThemeService} from "../Theme/Theme.service";
+import {HBThemeService} from "../HBTheme/HBTheme.service";
+import {MailService} from "../../mail/mail.service";
+import {PackNotFoundError} from "../common/errors/PackNotFound.error";
 
 @Injectable()
 export class PackService implements IsOwner, GetHash {
@@ -23,6 +27,9 @@ export class PackService implements IsOwner, GetHash {
     constructor(
         @InjectRepository(PackEntity) private repository: Repository<PackEntity>,
         @InjectRepository(PackHashEntity) private hashRepository: Repository<PackHashEntity>,
+        private themeService: ThemeService,
+        private hbthemeService: HBThemeService,
+        private mailService: MailService,
     ) {
     }
 
@@ -154,6 +161,43 @@ export class PackService implements IsOwner, GetHash {
             .where({id})
             .getOne();
         return hashEntity.hashString;
+    }
+
+    async delete(ids: string[]) {
+        await this.repository.manager.transaction(async () => {
+            await this.repository.delete({id: In(ids)});
+            await this.themeService.delete({packIds: ids});
+            await this.hbthemeService.delete({packIds: ids});
+        });
+    }
+
+    async setVisibility(id: string, makePrivate: boolean, reason: string) {
+        await this.repository.manager.transaction(async () => {
+            const pack = await this.findOne({id}, {
+                relations: {
+                    creator: true,
+                    previews: true,
+                },
+            });
+
+            if (!pack) {
+                throw new PackNotFoundError();
+            }
+
+            pack.isPrivate = makePrivate;
+            await pack.save();
+            await this.themeService.setVisibility({packId: id}, makePrivate, reason);
+            await this.hbthemeService.setVisibility({packId: id}, makePrivate, reason);
+
+            try {
+                // only send email if a reason was provided (meaning an admin did this)
+                if (reason) {
+                    await this.mailService.sendPackPrivatedByAdmin(pack, reason);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        });
     }
 
 }

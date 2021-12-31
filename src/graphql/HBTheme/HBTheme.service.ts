@@ -12,6 +12,9 @@ import {exists} from "../common/functions/exists";
 import {createInfoSelectQueryBuilder} from "../common/functions/createInfoSelectQueryBuilder";
 import {HBThemeHashEntity} from "../Cache/HBTheme/HBThemeHash.entity";
 import {GetHash} from "../common/interfaces/GetHash.interface";
+import {MailService} from "../../mail/mail.service";
+import {OtherError} from "../common/errors/Other.error";
+import {HBThemeNotFoundError} from "../common/errors/HBThemeNotFound.error";
 
 @Injectable()
 export class HBThemeService implements IsOwner, GetHash {
@@ -19,6 +22,7 @@ export class HBThemeService implements IsOwner, GetHash {
     constructor(
         @InjectRepository(HBThemeEntity) private repository: Repository<HBThemeEntity>,
         @InjectRepository(HBThemeHashEntity) private hashRepository: Repository<HBThemeHashEntity>,
+        private mailService: MailService,
     ) {
     }
 
@@ -34,7 +38,7 @@ export class HBThemeService implements IsOwner, GetHash {
                 },
             options?: ServiceFindOptionsParameter<HBThemeEntity>,
     ): Promise<HBThemeEntity> {
-        const queryBuilder = this.repository.createQueryBuilder()
+        const queryBuilder = this.repository.createQueryBuilder();
         const findConditions: FindConditions<HBThemeEntity> = {};
 
         if (id != undefined) {
@@ -95,7 +99,7 @@ export class HBThemeService implements IsOwner, GetHash {
         queryBuilder
             .where(findConditions)
             .leftJoinAndSelect(queryBuilder.alias + ".tags", "tags")
-            .orderBy({[`"${queryBuilder.alias}"."${sort}"`]: order})
+            .orderBy({[`"${queryBuilder.alias}"."${sort}"`]: order});
 
         if (query?.length > 0) {
             // TODO: this only selects the tags that match the query. there is a double join caused by perch and the manual 'left join' above
@@ -155,6 +159,53 @@ export class HBThemeService implements IsOwner, GetHash {
             .where({id})
             .getOne();
         return hashEntity.hashString;
+    }
+
+    async delete({ids, packIds}: { ids?: string[], packIds?: string[] } = {}) {
+        const findConditions: FindConditions<HBThemeEntity> = {};
+
+        if (ids) {
+            findConditions.id = In(ids);
+        }
+        if (packIds) {
+            findConditions.packId = In(packIds);
+        }
+
+        await this.repository.delete(findConditions);
+    }
+
+    async setVisibility({id, packId}: { id?: string, packId?: string }, makePrivate: boolean, reason: string) {
+        if (packId) {
+            // this is called from PackService, so force set the visibility and don't send any emails or whatever
+            await this.repository.update({packId}, {
+                isPrivate: makePrivate,
+                updatedTimestamp: () => "\"updatedTimestamp\"",
+            });
+        } else {
+            await this.repository.manager.transaction(async () => {
+                const theme = await this.repository.findOne({
+                    where: {id},
+                    relations: ["creator", "previews"],
+                });
+
+                if (!theme) {
+                    throw new HBThemeNotFoundError();
+                }
+                if (theme.packId) {
+                    throw new OtherError("Cannot set visibility of a hbtheme that is part of a pack");
+                }
+
+                theme.isPrivate = makePrivate;
+                await theme.save();
+                try {
+                    if (reason) {
+                        await this.mailService.sendThemePrivatedByAdmin(theme, reason);
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+        }
     }
 
 }

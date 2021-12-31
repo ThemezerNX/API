@@ -237,4 +237,15 @@ export class LayoutService implements IsOwner {
         ));
     }
 
+    async transfer(oldUserId: string, newUserId: string): Promise<void> {
+        await this.repository.createQueryBuilder()
+            .update()
+            .set({
+                creatorId: newUserId,
+                updatedTimestamp: () => "\"updatedTimestamp\"",
+            })
+            .where({creatorId: oldUserId})
+            .execute();
+    }
+
 }

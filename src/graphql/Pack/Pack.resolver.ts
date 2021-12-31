@@ -7,6 +7,7 @@ import {PaginatedPacks} from "./PaginatedPacks.model";
 import {PackNotFoundError} from "../common/errors/PackNotFound.error";
 import {GraphQLResolveInfo} from "graphql";
 import {ListArgs} from "./dto/List.args";
+import {Auth} from "../../common/decorators/Auth.decorator";
 
 
 @Resolver(PackModel)
@@ -67,6 +68,24 @@ export class PackResolver {
                 includeNSFW,
             }, {info})
         ).map((u) => new PackModel(u));
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Delete a pack and all of its themes.",
+    })
+    @Auth({ownerOnly: true})
+    async deletePack(@Args("id") id: string): Promise<boolean> {
+        await this.packService.delete([id]);
+        return true;
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Make a pack and all of its themes private/public. The creator is sent an email with the reason.",
+    })
+    @Auth({ownerOnly: true})
+    async setPackVisibility(@Args("id") id: string, @Args("makePrivate") makePrivate: boolean, @Args("reason") reason: string): Promise<boolean> {
+        await this.packService.setVisibility(id, makePrivate, reason);
+        return true;
     }
 
 }

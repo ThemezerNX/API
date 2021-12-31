@@ -10,17 +10,18 @@ import {ThemeOptionService} from "./ThemeOptions/ThemeOption.service";
 import {LayoutOptionModule} from "../LayoutOption/LayoutOption.module";
 import {ThemeHashEntity} from "../Cache/Theme/ThemeHash.entity";
 import {WebhookModule} from "../../webhook/Webhook.module";
+import {MailModule} from "../../mail/mail.module";
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([ThemeEntity]),
         TypeOrmModule.forFeature([ThemeHashEntity]),
         TypeOrmModule.forFeature([ThemeOptionEntity]),
-        TypeOrmModule.forFeature([ThemeOptionEntity]),
         UserModule,
         ThemeDownloadModule,
         LayoutOptionModule,
         WebhookModule,
+        MailModule,
     ],
     providers: [ThemeResolver, ThemeService, ThemeOptionService],
     exports: [ThemeService, ThemeDownloadModule],

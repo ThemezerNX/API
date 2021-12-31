@@ -6,6 +6,9 @@ import {PackEntity} from "./Pack.entity";
 import {UserModule} from "../User/User.module";
 import {PackDownloadModule} from "./Download/PackDownload.module";
 import {PackHashEntity} from "../Cache/Pack/PackHash.entity";
+import {ThemeModule} from "../Theme/Theme.module";
+import {HBThemeModule} from "../HBTheme/HBTheme.module";
+import {MailModule} from "../../mail/mail.module";
 
 @Module({
     imports: [
@@ -13,6 +16,9 @@ import {PackHashEntity} from "../Cache/Pack/PackHash.entity";
         TypeOrmModule.forFeature([PackHashEntity]),
         UserModule,
         PackDownloadModule,
+        ThemeModule,
+        HBThemeModule,
+        MailModule,
     ],
     providers: [PackResolver, PackService],
     exports: [PackService, PackDownloadModule],

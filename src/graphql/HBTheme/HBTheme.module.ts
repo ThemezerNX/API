@@ -6,6 +6,7 @@ import {HBThemeResolver} from "./HBTheme.resolver";
 import {UserModule} from "../User/User.module";
 import {HBThemeDownloadModule} from "./Download/HBThemeDownload.module";
 import {HBThemeHashEntity} from "../Cache/HBTheme/HBThemeHash.entity";
+import {MailModule} from "../../mail/mail.module";
 
 @Module({
     imports: [
@@ -13,6 +14,7 @@ import {HBThemeHashEntity} from "../Cache/HBTheme/HBThemeHash.entity";
         TypeOrmModule.forFeature([HBThemeHashEntity]),
         UserModule,
         HBThemeDownloadModule,
+        MailModule,
     ],
     providers: [HBThemeResolver, HBThemeService],
     exports: [HBThemeService, HBThemeDownloadModule],
