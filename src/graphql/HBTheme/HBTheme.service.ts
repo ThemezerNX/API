@@ -15,6 +15,8 @@ import {GetHash} from "../common/interfaces/GetHash.interface";
 import {MailService} from "../../mail/mail.service";
 import {OtherError} from "../common/errors/Other.error";
 import {HBThemeNotFoundError} from "../common/errors/HBThemeNotFound.error";
+import {ItemVisibility} from "../common/enums/ItemVisibility";
+import {addPrivateCondition} from "../common/functions/addPrivateCondition";
 
 @Injectable()
 export class HBThemeService implements IsOwner, GetHash {
@@ -55,7 +57,7 @@ export class HBThemeService implements IsOwner, GetHash {
             .leftJoinAndSelect(queryBuilder.alias + ".tags", "tags")
             .where(findConditions);
 
-        createInfoSelectQueryBuilder(options, this.repository);
+        createInfoSelectQueryBuilder(options, this.repository, queryBuilder);
 
         return queryBuilder.getOne();
     }
@@ -69,6 +71,7 @@ export class HBThemeService implements IsOwner, GetHash {
             query,
             creators,
             includeNSFW,
+            visibility = new ItemVisibility(),
         }:
             {
                 packId?: string,
@@ -78,6 +81,7 @@ export class HBThemeService implements IsOwner, GetHash {
                 query?: string,
                 creators?: string[],
                 includeNSFW?: boolean
+                visibility?: ItemVisibility,
             },
         options?: ServiceFindOptionsParameter<HBThemeEntity>,
     ): Promise<{ result: HBThemeEntity[], count: number }> {
@@ -102,7 +106,6 @@ export class HBThemeService implements IsOwner, GetHash {
             .orderBy({[`"${queryBuilder.alias}"."${sort}"`]: order});
 
         if (query?.length > 0) {
-            // TODO: this only selects the tags that match the query. there is a double join caused by perch and the manual 'left join' above
             queryBuilder.andWhere(`to_tsquery(:query) @@ (
                 setweight(to_tsvector('pg_catalog.english', coalesce("${queryBuilder.alias}".name, '')), 'A') ||
                 setweight(to_tsvector('pg_catalog.english', coalesce("${queryBuilder.alias}".description, '')), 'C') ||
@@ -110,6 +113,8 @@ export class HBThemeService implements IsOwner, GetHash {
                 to_tsvector(tags.name)
             )`, {query: toTsQuery(query)});
         }
+
+        addPrivateCondition(queryBuilder, visibility);
 
         createInfoSelectQueryBuilder(options, this.repository, queryBuilder);
 
@@ -144,7 +149,7 @@ export class HBThemeService implements IsOwner, GetHash {
             queryBuilder.limit(limit);
         }
 
-        createInfoSelectQueryBuilder(options, this.repository);
+        createInfoSelectQueryBuilder(options, this.repository, queryBuilder);
 
         return queryBuilder.getMany();
     }

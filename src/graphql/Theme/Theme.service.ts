@@ -45,6 +45,8 @@ import {HBThemeDarkColorSchemeEntity} from "../HBTheme/ColorScheme/HBThemeDarkCo
 import {OtherError} from "../common/errors/Other.error";
 import {MailService} from "../../mail/mail.service";
 import {ThemeNotFoundError} from "../common/errors/ThemeNotFound.error";
+import {addPrivateCondition} from "../common/functions/addPrivateCondition";
+import {ItemVisibility} from "../common/enums/ItemVisibility";
 
 @Injectable()
 export class ThemeService implements IsOwner, GetHash {
@@ -99,6 +101,7 @@ export class ThemeService implements IsOwner, GetHash {
             creators,
             layouts,
             includeNSFW,
+            visibility = new ItemVisibility(),
         }:
             {
                 packId?: string,
@@ -110,6 +113,7 @@ export class ThemeService implements IsOwner, GetHash {
                 creators?: string[],
                 layouts?: string[],
                 includeNSFW?: Boolean
+                visibility?: ItemVisibility,
             },
         options?: ServiceFindOptionsParameter<ThemeEntity>,
     ) {
@@ -150,7 +154,9 @@ export class ThemeService implements IsOwner, GetHash {
             )`, {query: toTsQuery(query)});
         }
 
-        createInfoSelectQueryBuilder(options, this.repository);
+        addPrivateCondition(queryBuilder, visibility);
+
+        createInfoSelectQueryBuilder(options, this.repository, queryBuilder);
 
         return executeAndPaginate(queryBuilder, paginationArgs);
     }

@@ -20,6 +20,8 @@ import {ThemeService} from "../Theme/Theme.service";
 import {HBThemeService} from "../HBTheme/HBTheme.service";
 import {MailService} from "../../mail/mail.service";
 import {PackNotFoundError} from "../common/errors/PackNotFound.error";
+import {addPrivateCondition} from "../common/functions/addPrivateCondition";
+import {ItemVisibility} from "../common/enums/ItemVisibility";
 
 @Injectable()
 export class PackService implements IsOwner, GetHash {
@@ -55,6 +57,7 @@ export class PackService implements IsOwner, GetHash {
             query,
             creators,
             includeNSFW,
+            visibility = new ItemVisibility(),
         }:
             {
                 paginationArgs?: PaginationArgs,
@@ -64,6 +67,7 @@ export class PackService implements IsOwner, GetHash {
                 target?: Target,
                 creators?: string[],
                 includeNSFW?: boolean
+                visibility?: ItemVisibility,
             },
         options?: ServiceFindOptionsParameter<PackEntity>,
     ): Promise<{ result: PackEntity[], count: number }> {
@@ -91,6 +95,8 @@ export class PackService implements IsOwner, GetHash {
         }
 
         queryBuilder.orderBy({[`"${queryBuilder.alias}"."${sort}"`]: order});
+
+        addPrivateCondition(queryBuilder, visibility);
 
         const {result, count} = await executeManyRawAndPaginate(queryBuilder, paginationArgs);
         // map the isNSFW field

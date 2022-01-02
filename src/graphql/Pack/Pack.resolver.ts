@@ -8,6 +8,9 @@ import {PackNotFoundError} from "../common/errors/PackNotFound.error";
 import {GraphQLResolveInfo} from "graphql";
 import {ListArgs} from "./dto/List.args";
 import {Auth} from "../../common/decorators/Auth.decorator";
+import {CurrentUser} from "../../common/decorators/CurrentUser.decorator";
+import {UserEntity} from "../User/User.entity";
+import {checkAccessPermissions} from "../common/functions/checkAccessPermissions";
 
 
 @Resolver(PackModel)
@@ -23,12 +26,14 @@ export class PackResolver {
     })
     async pack(
         @Info() info: GraphQLResolveInfo,
+        @CurrentUser() user: UserEntity,
         @Args("id") id: string,
     ): Promise<PackModel> {
         const pack = await this.packService.findOne({id}, {info});
         if (!pack) {
             throw new PackNotFoundError();
         }
+        checkAccessPermissions(pack, user);
         return new PackModel(pack);
     }
 
@@ -37,6 +42,7 @@ export class PackResolver {
     })
     async packs(
         @Info() info: GraphQLResolveInfo,
+        @CurrentUser() user: UserEntity,
         @Args() paginationArgs: PaginationArgs,
         @Args() itemSortArgs: ItemSortArgs,
         @Args() listArgs?: ListArgs,
@@ -45,6 +51,7 @@ export class PackResolver {
             paginationArgs,
             ...itemSortArgs,
             ...listArgs,
+            visibility: {currentUserId: user?.id, forceSelect: user?.isAdmin},
         }, {info, rootField: "nodes"});
 
         return new PaginatedPacks(

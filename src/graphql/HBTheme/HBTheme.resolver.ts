@@ -8,6 +8,9 @@ import {HBThemeNotFoundError} from "../common/errors/HBThemeNotFound.error";
 import {ListArgs} from "./dto/List.args";
 import {GraphQLResolveInfo} from "graphql";
 import {Auth} from "../../common/decorators/Auth.decorator";
+import {checkAccessPermissions} from "../common/functions/checkAccessPermissions";
+import {CurrentUser} from "../../common/decorators/CurrentUser.decorator";
+import {UserEntity} from "../User/User.entity";
 
 
 @Resolver(HBThemeModel)
@@ -21,12 +24,14 @@ export class HBThemeResolver {
     })
     async hbtheme(
         @Info() info: GraphQLResolveInfo,
+        @CurrentUser() user: UserEntity,
         @Args("id") id: string,
     ): Promise<HBThemeModel> {
         const hbtheme = await this.hbthemeService.findOne({id}, {info});
         if (!hbtheme) {
             throw new HBThemeNotFoundError();
         }
+        checkAccessPermissions(hbtheme, user);
         return new HBThemeModel(hbtheme);
     }
 
@@ -35,6 +40,7 @@ export class HBThemeResolver {
     })
     async hbthemes(
         @Info() info: GraphQLResolveInfo,
+        @CurrentUser() user: UserEntity,
         @Args() paginationArgs: PaginationArgs,
         @Args() itemSortArgs: ItemSortArgs,
         @Args() listArgs?: ListArgs,
@@ -43,6 +49,7 @@ export class HBThemeResolver {
             paginationArgs,
             ...itemSortArgs,
             ...listArgs,
+            visibility: {currentUserId: user?.id, forceSelect: user?.isAdmin},
         }, {info, rootField: "nodes"});
 
         return new PaginatedHBThemes(

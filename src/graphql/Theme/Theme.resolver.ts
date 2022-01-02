@@ -13,6 +13,7 @@ import {UserEntity} from "../User/User.entity";
 import {GraphQLResolveInfo} from "graphql";
 import {CurrentUser} from "../../common/decorators/CurrentUser.decorator";
 import {Auth} from "../../common/decorators/Auth.decorator";
+import {checkAccessPermissions} from "../common/functions/checkAccessPermissions";
 
 
 @Resolver(ThemeModel)
@@ -26,12 +27,14 @@ export class ThemeResolver {
     })
     async theme(
         @Info() info: GraphQLResolveInfo,
+        @CurrentUser() user: UserEntity,
         @Args("id") id: string,
     ): Promise<ThemeModel> {
         const theme = await this.themeService.findOne({id}, {info});
         if (!theme) {
             throw new ThemeNotFoundError();
         }
+        checkAccessPermissions(theme, user);
         return new ThemeModel(theme);
     }
 
@@ -40,6 +43,7 @@ export class ThemeResolver {
     })
     async themes(
         @Info() info: GraphQLResolveInfo,
+        @CurrentUser() user: UserEntity,
         @Args() paginationArgs: PaginationArgs,
         @Args() itemSortArgs: ItemSortArgs,
         @Args() listArgs?: ListArgs,
@@ -48,6 +52,7 @@ export class ThemeResolver {
             paginationArgs,
             ...itemSortArgs,
             ...listArgs,
+            visibility: {currentUserId: user?.id, forceSelect: user?.isAdmin},
         }, {info, rootField: "nodes"});
 
         return new PaginatedThemes(
