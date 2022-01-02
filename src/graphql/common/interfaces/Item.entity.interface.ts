@@ -31,6 +31,7 @@ export abstract class ItemEntityInterface extends CachableEntityInterface {
     creator: UserEntity;
 
     @Column("varchar", {length: 19})
+    @SelectAlways()
     creatorId: string;
 
     @Column({length: 100})
@@ -48,9 +49,6 @@ export abstract class ItemEntityInterface extends CachableEntityInterface {
 
     @Column("int", {default: 0})
     downloadCount: number;
-
-    @Column()
-    isPrivate: boolean;
 
     downloadUrl: string;
 

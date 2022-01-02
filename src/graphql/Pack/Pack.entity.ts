@@ -6,6 +6,7 @@ import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
 import {CDNMapper} from "../common/CDNMapper";
 import {EntityWithPreviewsInterface} from "../common/interfaces/EntityWithPreviews.interface";
 import {WebsiteMappings} from "../common/WebsiteMappings";
+import {SelectAlways} from "perch-query-builder";
 
 @Entity()
 export class PackEntity extends ItemEntityInterface implements EntityWithPreviewsInterface {
@@ -21,6 +22,10 @@ export class PackEntity extends ItemEntityInterface implements EntityWithPreview
 
     @OneToMany(() => HBThemeEntity, hbtheme => hbtheme.pack, {onDelete: "CASCADE"})
     hbthemes: HBThemeEntity[];
+
+    @Column()
+    @SelectAlways()
+    isPrivate: boolean;
 
     @AfterLoad()
     setUrls() {

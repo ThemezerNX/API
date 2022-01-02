@@ -5,6 +5,7 @@ import {ThemeTagEntity} from "../../ThemeTag/ThemeTag.entity";
 import {PreviewsEntityInterface} from "./Previews.entity.interface";
 import {AssetsEntityInterface} from "./Assets.entity.interface";
 import {deleteIfEmpty, recomputeNSFW} from "../../Pack/Pack.constraints";
+import {SelectAlways} from "perch-query-builder";
 
 
 export abstract class ThemeItemEntityInterface extends ItemEntityInterface {
@@ -26,6 +27,10 @@ export abstract class ThemeItemEntityInterface extends ItemEntityInterface {
 
     abstract previews: PreviewsEntityInterface;
     abstract assets: AssetsEntityInterface;
+
+    @Column()
+    @SelectAlways()
+    isPrivate: boolean;
 
     abstract setUrls(): void;
 
