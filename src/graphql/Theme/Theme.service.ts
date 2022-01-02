@@ -579,7 +579,7 @@ export class ThemeService implements IsOwner, GetHash {
         const hashEntity = await this.hashRepository.createQueryBuilder()
             .where({id})
             .getOne();
-        return hashEntity.hashString;
+        return hashEntity?.hashString;
     }
 
     async delete({ids, packIds}: { ids?: string[], packIds?: string[] } = {}) {

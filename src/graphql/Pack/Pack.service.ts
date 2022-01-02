@@ -160,7 +160,7 @@ export class PackService implements IsOwner, GetHash {
         const hashEntity = await this.hashRepository.createQueryBuilder()
             .where({id})
             .getOne();
-        return hashEntity.hashString;
+        return hashEntity?.hashString;
     }
 
     async delete(ids: string[]) {
