@@ -58,7 +58,7 @@ export class ThemeResolver {
     }
 
     @Query(() => [ThemeModel], {
-        description: `Fetch random themes`,
+        description: `Fetch random themes. Does not include private items.`,
     })
     async randomThemes(
         @Info() info: GraphQLResolveInfo,

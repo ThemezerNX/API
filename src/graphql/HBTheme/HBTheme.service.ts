@@ -134,6 +134,8 @@ export class HBThemeService implements IsOwner, GetHash {
             findConditions.isNSFW = false;
         }
 
+        findConditions.isPrivate = false;
+
         queryBuilder
             .where(findConditions)
             .orderBy("RANDOM()");

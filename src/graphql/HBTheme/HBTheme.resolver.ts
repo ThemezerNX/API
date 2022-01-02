@@ -53,7 +53,7 @@ export class HBThemeResolver {
     }
 
     @Query(() => [HBThemeModel], {
-        description: `Fetch random hbthemes`,
+        description: `Fetch random hbthemes. Does not include private items.`,
     })
     async randomHBThemes(
         @Info() info: GraphQLResolveInfo,

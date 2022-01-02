@@ -42,8 +42,6 @@ import {PackMinThemesError} from "../common/errors/submissions/PackMinThemes.err
 import {NoThemesError} from "../common/errors/submissions/NoThemes.error";
 import {HBThemeLightColorSchemeEntity} from "../HBTheme/ColorScheme/HBThemeLightColorScheme.entity";
 import {HBThemeDarkColorSchemeEntity} from "../HBTheme/ColorScheme/HBThemeDarkColorScheme.entity";
-import {ItemVisibility} from "../common/enums/ItemVisibility";
-import {addPrivateCondition} from "../common/functions/addPrivateCondition";
 import {OtherError} from "../common/errors/Other.error";
 import {MailService} from "../../mail/mail.service";
 import {ThemeNotFoundError} from "../common/errors/ThemeNotFound.error";
@@ -115,7 +113,7 @@ export class ThemeService implements IsOwner, GetHash {
             },
         options?: ServiceFindOptionsParameter<ThemeEntity>,
     ) {
-        const queryBuilder = this.repository.createQueryBuilder()
+        const queryBuilder = this.repository.createQueryBuilder();
         const findConditions: FindConditions<ThemeEntity> = {};
 
         if (packId != undefined) {
@@ -179,6 +177,8 @@ export class ThemeService implements IsOwner, GetHash {
         if (includeNSFW != true) {
             findConditions.isNSFW = false;
         }
+
+        findConditions.isPrivate = false;
 
         queryBuilder
             .where(findConditions)

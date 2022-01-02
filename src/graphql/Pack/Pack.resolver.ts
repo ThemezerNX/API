@@ -55,7 +55,7 @@ export class PackResolver {
     }
 
     @Query(() => [PackModel], {
-        description: `Fetch random packs`,
+        description: `Fetch random packs. Does not include private items.`,
     })
     async randomPacks(
         @Info() info: GraphQLResolveInfo,

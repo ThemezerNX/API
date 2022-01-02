@@ -114,6 +114,8 @@ export class PackService implements IsOwner, GetHash {
         let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<PackEntity> = {};
 
+        findConditions.isPrivate = false;
+
         queryBuilder.where(findConditions);
 
         queryBuilder.leftJoin((sq) =>
