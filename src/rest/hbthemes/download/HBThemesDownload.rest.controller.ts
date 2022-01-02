@@ -7,6 +7,7 @@ import {HBThemeCacheService} from "../../../graphql/Cache/HBTheme/HBThemeCache.s
 import {ClientIP} from "../../../common/decorators/ClientIP.decorator";
 import {CurrentUser} from "../../../common/decorators/CurrentUser.decorator";
 import {UserAgent} from "../../../common/decorators/UserAgent.decorator";
+import {checkAccessPermissions} from "../../common/functions/checkAccessPermissions";
 
 @Controller()
 export class HBThemesDownloadRestController {
@@ -25,6 +26,7 @@ export class HBThemesDownloadRestController {
     @Get()
     @Redirect()
     async getDownload(@Param("id") id: string, @ClientIP() ip: string, @CurrentUser() user: UserEntity, @UserAgent() userAgent: string) {
+        checkAccessPermissions(await this.hbthemeService.findOne({id}), user);
         const hash = await this.getHash(id);
 
         await this.hbthemeDownloadService.increment(id, ip, userAgent, user ? user.id : undefined);
@@ -34,13 +36,15 @@ export class HBThemesDownloadRestController {
 
     @Get("theme.zip")
     @Header("Content-type", "application/zip")
-    async getDownloadFile(@Param("id") id: string, @Res() res: Response) {
+    async getDownloadFile(@Param("id") id: string, @CurrentUser() user: UserEntity, @Res() res: Response) {
+        checkAccessPermissions(await this.hbthemeService.findOne({id}), user);
         await this.getHash(id);
 
         const {data, fileName} = await this.hbthemeCacheService.getFile(id);
 
         res.attachment(fileName);
         res.end(data, "binary");
+        res.end(null);
     }
 
 }

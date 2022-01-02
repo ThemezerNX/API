@@ -7,6 +7,7 @@ import {PackDownloadService} from "../../../graphql/Pack/Download/PackDownload.s
 import {ClientIP} from "../../../common/decorators/ClientIP.decorator";
 import {CurrentUser} from "../../../common/decorators/CurrentUser.decorator";
 import {UserAgent} from "../../../common/decorators/UserAgent.decorator";
+import {checkAccessPermissions} from "../../common/functions/checkAccessPermissions";
 
 @Controller()
 export class PacksDownloadRestController {
@@ -25,6 +26,7 @@ export class PacksDownloadRestController {
     @Get()
     @Redirect()
     async getDownload(@Param("id") id: string, @ClientIP() ip: string, @CurrentUser() user: UserEntity, @UserAgent() userAgent: string) {
+        checkAccessPermissions(await this.packService.findOne({id}), user);
         const hash = await this.getHash(id);
 
         await this.packDownloadService.increment(id, ip, userAgent, user ? user.id : undefined);
@@ -34,7 +36,8 @@ export class PacksDownloadRestController {
 
     @Get("pack.zip")
     @Header("Content-type", "application/zip")
-    async getDownloadFile(@Param("id") id: string, @Res() res: Response) {
+    async getDownloadFile(@Param("id") id: string, @CurrentUser() user: UserEntity, @Res() res: Response) {
+        checkAccessPermissions(await this.packService.findOne({id}), user);
         await this.getHash(id);
 
         const {data, fileName} = await this.packCacheService.getFile(id);
