@@ -1,4 +1,4 @@
-import {Args, Info, Query, Resolver} from "@nestjs/graphql";
+import {Args, Info, Mutation, Query, Resolver} from "@nestjs/graphql";
 import {PackService} from "./Pack.service";
 import {LimitArg, PaginationArgs} from "../common/args/Pagination.args";
 import {ItemSortArgs} from "../common/args/ItemSort.args";
