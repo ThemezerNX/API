@@ -7,6 +7,9 @@ import {HBThemeDataInput} from "./HBThemeData.input";
 @ArgsType()
 export class SubmitThemesArgs {
 
+    @Field()
+    makePrivate: boolean;
+
     @Field(() => [ThemeDataInput], {nullable: true})
     @ArrayMaxSize(25)
     @ValidateChild(() => ThemeDataInput)

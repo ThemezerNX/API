@@ -8,6 +8,9 @@ import {ArrayMaxSize} from "class-validator";
 @ArgsType()
 export class SubmitPackWithThemesArgs {
 
+    @Field()
+    makePrivate: boolean;
+
     @Field(() => PackDataInput)
     @ValidateChild(() => PackDataInput)
     packData: PackDataInput;

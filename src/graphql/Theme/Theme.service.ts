@@ -198,7 +198,13 @@ export class ThemeService implements IsOwner, GetHash {
         });
     }
 
-    async insertMultiple(creator: UserEntity, themeData: ThemeDataInput[], hbthemeData: HBThemeDataInput[], packData: PackDataInput) {
+    async insertMultiple(
+        creator: UserEntity,
+        makePrivate: boolean,
+        themeData: ThemeDataInput[],
+        hbthemeData: HBThemeDataInput[],
+        packData: PackDataInput,
+    ) {
         if (packData && themeData.length + hbthemeData.length < 2) {
             throw new PackMinThemesError({amount: 2});
         } else if (themeData.length + hbthemeData.length == 0) {
@@ -219,6 +225,7 @@ export class ThemeService implements IsOwner, GetHash {
                         description: packData.description,
                         previews: new PackPreviewsEntity(),
                         isNSFW: themeData.some(theme => theme.isNSFW),
+                        isPrivate: makePrivate,
                     });
                 }
 
@@ -235,6 +242,7 @@ export class ThemeService implements IsOwner, GetHash {
                         tags: ThemeService.selectTags(submittedTheme.tags, insertedTags),
                         previews: new ThemePreviewsEntity(),
                         assets: new ThemeAssetsEntity(),
+                        isPrivate: makePrivate,
                     });
 
                     // previews
@@ -362,6 +370,7 @@ export class ThemeService implements IsOwner, GetHash {
                         assets: new HBThemeAssetsEntity(),
                         lightTheme: new HBThemeLightColorSchemeEntity(submittedTheme.lightTheme),
                         darkTheme: new HBThemeDarkColorSchemeEntity(submittedTheme.darkTheme),
+                        isPrivate: makePrivate,
                     });
 
                     // previews
@@ -489,8 +498,6 @@ export class ThemeService implements IsOwner, GetHash {
                     insertedHbthemes.push(hbtheme);
                 }
 
-                console.log(insertedThemes, insertedHbthemes, insertedTags);
-
                 // Save all items ---------------------------------------------------------
                 if (insertedPack) {
                     if (packData.preview) {
@@ -538,12 +545,14 @@ export class ThemeService implements IsOwner, GetHash {
             });
 
             // send webhook message
-            if (insertedPack) {
-                // pack submission
-                await this.webhookService.newPack(insertedPack, insertedThemes, insertedHbthemes);
-            } else {
-                // theme submission
-                await this.webhookService.newThemes(insertedThemes, insertedHbthemes);
+            if (!makePrivate) {
+                if (insertedPack) {
+                    // pack submission
+                    await this.webhookService.newPack(insertedPack, insertedThemes, insertedHbthemes);
+                } else {
+                    // theme submission
+                    await this.webhookService.newThemes(insertedThemes, insertedHbthemes);
+                }
             }
         } catch (e) {
             if ((e.detail as string)?.includes("layoutId")) {
