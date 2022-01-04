@@ -50,6 +50,7 @@ import {ItemVisibility} from "../common/enums/ItemVisibility";
 import {PrivatableThemeDataInput} from "./dto/PrivatableThemeData.input";
 import {PrivatableHbthemeDataInput} from "./dto/PrivatableHbthemeData.input";
 import {UpdateThemeDataInput} from "./dto/UpdateThemeData.input";
+import {deleteIfEmpty, recomputeNSFW} from "../Pack/Pack.constraints";
 
 @Injectable()
 export class ThemeService implements IsOwner, GetHash {
@@ -589,7 +590,16 @@ export class ThemeService implements IsOwner, GetHash {
             findConditions.packId = In(packIds);
         }
 
-        await this.repository.delete(findConditions);
+        await this.repository.manager.transaction(async entityManager => {
+            const usedPackIds = (await entityManager.find(ThemeEntity, findConditions)).map(theme => theme.packId);
+            const usedPackIdsSet = new Set(usedPackIds);
+
+            await entityManager.delete(ThemeEntity, findConditions);
+            for (const packId of usedPackIdsSet || []) {
+                // if there are less than 2 items left in the pack, delete the pack
+                await deleteIfEmpty(entityManager, packId);
+            }
+        });
     }
 
     async setVisibility({id, packId}: { id?: string, packId?: string }, makePrivate: boolean, reason: string) {
@@ -631,7 +641,7 @@ export class ThemeService implements IsOwner, GetHash {
             where: {id},
             relations: ["creator", "previews", "assets", "tags"],
         });
-        await getConnection().manager.transaction(async entityManager => {
+        await getConnection().manager.transaction("READ UNCOMMITTED", async entityManager => {
             if (!theme) {
                 throw new ThemeNotFoundError();
             }
@@ -655,8 +665,6 @@ export class ThemeService implements IsOwner, GetHash {
                         insertedTags.push(tag);
                     }
                 }
-
-                console.log(insertedTags);
             }
 
             if (data.screenshot !== undefined) {
@@ -752,6 +760,9 @@ export class ThemeService implements IsOwner, GetHash {
 
             await ThemeService.insertOrUpdateTags(entityManager, insertedTags);
             await entityManager.save(ThemeEntity, theme);
+            if (theme.packId) {
+                await recomputeNSFW(entityManager, {packId: theme.packId});
+            }
         });
     }
 

@@ -17,6 +17,7 @@ import {OtherError} from "../common/errors/Other.error";
 import {HBThemeNotFoundError} from "../common/errors/HBThemeNotFound.error";
 import {ItemVisibility} from "../common/enums/ItemVisibility";
 import {addPrivateCondition} from "../common/functions/addPrivateCondition";
+import {deleteIfEmpty} from "../Pack/Pack.constraints";
 
 @Injectable()
 export class HBThemeService implements IsOwner, GetHash {
@@ -183,7 +184,16 @@ export class HBThemeService implements IsOwner, GetHash {
             findConditions.packId = In(packIds);
         }
 
-        await this.repository.delete(findConditions);
+        await this.repository.manager.transaction(async entityManager => {
+            const usedPackIds = (await entityManager.find(HBThemeEntity, findConditions)).map(theme => theme.packId);
+            const usedPackIdsSet = new Set(usedPackIds);
+
+            await entityManager.delete(HBThemeEntity, findConditions);
+            for (const packId of usedPackIdsSet || []) {
+                // if there are less than 2 items left in the pack, delete the pack
+                await deleteIfEmpty(entityManager, packId);
+            }
+        });
     }
 
     async setVisibility({id, packId}: { id?: string, packId?: string }, makePrivate: boolean, reason: string) {
