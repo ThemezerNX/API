@@ -49,7 +49,7 @@ export class LayoutEntity extends ItemEntityInterface implements EntityWithPrevi
     setUrls() {
         this.downloadUrl = CDNMapper.layouts.download(this.id);
         this.downloadCommonUrl = CDNMapper.layouts.downloadCommon(this.id);
-        this.pageUrl = WebsiteMappings.layout(this.id);
+        this.pageUrl = WebsiteMappings.layout(this.id, this.name);
     }
 
 }

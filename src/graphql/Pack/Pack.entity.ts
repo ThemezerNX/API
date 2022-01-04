@@ -30,7 +30,7 @@ export class PackEntity extends ItemEntityInterface implements EntityWithPreview
     @AfterLoad()
     setUrls() {
         this.downloadUrl = CDNMapper.packs.download(this.id);
-        this.pageUrl = WebsiteMappings.pack(this.id);
+        this.pageUrl = WebsiteMappings.pack(this.id, this.name);
     }
 
 }

@@ -44,7 +44,7 @@ export class ThemeEntity extends ThemeItemEntityInterface implements EntityWithP
     @AfterLoad()
     setUrls() {
         this.downloadUrl = CDNMapper.themes.download(this.id);
-        this.pageUrl = WebsiteMappings.theme(this.id);
+        this.pageUrl = WebsiteMappings.theme(this.id, this.name);
     }
 
 }

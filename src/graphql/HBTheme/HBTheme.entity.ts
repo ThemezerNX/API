@@ -38,7 +38,7 @@ export class HBThemeEntity extends ThemeItemEntityInterface implements EntityWit
     @AfterLoad()
     setUrls() {
         this.downloadUrl = CDNMapper.hbthemes.download(this.id);
-        this.pageUrl = WebsiteMappings.hbtheme(this.id);
+        this.pageUrl = WebsiteMappings.hbtheme(this.id, this.name);
     }
 
 }
