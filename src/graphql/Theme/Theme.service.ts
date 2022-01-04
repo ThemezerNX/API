@@ -104,6 +104,7 @@ export class ThemeService implements IsOwner, GetHash {
             layouts,
             includeNSFW,
             visibility = new ItemVisibility(),
+            looseOnly,
         }:
             {
                 packId?: string,
@@ -116,6 +117,7 @@ export class ThemeService implements IsOwner, GetHash {
                 layouts?: string[],
                 includeNSFW?: Boolean
                 visibility?: ItemVisibility,
+                looseOnly?: boolean
             },
         options?: ServiceFindOptionsParameter<ThemeEntity>,
     ) {
@@ -140,6 +142,9 @@ export class ThemeService implements IsOwner, GetHash {
         }
         if (includeNSFW != true) {
             findConditions.isNSFW = false;
+        }
+        if (looseOnly) {
+            findConditions.packId = null;
         }
 
         queryBuilder

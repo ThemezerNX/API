@@ -25,4 +25,7 @@ export class ListArgs {
     @IsOptional()
     includeNSFW: boolean = false;
 
+    @Field({defaultValue: false, description: "If true, only fetches themes that are not part of a pack."})
+    looseOnly: boolean = false;
+
 }

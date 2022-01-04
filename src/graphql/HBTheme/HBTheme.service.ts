@@ -72,6 +72,7 @@ export class HBThemeService implements IsOwner, GetHash {
             creators,
             includeNSFW,
             visibility = new ItemVisibility(),
+            looseOnly,
         }:
             {
                 packId?: string,
@@ -82,6 +83,7 @@ export class HBThemeService implements IsOwner, GetHash {
                 creators?: string[],
                 includeNSFW?: boolean
                 visibility?: ItemVisibility,
+                looseOnly?: boolean
             },
         options?: ServiceFindOptionsParameter<HBThemeEntity>,
     ): Promise<{ result: HBThemeEntity[], count: number }> {
@@ -98,6 +100,9 @@ export class HBThemeService implements IsOwner, GetHash {
         }
         if (includeNSFW != true) {
             findConditions.isNSFW = false;
+        }
+        if (looseOnly) {
+            findConditions.packId = null;
         }
 
         queryBuilder
