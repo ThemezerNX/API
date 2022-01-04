@@ -24,7 +24,7 @@ export class ThemeDataInput extends ThemeItemDataInputInterface {
     @ValidateChild(() => ChosenLayoutOptionValue)
     options: ChosenLayoutOptionValue[] = [];
 
-    @Field(() => ThemeAssetsDataInput, {nullable: true})
+    @Field(() => ThemeAssetsDataInput)
     @ValidateChild(() => ThemeAssetsDataInput)
     @IsOptional()
     assets?: ThemeAssetsDataInput;

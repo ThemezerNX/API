@@ -14,6 +14,7 @@ import {GraphQLResolveInfo} from "graphql";
 import {CurrentUser} from "../../common/decorators/CurrentUser.decorator";
 import {Auth} from "../../common/decorators/Auth.decorator";
 import {checkAccessPermissions} from "../common/functions/checkAccessPermissions";
+import {UpdateThemeArgs} from "./dto/UpdateTheme.args";
 
 
 @Resolver(ThemeModel)
@@ -120,6 +121,15 @@ export class ThemeResolver {
     @Auth({ownerOnly: true})
     async setThemeVisibility(@Args("id") id: string, @Args("makePrivate") makePrivate: boolean, @Args("reason") reason: string): Promise<boolean> {
         await this.themeService.setVisibility({id}, makePrivate, reason);
+        return true;
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Update a theme.",
+    })
+    @Auth({ownerOnly: true})
+    async updateTheme(@Args() {id, data}: UpdateThemeArgs): Promise<boolean> {
+        await this.themeService.update(id, data);
         return true;
     }
 

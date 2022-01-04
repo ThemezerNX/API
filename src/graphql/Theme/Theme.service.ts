@@ -1,7 +1,7 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
 import {titleCase} from "title-case";
-import {FindConditions, getConnection, In, Repository} from "typeorm";
+import {EntityManager, FindConditions, getConnection, In, Repository} from "typeorm";
 import {ThemeEntity} from "./Theme.entity";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {compareTargetFn, Target} from "../common/enums/Target";
@@ -49,6 +49,7 @@ import {addPrivateCondition} from "../common/functions/addPrivateCondition";
 import {ItemVisibility} from "../common/enums/ItemVisibility";
 import {PrivatableThemeDataInput} from "./dto/PrivatableThemeData.input";
 import {PrivatableHbthemeDataInput} from "./dto/PrivatableHbthemeData.input";
+import {UpdateThemeDataInput} from "./dto/UpdateThemeData.input";
 
 @Injectable()
 export class ThemeService implements IsOwner, GetHash {
@@ -255,7 +256,7 @@ export class ThemeService implements IsOwner, GetHash {
                         tags: ThemeService.selectTags(submittedTheme.tags, insertedTags),
                         previews: new ThemePreviewsEntity(),
                         assets: new ThemeAssetsEntity(),
-                        isPrivate: submittedTheme instanceof PrivatableThemeDataInput ? submittedTheme.makePrivate : makePrivate,
+                        isPrivate: (submittedTheme instanceof PrivatableThemeDataInput ? submittedTheme.makePrivate : makePrivate) || false,
                     });
 
                     // previews
@@ -334,33 +335,7 @@ export class ThemeService implements IsOwner, GetHash {
                         // themes don't support options for custom layouts
                         throw new InvalidThemeContentsError({}, "cannot combine layout options with a custom layout");
                     }
-                    const options = submittedTheme.options.map(async (o) => {
-                        const option = new ThemeOptionEntity();
-                        option.layoutOptionValueUUID = o.uuid;
-                        // determine which type the layoutOption expects, verify
-                        const layoutOption = await this.layoutOptionService.findOption({valueUuid: o.uuid});
-                        const type = layoutOption.type;
-                        if (type === LayoutOptionType.INTEGER) {
-                            if (!o.integerValue) throw new InvalidThemeContentsError({},
-                                `missing option integerValue for ${o.uuid}`);
-                            option.variable = o.integerValue.toString();
-                        } else if (type === LayoutOptionType.DECIMAL) {
-                            if (!o.decimalValue) throw new InvalidThemeContentsError({},
-                                `missing option decimalValue for ${o.uuid}`);
-                            option.variable = o.decimalValue.toPrecision(8).toString();
-                        } else if (type === LayoutOptionType.STRING) {
-                            if (!o.stringValue) throw new InvalidThemeContentsError({},
-                                `missing option stringValue for ${o.uuid}`);
-                            option.variable = o.stringValue;
-                        } else if (type === LayoutOptionType.COLOR) {
-                            if (!o.colorValue) throw new InvalidThemeContentsError({},
-                                `missing option colorValue for ${o.uuid}`);
-                            option.variable = o.colorValue;
-                        }
-
-                        return option;
-                    });
-                    theme.options = await Promise.all(options);
+                    theme.options = await this.getOptions(submittedTheme);
 
                     for (const tag of theme.tags) {
                         if (!insertedTags.map((t: ThemeTagEntity) => t.name).includes(tag.name)) {
@@ -383,7 +358,7 @@ export class ThemeService implements IsOwner, GetHash {
                         assets: new HBThemeAssetsEntity(),
                         lightTheme: new HBThemeLightColorSchemeEntity(submittedTheme.lightTheme),
                         darkTheme: new HBThemeDarkColorSchemeEntity(submittedTheme.darkTheme),
-                        isPrivate: submittedTheme instanceof PrivatableHbthemeDataInput ? submittedTheme.makePrivate : makePrivate,
+                        isPrivate: (submittedTheme instanceof PrivatableThemeDataInput ? submittedTheme.makePrivate : makePrivate) || false,
                     });
 
                     // previews
@@ -535,23 +510,8 @@ export class ThemeService implements IsOwner, GetHash {
                         hbtheme.pack = insertedPack;
                     }
                 }
-
-                await entityManager
-                    .createQueryBuilder()
-                    .insert()
-                    .into(ThemeTagEntity)
-                    .values(insertedTags)
-                    .orUpdate(["name"], ["name"])
-                    .execute();
-
-                // because of a bug in typeorm tags are only saved in the first relation, not in all
-                await entityManager
-                    .createQueryBuilder()
-                    .insert()
-                    .into(ThemeTagEntity)
-                    .values(insertedHbTags)
-                    .orUpdate(["name"], ["name"])
-                    .execute();
+                await ThemeService.insertOrUpdateTags(entityManager, insertedTags);
+                await ThemeService.insertOrUpdateTags(entityManager, insertedHbTags);
 
                 await entityManager.save(ThemeEntity, insertedThemes);
                 await entityManager.save(HBThemeEntity, insertedHbthemes);
@@ -576,6 +536,17 @@ export class ThemeService implements IsOwner, GetHash {
                 throw new LayoutNotFoundError({}, "Referenced layout does not exist");
             } else throw e;
         }
+    }
+
+    private static async insertOrUpdateTags(entityManager: EntityManager, insertedTags: ThemeTagEntity[]) {
+        // because of a bug in typeorm tags are only saved in the first relation, not in all
+        await entityManager
+            .createQueryBuilder()
+            .insert()
+            .into(ThemeTagEntity)
+            .values(insertedTags)
+            .orUpdate(["name"], ["name"])
+            .execute();
     }
 
     private static async readIcon(assets, fileName: keyof ThemeAssetsDataInput | keyof HBThemeAssetsDataInput, {
@@ -655,4 +626,161 @@ export class ThemeService implements IsOwner, GetHash {
         }
     }
 
+    async update(id: string, data: UpdateThemeDataInput) {
+        const theme = await this.repository.findOne({
+            where: {id},
+            relations: ["creator", "previews", "assets", "tags"],
+        });
+        await getConnection().manager.transaction(async entityManager => {
+            if (!theme) {
+                throw new ThemeNotFoundError();
+            }
+            if (data.name !== undefined) {
+                theme.name = data.name;
+            }
+            if (data.description !== undefined) {
+                theme.description = data.description;
+            }
+            if (data.isNSFW !== undefined) {
+                theme.isNSFW = data.isNSFW;
+            }
+            const insertedTags: ThemeTagEntity[] = theme.tags;
+            if (data.tags === null || data.tags === []) {
+                theme.tags = [];
+            } else if (data.tags !== undefined) {
+                theme.tags = ThemeService.selectTags(data.tags, insertedTags);
+
+                for (const tag of theme.tags) {
+                    if (!insertedTags.map((t: ThemeTagEntity) => t.name).includes(tag.name)) {
+                        insertedTags.push(tag);
+                    }
+                }
+
+                console.log(insertedTags);
+            }
+
+            if (data.screenshot !== undefined) {
+                await theme.previews.generateFromStream((await data.screenshot).createReadStream);
+            }
+            if (data.assets !== undefined) {
+                if (!theme.layoutId) {
+                    if (data.assets.customLayoutJson !== undefined) {
+                        theme.assets.customLayoutJson = data.assets.customLayoutJson;
+                    }
+                    if (data.assets.customCommonLayoutJson !== undefined) {
+                        theme.assets.customCommonLayoutJson = data.assets.customCommonLayoutJson;
+                    }
+                }
+
+                if (data.assets.homeIcon === null) {
+                    theme.assets.homeIconFile = null;
+                } else if (data.assets.homeIcon !== undefined) {
+                    theme.assets.homeIconFile = await ThemeService.readIcon(
+                        data.assets,
+                        "homeIcon",
+                        ThemeAssetsEntity.HOME_ICON_FILE,
+                    );
+                }
+                if (data.assets.albumIcon === null) {
+                    theme.assets.albumIconFile = null;
+                } else if (data.assets.albumIcon !== undefined) {
+                    theme.assets.albumIconFile = await ThemeService.readIcon(
+                        data.assets,
+                        "albumIcon",
+                        ThemeAssetsEntity.ALBUM_ICON_FILE,
+                    );
+                }
+                if (data.assets.newsIcon === null) {
+                    theme.assets.newsIconFile = null;
+                } else if (data.assets.newsIcon !== undefined) {
+                    theme.assets.newsIconFile = await ThemeService.readIcon(
+                        data.assets,
+                        "newsIcon",
+                        ThemeAssetsEntity.NEWS_ICON_FILE,
+                    );
+                }
+                if (data.assets.shopIcon === null) {
+                    theme.assets.shopIconFile = null;
+                } else if (data.assets.shopIcon !== undefined) {
+                    theme.assets.shopIconFile = await ThemeService.readIcon(
+                        data.assets,
+                        "shopIcon",
+                        ThemeAssetsEntity.SHOP_ICON_FILE,
+                    );
+                }
+                if (data.assets.controllerIcon === null) {
+                    theme.assets.controllerIconFile = null;
+                } else if (data.assets.controllerIcon !== undefined) {
+                    theme.assets.controllerIconFile = await ThemeService.readIcon(
+                        data.assets,
+                        "controllerIcon",
+                        ThemeAssetsEntity.CONTROLLER_ICON_FILE,
+                    );
+                }
+                if (data.assets.settingsIcon === null) {
+                    theme.assets.settingsIconFile = null;
+                } else if (data.assets.settingsIcon !== undefined) {
+                    theme.assets.settingsIconFile = await ThemeService.readIcon(
+                        data.assets,
+                        "settingsIcon",
+                        ThemeAssetsEntity.SETTINGS_ICON_FILE,
+                    );
+                }
+                if (data.assets.powerIcon === null) {
+                    theme.assets.powerIconFile = null;
+                } else if (data.assets.powerIcon !== undefined) {
+                    theme.assets.powerIconFile = await ThemeService.readIcon(
+                        data.assets,
+                        "powerIcon",
+                        ThemeAssetsEntity.POWER_ICON_FILE,
+                    );
+                }
+
+                if (data.assets.backgroundImage !== undefined) {
+                    await theme.assets.setImage((await data.assets.backgroundImage).createReadStream);
+                }
+            }
+            if ((data.assets?.customLayoutJson || data.assets?.customCommonLayoutJson) && data.options?.length > 0) {
+                // themes don't support options for custom layouts
+                throw new InvalidThemeContentsError({}, "cannot combine layout options with a custom layout");
+            }
+            if (data.options === null) {
+                theme.options = null;
+            } else if (data.options !== undefined) {
+                theme.options = await this.getOptions(data);
+            }
+
+            await ThemeService.insertOrUpdateTags(entityManager, insertedTags);
+            await entityManager.save(ThemeEntity, theme);
+        });
+    }
+
+    private getOptions(data: ThemeDataInput | UpdateThemeDataInput) {
+        return Promise.all(data.options.map(async (o) => {
+            const option = new ThemeOptionEntity();
+            option.layoutOptionValueUUID = o.uuid;
+            // determine which type the layoutOption expects, verify
+            const layoutOption = await this.layoutOptionService.findOption({valueUuid: o.uuid});
+            const type = layoutOption.type;
+            if (type === LayoutOptionType.INTEGER) {
+                if (!o.integerValue) throw new InvalidThemeContentsError({},
+                    `missing option integerValue for ${o.uuid}`);
+                option.variable = o.integerValue.toString();
+            } else if (type === LayoutOptionType.DECIMAL) {
+                if (!o.decimalValue) throw new InvalidThemeContentsError({},
+                    `missing option decimalValue for ${o.uuid}`);
+                option.variable = o.decimalValue.toPrecision(8).toString();
+            } else if (type === LayoutOptionType.STRING) {
+                if (!o.stringValue) throw new InvalidThemeContentsError({},
+                    `missing option stringValue for ${o.uuid}`);
+                option.variable = o.stringValue;
+            } else if (type === LayoutOptionType.COLOR) {
+                if (!o.colorValue) throw new InvalidThemeContentsError({},
+                    `missing option colorValue for ${o.uuid}`);
+                option.variable = o.colorValue;
+            }
+
+            return option;
+        }));
+    }
 }
