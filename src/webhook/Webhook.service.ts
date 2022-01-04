@@ -27,7 +27,7 @@ export class WebhookService {
         pack.previews.setUrls();
         const embed = new MessageEmbed()
             .setColor("#b40a86")
-            .setTitle(pack.name)
+            .setTitle(pack.name + (pack.isNSFW ? " (NSFW)" : ""))
             .setDescription(pack.description)
             .setURL(WebsiteMappings.pack(pack.id, pack.name))
             .setAuthor(pack.creator.username, pack.creator.profile?.avatarUrl, WebsiteMappings.user(pack.creator.id))
