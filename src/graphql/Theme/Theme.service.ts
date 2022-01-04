@@ -47,6 +47,8 @@ import {MailService} from "../../mail/mail.service";
 import {ThemeNotFoundError} from "../common/errors/ThemeNotFound.error";
 import {addPrivateCondition} from "../common/functions/addPrivateCondition";
 import {ItemVisibility} from "../common/enums/ItemVisibility";
+import {PrivatableThemeDataInput} from "./dto/PrivatableThemeData.input";
+import {PrivatableHbthemeDataInput} from "./dto/PrivatableHbthemeData.input";
 
 @Injectable()
 export class ThemeService implements IsOwner, GetHash {
@@ -207,8 +209,8 @@ export class ThemeService implements IsOwner, GetHash {
     async insertMultiple(
         creator: UserEntity,
         makePrivate: boolean,
-        themeData: ThemeDataInput[],
-        hbthemeData: HBThemeDataInput[],
+        themeData: ThemeDataInput[] | PrivatableThemeDataInput[],
+        hbthemeData: HBThemeDataInput[] | PrivatableHbthemeDataInput[],
         packData: PackDataInput,
     ) {
         if (packData && themeData.length + hbthemeData.length < 2) {
@@ -248,7 +250,7 @@ export class ThemeService implements IsOwner, GetHash {
                         tags: ThemeService.selectTags(submittedTheme.tags, insertedTags),
                         previews: new ThemePreviewsEntity(),
                         assets: new ThemeAssetsEntity(),
-                        isPrivate: makePrivate,
+                        isPrivate: submittedTheme instanceof PrivatableThemeDataInput ? submittedTheme.makePrivate : makePrivate,
                     });
 
                     // previews
@@ -376,7 +378,7 @@ export class ThemeService implements IsOwner, GetHash {
                         assets: new HBThemeAssetsEntity(),
                         lightTheme: new HBThemeLightColorSchemeEntity(submittedTheme.lightTheme),
                         darkTheme: new HBThemeDarkColorSchemeEntity(submittedTheme.darkTheme),
-                        isPrivate: makePrivate,
+                        isPrivate: submittedTheme instanceof PrivatableHbthemeDataInput ? submittedTheme.makePrivate : makePrivate,
                     });
 
                     // previews
@@ -557,7 +559,11 @@ export class ThemeService implements IsOwner, GetHash {
                     await this.webhookService.newPack(insertedPack, insertedThemes, insertedHbthemes);
                 } else {
                     // theme submission
-                    await this.webhookService.newThemes(insertedThemes, insertedHbthemes);
+                    const nonPrivateThemes = insertedThemes.filter((theme: ThemeEntity) => !theme.isPrivate);
+                    const nonPrivateHBThemes = insertedHbthemes.filter((theme: HBThemeEntity) => !theme.isPrivate);
+                    if (nonPrivateThemes.length > 0 || nonPrivateHBThemes.length > 0) {
+                        await this.webhookService.newThemes(nonPrivateThemes, nonPrivateHBThemes);
+                    }
                 }
             }
         } catch (e) {

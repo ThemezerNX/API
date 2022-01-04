@@ -1,23 +1,20 @@
 import {ArgsType, Field} from "@nestjs/graphql";
-import {ThemeDataInput} from "./ThemeData.input";
 import {ArrayMaxSize} from "class-validator";
 import {ValidateChild} from "../../common/decorators/ValidateNested.decorator";
-import {HBThemeDataInput} from "./HBThemeData.input";
+import {PrivatableThemeDataInput} from "./PrivatableThemeData.input";
+import {PrivatableHbthemeDataInput} from "./PrivatableHbthemeData.input";
 
 @ArgsType()
 export class SubmitThemesArgs {
 
-    @Field()
-    makePrivate: boolean;
-
-    @Field(() => [ThemeDataInput], {nullable: true})
+    @Field(() => [PrivatableThemeDataInput], {nullable: true})
     @ArrayMaxSize(25)
-    @ValidateChild(() => ThemeDataInput)
-    themesData?: ThemeDataInput[] = [];
+    @ValidateChild(() => PrivatableThemeDataInput)
+    themesData?: PrivatableThemeDataInput[] = [];
 
-    @Field(() => [HBThemeDataInput], {nullable: true})
+    @Field(() => [PrivatableHbthemeDataInput], {nullable: true})
     @ArrayMaxSize(25)
-    @ValidateChild(() => HBThemeDataInput)
-    hbthemesData?: HBThemeDataInput[] = [];
+    @ValidateChild(() => PrivatableHbthemeDataInput)
+    hbthemesData?: PrivatableHbthemeDataInput[] = [];
 
 }

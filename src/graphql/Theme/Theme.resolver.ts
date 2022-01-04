@@ -98,11 +98,10 @@ export class ThemeResolver {
     @Mutation(() => Boolean)
     @Auth()
     async submitThemes(@CurrentUser() user: UserEntity, @Args() {
-        makePrivate,
         themesData,
         hbthemesData,
     }: SubmitThemesArgs): Promise<boolean> {
-        await this.themeService.insertMultiple(user, makePrivate, themesData, hbthemesData, null);
+        await this.themeService.insertMultiple(user, null, themesData, hbthemesData, null);
         return true;
     }
 
