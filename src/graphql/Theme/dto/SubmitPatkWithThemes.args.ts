@@ -15,14 +15,14 @@ export class SubmitPackWithThemesArgs {
     @ValidateChild(() => PackDataInput)
     packData: PackDataInput;
 
-    @Field(() => [ThemeDataInput])
+    @Field(() => [ThemeDataInput], {nullable: true})
     @ArrayMaxSize(25)
     @ValidateChild(() => ThemeDataInput)
-    themesData: ThemeDataInput[];
+    themesData: ThemeDataInput[] = [];
 
-    @Field(() => [HBThemeDataInput])
+    @Field(() => [HBThemeDataInput], {nullable: true})
     @ArrayMaxSize(25)
     @ValidateChild(() => HBThemeDataInput)
-    hbthemesData: HBThemeDataInput[];
+    hbthemesData: HBThemeDataInput[] = [];
 
 }
