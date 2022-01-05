@@ -13,6 +13,7 @@ import {PasswordIncorrectError} from "../common/errors/auth/PasswordIncorrect.er
 import {UpdateUserArgs} from "./dto/UpdateUser.args";
 import {CurrentUser} from "../../common/decorators/CurrentUser.decorator";
 import {UserEntity} from "./User.entity";
+import {UpdateUserProfileArgs} from "./dto/UpdateUserPreferences.args";
 
 
 @Resolver(UserModel)
@@ -79,6 +80,15 @@ export class UserResolver {
     @Auth({ownerOnly: true})
     async updateUser(@Args() {id, data}: UpdateUserArgs): Promise<boolean> {
         await this.userService.update(id, data);
+        return true;
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Update a user.",
+    })
+    @Auth()
+    async updateUserPreferences(@CurrentUser() {id}: UserEntity, @Args() data: UpdateUserProfileArgs): Promise<boolean> {
+        await this.userService.updatePreferences(id, data);
         return true;
     }
 

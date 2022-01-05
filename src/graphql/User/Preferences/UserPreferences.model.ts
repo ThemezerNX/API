@@ -8,10 +8,10 @@ export class UserPreferencesModel extends RootModelAbstract {
     @Field()
     showNSFW: boolean;
 
-    @Field()
-    popularEmails: boolean;
+    @Field({description: "Whether to receive emails about new notifications"})
+    notificationEmails: boolean;
 
-    @Field()
+    @Field({description: "Whether to receive promational emails"})
     promotionEmails: boolean;
 
 }

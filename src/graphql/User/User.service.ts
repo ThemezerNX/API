@@ -1,6 +1,6 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
-import {FindConditions, getConnection, Repository} from "typeorm";
+import {FindConditions, Repository} from "typeorm";
 import {UserEntity} from "./User.entity";
 import {StringContains} from "../common/findOperators/StringContains";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
@@ -17,6 +17,7 @@ import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptio
 import {LayoutService} from "../Layout/Layout.service";
 import {UpdateUserDataInput} from "./dto/UpdateUserData.input";
 import {UserNotFoundError} from "../common/errors/auth/UserNotFound.error";
+import {UpdateUserProfileArgs} from "./dto/UpdateUserPreferences.args";
 
 @Injectable()
 export class UserService implements IsOwner {
@@ -139,35 +140,55 @@ export class UserService implements IsOwner {
             where: {id},
             relations: ["profile", "preferences", "connections"],
         });
-        await getConnection().manager.transaction(async entityManager => {
-            if (!user) {
-                throw new UserNotFoundError();
+        if (!user) {
+            throw new UserNotFoundError();
+        }
+        if (data.username !== undefined) {
+            user.username = data.username;
+        }
+        if (data.profile !== undefined) {
+            if (data.profile.bio !== undefined) {
+                user.profile.bio = data.profile.bio;
             }
-            if (data.username !== undefined) {
-                user.username = data.username;
-            }
-            if (data.profile !== undefined) {
-                if (data.profile.bio !== undefined) {
-                    user.profile.bio = data.profile.bio;
-                }
-                if (data.profile.color !== undefined) {
-                    user.profile.color = data.profile.color;
-                }
-
-                if (data.profile.avatar === null) {
-                    user.profile.avatarFile = null;
-                } else if (data.profile.avatar !== undefined) {
-                    await user.profile.setAvatar((await data.profile.avatar).createReadStream);
-                }
-                if (data.profile.banner === null) {
-                    user.profile.bannerFile = null;
-                } else if (data.profile.banner !== undefined) {
-                    await user.profile.setBanner((await data.profile.banner).createReadStream);
-                }
+            if (data.profile.color !== undefined) {
+                user.profile.color = data.profile.color;
             }
 
-            await entityManager.save(UserEntity, user);
+            if (data.profile.avatar === null) {
+                user.profile.avatarFile = null;
+            } else if (data.profile.avatar !== undefined) {
+                await user.profile.setAvatar((await data.profile.avatar).createReadStream);
+            }
+            if (data.profile.banner === null) {
+                user.profile.bannerFile = null;
+            } else if (data.profile.banner !== undefined) {
+                await user.profile.setBanner((await data.profile.banner).createReadStream);
+            }
+        }
+
+        await user.save();
+    }
+
+    async updatePreferences(id: string, data: UpdateUserProfileArgs) {
+        const user = await this.repository.findOne({
+            where: {id},
+            relations: ["preferences"],
         });
+
+        if (!user) {
+            throw new UserNotFoundError();
+        }
+        if (data.showNSFW !== undefined) {
+            user.preferences.showNSFW = data.showNSFW;
+        }
+        if (data.promotionEmails !== undefined) {
+            user.preferences.promotionEmails = data.promotionEmails;
+        }
+        if (data.notificationEmails !== undefined) {
+            user.preferences.notificationEmails = data.notificationEmails;
+        }
+
+        await user.save();
     }
 
     setHasAccepted(id: string, value: boolean) {

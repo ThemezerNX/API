@@ -21,10 +21,7 @@ export class UserPreferencesEntity extends BaseEntity {
     showNSFW: boolean;
 
     @Column({default: true})
-    messages: boolean;
-
-    @Column({default: true})
-    popularEmails: boolean;
+    notificationEmails: boolean;
 
     @Column({default: true})
     promotionEmails: boolean;

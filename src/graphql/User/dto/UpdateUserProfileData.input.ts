@@ -5,7 +5,7 @@ import {FileUpload, GraphQLUpload} from "graphql-upload";
 import {HexColorCodeResolver} from "graphql-scalars";
 
 @InputType({description: "Acts as a patch. Undefined fields are not updated, null fields are set to null."})
-export class UpdateProfileDataInput {
+export class UpdateUserProfileDataInput {
 
     @Length(0, 10000)
     @Field({nullable: true})

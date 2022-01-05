@@ -1,7 +1,7 @@
 import {Field, InputType} from "@nestjs/graphql";
 import {IsOptional, Length} from "class-validator";
 import {ValidateChild} from "../../common/decorators/ValidateNested.decorator";
-import {UpdateProfileDataInput} from "./UpdateProfileData.input";
+import {UpdateUserProfileDataInput} from "./UpdateUserProfileData.input";
 
 @InputType({description: "Acts as a patch. Undefined fields are not updated, null fields are set to null."})
 export class UpdateUserDataInput {
@@ -11,9 +11,9 @@ export class UpdateUserDataInput {
     @IsOptional()
     username?: string;
 
-    @Field(() => UpdateProfileDataInput, {nullable: true})
-    @ValidateChild(() => UpdateProfileDataInput)
+    @Field(() => UpdateUserProfileDataInput, {nullable: true})
+    @ValidateChild(() => UpdateUserProfileDataInput)
     @IsOptional()
-    profile?: UpdateProfileDataInput;
+    profile?: UpdateUserProfileDataInput;
 
 }
