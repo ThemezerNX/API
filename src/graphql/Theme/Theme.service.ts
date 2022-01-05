@@ -1,7 +1,6 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
-import {titleCase} from "title-case";
-import {EntityManager, FindConditions, getConnection, In, Repository} from "typeorm";
+import {FindConditions, getConnection, In, Repository} from "typeorm";
 import {ThemeEntity} from "./Theme.entity";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {compareTargetFn, Target} from "../common/enums/Target";
@@ -16,7 +15,6 @@ import {ThemeTagEntity} from "../ThemeTag/ThemeTag.entity";
 import {ThemePreviewsEntity} from "./Previews/ThemePreviews.entity";
 import {ThemeAssetsEntity} from "./Assets/ThemeAssets.entity";
 import {InvalidThemeContentsError} from "../common/errors/InvalidThemeContents.error";
-import {streamToBuffer} from "@jorgeferrero/stream-to-buffer";
 import {ThemeOptionEntity} from "./ThemeOptions/ThemeOption.entity";
 import {LayoutOptionService} from "../LayoutOption/LayoutOption.service";
 import {LayoutOptionType} from "../LayoutOption/common/LayoutOptionType.enum";
@@ -25,19 +23,14 @@ import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptio
 import {createInfoSelectQueryBuilder} from "../common/functions/createInfoSelectQueryBuilder";
 import {ThemeHashEntity} from "../Cache/Theme/ThemeHash.entity";
 import {GetHash} from "../common/interfaces/GetHash.interface";
-import {ThemeAssetsDataInput} from "./dto/ThemeAssetsData.input";
-import * as sharp from "sharp";
-import {propertyToTitleCase} from "../common/functions/propertyToTitleCase";
 import {PackEntity} from "../Pack/Pack.entity";
 import {PackPreviewsEntity} from "../Pack/Previews/PackPreviews.entity";
-import {InvalidIconAssetError} from "../common/errors/InvalidIconAsset.error";
 import {WebhookService} from "../../webhook/Webhook.service";
 import {UserEntity} from "../User/User.entity";
 import {HBThemeEntity} from "../HBTheme/HBTheme.entity";
 import {HBThemeDataInput} from "./dto/HBThemeData.input";
 import {HBThemePreviewsEntity} from "../HBTheme/Previews/HBThemePreviews.entity";
 import {HBThemeAssetsEntity} from "../HBTheme/Assets/HBThemeAssets.entity";
-import {HBThemeAssetsDataInput} from "./dto/HBThemeAssetsData.input";
 import {PackMinThemesError} from "../common/errors/submissions/PackMinThemes.error";
 import {NoThemesError} from "../common/errors/submissions/NoThemes.error";
 import {HBThemeLightColorSchemeEntity} from "../HBTheme/ColorScheme/HBThemeLightColorScheme.entity";
@@ -51,6 +44,9 @@ import {PrivatableThemeDataInput} from "./dto/PrivatableThemeData.input";
 import {PrivatableHbthemeDataInput} from "./dto/PrivatableHbthemeData.input";
 import {UpdateThemeDataInput} from "./dto/UpdateThemeData.input";
 import {deleteIfEmpty, recomputeNSFW} from "../Pack/Pack.constraints";
+import {selectTags} from "../common/functions/selectTags";
+import {readImageAsset} from "../common/functions/readImageAsset";
+import {insertOrUpdateTags} from "../common/functions/insertOrUpdateTags";
 
 @Injectable()
 export class ThemeService implements IsOwner, GetHash {
@@ -206,13 +202,6 @@ export class ThemeService implements IsOwner, GetHash {
         return queryBuilder.getMany();
     }
 
-    private static selectTags(newTags: string[], existingTags: ThemeTagEntity[]) {
-        return newTags.map((tag) => {
-            const tileCaseTag = titleCase(tag);
-            return existingTags.find((t) => t.name === tileCaseTag) || new ThemeTagEntity(tileCaseTag);
-        });
-    }
-
     async insertMultiple(
         creator: UserEntity,
         makePrivate: boolean,
@@ -254,7 +243,7 @@ export class ThemeService implements IsOwner, GetHash {
                         creator: creator,
                         layoutId: submittedTheme.layoutId || null,
                         // find the tag in the array
-                        tags: ThemeService.selectTags(submittedTheme.tags, insertedTags),
+                        tags: selectTags(submittedTheme.tags, insertedTags),
                         previews: new ThemePreviewsEntity(),
                         assets: new ThemeAssetsEntity(),
                         isPrivate: (submittedTheme instanceof PrivatableThemeDataInput ? submittedTheme.makePrivate : makePrivate) || false,
@@ -279,49 +268,49 @@ export class ThemeService implements IsOwner, GetHash {
                     }
 
                     if (submittedTheme.assets?.homeIcon) {
-                        theme.assets.homeIconFile = await ThemeService.readIcon(
+                        theme.assets.homeIconFile = await readImageAsset(
                             submittedTheme.assets,
                             "homeIcon",
                             ThemeAssetsEntity.HOME_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets?.albumIcon) {
-                        theme.assets.albumIconFile = await ThemeService.readIcon(
+                        theme.assets.albumIconFile = await readImageAsset(
                             submittedTheme.assets,
                             "albumIcon",
                             ThemeAssetsEntity.ALBUM_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets?.newsIcon) {
-                        theme.assets.newsIconFile = await ThemeService.readIcon(
+                        theme.assets.newsIconFile = await readImageAsset(
                             submittedTheme.assets,
                             "newsIcon",
                             ThemeAssetsEntity.NEWS_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets?.shopIcon) {
-                        theme.assets.shopIconFile = await ThemeService.readIcon(
+                        theme.assets.shopIconFile = await readImageAsset(
                             submittedTheme.assets,
                             "shopIcon",
                             ThemeAssetsEntity.SHOP_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets?.controllerIcon) {
-                        theme.assets.controllerIconFile = await ThemeService.readIcon(
+                        theme.assets.controllerIconFile = await readImageAsset(
                             submittedTheme.assets,
                             "controllerIcon",
                             ThemeAssetsEntity.CONTROLLER_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets?.settingsIcon) {
-                        theme.assets.settingsIconFile = await ThemeService.readIcon(
+                        theme.assets.settingsIconFile = await readImageAsset(
                             submittedTheme.assets,
                             "settingsIcon",
                             ThemeAssetsEntity.SETTINGS_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets?.powerIcon) {
-                        theme.assets.powerIconFile = await ThemeService.readIcon(
+                        theme.assets.powerIconFile = await readImageAsset(
                             submittedTheme.assets,
                             "powerIcon",
                             ThemeAssetsEntity.POWER_ICON_FILE,
@@ -354,7 +343,7 @@ export class ThemeService implements IsOwner, GetHash {
                         description: submittedTheme.description,
                         isNSFW: submittedTheme.isNSFW,
                         creator: creator,
-                        tags: ThemeService.selectTags(submittedTheme.tags, insertedHbTags),
+                        tags: selectTags(submittedTheme.tags, insertedHbTags),
                         previews: new HBThemePreviewsEntity(),
                         assets: new HBThemeAssetsEntity(),
                         lightTheme: new HBThemeLightColorSchemeEntity(submittedTheme.lightTheme),
@@ -373,109 +362,105 @@ export class ThemeService implements IsOwner, GetHash {
                     hbtheme.assets.layout = submittedTheme.assets.layout;
 
                     if (submittedTheme.assets.icon) {
-                        hbtheme.assets.iconFile = await ThemeService.readIcon(
+                        hbtheme.assets.iconFile = await readImageAsset(
                             submittedTheme.assets,
                             "icon",
                             HBThemeAssetsEntity.ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets.batteryIcon) {
-                        hbtheme.assets.batteryIconFile = await ThemeService.readIcon(
+                        hbtheme.assets.batteryIconFile = await readImageAsset(
                             submittedTheme.assets,
                             "batteryIcon",
                             HBThemeAssetsEntity.BATTERY_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets.chargingIcon) {
-                        hbtheme.assets.chargingIconFile = await ThemeService.readIcon(
+                        hbtheme.assets.chargingIconFile = await readImageAsset(
                             submittedTheme.assets,
                             "chargingIcon",
                             HBThemeAssetsEntity.CHARGING_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets.folderIcon) {
-                        hbtheme.assets.folderIconFile = await ThemeService.readIcon(
+                        hbtheme.assets.folderIconFile = await readImageAsset(
                             submittedTheme.assets,
                             "folderIcon",
                             HBThemeAssetsEntity.FOLDER_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets.invalidIcon) {
-                        hbtheme.assets.invalidIconFile = await ThemeService.readIcon(
+                        hbtheme.assets.invalidIconFile = await readImageAsset(
                             submittedTheme.assets,
                             "invalidIcon",
                             HBThemeAssetsEntity.INVALID_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets.themeIconDark) {
-                        hbtheme.assets.themeIconDarkFile = await ThemeService.readIcon(
+                        hbtheme.assets.themeIconDarkFile = await readImageAsset(
                             submittedTheme.assets,
                             "themeIconDark",
                             HBThemeAssetsEntity.THEME_ICON_DARK_FILE,
                         );
                     }
                     if (submittedTheme.assets.themeIconLight) {
-                        hbtheme.assets.themeIconLightFile = await ThemeService.readIcon(
+                        hbtheme.assets.themeIconLightFile = await readImageAsset(
                             submittedTheme.assets,
                             "themeIconLight",
                             HBThemeAssetsEntity.THEME_ICON_LIGHT_FILE,
                         );
                     }
                     if (submittedTheme.assets.airplaneIcon) {
-                        hbtheme.assets.airplaneIconFile = await ThemeService.readIcon(
+                        hbtheme.assets.airplaneIconFile = await readImageAsset(
                             submittedTheme.assets,
                             "airplaneIcon",
                             HBThemeAssetsEntity.AIRPLANE_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets.wifiNoneIcon) {
-                        hbtheme.assets.wifiNoneIconFile = await ThemeService.readIcon(
+                        hbtheme.assets.wifiNoneIconFile = await readImageAsset(
                             submittedTheme.assets,
                             "wifiNoneIcon",
                             HBThemeAssetsEntity.WIFI_NONE_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets.wifi1Icon) {
-                        hbtheme.assets.wifi1IconFile = await ThemeService.readIcon(
+                        hbtheme.assets.wifi1IconFile = await readImageAsset(
                             submittedTheme.assets,
                             "wifi1Icon",
                             HBThemeAssetsEntity.WIFI1_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets.wifi2Icon) {
-                        hbtheme.assets.wifi2IconFile = await ThemeService.readIcon(
+                        hbtheme.assets.wifi2IconFile = await readImageAsset(
                             submittedTheme.assets,
                             "wifi2Icon",
                             HBThemeAssetsEntity.WIFI2_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets.wifi3Icon) {
-                        hbtheme.assets.wifi3IconFile = await ThemeService.readIcon(
+                        hbtheme.assets.wifi3IconFile = await readImageAsset(
                             submittedTheme.assets,
                             "wifi3Icon",
                             HBThemeAssetsEntity.WIFI3_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets.ethIcon) {
-                        hbtheme.assets.ethIconFile = await ThemeService.readIcon(
+                        hbtheme.assets.ethIconFile = await readImageAsset(
                             submittedTheme.assets,
                             "ethIcon",
                             HBThemeAssetsEntity.ETH_ICON_FILE,
                         );
                     }
                     if (submittedTheme.assets.ethNoneIcon) {
-                        hbtheme.assets.ethNoneIconFile = await ThemeService.readIcon(
+                        hbtheme.assets.ethNoneIconFile = await readImageAsset(
                             submittedTheme.assets,
                             "ethNoneIcon",
                             HBThemeAssetsEntity.ETH_NONE_ICON_FILE,
                         );
                     }
-                    if (submittedTheme.assets.backgroundImage) {
-                        hbtheme.assets.backgroundImageFile = await ThemeService.readIcon(
-                            submittedTheme.assets,
-                            "backgroundImage",
-                            HBThemeAssetsEntity.BACKGROUND_IMAGE_FILE,
-                        );
+                    if (submittedTheme.assets.backgroundImage !== undefined) {
+                        await hbtheme.assets.setImage((await submittedTheme.assets.backgroundImage).createReadStream);
                     }
 
                     for (const tag of hbtheme.tags) {
@@ -511,8 +496,8 @@ export class ThemeService implements IsOwner, GetHash {
                         hbtheme.pack = insertedPack;
                     }
                 }
-                await ThemeService.insertOrUpdateTags(entityManager, insertedTags);
-                await ThemeService.insertOrUpdateTags(entityManager, insertedHbTags);
+                await insertOrUpdateTags(entityManager, insertedTags);
+                await insertOrUpdateTags(entityManager, insertedHbTags);
 
                 await entityManager.save(ThemeEntity, insertedThemes);
                 await entityManager.save(HBThemeEntity, insertedHbthemes);
@@ -537,33 +522,6 @@ export class ThemeService implements IsOwner, GetHash {
                 throw new LayoutNotFoundError({}, "Referenced layout does not exist");
             } else throw e;
         }
-    }
-
-    private static async insertOrUpdateTags(entityManager: EntityManager, insertedTags: ThemeTagEntity[]) {
-        // because of a bug in typeorm tags are only saved in the first relation, not in all
-        await entityManager
-            .createQueryBuilder()
-            .insert()
-            .into(ThemeTagEntity)
-            .values(insertedTags)
-            .orUpdate(["name"], ["name"])
-            .execute();
-    }
-
-    private static async readIcon(assets, fileName: keyof ThemeAssetsDataInput | keyof HBThemeAssetsDataInput, {
-        width: requiredWidth,
-        height: requiredHeight,
-    }) {
-        const buffer = await streamToBuffer((await assets[fileName]).createReadStream());
-        const image = sharp(buffer);
-        const {width, height} = await image.metadata();
-        if (width !== requiredWidth || height !== requiredHeight)
-            throw new InvalidIconAssetError({
-                propertyName: propertyToTitleCase(fileName),
-                requiredWidth,
-                requiredHeight,
-            });
-        return buffer;
     }
 
     async isOwner(id: string, userId: string): Promise<boolean> {
@@ -641,7 +599,7 @@ export class ThemeService implements IsOwner, GetHash {
             where: {id},
             relations: ["creator", "previews", "assets", "tags"],
         });
-        await getConnection().manager.transaction("READ UNCOMMITTED", async entityManager => {
+        await getConnection().manager.transaction(async entityManager => {
             if (!theme) {
                 throw new ThemeNotFoundError();
             }
@@ -658,7 +616,7 @@ export class ThemeService implements IsOwner, GetHash {
             if (data.tags === null || data.tags === []) {
                 theme.tags = [];
             } else if (data.tags !== undefined) {
-                theme.tags = ThemeService.selectTags(data.tags, insertedTags);
+                theme.tags = selectTags(data.tags, insertedTags);
 
                 for (const tag of theme.tags) {
                     if (!insertedTags.map((t: ThemeTagEntity) => t.name).includes(tag.name)) {
@@ -683,7 +641,7 @@ export class ThemeService implements IsOwner, GetHash {
                 if (data.assets.homeIcon === null) {
                     theme.assets.homeIconFile = null;
                 } else if (data.assets.homeIcon !== undefined) {
-                    theme.assets.homeIconFile = await ThemeService.readIcon(
+                    theme.assets.homeIconFile = await readImageAsset(
                         data.assets,
                         "homeIcon",
                         ThemeAssetsEntity.HOME_ICON_FILE,
@@ -692,7 +650,7 @@ export class ThemeService implements IsOwner, GetHash {
                 if (data.assets.albumIcon === null) {
                     theme.assets.albumIconFile = null;
                 } else if (data.assets.albumIcon !== undefined) {
-                    theme.assets.albumIconFile = await ThemeService.readIcon(
+                    theme.assets.albumIconFile = await readImageAsset(
                         data.assets,
                         "albumIcon",
                         ThemeAssetsEntity.ALBUM_ICON_FILE,
@@ -701,7 +659,7 @@ export class ThemeService implements IsOwner, GetHash {
                 if (data.assets.newsIcon === null) {
                     theme.assets.newsIconFile = null;
                 } else if (data.assets.newsIcon !== undefined) {
-                    theme.assets.newsIconFile = await ThemeService.readIcon(
+                    theme.assets.newsIconFile = await readImageAsset(
                         data.assets,
                         "newsIcon",
                         ThemeAssetsEntity.NEWS_ICON_FILE,
@@ -710,7 +668,7 @@ export class ThemeService implements IsOwner, GetHash {
                 if (data.assets.shopIcon === null) {
                     theme.assets.shopIconFile = null;
                 } else if (data.assets.shopIcon !== undefined) {
-                    theme.assets.shopIconFile = await ThemeService.readIcon(
+                    theme.assets.shopIconFile = await readImageAsset(
                         data.assets,
                         "shopIcon",
                         ThemeAssetsEntity.SHOP_ICON_FILE,
@@ -719,7 +677,7 @@ export class ThemeService implements IsOwner, GetHash {
                 if (data.assets.controllerIcon === null) {
                     theme.assets.controllerIconFile = null;
                 } else if (data.assets.controllerIcon !== undefined) {
-                    theme.assets.controllerIconFile = await ThemeService.readIcon(
+                    theme.assets.controllerIconFile = await readImageAsset(
                         data.assets,
                         "controllerIcon",
                         ThemeAssetsEntity.CONTROLLER_ICON_FILE,
@@ -728,7 +686,7 @@ export class ThemeService implements IsOwner, GetHash {
                 if (data.assets.settingsIcon === null) {
                     theme.assets.settingsIconFile = null;
                 } else if (data.assets.settingsIcon !== undefined) {
-                    theme.assets.settingsIconFile = await ThemeService.readIcon(
+                    theme.assets.settingsIconFile = await readImageAsset(
                         data.assets,
                         "settingsIcon",
                         ThemeAssetsEntity.SETTINGS_ICON_FILE,
@@ -737,7 +695,7 @@ export class ThemeService implements IsOwner, GetHash {
                 if (data.assets.powerIcon === null) {
                     theme.assets.powerIconFile = null;
                 } else if (data.assets.powerIcon !== undefined) {
-                    theme.assets.powerIconFile = await ThemeService.readIcon(
+                    theme.assets.powerIconFile = await readImageAsset(
                         data.assets,
                         "powerIcon",
                         ThemeAssetsEntity.POWER_ICON_FILE,
@@ -758,7 +716,7 @@ export class ThemeService implements IsOwner, GetHash {
                 theme.options = await this.getOptions(data);
             }
 
-            await ThemeService.insertOrUpdateTags(entityManager, insertedTags);
+            await insertOrUpdateTags(entityManager, insertedTags);
             await entityManager.save(ThemeEntity, theme);
             if (theme.packId) {
                 await recomputeNSFW(entityManager, {packId: theme.packId});
@@ -794,4 +752,5 @@ export class ThemeService implements IsOwner, GetHash {
             return option;
         }));
     }
+
 }

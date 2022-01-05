@@ -164,7 +164,7 @@ export class ThemeAssetsEntity extends AssetsEntityInterface {
     }
 
     async setImage(createReadStream: () => ReadStream) {
-        this.backgroundImageFile = await generateBackground(createReadStream);
+        this.backgroundImageFile = await generateBackground(createReadStream, ThemeAssetsEntity.BACKGROUND_IMAGE_FILE);
     }
 
 }

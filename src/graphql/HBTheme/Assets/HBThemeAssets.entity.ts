@@ -3,6 +3,8 @@ import {HBThemeEntity} from "../HBTheme.entity";
 import {CDNMapper} from "../../common/CDNMapper";
 import {AssetsEntityInterface} from "../../common/interfaces/Assets.entity.interface";
 import {SelectAlways} from "perch-query-builder";
+import {ReadStream} from "fs";
+import {generateBackground} from "../../common/processors/ScreenshotProcessor";
 
 @Entity()
 export class HBThemeAssetsEntity extends AssetsEntityInterface {
@@ -263,6 +265,10 @@ export class HBThemeAssetsEntity extends AssetsEntityInterface {
         this.backgroundImageUrl = !!this.backgroundImageHash ? CDNMapper.hbthemes.assets(this.hbthemeId,
             HBThemeAssetsEntity.BACKGROUND_IMAGE_FILE.name,
             this.backgroundImageHash) : null;
+    }
+
+    async setImage(createReadStream: () => ReadStream) {
+        this.backgroundImageFile = await generateBackground(createReadStream, HBThemeAssetsEntity.BACKGROUND_IMAGE_FILE);
     }
 
 }

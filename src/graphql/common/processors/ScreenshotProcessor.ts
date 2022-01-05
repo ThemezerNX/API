@@ -36,7 +36,10 @@ const createBlurHash = async (file: (() => ReadStream) | Buffer, width: number, 
     return encode(new Uint8ClampedArray(await sharpInstance.toBuffer()), width, height, 5, 4);
 };
 
-export const generateImages = async (file: (() => ReadStream) | Buffer, {jpeg240 = false, requireNintendoExif = true} = {}) => {
+export const generateImages = async (file: (() => ReadStream) | Buffer, {
+    jpeg240 = false,
+    requireNintendoExif = true,
+} = {}) => {
     if (requireNintendoExif) {
         const sharpInstance = createSharpInstance(file);
         const metadata = await sharpInstance.metadata();
@@ -59,19 +62,28 @@ export const generateImages = async (file: (() => ReadStream) | Buffer, {jpeg240
     return {image720File, image360File, image240File, image180File, imageBlurHash};
 };
 
-export const generateBackground = async (createReadStream: () => ReadStream) => {
+export const generateBackground = async (
+    createReadStream: () => ReadStream,
+    {
+        height,
+        width,
+    }: {
+        height: number,
+        width: number
+    },
+) => {
     const sharpInstance = createSharpInstance(createReadStream);
     const metadata = await sharpInstance.metadata();
 
-    // if not min 720p, throw error
+    // if not min resolution, throw error
     if (metadata) {
-        if (metadata.width < 1280 || metadata.height < 720) {
+        if (metadata.width < width || metadata.height < height) {
             throw new InvalidImageError({}, "Background Image should be at least 1280x720");
         }
     }
 
     sharpInstance
-        .resize(1280, 720, {fit: sharp.fit.cover})
+        .resize(width, height, {fit: sharp.fit.cover})
         .toFormat("jpeg");
     return sharpInstance.toBuffer();
 };

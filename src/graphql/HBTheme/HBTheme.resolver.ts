@@ -11,6 +11,7 @@ import {Auth} from "../../common/decorators/Auth.decorator";
 import {checkAccessPermissions} from "../common/functions/checkAccessPermissions";
 import {CurrentUser} from "../../common/decorators/CurrentUser.decorator";
 import {UserEntity} from "../User/User.entity";
+import {UpdateHBThemeArgs} from "./dto/UpdateHBThemeArgs";
 
 
 @Resolver(HBThemeModel)
@@ -91,6 +92,15 @@ export class HBThemeResolver {
     @Auth({ownerOnly: true})
     async setHbthemeVisibility(@Args("id") id: string, @Args("makePrivate") makePrivate: boolean, @Args("reason") reason: string): Promise<boolean> {
         await this.hbthemeService.setVisibility({id}, makePrivate, reason);
+        return true;
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Update a hbtheme.",
+    })
+    @Auth({ownerOnly: true})
+    async updateHbtheme(@Args() {id, data}: UpdateHBThemeArgs): Promise<boolean> {
+        await this.hbthemeService.update(id, data);
         return true;
     }
 

@@ -1,6 +1,6 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
-import {FindConditions, In, Repository} from "typeorm";
+import {FindConditions, getConnection, In, Repository} from "typeorm";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {SortOrder} from "../common/enums/SortOrder";
 import {HBThemeEntity} from "./HBTheme.entity";
@@ -17,7 +17,13 @@ import {OtherError} from "../common/errors/Other.error";
 import {HBThemeNotFoundError} from "../common/errors/HBThemeNotFound.error";
 import {ItemVisibility} from "../common/enums/ItemVisibility";
 import {addPrivateCondition} from "../common/functions/addPrivateCondition";
-import {deleteIfEmpty} from "../Pack/Pack.constraints";
+import {deleteIfEmpty, recomputeNSFW} from "../Pack/Pack.constraints";
+import {ThemeTagEntity} from "../ThemeTag/ThemeTag.entity";
+import {selectTags} from "../common/functions/selectTags";
+import {UpdateHBThemeDataInput} from "./dto/UpdateHBThemeDataInput";
+import {HBThemeAssetsEntity} from "./Assets/HBThemeAssets.entity";
+import {readImageAsset} from "../common/functions/readImageAsset";
+import {insertOrUpdateTags} from "../common/functions/insertOrUpdateTags";
 
 @Injectable()
 export class HBThemeService implements IsOwner, GetHash {
@@ -228,6 +234,191 @@ export class HBThemeService implements IsOwner, GetHash {
                 }
             });
         }
+    }
+
+    async update(id: string, data: UpdateHBThemeDataInput) {
+        const theme = await this.repository.findOne({
+            where: {id},
+            relations: ["creator", "previews", "assets", "tags"],
+        });
+        await getConnection().manager.transaction(async entityManager => {
+            if (!theme) {
+                throw new HBThemeNotFoundError();
+            }
+            if (data.name !== undefined) {
+                theme.name = data.name;
+            }
+            if (data.description !== undefined) {
+                theme.description = data.description;
+            }
+            if (data.isNSFW !== undefined) {
+                theme.isNSFW = data.isNSFW;
+            }
+            const insertedTags: ThemeTagEntity[] = theme.tags;
+            if (data.tags === null || data.tags === []) {
+                theme.tags = [];
+            } else if (data.tags !== undefined) {
+                theme.tags = selectTags(data.tags, insertedTags);
+
+                for (const tag of theme.tags) {
+                    if (!insertedTags.map((t: ThemeTagEntity) => t.name).includes(tag.name)) {
+                        insertedTags.push(tag);
+                    }
+                }
+            }
+
+            if (data.screenshot !== undefined) {
+                await theme.previews.generateFromStream((await data.screenshot).createReadStream);
+            }
+            if (data.assets !== undefined) {
+
+                if (data.assets.icon === null) {
+                    theme.assets.iconFile = null;
+                } else if (data.assets.icon) {
+                    theme.assets.iconFile = await readImageAsset(
+                        data.assets,
+                        "icon",
+                        HBThemeAssetsEntity.ICON_FILE,
+                    );
+                }
+                if (data.assets.batteryIcon === null) {
+                    theme.assets.batteryIconFile = null;
+                } else if (data.assets.batteryIcon) {
+                    theme.assets.batteryIconFile = await readImageAsset(
+                        data.assets,
+                        "batteryIcon",
+                        HBThemeAssetsEntity.BATTERY_ICON_FILE,
+                    );
+                }
+                if (data.assets.chargingIcon === null) {
+                    theme.assets.chargingIconFile = null;
+                } else if (data.assets.chargingIcon) {
+                    theme.assets.chargingIconFile = await readImageAsset(
+                        data.assets,
+                        "chargingIcon",
+                        HBThemeAssetsEntity.CHARGING_ICON_FILE,
+                    );
+                }
+                if (data.assets.folderIcon === null) {
+                    theme.assets.folderIconFile = null;
+                } else if (data.assets.folderIcon) {
+                    theme.assets.folderIconFile = await readImageAsset(
+                        data.assets,
+                        "folderIcon",
+                        HBThemeAssetsEntity.FOLDER_ICON_FILE,
+                    );
+                }
+                if (data.assets.invalidIcon === null) {
+                    theme.assets.invalidIconFile = null;
+                } else if (data.assets.invalidIcon) {
+                    theme.assets.invalidIconFile = await readImageAsset(
+                        data.assets,
+                        "invalidIcon",
+                        HBThemeAssetsEntity.INVALID_ICON_FILE,
+                    );
+                }
+                if (data.assets.themeIconDark === null) {
+                    theme.assets.themeIconDarkFile = null;
+                } else if (data.assets.themeIconDark) {
+                    theme.assets.themeIconDarkFile = await readImageAsset(
+                        data.assets,
+                        "themeIconDark",
+                        HBThemeAssetsEntity.THEME_ICON_DARK_FILE,
+                    );
+                }
+                if (data.assets.themeIconLight === null) {
+                    theme.assets.themeIconLightFile = null;
+                } else if (data.assets.themeIconLight) {
+                    theme.assets.themeIconLightFile = await readImageAsset(
+                        data.assets,
+                        "themeIconLight",
+                        HBThemeAssetsEntity.THEME_ICON_LIGHT_FILE,
+                    );
+                }
+                if (data.assets.airplaneIcon === null) {
+                    theme.assets.airplaneIconFile = null;
+                } else if (data.assets.airplaneIcon) {
+                    theme.assets.airplaneIconFile = await readImageAsset(
+                        data.assets,
+                        "airplaneIcon",
+                        HBThemeAssetsEntity.AIRPLANE_ICON_FILE,
+                    );
+                }
+                if (data.assets.wifiNoneIcon === null) {
+                    theme.assets.wifiNoneIconFile = null;
+                } else if (data.assets.wifiNoneIcon) {
+                    theme.assets.wifiNoneIconFile = await readImageAsset(
+                        data.assets,
+                        "wifiNoneIcon",
+                        HBThemeAssetsEntity.WIFI_NONE_ICON_FILE,
+                    );
+                }
+                if (data.assets.wifi1Icon === null) {
+                    theme.assets.wifi1IconFile = null;
+                } else if (data.assets.wifi1Icon) {
+                    theme.assets.wifi1IconFile = await readImageAsset(
+                        data.assets,
+                        "wifi1Icon",
+                        HBThemeAssetsEntity.WIFI1_ICON_FILE,
+                    );
+                }
+                if (data.assets.wifi2Icon === null) {
+                    theme.assets.wifi2IconFile = null;
+                } else if (data.assets.wifi2Icon) {
+                    theme.assets.wifi2IconFile = await readImageAsset(
+                        data.assets,
+                        "wifi2Icon",
+                        HBThemeAssetsEntity.WIFI2_ICON_FILE,
+                    );
+                }
+                if (data.assets.wifi3Icon === null) {
+                    theme.assets.wifi3IconFile = null;
+                } else if (data.assets.wifi3Icon) {
+                    theme.assets.wifi3IconFile = await readImageAsset(
+                        data.assets,
+                        "wifi3Icon",
+                        HBThemeAssetsEntity.WIFI3_ICON_FILE,
+                    );
+                }
+                if (data.assets.ethIcon === null) {
+                    theme.assets.ethIconFile = null;
+                } else if (data.assets.ethIcon) {
+                    theme.assets.ethIconFile = await readImageAsset(
+                        data.assets,
+                        "ethIcon",
+                        HBThemeAssetsEntity.ETH_ICON_FILE,
+                    );
+                }
+                if (data.assets.ethNoneIcon === null) {
+                    theme.assets.ethNoneIconFile = null;
+                } else if (data.assets.ethNoneIcon) {
+                    theme.assets.ethNoneIconFile = await readImageAsset(
+                        data.assets,
+                        "ethNoneIcon",
+                        HBThemeAssetsEntity.ETH_NONE_ICON_FILE,
+                    );
+                }
+                if (data.assets.backgroundImage === null) {
+                    theme.assets.backgroundImageFile = null;
+                } else if (data.assets.backgroundImage) {
+                    theme.assets.backgroundImageFile = await readImageAsset(
+                        data.assets,
+                        "backgroundImage",
+                        HBThemeAssetsEntity.BACKGROUND_IMAGE_FILE,
+                    );
+                }
+
+                if (data.assets.backgroundImage !== undefined) {
+                    await theme.assets.setImage((await data.assets.backgroundImage).createReadStream);
+                }
+            }
+
+            await insertOrUpdateTags(entityManager, insertedTags);
+            await entityManager.save(HBThemeEntity, theme);
+            if (theme.packId) {
+                await recomputeNSFW(entityManager, {packId: theme.packId});
+            }
+        });
     }
 
 }
