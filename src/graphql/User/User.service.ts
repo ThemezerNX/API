@@ -170,4 +170,12 @@ export class UserService implements IsOwner {
         });
     }
 
+    setHasAccepted(id: string, value: boolean) {
+        return this.repository.update({id}, {hasAccepted: value});
+    }
+
+    setIsBlocked(id: string, value: boolean) {
+        return this.repository.update({id}, {isBlocked: value});
+    }
+
 }

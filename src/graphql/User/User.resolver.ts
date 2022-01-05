@@ -11,6 +11,8 @@ import {Auth} from "../../common/decorators/Auth.decorator";
 import {AuthService} from "../Auth/Auth.service";
 import {PasswordIncorrectError} from "../common/errors/auth/PasswordIncorrect.error";
 import {UpdateUserArgs} from "./dto/UpdateUser.args";
+import {CurrentUser} from "../../common/decorators/CurrentUser.decorator";
+import {UserEntity} from "./User.entity";
 
 
 @Resolver(UserModel)
@@ -77,6 +79,24 @@ export class UserResolver {
     @Auth({ownerOnly: true})
     async updateUser(@Args() {id, data}: UpdateUserArgs): Promise<boolean> {
         await this.userService.update(id, data);
+        return true;
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Accept the Terms of Service.",
+    })
+    @Auth()
+    async updateUserAcceptToS(@CurrentUser() {id}: UserEntity, @Args("accept") accept: boolean): Promise<boolean> {
+        await this.userService.setHasAccepted(id, accept);
+        return true;
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Block a user from submitting new items. Only accessible to the admins.",
+    })
+    @Auth({adminOnly: true})
+    async updateUserBlockStatus(@Args("id") id: string, @Args("accept") accept: boolean): Promise<boolean> {
+        await this.userService.setIsBlocked(id, accept);
         return true;
     }
 
