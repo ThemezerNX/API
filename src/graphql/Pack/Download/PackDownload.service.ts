@@ -15,12 +15,11 @@ export class PackDownloadService {
 
         // Try to find an entry made within the last hour
         if (userId != undefined) {
-            findConditions.user = {
-                id: userId,
-            };
+            findConditions.userId = userId;
+        } else {
+            findConditions.ip = ip;
         }
         findConditions.packId = id;
-        findConditions.ip = ip;
         findConditions.timestamp = Raw((alias) => `${alias} > (NOW() - '1 hour'::INTERVAL)`);
 
         const entry = await this.repository.findOne({
