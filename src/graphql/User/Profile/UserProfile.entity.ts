@@ -34,10 +34,22 @@ export class UserProfileEntity extends CachableEntityInterface {
     @Column("bytea", {nullable: true})
     bannerFile?: Buffer;
 
-    @Column("bytea", {nullable: true})
+    @Column({
+        type: "bytea",
+        nullable: true,
+        update: false,
+        generatedType: "STORED",
+        asExpression: "sha256(\"avatarFile\")",
+    })
     @SelectAlways()
     avatarHash?: Buffer;
-    @Column("bytea", {nullable: true})
+    @Column({
+        type: "bytea",
+        nullable: true,
+        update: false,
+        generatedType: "STORED",
+        asExpression: "sha256(\"bannerFile\")",
+    })
     @SelectAlways()
     bannerHash?: Buffer;
 
