@@ -44,6 +44,14 @@ export class UserEntity extends CachableEntityInterface {
     })
     verificationToken: string;
 
+    @Column({
+        type: "char",
+        length: 32,
+        default: () => "md5(random()::text)",
+        update: false,
+    })
+    csrfToken: string;
+
     @Column({default: false})
     isVerified: boolean = false;
 
@@ -80,6 +88,7 @@ export class UserEntity extends CachableEntityInterface {
 
     toJSON() {
         delete this.password;
+        delete this.csrfToken;
         return this;
     }
 
