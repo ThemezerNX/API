@@ -18,7 +18,7 @@ const itemRoutes = {
         return itemRoute(itemType, itemId, "assets", fileName, null, hash);
     },
     download: (itemType: string, itemId: string, asset?: string) => {
-        return url(`${itemType}/${itemId}/download` + (asset ? `/${asset}` : ""));
+        return url(`${itemType}/${itemId}/download` + (asset ? `/${asset}` : "") + "?cache=false");
     },
 };
 
