@@ -17,4 +17,10 @@ export class UserProfileModel extends RootModelAbstract {
     @Field(() => URLResolver, {description: "WebP image", nullable: true})
     bannerUrl?: string;
 
+    @Field({description: "BlurHash of the avatar", nullable: true})
+    avatarBlurHash: string;
+
+    @Field({description: "BlurHash of the banner", nullable: true})
+    bannerBlurHash: string;
+
 }

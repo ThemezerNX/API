@@ -18,7 +18,7 @@ export abstract class PreviewsModelInterface extends RootModelAbstract {
     @Field(() => URLResolver, {description: "WebP image, 320x180"})
     image180Url: string;
 
-    @Field({description: "WebP image, 80x45"})
+    @Field({description: "BlurHash of the image"})
     imageBlurHash: string;
 
 }

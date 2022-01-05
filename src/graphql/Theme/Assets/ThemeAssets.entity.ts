@@ -13,7 +13,7 @@ export class ThemeAssetsEntity extends AssetsEntityInterface {
     static LAYOUT_FILENAME = "layout.json";
     static COMMON_FILENAME = "common.json";
 
-    static BACKGROUND_IMAGE_FILE = {name: "image.jpg", width: 1280, height: 720};
+    static BACKGROUND_IMAGE_FILE = {name: "image.jpg", minWidth: 1280, minHeight: 720};
     static ALBUM_ICON_FILE = {name: "album.png", width: 64, height: 56};
     static NEWS_ICON_FILE = {name: "news.png", width: 64, height: 56};
     static SHOP_ICON_FILE = {name: "shop.png", width: 64, height: 56};

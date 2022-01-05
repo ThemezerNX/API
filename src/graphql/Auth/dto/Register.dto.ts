@@ -13,7 +13,7 @@ export class RegisterData {
     password: string;
 
     @Field()
-    @MinLength(4)
+    @MinLength(2)
     username: string;
 
 }

@@ -21,13 +21,13 @@ export class UsersController {
         return new StreamableFile(file);
     }
 
-    @Get(UserProfileEntity.BANNER_FILENAME)
+    @Get(UserProfileEntity.BANNER_FILE.name)
     @Header("Content-Type", "image/webp")
     getBanner(@Param("id") id: string): Promise<StreamableFile> {
         return this.getFile(id, "bannerFile");
     }
 
-    @Get(UserProfileEntity.AVATAR_FILENAME)
+    @Get(UserProfileEntity.AVATAR_FILE.name)
     @Header("Content-Type", "image/webp")
     getAvatar(@Param("id") id: string): Promise<StreamableFile> {
         return this.getFile(id, "avatarFile");

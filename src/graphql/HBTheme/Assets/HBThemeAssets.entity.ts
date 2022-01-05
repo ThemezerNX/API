@@ -25,7 +25,13 @@ export class HBThemeAssetsEntity extends AssetsEntityInterface {
     static WIFI3_ICON_FILE = {name: "wifi3_icon.png", width: 50, height: 50};
     static ETH_ICON_FILE = {name: "eth_icon.png", width: 50, height: 50};
     static ETH_NONE_ICON_FILE = {name: "eth_none_icon.png", width: 50, height: 50};
-    static BACKGROUND_IMAGE_FILE = {name: "background_image.jpg", width: 1280, height: 720};
+    static BACKGROUND_IMAGE_FILE = {
+        name: "background_image.jpg",
+        width: 1280,
+        height: 720,
+        minWidth: 1280,
+        minHeight: 720,
+    };
 
     @OneToOne(() => HBThemeEntity, hbthemeEntity => hbthemeEntity.assets, {onDelete: "CASCADE"})
     @JoinColumn({name: "hbthemeId"})
@@ -268,7 +274,8 @@ export class HBThemeAssetsEntity extends AssetsEntityInterface {
     }
 
     async setImage(createReadStream: () => ReadStream) {
-        this.backgroundImageFile = await generateBackground(createReadStream, HBThemeAssetsEntity.BACKGROUND_IMAGE_FILE);
+        this.backgroundImageFile = await generateBackground(createReadStream,
+            HBThemeAssetsEntity.BACKGROUND_IMAGE_FILE);
     }
 
 }

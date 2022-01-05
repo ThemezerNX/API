@@ -10,6 +10,7 @@ import {GraphQLResolveInfo} from "graphql";
 import {Auth} from "../../common/decorators/Auth.decorator";
 import {AuthService} from "../Auth/Auth.service";
 import {PasswordIncorrectError} from "../common/errors/auth/PasswordIncorrect.error";
+import {UpdateUserArgs} from "./dto/UpdateUser.args";
 
 
 @Resolver(UserModel)
@@ -67,6 +68,15 @@ export class UserResolver {
             throw new PasswordIncorrectError();
         }
         await this.userService.delete(id);
+        return true;
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Update a user.",
+    })
+    @Auth({ownerOnly: true})
+    async updateUser(@Args() {id, data}: UpdateUserArgs): Promise<boolean> {
+        await this.userService.update(id, data);
         return true;
     }
 

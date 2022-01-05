@@ -1,6 +1,6 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
-import {FindConditions, Repository} from "typeorm";
+import {FindConditions, getConnection, Repository} from "typeorm";
 import {UserEntity} from "./User.entity";
 import {StringContains} from "../common/findOperators/StringContains";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
@@ -15,6 +15,8 @@ import {IsOwner} from "../common/interfaces/IsOwner.interface";
 import {createInfoSelectQueryBuilder} from "../common/functions/createInfoSelectQueryBuilder";
 import {ServiceFindOptionsParameter} from "../common/interfaces/ServiceFindOptions.parameter";
 import {LayoutService} from "../Layout/Layout.service";
+import {UpdateUserDataInput} from "./dto/UpdateUserData.input";
+import {UserNotFoundError} from "../common/errors/auth/UserNotFound.error";
 
 @Injectable()
 export class UserService implements IsOwner {
@@ -131,4 +133,41 @@ export class UserService implements IsOwner {
             await this.repository.delete({id});
         });
     }
+
+    async update(id: string, data: UpdateUserDataInput) {
+        const user = await this.repository.findOne({
+            where: {id},
+            relations: ["profile", "preferences", "connections"],
+        });
+        await getConnection().manager.transaction(async entityManager => {
+            if (!user) {
+                throw new UserNotFoundError();
+            }
+            if (data.username !== undefined) {
+                user.username = data.username;
+            }
+            if (data.profile !== undefined) {
+                if (data.profile.bio !== undefined) {
+                    user.profile.bio = data.profile.bio;
+                }
+                if (data.profile.color !== undefined) {
+                    user.profile.color = data.profile.color;
+                }
+
+                if (data.profile.avatar === null) {
+                    user.profile.avatarFile = null;
+                } else if (data.profile.avatar !== undefined) {
+                    await user.profile.setAvatar((await data.profile.avatar).createReadStream);
+                }
+                if (data.profile.banner === null) {
+                    user.profile.bannerFile = null;
+                } else if (data.profile.banner !== undefined) {
+                    await user.profile.setBanner((await data.profile.banner).createReadStream);
+                }
+            }
+
+            await entityManager.save(UserEntity, user);
+        });
+    }
+
 }

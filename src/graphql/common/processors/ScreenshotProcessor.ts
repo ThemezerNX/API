@@ -5,7 +5,7 @@ import {encode} from "blurhash";
 import {InvalidScreenshotError} from "../errors/InvalidScreenshot.error";
 import * as parseExif from "exif-reader";
 
-const createSharpInstance = (file: (() => ReadStream) | Buffer) => {
+export const createSharpInstance = (file: (() => ReadStream) | Buffer) => {
     if (file instanceof Buffer) {
         return sharp(file);
     } else {
@@ -25,7 +25,7 @@ const resizeImage = async (file: (() => ReadStream) | Buffer, width: number, hei
     return sharpInstance.toBuffer();
 };
 
-const createBlurHash = async (file: (() => ReadStream) | Buffer, width: number, height: number): Promise<string> => {
+export const createBlurHash = async (file: (() => ReadStream) | Buffer, width: number, height: number): Promise<string> => {
     const sharpInstance = createSharpInstance(file);
 
     sharpInstance
@@ -65,11 +65,11 @@ export const generateImages = async (file: (() => ReadStream) | Buffer, {
 export const generateBackground = async (
     createReadStream: () => ReadStream,
     {
-        height,
-        width,
+        minWidth,
+        minHeight,
     }: {
-        height: number,
-        width: number
+        minWidth: number
+        minHeight: number,
     },
 ) => {
     const sharpInstance = createSharpInstance(createReadStream);
@@ -77,13 +77,13 @@ export const generateBackground = async (
 
     // if not min resolution, throw error
     if (metadata) {
-        if (metadata.width < width || metadata.height < height) {
-            throw new InvalidImageError({}, "Background Image should be at least 1280x720");
+        if (metadata.width < minWidth || metadata.height < minHeight) {
+            throw new InvalidImageError({minWidth, minHeight}, `Background Image should be at least {minWidth}x{minHeight}`);
         }
     }
 
     sharpInstance
-        .resize(width, height, {fit: sharp.fit.cover})
+        .resize(minWidth, minHeight, {fit: sharp.fit.cover})
         .toFormat("jpeg");
     return sharpInstance.toBuffer();
 };
