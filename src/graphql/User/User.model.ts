@@ -14,7 +14,8 @@ export class UserModel extends CreatorModel {
     @Expose({groups: ["owner", "admin"], toPlainOnly: true})
     email?: string;
 
-    @Field()
+    @Field({nullable: true})
+    @Expose({groups: ["owner"], toPlainOnly: true})
     csrfToken: string;
 
     @Field({nullable: true})

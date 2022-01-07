@@ -31,11 +31,11 @@ export class UserService implements IsOwner {
     findOne({
                 id,
                 email,
-                acceptedAndVerified = true,
+                isVerified = true,
             }: {
                 id?: string,
                 email?: string,
-                acceptedAndVerified?: boolean,
+                isVerified?: boolean,
             },
             options?: ServiceFindOptionsParameter<UserEntity>,
     ): Promise<UserEntity> {
@@ -43,8 +43,7 @@ export class UserService implements IsOwner {
         let queryBuilder = createInfoSelectQueryBuilder(options, this.repository);
         const findConditions: FindConditions<UserEntity> = {};
 
-        if (acceptedAndVerified) {
-            findConditions.hasAccepted = true;
+        if (isVerified) {
             findConditions.isVerified = true;
         }
 
