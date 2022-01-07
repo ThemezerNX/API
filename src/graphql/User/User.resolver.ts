@@ -110,12 +110,4 @@ export class UserResolver {
         return true;
     }
 
-    @Query(() => String, {
-        description: "Fetch the currently authenticated user's CSRF token.",
-    })
-    @Auth()
-    async getCSRFToken(@CurrentUser() {csrfToken}: UserEntity, @Args("accept") accept: boolean): Promise<string> {
-        return csrfToken;
-    }
-
 }
