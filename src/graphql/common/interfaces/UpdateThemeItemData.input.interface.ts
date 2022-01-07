@@ -12,7 +12,7 @@ export abstract class UpdateThemeItemDataInputInterface {
     name?: string;
 
     @Field({nullable: true})
-    @Length(10, 1000)
+    @Length(10, 10000)
     @IsOptional()
     description?: string;
 

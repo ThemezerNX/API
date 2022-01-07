@@ -11,7 +11,7 @@ export abstract class ThemeItemDataInputInterface {
     name: string;
 
     @Field({nullable: true})
-    @Length(10, 1000)
+    @Length(10, 10000)
     @IsOptional()
     description?: string;
 

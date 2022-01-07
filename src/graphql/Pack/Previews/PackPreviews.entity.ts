@@ -1,8 +1,11 @@
-import {AfterLoad, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
+import {AfterLoad, Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from "typeorm";
 import {PreviewsEntityInterface} from "../../common/interfaces/Previews.entity.interface";
 import {CDNMapper} from "../../common/CDNMapper";
 import {PackEntity} from "../Pack.entity";
 import * as sharp from "sharp";
+import {compareTargetFn} from "../../common/enums/Target";
+import {ThemeEntity} from "../../Theme/Theme.entity";
+import {HBThemeEntity} from "../../HBTheme/HBTheme.entity";
 
 const CANVAS_WIDTH = 1280;
 const CANVAS_HEIGHT = 720;
@@ -93,6 +96,9 @@ export class PackPreviewsEntity extends PreviewsEntityInterface {
     @PrimaryColumn({update: false})
     packId: string;
 
+    @Column()
+    isCustom: boolean;
+
     @AfterLoad()
     setUrls() {
         this.image720Url = !!this.image720Hash ? CDNMapper.packs.previews(this.packId,
@@ -109,7 +115,18 @@ export class PackPreviewsEntity extends PreviewsEntityInterface {
             this.image180Hash) : null;
     }
 
-    async generateFromThemes(background: Buffer | null, images: Buffer[]) {
+    async generateCollage(themes: ThemeEntity[], hbThemes: HBThemeEntity[]) {
+        const orderedThemes = []
+            .concat(themes.sort((a, b) => compareTargetFn(a.target, b.target)))
+            .concat(hbThemes)
+            .filter((theme: ThemeEntity | HBThemeEntity) => !theme.isPrivate);
+
+        const firstBackground = orderedThemes.find((theme: ThemeEntity | HBThemeEntity) => !!theme.assets?.backgroundImageFile)?.assets.backgroundImageFile;
+        const themePreviews = orderedThemes.map((theme: ThemeEntity | HBThemeEntity) => theme.previews.image720File);
+        await this.generateFromThemes(firstBackground, themePreviews);
+    }
+
+    private async generateFromThemes(background: Buffer | null, images: Buffer[]) {
         const toCompose = [];
 
         const imageCount = Math.min(images.length, MAX_IMAGE_COLLAGE_COUNT);
@@ -128,7 +145,7 @@ export class PackPreviewsEntity extends PreviewsEntityInterface {
             .blur(CANVAS_BLUR)
             .composite(toCompose)
             .toFormat("webp")
-            .toBuffer()
+            .toBuffer();
 
         await super.generateFromStream(collage);
     }

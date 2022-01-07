@@ -22,8 +22,9 @@ import {MailService} from "../../mail/mail.service";
 import {PackNotFoundError} from "../common/errors/PackNotFound.error";
 import {addPrivateCondition} from "../common/functions/addPrivateCondition";
 import {ItemVisibility} from "../common/enums/ItemVisibility";
-import {recomputeNSFW} from "./Pack.constraints";
+import {recomputeNSFW, regeneratePreview} from "./Pack.constraints";
 import {UserEntity} from "../User/User.entity";
+import {UpdatePackDataInput} from "./dto/UpdatePackData.input";
 
 @Injectable()
 export class PackService implements IsOwner, GetHash {
@@ -182,7 +183,7 @@ export class PackService implements IsOwner, GetHash {
     }
 
     async setVisibility(id: string, makePrivate: boolean, reason: string) {
-        await this.repository.manager.transaction(async () => {
+        await this.repository.manager.transaction(async entityManager => {
             const pack = await this.findOne({id}, {
                 relations: {
                     creator: true,
@@ -195,10 +196,10 @@ export class PackService implements IsOwner, GetHash {
             }
 
             pack.isPrivate = makePrivate;
-            await pack.save();
+            await entityManager.save(PackEntity, pack);
             await this.themeService.setVisibility({packId: id}, makePrivate, reason);
             await this.hbthemeService.setVisibility({packId: id}, makePrivate, reason);
-
+            await regeneratePreview(entityManager, id);
             try {
                 // only send email if a reason was provided (meaning an admin did this)
                 if (reason) {
@@ -207,6 +208,40 @@ export class PackService implements IsOwner, GetHash {
             } catch (e) {
                 console.error(e);
             }
+        });
+    }
+
+    async update(id: string, data: UpdatePackDataInput) {
+        const pack = await this.repository.findOne({
+            where: {id},
+            relations: [
+                "creator",
+                "previews",
+                "themes",
+                "hbthemes",
+                "themes.previews",
+                "themes.assets",
+                "hbthemes.previews",
+                "hbthemes.assets"
+            ],
+        });
+        await getConnection().manager.transaction(async entityManager => {
+            if (!pack) {
+                throw new PackNotFoundError();
+            }
+            if (data.name !== undefined) {
+                pack.name = data.name;
+            }
+            if (data.description !== undefined) {
+                pack.description = data.description;
+            }
+            if (data.preview === null) {
+                await pack.previews.generateCollage(pack.themes, pack.hbthemes);
+                pack.previews.isCustom = false;
+            } else if (data.preview !== undefined) {
+                await pack.previews.generateFromStream((await data.preview).createReadStream);
+            }
+            await entityManager.save(PackEntity, pack);
         });
     }
 
@@ -235,6 +270,7 @@ export class PackService implements IsOwner, GetHash {
                 .execute();
 
             await recomputeNSFW(entityManager, {packId: id});
+            await regeneratePreview(entityManager, id);
         });
     }
 
@@ -263,6 +299,7 @@ export class PackService implements IsOwner, GetHash {
                 .execute();
 
             await recomputeNSFW(entityManager, {packId: id});
+            await regeneratePreview(entityManager, id);
         });
     }
 

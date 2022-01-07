@@ -3,12 +3,12 @@ import {IsOptional, Length} from "class-validator";
 import {FileUpload, GraphQLUpload} from "graphql-upload";
 import {Exclude} from "class-transformer";
 
-@InputType()
-export class PackDataInput {
+@InputType({description: "Acts as a patch. Undefined fields are not updated, null fields are set to null."})
+export class UpdatePackDataInput {
 
-    @Field()
+    @Field({nullable: true})
     @Length(3, 100)
-    name: string;
+    name?: string;
 
     @Field({nullable: true})
     @Length(10, 10000)
@@ -21,5 +21,8 @@ export class PackDataInput {
     })
     @Exclude()
     preview?: Promise<FileUpload>;
+
+    // Do not support this for now. Use the dedicated updateVisibility mutation for this
+    // makePrivate: boolean;
 
 }

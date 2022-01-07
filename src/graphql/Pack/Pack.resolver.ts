@@ -12,6 +12,7 @@ import {CurrentUser} from "../../common/decorators/CurrentUser.decorator";
 import {UserEntity} from "../User/User.entity";
 import {checkAccessPermissions} from "../common/functions/checkAccessPermissions";
 import {ModifyPackContentsArgs} from "./dto/ModifyPackContents.args";
+import {UpdatePackArgs} from "./dto/UpdatePackArgs";
 
 
 @Resolver(PackModel)
@@ -119,6 +120,15 @@ export class PackResolver {
         hbthemeIds,
     }: ModifyPackContentsArgs): Promise<boolean> {
         await this.packService.removeFromPack(id, themeIds, hbthemeIds, user);
+        return true;
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Update a pack.",
+    })
+    @Auth({ownerOnly: true})
+    async updatePck(@Args() {id, data}: UpdatePackArgs): Promise<boolean> {
+        await this.packService.update(id, data);
         return true;
     }
 

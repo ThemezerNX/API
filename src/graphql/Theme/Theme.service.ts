@@ -1,9 +1,9 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
-import {FindConditions, getConnection, In, Repository} from "typeorm";
+import {EntityManager, FindConditions, getConnection, In, Repository} from "typeorm";
 import {ThemeEntity} from "./Theme.entity";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
-import {compareTargetFn, Target} from "../common/enums/Target";
+import {Target} from "../common/enums/Target";
 import {SortOrder} from "../common/enums/SortOrder";
 import {ItemSort} from "../common/args/ItemSort.args";
 import {toTsQuery} from "../common/TsQueryCreator";
@@ -43,7 +43,7 @@ import {ItemVisibility} from "../common/enums/ItemVisibility";
 import {PrivatableThemeDataInput} from "./dto/PrivatableThemeData.input";
 import {PrivatableHbthemeDataInput} from "./dto/PrivatableHbthemeData.input";
 import {UpdateThemeDataInput} from "./dto/UpdateThemeData.input";
-import {deleteIfEmpty, recomputeNSFW} from "../Pack/Pack.constraints";
+import {deleteIfEmpty, recomputeNSFW, regeneratePreview} from "../Pack/Pack.constraints";
 import {selectTags} from "../common/functions/selectTags";
 import {readImageAsset} from "../common/functions/readImageAsset";
 import {insertOrUpdateTags} from "../common/functions/insertOrUpdateTags";
@@ -476,16 +476,10 @@ export class ThemeService implements IsOwner, GetHash {
                 if (insertedPack) {
                     if (packData.preview) {
                         await insertedPack.previews.generateFromStream((await packData.preview).createReadStream);
+                        insertedPack.previews.isCustom = true;
                     } else {
                         // generate collage (design 2)
-                        const orderedThemes = []
-                            .concat(insertedThemes
-                                .sort((a, b) => compareTargetFn(a.target, b.target)))
-                            .concat(insertedHbthemes);
-
-                        const firstBackground = orderedThemes.find((theme: ThemeEntity | HBThemeEntity) => !!theme.assets?.backgroundImageFile)?.assets.backgroundImageFile;
-                        const themePreviews = orderedThemes.map((theme: ThemeEntity | HBThemeEntity) => theme.previews.image720File);
-                        await insertedPack.previews.generateFromThemes(firstBackground, themePreviews);
+                        await insertedPack.previews.generateCollage(insertedThemes, insertedHbthemes);
                     }
                     insertedPack = await insertedPack.save();
                     // set as pack on all themes
@@ -555,20 +549,27 @@ export class ThemeService implements IsOwner, GetHash {
             await entityManager.delete(ThemeEntity, findConditions);
             for (const packId of usedPackIdsSet || []) {
                 // if there are less than 2 items left in the pack, delete the pack
-                await deleteIfEmpty(entityManager, packId);
+                const isDeleted = await deleteIfEmpty(entityManager, packId);
+                if (!isDeleted) {
+                    await regeneratePreview(entityManager, packId);
+                }
             }
         });
     }
 
-    async setVisibility({id, packId}: { id?: string, packId?: string }, makePrivate: boolean, reason: string) {
+    async setVisibility({
+                            id,
+                            packId,
+                            entityManager,
+                        }: { id?: string, packId?: string, entityManager?: EntityManager }, makePrivate: boolean, reason: string) {
         if (packId) {
             // this is called from PackService, so force set the visibility and don't send any emails or whatever
-            await this.repository.update({packId}, {
+            await entityManager.update(HBThemeEntity, {packId}, {
                 isPrivate: makePrivate,
                 updatedTimestamp: () => "\"updatedTimestamp\"",
             });
         } else {
-            await this.repository.manager.transaction(async () => {
+            await this.repository.manager.transaction(async entityManager => {
                 const theme = await this.repository.findOne({
                     where: {id},
                     relations: ["creator", "previews"],
@@ -582,7 +583,8 @@ export class ThemeService implements IsOwner, GetHash {
                 }
 
                 theme.isPrivate = makePrivate;
-                await theme.save();
+                await entityManager.save(ThemeEntity, theme);
+                await regeneratePreview(entityManager, packId);
                 try {
                     if (reason) {
                         await this.mailService.sendThemePrivatedByAdmin(theme, reason);
@@ -628,7 +630,7 @@ export class ThemeService implements IsOwner, GetHash {
             if (data.screenshot !== undefined) {
                 await theme.previews.generateFromStream((await data.screenshot).createReadStream);
             }
-            if (data.assets !== undefined) {
+            if (data.assets) {
                 if (!theme.layoutId) {
                     if (data.assets.customLayoutJson !== undefined) {
                         theme.assets.customLayoutJson = data.assets.customLayoutJson;
@@ -719,7 +721,15 @@ export class ThemeService implements IsOwner, GetHash {
             await insertOrUpdateTags(entityManager, insertedTags);
             await entityManager.save(ThemeEntity, theme);
             if (theme.packId) {
-                await recomputeNSFW(entityManager, {packId: theme.packId});
+                if (data.isNSFW !== undefined) {
+                    await recomputeNSFW(entityManager, {packId: theme.packId});
+                }
+                if (
+                    data.screenshot !== undefined ||
+                    (data.assets && data.assets.backgroundImage !== undefined)
+                ) {
+                    await regeneratePreview(entityManager, theme.packId);
+                }
             }
         });
     }

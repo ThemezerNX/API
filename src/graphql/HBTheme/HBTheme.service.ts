@@ -1,6 +1,6 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
-import {FindConditions, getConnection, In, Repository} from "typeorm";
+import {EntityManager, FindConditions, getConnection, In, Repository} from "typeorm";
 import {executeAndPaginate, PaginationArgs} from "../common/args/Pagination.args";
 import {SortOrder} from "../common/enums/SortOrder";
 import {HBThemeEntity} from "./HBTheme.entity";
@@ -17,7 +17,7 @@ import {OtherError} from "../common/errors/Other.error";
 import {HBThemeNotFoundError} from "../common/errors/HBThemeNotFound.error";
 import {ItemVisibility} from "../common/enums/ItemVisibility";
 import {addPrivateCondition} from "../common/functions/addPrivateCondition";
-import {deleteIfEmpty, recomputeNSFW} from "../Pack/Pack.constraints";
+import {deleteIfEmpty, recomputeNSFW, regeneratePreview} from "../Pack/Pack.constraints";
 import {ThemeTagEntity} from "../ThemeTag/ThemeTag.entity";
 import {selectTags} from "../common/functions/selectTags";
 import {UpdateHBThemeDataInput} from "./dto/UpdateHBThemeDataInput";
@@ -197,20 +197,27 @@ export class HBThemeService implements IsOwner, GetHash {
             await entityManager.delete(HBThemeEntity, findConditions);
             for (const packId of usedPackIdsSet || []) {
                 // if there are less than 2 items left in the pack, delete the pack
-                await deleteIfEmpty(entityManager, packId);
+                const isDeleted = await deleteIfEmpty(entityManager, packId);
+                if (!isDeleted) {
+                    await regeneratePreview(entityManager, packId);
+                }
             }
         });
     }
 
-    async setVisibility({id, packId}: { id?: string, packId?: string }, makePrivate: boolean, reason: string) {
+    async setVisibility({
+                            id,
+                            packId,
+                            entityManager,
+                        }: { id?: string, packId?: string, entityManager?: EntityManager }, makePrivate: boolean, reason: string) {
         if (packId) {
             // this is called from PackService, so force set the visibility and don't send any emails or whatever
-            await this.repository.update({packId}, {
+            await entityManager.update(HBThemeEntity, {packId}, {
                 isPrivate: makePrivate,
                 updatedTimestamp: () => "\"updatedTimestamp\"",
             });
         } else {
-            await this.repository.manager.transaction(async () => {
+            await this.repository.manager.transaction(async entityManager => {
                 const theme = await this.repository.findOne({
                     where: {id},
                     relations: ["creator", "previews"],
@@ -224,7 +231,8 @@ export class HBThemeService implements IsOwner, GetHash {
                 }
 
                 theme.isPrivate = makePrivate;
-                await theme.save();
+                await entityManager.save(HBThemeEntity, theme);
+                await regeneratePreview(entityManager, packId);
                 try {
                     if (reason) {
                         await this.mailService.sendThemePrivatedByAdmin(theme, reason);
@@ -270,8 +278,7 @@ export class HBThemeService implements IsOwner, GetHash {
             if (data.screenshot !== undefined) {
                 await theme.previews.generateFromStream((await data.screenshot).createReadStream);
             }
-            if (data.assets !== undefined) {
-
+            if (data.assets) {
                 if (data.assets.icon === null) {
                     theme.assets.iconFile = null;
                 } else if (data.assets.icon) {
@@ -416,7 +423,15 @@ export class HBThemeService implements IsOwner, GetHash {
             await insertOrUpdateTags(entityManager, insertedTags);
             await entityManager.save(HBThemeEntity, theme);
             if (theme.packId) {
-                await recomputeNSFW(entityManager, {packId: theme.packId});
+                if (data.isNSFW !== undefined) {
+                    await recomputeNSFW(entityManager, {packId: theme.packId});
+                }
+                if (
+                    data.screenshot !== undefined ||
+                    (data.assets && data.assets.backgroundImage !== undefined)
+                ) {
+                    await regeneratePreview(entityManager, theme.packId);
+                }
             }
         });
     }
