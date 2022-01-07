@@ -1,6 +1,7 @@
 import {ArgsType, Field} from "@nestjs/graphql";
 import {Target} from "../../common/enums/Target";
 import {IsOptional} from "class-validator";
+import {HexadecimalResolver} from "graphql-scalars";
 
 @ArgsType()
 export class ListArgs {
@@ -17,7 +18,7 @@ export class ListArgs {
     @IsOptional()
     creators?: string[];
 
-    @Field(() => [String], {nullable: true})
+    @Field(() => [HexadecimalResolver], {nullable: true})
     @IsOptional()
     layouts?: string[];
 

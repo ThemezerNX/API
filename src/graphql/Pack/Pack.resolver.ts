@@ -11,6 +11,7 @@ import {Auth} from "../../common/decorators/Auth.decorator";
 import {CurrentUser} from "../../common/decorators/CurrentUser.decorator";
 import {UserEntity} from "../User/User.entity";
 import {checkAccessPermissions} from "../common/functions/checkAccessPermissions";
+import {ModifyPackContentsArgs} from "./dto/ModifyPackContents.args";
 
 
 @Resolver(PackModel)
@@ -92,6 +93,32 @@ export class PackResolver {
     @Auth({ownerOnly: true})
     async setPackVisibility(@Args("id") id: string, @Args("makePrivate") makePrivate: boolean, @Args("reason") reason: string): Promise<boolean> {
         await this.packService.setVisibility(id, makePrivate, reason);
+        return true;
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Add themes to a pack.",
+    })
+    @Auth({ownerOnly: true})
+    async addToPack(@CurrentUser() user: UserEntity, @Args() {
+        id,
+        themeIds,
+        hbthemeIds,
+    }: ModifyPackContentsArgs): Promise<boolean> {
+        await this.packService.addToPack(id, themeIds, hbthemeIds, user);
+        return true;
+    }
+
+    @Mutation(() => Boolean, {
+        description: "Remove themes from a pack.",
+    })
+    @Auth({ownerOnly: true})
+    async removeFromPack(@CurrentUser() user: UserEntity, @Args() {
+        id,
+        themeIds,
+        hbthemeIds,
+    }: ModifyPackContentsArgs): Promise<boolean> {
+        await this.packService.removeFromPack(id, themeIds, hbthemeIds, user);
         return true;
     }
 

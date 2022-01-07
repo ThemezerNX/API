@@ -1,5 +1,5 @@
 import {PackEntity} from "./Pack.entity";
-import {FindConditions, In, Repository} from "typeorm";
+import {FindConditions, getConnection, In, Repository} from "typeorm";
 import {Injectable} from "@nestjs/common";
 import {Target} from "../common/enums/Target";
 import {InjectRepository} from "@nestjs/typeorm";
@@ -22,6 +22,8 @@ import {MailService} from "../../mail/mail.service";
 import {PackNotFoundError} from "../common/errors/PackNotFound.error";
 import {addPrivateCondition} from "../common/functions/addPrivateCondition";
 import {ItemVisibility} from "../common/enums/ItemVisibility";
+import {recomputeNSFW} from "./Pack.constraints";
+import {UserEntity} from "../User/User.entity";
 
 @Injectable()
 export class PackService implements IsOwner, GetHash {
@@ -205,6 +207,62 @@ export class PackService implements IsOwner, GetHash {
             } catch (e) {
                 console.error(e);
             }
+        });
+    }
+
+    async addToPack(id: string, themeIds: string[], hbthemeIds: string[], user: UserEntity) {
+        await getConnection().transaction(async (entityManager) => {
+            await entityManager.createQueryBuilder()
+                .update(ThemeEntity)
+                .set({packId: id})
+                .where({id: In(themeIds)})
+                .andWhere(
+                    "\"creatorId\" = :userId OR :isAdmin", {
+                        userId: user.id,
+                        isAdmin: user.isAdmin,
+                    })
+                .execute();
+
+            await entityManager.createQueryBuilder()
+                .update(HBThemeEntity)
+                .set({packId: id})
+                .where({id: In(hbthemeIds)})
+                .andWhere(
+                    "\"creatorId\" = :userId OR :isAdmin", {
+                        userId: user.id,
+                        isAdmin: user.isAdmin,
+                    })
+                .execute();
+
+            await recomputeNSFW(entityManager, {packId: id});
+        });
+    }
+
+    async removeFromPack(id: string, themeIds: string[], hbthemeIds: string[], user: UserEntity) {
+        await getConnection().transaction(async (entityManager) => {
+            await entityManager.createQueryBuilder()
+                .update(ThemeEntity)
+                .set({packId: null})
+                .where({id: In(themeIds)})
+                .andWhere(
+                    "\"creatorId\" = :userId OR :isAdmin", {
+                        userId: user.id,
+                        isAdmin: user.isAdmin,
+                    })
+                .execute();
+
+            await entityManager.createQueryBuilder()
+                .update(HBThemeEntity)
+                .set({packId: null})
+                .where({id: In(hbthemeIds)})
+                .andWhere(
+                    "\"creatorId\" = :userId OR :isAdmin", {
+                        userId: user.id,
+                        isAdmin: user.isAdmin,
+                    })
+                .execute();
+
+            await recomputeNSFW(entityManager, {packId: id});
         });
     }
 
