@@ -23,6 +23,7 @@ import {UserEntity} from "./User/User.entity";
 import {UserConnectionsEntity} from "./User/Connections/UserConnections.entity";
 import {UserPreferencesEntity} from "./User/Preferences/UserPreferences.entity";
 import {UserProfileEntity} from "./User/Profile/UserProfile.entity";
+import {ThemeOverlayCreatorModule} from "./ThemeOverlayCreator/ThemeOverlayCreator.module";
 
 async function dropViews(queryRunner: QueryRunner) {
     const phm = PackHashEntity.getRepository().metadata;
@@ -156,7 +157,7 @@ async function insertDefaults(connection: Connection) {
                 // 1. drop all views/mviews, as typeorm cannot drop them in correct order nor does cascade drop.
                 const queryRunner = await connection.createQueryRunner();
 
-                if (true) {
+                if (false) {
                     if (process.env.NODE_ENV == "development") {
                         await dropViews(queryRunner);
                         await connection.synchronize(false);
@@ -176,6 +177,7 @@ async function insertDefaults(connection: Connection) {
         LayoutModule,
         LayoutOptionModule,
         ThemeTagModule,
+        ThemeOverlayCreatorModule,
         NXInstallerModule,
         AuthModule,
     ],

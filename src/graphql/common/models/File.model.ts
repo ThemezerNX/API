@@ -1,20 +1,19 @@
 import {Field, ObjectType} from "@nestjs/graphql";
-import {ByteResolver, UUIDResolver} from "graphql-scalars";
 
 @ObjectType("File")
 export class FileModel {
 
-    constructor(filename, data, mimetype) {
-        this.filename = filename;
+    constructor(fileName, data, mimetype) {
+        this.fileName = fileName;
         this.data = data;
-        this.mimetype = mimetype
+        this.mimetype = mimetype;
     }
 
     @Field()
-    filename: string;
+    fileName: string;
 
-    @Field(() => [ByteResolver])
-    data: Buffer;
+    @Field()
+    data: string;
 
     @Field()
     mimetype: string;

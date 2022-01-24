@@ -17,6 +17,9 @@ import {IsOwner} from "../common/interfaces/IsOwner.interface";
 import {exists} from "../common/functions/exists";
 import {ChosenLayoutOptionValue} from "./dto/ChosenLayoutOptionValue.input";
 import {createInfoSelectQueryBuilder} from "../common/functions/createInfoSelectQueryBuilder";
+import {LayoutNotFoundError} from "../common/errors/LayoutNotFound.error";
+import {ThemeOptionEntity} from "../Theme/ThemeOptions/ThemeOption.entity";
+import {v4 as uuid} from "uuid";
 
 @Injectable()
 export class LayoutService implements IsOwner {
@@ -132,44 +135,51 @@ export class LayoutService implements IsOwner {
         }
     }
 
-    async buildOne(id: string, options: ChosenLayoutOptionValue[] = []): Promise<FileModel> {
-        const layout = await this.repository.findOne({
-            where: {id},
-            relations: ["creator"],
-        });
-
-        if (!layout) {
-            return;
-        }
-
-        const parsedJson = JSON.parse(layout.json);
+    buildOneForOverlayTheme(layoutJson: string, pieceJson: string) {
         const injectorLayout = new InjectorLayout();
 
-        injectorLayout.PatchName = layout.name;
-        injectorLayout.AuthorName = layout.creator.username;
-        injectorLayout.TargetName = layout.target + ".szs";
+        injectorLayout.copyBasicPropertiesFromJson(layoutJson);
 
-        if (parsedJson.HideOnlineBtn == true || parsedJson.HideOnlineBtn == false) {
-            injectorLayout.HideOnlineBtn = parsedJson.HideOnlineBtn;
-        }
-        if (!!parsedJson.Files) {
-            injectorLayout.Files = parsedJson.Files;
-        }
-        if (!!parsedJson.Anims) {
-            injectorLayout.Anims = parsedJson.Anims;
+        if (pieceJson) {
+            injectorLayout.applyOptions([{json: pieceJson}]);
         }
 
-        // Get all options and map the jsons to LoadedLayoutOption[]
-        const optionJsons = await this.layoutOptionService.findValues({
-            uuids: options.map((o) => o.uuid),
+        injectorLayout.ID = stringifyID({
+            service: "Themezer-overlaycreator",
+            id: uuid(),
         });
 
-        const loadedOptions = options.map((o) => {
-            const value = optionJsons.find((j) => j.uuid == o.uuid);
-            const l = o as LoadedLayoutOption;
-            l.json = value.json;
-            l.type = value.layoutOption.type;
-            return l;
+        return Buffer.from(JSON.stringify(injectorLayout));
+    }
+
+    buildOneForTheme(layout: LayoutEntity, options: ThemeOptionEntity[] = []) {
+        const injectorLayout = new InjectorLayout();
+        injectorLayout.copyBasicProperties(layout);
+
+        const loadedOptions: LoadedLayoutOption[] = options.map((option) => {
+            const type = option.layoutOptionValue.layoutOption.type;
+            const newFormattedOption: LoadedLayoutOption = {
+                uuid: option.layoutOptionValueUUID,
+                json: option.layoutOptionValue.json,
+                type,
+            };
+
+            switch (type) {
+                case LayoutOptionType.INTEGER:
+                    newFormattedOption.integerValue = Number(option.variable);
+                    break;
+                case LayoutOptionType.DECIMAL:
+                    newFormattedOption.decimalValue = Number(option.variable);
+                    break;
+                case LayoutOptionType.STRING:
+                    newFormattedOption.stringValue = option.variable;
+                    break;
+                case LayoutOptionType.COLOR:
+                    newFormattedOption.colorValue = option.variable;
+                    break;
+            }
+
+            return newFormattedOption;
         });
 
         injectorLayout.applyOptions(loadedOptions);
@@ -185,11 +195,55 @@ export class LayoutService implements IsOwner {
             }),
         });
 
-        return new FileModel(
-            layout.name + ".json",
-            Buffer.from(JSON.stringify(injectorLayout)),
-            "application/json",
-        );
+        return Buffer.from(JSON.stringify(injectorLayout));
+    }
+
+    async buildOne(id: string, options: ChosenLayoutOptionValue[] = []) {
+        const layout = await this.repository.findOne({
+            where: {id},
+            relations: ["creator"],
+        });
+
+        if (!layout) {
+            throw new LayoutNotFoundError();
+        }
+
+        const injectorLayout = new InjectorLayout();
+        injectorLayout.copyBasicProperties(layout);
+
+        // Get all options and map the jsons to LoadedLayoutOption[]
+        const optionJsons = await this.layoutOptionService.findValues({
+            uuids: options.map((o) => o.uuid),
+        });
+
+        const loadedOptions = options.map((o) => {
+            const value = optionJsons.find((j) => j.uuid == o.uuid);
+
+            return {
+                ...o,
+                json: value.json,
+                type: value.layoutOption.type,
+            };
+        });
+
+        injectorLayout.applyOptions(loadedOptions);
+
+        injectorLayout.ID = stringifyID({
+            service: "Themezer",
+            id: layout.id,
+            options: loadedOptions.map((o) => {
+                return {
+                    uuid: o.uuid,
+                    variable: LayoutService.getOptionValueVariable(o),
+                };
+            }),
+        });
+
+        return {
+            fileName: layout.name + ".json",
+            data: Buffer.from(JSON.stringify(injectorLayout)),
+            mimetype: "application/json",
+        };
     }
 
     async buildCommon(id: string): Promise<FileModel> {

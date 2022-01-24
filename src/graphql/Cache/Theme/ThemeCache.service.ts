@@ -8,6 +8,7 @@ import {Target} from "../../common/enums/Target";
 import {toNice, toTheme} from "@themezernx/target-parser/dist";
 import {invalidFilenameCharsREGEX} from "../../common/Constants";
 import {ThemeAssetsEntity} from "../../Theme/Assets/ThemeAssets.entity";
+import {LayoutService} from "../../Layout/Layout.service";
 
 @Injectable()
 export class ThemeCacheService {
@@ -15,6 +16,7 @@ export class ThemeCacheService {
     constructor(
         @InjectRepository(ThemeCacheEntity) private cacheRepository: Repository<ThemeCacheEntity>,
         private themeService: ThemeService,
+        private layoutService: LayoutService,
     ) {
     }
 
@@ -33,6 +35,11 @@ export class ThemeCacheService {
         const theme = await this.themeService.findOne({id: themeId}, {
             relations: {
                 creator: true,
+                options: {
+                    layoutOptionValue: {
+                        layoutOption: true,
+                    },
+                },
             },
         });
         const existingCache = await this.cacheRepository.findOne({where: {themeId}});
@@ -46,9 +53,10 @@ export class ThemeCacheService {
             const sarc = new SarcFile();
 
             const assets = theme.assets;
-            let layoutInfo: string = "";
+            let layoutInfo = "";
             if (theme.layout) {
-                sarc.addRawFile(Buffer.from(theme.layout.json), ThemeAssetsEntity.LAYOUT_FILENAME);
+                const builtLayout = await this.layoutService.buildOneForTheme(theme.layout, theme.options);
+                sarc.addRawFile(builtLayout, ThemeAssetsEntity.LAYOUT_FILENAME);
                 layoutInfo = `${theme.layout.name} by ${theme.layout.creator.username}`;
                 if (theme.layout.commonJson) {
                     sarc.addRawFile(Buffer.from(theme.layout.json), ThemeAssetsEntity.COMMON_FILENAME);

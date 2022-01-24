@@ -1,6 +1,7 @@
 import {LayoutOptionType} from "../../LayoutOption/common/LayoutOptionType.enum";
 import {Parser} from "expr-eval";
 import {patch} from "@themezernx/json-merger";
+import {LayoutEntity} from "../Layout.entity";
 
 const lengthenHexCode = (hex: string): string[] => {
     if (hex.length == 3) {
@@ -14,13 +15,13 @@ const lengthenHexCode = (hex: string): string[] => {
 
 export class LoadedLayoutOption {
 
-    uuid: string;
+    uuid?: string;
+    json: string;
+    type?: LayoutOptionType;
     integerValue?: number;
     decimalValue?: number;
     stringValue?: string;
     colorValue?: string;
-    type: LayoutOptionType;
-    json: string;
 
 }
 
@@ -81,6 +82,42 @@ export class InjectorLayout {
 
         return json;
     }
+
+    copyBasicPropertiesFromJson = (layoutJson: string) => {
+        const parsedJson = JSON.parse(layoutJson);
+
+        this.PatchName = parsedJson.PatchName;
+        this.AuthorName = parsedJson.AuthorName;
+        this.TargetName = parsedJson.TargetName;
+
+        if (parsedJson.HideOnlineBtn == true || parsedJson.HideOnlineBtn == false) {
+            this.HideOnlineBtn = parsedJson.HideOnlineBtn;
+        }
+        if (!!parsedJson.Files) {
+            this.Files = parsedJson.Files;
+        }
+        if (!!parsedJson.Anims) {
+            this.Anims = parsedJson.Anims;
+        }
+    };
+
+    copyBasicProperties = (layout: LayoutEntity) => {
+        const parsedJson = JSON.parse(layout.json);
+
+        this.PatchName = layout.name;
+        this.AuthorName = layout.creator.username;
+        this.TargetName = layout.target + ".szs";
+
+        if (parsedJson.HideOnlineBtn == true || parsedJson.HideOnlineBtn == false) {
+            this.HideOnlineBtn = parsedJson.HideOnlineBtn;
+        }
+        if (!!parsedJson.Files) {
+            this.Files = parsedJson.Files;
+        }
+        if (!!parsedJson.Anims) {
+            this.Anims = parsedJson.Anims;
+        }
+    };
 
     applyOptions = (pieces: LoadedLayoutOption[]) => {
         // pieces are already sorted by priority asc

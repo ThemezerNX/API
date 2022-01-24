@@ -73,11 +73,12 @@ export class LayoutResolver {
     @Query(() => FileModel, {
         description: `Combine a layout with options`,
     })
-    buildLayout(
+    async buildLayout(
         @Args("id") id: string,
         @Args({name: "options", type: () => [ChosenLayoutOptionValue]}) options: ChosenLayoutOptionValue[],
     ): Promise<FileModel> {
-        return this.layoutService.buildOne(id, options);
+        const {fileName, data, mimetype} = await this.layoutService.buildOne(id, options);
+        return new FileModel(fileName, data.toString("base64"), mimetype);
     }
 
 }
