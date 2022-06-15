@@ -36,7 +36,7 @@ export default async (_parent, {layout, piece, common}, _context, _info) => {
 
                 // Create objects
                 const layout1 = new Layout();
-                await layout1.readFile(`${path}/${files[0]}`);
+                await layout1.readFile(`${path}/${files[0]}`, false);
                 if (!!piece) {
                     layout1.addPiece(await readFile(`${path}/${files[1]}`, "utf8"));
                 }
