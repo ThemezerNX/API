@@ -42,7 +42,7 @@
         "is-zip-file": "^1.0.2",
         "join-monster": "^2.1.2",
         "join-monster-graphql-tools-adapter": "^0.1.0",
-        "jsdom": "^16.4.0",
+        "jsdom": "^16.5.0",
         "mvdir": "^1.0.17",
         "node-filter-async": "^2.0.0",
         "object-hash": "^2.0.3",
