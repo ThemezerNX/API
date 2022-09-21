@@ -359,6 +359,6 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
             rimraf(themePaths[i], () => {
             });
         }
-        throw new Error(errorName.UNKNOWN);
+        throw e;
     }
 }
