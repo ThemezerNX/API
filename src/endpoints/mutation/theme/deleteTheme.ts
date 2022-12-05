@@ -27,7 +27,7 @@ export default async (_parent, {id}, context, _info) => {
                 });
 
                 // This stuff is for redirecting to the single theme left's page. The pack is removed if there's only one theme left in it.
-                if (dbData.pack_id && dbData.ids.length === 2) {
+                if (dbData.pack_id && dbData.ids.length <= 2) {
                     const lastTheme = await db.one(
                         `
                             UPDATE themes
