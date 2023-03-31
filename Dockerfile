@@ -3,7 +3,7 @@ FROM node:12 AS build-env
 # Install sarctool
 WORKDIR /tools
 RUN apt-get update
-RUN apt-get install -y python pip git
+RUN apt-get install -y python python-pip git
 RUN pip install SarcLib==0.3 libyaz0==0.5
 RUN git clone https://github.com/aboood40091/SARC-Tool
 
