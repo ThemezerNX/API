@@ -1,26 +1,22 @@
-name: Deploy
+name: ci
+
 on:
   push:
-    branches: [ master ]
-    paths:
-      - 'src/**/*'
-      - '**.ts'
-      - '**.json'
+    branches:
+      - "master"
+
 jobs:
-  Deploy:
-    runs-on: 'ubuntu-latest'
+  docker:
+    runs-on: ubuntu-latest
     steps:
-      - name: Deploying...
-        uses: appleboy/ssh-action@master
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and push
+        uses: docker/build-push-action@v4
         with:
-          host: ${{ secrets.SSHHOST }}
-          username: ${{ secrets.SSHUSERNAME }}
-          password: ${{ secrets.SSHPASSWORD }}
-          script: |
-            cd /home/themezer/API
-            pm2 stop /home/themezer/ecosystem.config.js --only API
-            git reset --hard
-            git pull
-            yarn
-            yarn run deploy
-            pm2 reload /home/themezer/ecosystem.config.js --only API
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: themezer/api:latest
