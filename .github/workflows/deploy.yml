@@ -25,6 +25,6 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
-          tags: themezer/api:latest
+          tags: ghcr.io/themezernx/${{ github.repository }}:/api:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
