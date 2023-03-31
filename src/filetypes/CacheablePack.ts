@@ -83,7 +83,7 @@ export default class CacheablePack extends Pack {
 
     updateCache = async () => {
         return new Promise((resolve, reject) => {
-            tmp.dir({unsafeCleanup: true}, async (err, _path, _cleanupCallback) => {
+            tmp.dir({unsafeCleanup: true, tmpdir: process.env.TMP_PATH}, async (err, _path, _cleanupCallback) => {
                 if (err) {
                     console.error(err);
                     reject(new Error(errorName.FILE_SAVE_ERROR));

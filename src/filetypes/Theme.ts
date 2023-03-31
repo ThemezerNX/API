@@ -5,7 +5,7 @@ import {fileNameToThemeTarget, fileNameToWebName} from "../util/targetParser";
 
 const {PythonShell} = require("python-shell");
 
-export const sarcToolPath = `${__dirname}/../../../SARC-Tool`;
+export const sarcToolPath = `/tools/SARC-Tool`;
 export const invalidFilenameCharsREGEX = /[\\~#*{}\/:<>?|"]/gm;
 
 // Allowed files according to https://github.com/exelix11/SwitchThemeInjector/blob/master/SwitchThemesCommon/PatchTemplate.cs#L10-L29
@@ -135,7 +135,7 @@ export default class Theme {
 
     toBase64 = () => {
         return new Promise(((resolve, reject) => {
-            tmp.dir({unsafeCleanup: true}, async (err, path, _cleanupCallback) => {
+            tmp.dir({unsafeCleanup: true, tmpdir: process.env.TMP_PATH}, async (err, path, _cleanupCallback) => {
                 if (err) {
                     console.error(err);
                     reject(new Error(errorName.FILE_SAVE_ERROR));

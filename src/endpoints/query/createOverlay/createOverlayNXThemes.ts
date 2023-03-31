@@ -14,7 +14,7 @@ const {
 
 export default async (_parent, {layout, piece, common}, _context, _info) => {
     return await new Promise((resolve, reject) => {
-        tmp.dir({unsafeCleanup: true}, async (err, path, cleanupCallback) => {
+        tmp.dir({unsafeCleanup: true, tmpdir: process.env.TMP_PATH}, async (err, path, cleanupCallback) => {
             if (err) {
                 console.error(err);
                 reject(new Error(errorName.FILE_SAVE_ERROR));

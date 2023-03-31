@@ -9,7 +9,7 @@ import {saveFiles} from "../../resolvers";
 
 export default async (_parent, {themeName, blackImg, whiteImg}, _context, _info) => {
     return await new Promise((resolve, reject) => {
-        tmp.dir({unsafeCleanup: true}, async (err, path, cleanupCallback) => {
+        tmp.dir({unsafeCleanup: true, tmpdir: process.env.TMP_PATH}, async (err, path, cleanupCallback) => {
             if (err) {
                 reject(err);
                 return;

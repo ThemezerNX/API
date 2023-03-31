@@ -128,7 +128,7 @@ if (process.env.NODE_ENV === "development") {
             origin: process.env.NODE_ENV === "development" ? process.env.WEBSITE_ENDPOINT : null,
         }),
     );
-    app.use("/cdn", express.static("../cdn"));
+    app.use("/cdn", process.env.CDN_PATH);
 } else {
     app.use(
         cors({

@@ -46,7 +46,7 @@ export default async (
 
     if (mayModerate) {
         return await new Promise(async (resolve, reject) => {
-            tmp.dir({prefix: "theme"}, async (err, path, _cleanupCallback) => {
+            tmp.dir({prefix: "theme", tmpdir: process.env.TMP_PATH}, async (err, path, _cleanupCallback) => {
                 try {
                     if (file) {
                         // Save the screenshot

@@ -116,7 +116,7 @@ export default class CacheableTheme extends Theme {
 
     updateCache = async () => {
         return new Promise<void>(async (resolve, reject) => {
-            tmp.dir({unsafeCleanup: true}, async (err, path, cleanupCallback) => {
+            tmp.dir({unsafeCleanup: true, tmpdir: process.env.TMP_PATH}, async (err, path, cleanupCallback) => {
                 if (err) {
                     console.error(err);
                     reject(new Error(errorName.FILE_SAVE_ERROR));

@@ -40,7 +40,7 @@ const {
 } = fs;
 
 export const joinMonsterOptions: any = {dialect: "pg"};
-export const storagePath = `${__dirname}/../../../cdn`;
+export const storagePath = process.env.CDN_PATH;
 
 export const urlNameREGEX = /[^a-zA-Z0-9_.]+/gm;
 // const noSpecialCharsREGEX = /[^a-z\d\-]+/gi

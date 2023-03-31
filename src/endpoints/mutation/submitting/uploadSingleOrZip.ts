@@ -22,7 +22,7 @@ export default async (_parent, {file}, context, _info) => {
     if (await context.authenticate()) {
         if (!context.req.user.is_blocked) {
             return await new Promise((resolve, reject) => {
-                tmp.dir({prefix: "theme"}, async (err, path, _cleanupCallback) => {
+                tmp.dir({prefix: "theme", tmpdir: process.env.TMP_PATH}, async (err, path, _cleanupCallback) => {
                     try {
                         if (err) {
                             reject(err);
