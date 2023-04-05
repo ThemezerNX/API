@@ -105,7 +105,7 @@ export default class Theme {
 
             // Run SARC-Tool main.py on the specified folder
             const options = {
-                pythonPath: "python3.8",
+                pythonPath: "python3",
                 scriptPath: sarcToolPath,
                 // Compression 0, to reduce stress on CPU
                 args: ["-little", "-compress", "0", "-o", `${folderPath}/theme.nxtheme`, folderPath],
