@@ -154,7 +154,7 @@ export default class Theme {
 
     loadFile = async (filePath): Promise<any> => {
         const options = {
-            pythonPath: "python3.8",
+            pythonPath: "python3",
             scriptPath: sarcToolPath,
             args: [filePath],
         };
