@@ -1,4 +1,4 @@
-FROM node:12-alpine AS build-env
+FROM node:16 AS build-env
 
 # Install sarctool
 WORKDIR /tools
