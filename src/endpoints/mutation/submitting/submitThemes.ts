@@ -25,15 +25,20 @@ const Hook = new webhook.Webhook(process.env.WEBHOOK_URL);
 
 export default async (_parent, {files, themes, details, type}, context, _info) => {
     let themePaths = [];
+    console.log("1")
     try {
         if (await context.authenticate()) {
+console.log("2")
             if (!context.req.user.is_blocked) {
+console.log("3")
                 return await new Promise(async (resolve, reject) => {
                     let insertedPack = null;
 
+console.log("4")
                     // Create array of screenshots to save
                     const toSave = files.map((f, i) => {
                         return new Promise((resolve, reject) => {
+console.log("5")
                             const path = decrypt(themes[i].tmp);
                             lstat(path, (err) => {
                                 if (err) {
@@ -50,11 +55,12 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                         });
                     });
                     const resolvedDecryptions = await Promise.all(toSave);
+console.log("6")
 
                     // Save the screenshots
                     const filePromises = saveFiles(resolvedDecryptions);
                     const savedFiles = await Promise.all(filePromises);
-
+console.log("7")
                     // If every theme has a screenshot
                     if (savedFiles.length === themes.length) {
                         const promises = savedFiles.map((file, i) => {
@@ -82,6 +88,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                             });
                         });
                         themePaths = await Promise.all(promises);
+console.log("8")
 
                         // If all jpegs are valid
                         if (themePaths.length === savedFiles.length) {
@@ -92,7 +99,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                     .toFile(`${path}/thumb.jpg`),
                             );
                             await Promise.all(thumbPromises);
-
+console.log("9")
                             // Insert pack into DB if user wants to and can submit as pack
                             if (type === "pack" && savedFiles.length > 1) {
                                 const packData = {
@@ -117,7 +124,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                     return;
                                 }
                             }
-
+console.log("10")
                             // Save NXTheme contents
                             const themeDataPromises = themePaths.map((path, i) => {
                                 return new Promise(async (resolve, reject) => {
@@ -194,7 +201,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                 });
                             });
                             const themeDatas = await Promise.all(themeDataPromises);
-
+console.log("11")
                             // Insert themes into DB
                             const query = () => pgp.helpers.insert(themeDatas, themesCS);
                             try {
@@ -202,7 +209,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                     query() +
                                     ` RETURNING id, to_hex(id) as hex_id, details, last_updated, creator_id, target, categories`,
                                 );
-
+console.log("12")
                                 const themeMovePromises = themePaths.map((path, i) => {
                                     return new Promise(async (resolve, reject) => {
                                         try {
@@ -245,7 +252,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                 });
 
                                 await Promise.all(themeMovePromises);
-
+console.log("13")
                                 resolve(true);
 
                                 setTimeout(() => {
@@ -337,6 +344,7 @@ export default async (_parent, {files, themes, details, type}, context, _info) =
                                         });
                                     }
                                 }, 5000);
+                                        console.log("14")
                             } catch (e) {
                                 console.error(e);
                                 reject(new Error(errorName.DB_SAVE_ERROR));
