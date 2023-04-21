@@ -16,7 +16,7 @@
     "dependencies": {
         "@themezernx/json-merger": "https://github.com/ThemezerNX/JSON-Merger.git",
         "@themezernx/layout-id-parser": "^1.0.4",
-        "adm-zip": "^0.4.14",
+        "adm-zip": "^0.5.10",
         "apollo-server-express": "^2.13.1",
         "apollo-server-plugin-response-cache": "^0.5.3",
         "axios": "^0.21.1",

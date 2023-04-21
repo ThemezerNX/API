@@ -24,6 +24,7 @@ export default async (_parent, {file}, context, _info) => {
             return await new Promise((resolve, reject) => {
                 tmp.dir({prefix: "theme", tmpdir: process.env.TMP_PATH}, async (err, path, _cleanupCallback) => {
                     try {
+                        console.log("1")
                         if (err) {
                             reject(err);
                             return;
@@ -31,11 +32,13 @@ export default async (_parent, {file}, context, _info) => {
 
                         const filePromises = saveFiles([{file, path}]);
                         const files = await Promise.all(filePromises);
+                        console.log("2")
 
                         // Create array of valid NXThemes
                         let NXThemePaths = [];
                         if (await isYaz0Promisified(`${path}/${files[0]}`)) {
                             NXThemePaths.push(`${path}/${files[0]}`);
+                            console.log("3")
                         } else if (await isZipPromisified(`${path}/${files[0]}`)) {
                             try {
                                 const zip = new AdmZip(`${path}/${files[0]}`);
@@ -55,6 +58,7 @@ export default async (_parent, {file}, context, _info) => {
                                     NXThemePaths = NXThemesInZip.map((file) => {
                                         return `${path}/${files[0]}_extracted/${file}`;
                                     });
+                                    console.log("4")
                                 } catch (e) {
                                     reject(new Error(errorName.ZIP_READ_ERROR));
                                     rimraf(path, () => {
@@ -72,6 +76,7 @@ export default async (_parent, {file}, context, _info) => {
                             return;
                         }
 
+                        console.log("5")
                         if (NXThemePaths.length > 50) {
                             reject(new Error(errorName.MAX_50_NXTHEMES));
                             return;
@@ -84,6 +89,7 @@ export default async (_parent, {file}, context, _info) => {
                             );
                             const unpackedThemes = await Promise.all(unpackPromises);
 
+                            console.log("6")
                             const readThemePromises = unpackedThemes.map((thm) => {
                                 return new Promise(async (resolve, reject) => {
                                     try {
@@ -100,6 +106,7 @@ export default async (_parent, {file}, context, _info) => {
                                         }
 
                                         // Check if image in dds or jpg format
+                                        console.log("7")
                                         let image = false;
                                         try {
                                             await access(
@@ -107,6 +114,7 @@ export default async (_parent, {file}, context, _info) => {
                                                 constants.R_OK | constants.W_OK,
                                             );
                                             image = true;
+                                            console.log("8")
                                         } catch (e) {
                                         }
                                         try {
@@ -115,6 +123,7 @@ export default async (_parent, {file}, context, _info) => {
                                                 constants.R_OK | constants.W_OK,
                                             );
                                             image = true;
+                                            console.log("9")
                                         } catch (e) {
                                         }
 
@@ -127,6 +136,7 @@ export default async (_parent, {file}, context, _info) => {
                                                 layoutID = getDefaultID(info.Target);
                                             }
 
+                                            console.log("10")
                                             let dbLayout = null;
                                             if (layoutID) {
                                                 const {service, id, piece_uuids} = parseID(layoutID);
@@ -162,6 +172,7 @@ export default async (_parent, {file}, context, _info) => {
                                                 }
                                             }
 
+                                            console.log("11")
                                             let target = null;
                                             if (validThemeTarget(info.Target)) {
                                                 target = themeTargetToFileName(info.Target);
@@ -170,6 +181,7 @@ export default async (_parent, {file}, context, _info) => {
                                                 return;
                                             }
 
+                                            console.log("12")
                                             // Return detected used_pieces separately
                                             let used_pieces = [];
                                             if (dbLayout) {
@@ -181,6 +193,7 @@ export default async (_parent, {file}, context, _info) => {
                                                 }
                                             }
 
+                                            console.log("13")
                                             resolve({
                                                 info: info,
                                                 tmp: encrypt(thm.getContentsPath),
@@ -202,9 +215,11 @@ export default async (_parent, {file}, context, _info) => {
                                 });
                             });
 
+                            console.log("14")
                             // Execute all the NXTheme read promises
                             const detectedThemes = await Promise.all(readThemePromises);
 
+                            console.log("15")
                             if (detectedThemes?.length > 0) {
                                 resolve(detectedThemes);
                             } else if (detectedThemes?.length === 0) {
