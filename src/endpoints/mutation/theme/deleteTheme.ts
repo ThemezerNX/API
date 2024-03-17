@@ -15,7 +15,7 @@ export default async (_parent, {id}, context, _info) => {
                         WHERE ("cascade".creator_id = $1 OR $3)
                           AND "cascade".id = hex_to_int('$2^')
                         RETURNING to_hex("cascade".id) as id, "cascade".pack_id, (
-                            SELECT array_agg(id)
+                            SELECT array_agg(id) filter(where id <> '{}')
                             FROM themes
                             WHERE pack_id IS NOT NULL
                               AND pack_id = "cascade".pack_id

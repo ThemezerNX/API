@@ -76,7 +76,7 @@ export default class Layout {
                                LIMIT 1
                            )                  as creator_name,
                            (
-                               SELECT array_agg(row_to_json(pcs)) AS pieces
+                               SELECT array_agg(row_to_json(pcs)) filter(where row_to_json(pcs) <> '{}') AS pieces
                                FROM (
                                         SELECT unnest(pieces) ->> 'name'                       as name,
                                                json_array_elements(unnest(pieces) -> 'values') as value

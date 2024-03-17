@@ -148,7 +148,7 @@ export default async (_parent, {file}, context, _info) => {
                                                             `
                                                                 SELECT *,
                                                                        (
-                                                                           SELECT array_agg(row_to_json(p)) as used_pieces
+                                                                           SELECT array_agg(row_to_json(p)) filter(where row_to_json(p) <> '{}') as used_pieces
                                                                            FROM (
                                                                                     SELECT unnest(pieces) ->> 'name'                       as name,
                                                                                            json_array_elements(unnest(pieces) -> 'values') as value
