@@ -8,6 +8,7 @@ const {
 } = pgp;
 
 const packCategories = (table) => {
+    console.log("PRINT1")
     return `(
         SELECT array_agg(c) filter(where c <> '{}') as categories
         FROM (
@@ -146,6 +147,8 @@ export default {
                     }
 
                     if (layouts?.length > 0) {
+                    console.log("PRINT2")
+
                         wheres.push(format(`
                             hexes_to_ints($1) && ARRAY(
                                 SELECT ARRAY_AGG(l) filter(where l <> '{}')
@@ -393,15 +396,19 @@ export default {
             last_updated: {sqlColumn: "last_updated"},
             pieces: {
                 jmIgnoreTable: true,
-                sqlExpr: (table) => `(
-                    SELECT array_agg(row_to_json(pcs)) filter(where row_to_json(pcs) <> '{}') AS pieces
-                    FROM (
-                        SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
-                        FROM layouts
-                        WHERE id = ${table}.layout_id
-                    ) as pcs
-                    WHERE value ->> 'uuid' = ANY(${table}.piece_uuids::text[])
-                )`,
+                sqlExpr: (table) => {
+                    console.log("PRINT3")
+
+                    return `(
+                        SELECT array_agg(row_to_json(pcs)) filter(where row_to_json(pcs) <> '{}') AS pieces
+                        FROM (
+                            SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
+                            FROM layouts
+                            WHERE id = ${table}.layout_id
+                        ) as pcs
+                        WHERE value ->> 'uuid' = ANY(${table}.piece_uuids::text[])
+                    )`
+                },
             },
             categories: {sqlColumn: "categories"},
             dl_count: {sqlColumn: "dl_count"},

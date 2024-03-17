@@ -63,6 +63,7 @@ export default class Layout {
         }
 
         if (!this.isCommon) {
+            console.log("PRINT6")
             const dbData = await db.one(
                 `
                     SELECT baselayout,
