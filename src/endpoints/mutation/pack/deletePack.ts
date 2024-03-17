@@ -7,7 +7,6 @@ export default async (_parent, {id}, context, _info) => {
     return await new Promise(async (resolve, reject) => {
         if (await context.authenticate()) {
             try {
-                console.log("PRINT4")
                 const dbData = await db.one(
                     `
                         DELETE

@@ -144,7 +144,6 @@ export default async (_parent, {file}, context, _info) => {
 
                                                 if (service === "Themezer") {
                                                     try {
-                                                        console.log("PRINT4")
                                                         dbLayout = await db.one(
                                                             `
                                                                 SELECT *,

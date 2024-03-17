@@ -8,7 +8,6 @@ export default async (_parent, {id}, context, _info) => {
     return await new Promise(async (resolve, reject) => {
         if (await context.authenticate()) {
             try {
-                console.log("PRINT5")
                 const dbData = await db.one(
                     `
                         DELETE
@@ -40,11 +39,13 @@ export default async (_parent, {id}, context, _info) => {
                     );
                     await db.none(
                         `
-                            DELETE
-                            FROM packs
-                            WHERE id = $1;
+                        DELETE FROM packs
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                            FROM themes
+                            WHERE themes.pack_id = packs.id
+                        );
                         `,
-                        [dbData.pack_id],
                     );
                     resolve(`/themes/${fileNameToWebName(lastTheme.target)}/${lastTheme.id}`);
                 } else resolve(null);

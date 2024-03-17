@@ -8,7 +8,6 @@ const {
 } = pgp;
 
 const packCategories = (table) => {
-    console.log("PRINT1")
     return `(
         SELECT array_agg(c) filter(where c <> '{}') as categories
         FROM (
@@ -143,13 +142,10 @@ export default {
                     }
 
                     if (!nsfw) {
-                        console.log("PRINT1, origin nsfw")
                         wheres.push(`NOT 'NSFW' = ANY(ARRAY(${packCategories(table)}))`);
                     }
 
                     if (layouts?.length > 0) {
-                        console.log("PRINT2")
-
                         wheres.push(format(`
                             hexes_to_ints($1) && ARRAY(
                                 SELECT ARRAY_AGG(l) filter(where l <> '{}')
@@ -164,8 +160,6 @@ export default {
                     }
 
                     if (query?.length > 0) {
-                        console.log("PRINT1, origin queryc")
-                    
                         wheres.push(format(`
                         (
                               TO_TSVECTOR('english', ${table}.details ->> 'name') ||
@@ -400,8 +394,6 @@ export default {
             pieces: {
                 jmIgnoreTable: true,
                 sqlExpr: (table) => {
-                    console.log("PRINT3")
-
                     return `(
                         SELECT array_agg(row_to_json(pcs)) filter(where row_to_json(pcs) <> '{}') AS pieces
                         FROM (
@@ -444,7 +436,6 @@ export default {
             last_updated: {sqlColumn: "last_updated"},
             categories: {
                 sqlExpr: (table) => {
-                    console.log("PRINT1, origin joinmonstermetadata")
                     return packCategories(table)
                 },
             },
