@@ -39,16 +39,25 @@ export default async (_parent, {id}, context, _info) => {
                     );
                     await db.none(
                         `
-                        DELETE FROM packs
-                        WHERE NOT EXISTS (
-                            SELECT 1
-                            FROM themes
-                            WHERE themes.pack_id = packs.id
-                        );
+                            DELETE
+                            FROM packs
+                            WHERE id = $1;
                         `,
+                        [dbData.pack_id],
                     );
                     resolve(`/themes/${fileNameToWebName(lastTheme.target)}/${lastTheme.id}`);
                 } else resolve(null);
+                
+                await db.none(
+                    `
+                    DELETE FROM packs
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM themes
+                        WHERE themes.pack_id = packs.id
+                    );
+                    `,
+                );
             } catch (e) {
                 console.error(e);
                 reject(new Error(errorName.THEME_NOT_FOUND));
