@@ -9,7 +9,7 @@ const {
 
 const packCategories = (table) => {
     return `(
-        SELECT array_agg(c) filter(where c <> '{}') as categories
+        SELECT array_agg(c) as categories
         FROM (
             SELECT DISTINCT UNNEST(categories)
             FROM themes
@@ -148,7 +148,7 @@ export default {
                     if (layouts?.length > 0) {
                         wheres.push(format(`
                             hexes_to_ints($1) && ARRAY(
-                                SELECT ARRAY_AGG(l) filter(where l <> '{}')
+                                SELECT ARRAY_AGG(l)
                                 FROM (
                                          SELECT layout_id
                                          FROM themes
@@ -395,7 +395,7 @@ export default {
                 jmIgnoreTable: true,
                 sqlExpr: (table) => {
                     return `(
-                        SELECT array_agg(row_to_json(pcs)) filter(where row_to_json(pcs) <> '{}') AS pieces
+                        SELECT array_agg(row_to_json(pcs)) AS pieces
                         FROM (
                             SELECT unnest(pieces) ->> 'name' as name, json_array_elements(unnest(pieces)->'values') as value
                             FROM layouts

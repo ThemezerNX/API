@@ -14,7 +14,7 @@ export default async (_parent, {id}, context, _info) => {
                         WHERE (creator_id = $1 OR $3)
                           AND id = hex_to_int('$2^')
                         RETURNING (
-                            SELECT array_agg(to_hex(id)) filter(where to_hex(id) <> '{}')
+                            SELECT array_agg(to_hex(id))
                             FROM themes
                             WHERE pack_id = hex_to_int('$2^')
                         ) as ids;
