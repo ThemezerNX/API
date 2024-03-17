@@ -143,11 +143,12 @@ export default {
                     }
 
                     if (!nsfw) {
+                        console.log("PRINT1, origin nsfw")
                         wheres.push(`NOT 'NSFW' = ANY(ARRAY(${packCategories(table)}))`);
                     }
 
                     if (layouts?.length > 0) {
-                    console.log("PRINT2")
+                        console.log("PRINT2")
 
                         wheres.push(format(`
                             hexes_to_ints($1) && ARRAY(
@@ -163,6 +164,8 @@ export default {
                     }
 
                     if (query?.length > 0) {
+                        console.log("PRINT1, origin queryc")
+                    
                         wheres.push(format(`
                         (
                               TO_TSVECTOR('english', ${table}.details ->> 'name') ||
@@ -440,7 +443,10 @@ export default {
             },
             last_updated: {sqlColumn: "last_updated"},
             categories: {
-                sqlExpr: (table) => packCategories(table),
+                sqlExpr: (table) => {
+                    console.log("PRINT1, origin joinmonstermetadata")
+                    return packCategories(table)
+                },
             },
             dl_count: {sqlColumn: "dl_count"},
             like_count: {
