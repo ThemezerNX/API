@@ -27,6 +27,12 @@ export const allowedFilesInNXTheme = [
     "settings.png",
     "power.dds",
     "power.png",
+    "nso.dds",
+    "nso.png",
+    "card.dds",
+    "card.png",
+    "share.dds",
+    "share.png",
     "lock.dds",
     "lock.png",
 ];
