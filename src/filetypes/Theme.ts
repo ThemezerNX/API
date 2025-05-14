@@ -88,7 +88,7 @@ export default class Theme {
 
     getInfo = () => {
         return {
-            Version: 15,
+            Version: 16,
             ThemeName: this.name,
             Author: this.author,
             Target: fileNameToThemeTarget(this.target),
