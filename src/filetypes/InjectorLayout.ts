@@ -12,17 +12,17 @@ export default class InjectorLayout {
     private target;
     private id;
     private hideOnlineBtn = false;
-    private targetFirmwareValue;
+    private targetFirmware;
     private files = [];
     private anims = [];
 
-    constructor(name?, author?, target?, id?, hideOnlineBtn?, targetFirmwareValue?, files?, anims?) {
+    constructor(name?, author?, target?, id?, hideOnlineBtn?, targetFirmware?, files?, anims?) {
         this.name = name;
         this.author = author;
         this.target = target ? (target + ".szs") : undefined;
         this.id = id;
         this.hideOnlineBtn = hideOnlineBtn;
-        this.targetFirmwareValue = targetFirmwareValue;
+        this.targetFirmware = targetFirmware;
         this.files = files;
         this.anims = anims;
     }
@@ -47,8 +47,8 @@ export default class InjectorLayout {
         return this.hideOnlineBtn;
     }
 
-    get getTargetFirmwareValue(): boolean {
-        return this.targetFirmwareValue;
+    get getTargetFirmware(): boolean {
+        return this.targetFirmware;
     }
 
     get getFiles(): any[] {
@@ -71,7 +71,7 @@ export default class InjectorLayout {
         this.target = this.target || json.TargetName;
         this.id = this.id || json.ID;
         this.hideOnlineBtn = json.HideOnlineBtn;
-        this.targetFirmwareValue = json.TargetFirmwareValue;
+        this.targetFirmware = json.TargetFirmware;
         this.files = json.Files;
         this.anims = json.Anims;
     };
@@ -83,7 +83,7 @@ export default class InjectorLayout {
             TargetName: this.target,
             ID: finalID || this.id,
             HideOnlineBtn: this.hideOnlineBtn,
-            TargetFirmwareValue: this.targetFirmwareValue,
+            TargetFirmware: this.targetFirmware,
             Files: this.files,
             Anims: this.anims,
         }, null, 4);
