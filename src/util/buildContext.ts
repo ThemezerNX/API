@@ -45,15 +45,17 @@ const buildCommonContext = (req, additionalContext: {}) => ({
                             // 1.1 If user exists, update and return
                             let user;
                             if (existingUser) {
-                                user = await db.one(
-                                    `
+                                if (process.env.READ_ONLY !== "true") {
+                                    user = await db.one(
+                                        `
                                     UPDATE creators
                                     SET discord_user = $2
                                     WHERE id = $1
                                     RETURNING *, coalesce(custom_username, discord_user ->> 'username') AS display_name
                                     `,
-                                    [id, res.data]
-                                );
+                                        [id, res.data]
+                                    );
+                                }
                             } else {
                                 if (process.env.READ_ONLY === "true") {
                                     reject(new Error(errorName.READ_ONLY));
