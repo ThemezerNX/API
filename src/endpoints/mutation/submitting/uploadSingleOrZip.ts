@@ -19,6 +19,10 @@ const isYaz0Promisified = promisify(YAZ0_FILE.isYaz0);
 const isZipPromisified = promisify(ZIP_FILE.isZip);
 
 export default async (_parent, {file}, context, _info) => {
+    if (process.env.READ_ONLY === "true") {
+        throw new Error("READ_ONLY mode is enabled.");
+    }
+
     if (await context.authenticate()) {
         if (!context.req.user.is_blocked) {
             return await new Promise((resolve, reject) => {

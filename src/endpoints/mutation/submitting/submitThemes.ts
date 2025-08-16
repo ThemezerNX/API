@@ -24,6 +24,10 @@ const isJpegPromisified = promisify(JPEG_FILE.isJpeg);
 const Hook = new webhook.Webhook(process.env.WEBHOOK_URL);
 
 export default async (_parent, {files, themes, details, type}, context, _info) => {
+    if (process.env.READ_ONLY === "true") {
+        throw new Error("READ_ONLY mode is enabled.");
+    }
+
     let themePaths = [];
     console.log("1")
     try {

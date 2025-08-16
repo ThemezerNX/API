@@ -15,6 +15,10 @@ function cleanString(input) {
 
 const buildCommonContext = (req, additionalContext: {}) => ({
     authenticate: () => {
+        if (process.env.READ_ONLY === "true") {
+            throw new Error("READ_ONLY mode is enabled.");
+        }
+
         const token = req.headers.token;
         if (token) {
             return new Promise((resolve, reject) => {

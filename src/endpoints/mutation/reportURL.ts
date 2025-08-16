@@ -6,6 +6,10 @@ import webhook from "webhook-discord";
 const Hook = new webhook.Webhook(process.env.REPORT_WEBHOOK_URL);
 
 export default async (_parent, {url, type, nsfw, reason}, context, _info) => {
+    if (process.env.READ_ONLY === "true") {
+        throw new Error("READ_ONLY mode is enabled.");
+    }
+
     return await new Promise(async (resolve, reject) => {
         if (await context.authenticate()) {
             try {

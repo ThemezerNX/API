@@ -29,6 +29,10 @@ export default async (
     context,
     _info,
 ) => {
+    if (process.env.READ_ONLY === "true") {
+        throw new Error("READ_ONLY mode is enabled.");
+    }
+
     await context.authenticate();
 
     let mayModerate = false;

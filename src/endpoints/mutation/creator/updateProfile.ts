@@ -25,6 +25,10 @@ export default async (
     context,
     _info,
 ) => {
+    if (process.env.READ_ONLY === "true") {
+        throw new Error("READ_ONLY mode is enabled.");
+    }
+
     await context.authenticate();
     if (context.req.user.id === id || context.req.user.roles?.includes("admin")) {
         return await new Promise(async (resolve, reject) => {

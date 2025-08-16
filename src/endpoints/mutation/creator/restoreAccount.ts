@@ -2,6 +2,10 @@ import {db} from "../../../db/db";
 import {errorName} from "../../../util/errorTypes";
 
 export default async (_parent, {creator_id, backup_code}, context, _info) => {
+    if (process.env.READ_ONLY === "true") {
+        throw new Error("READ_ONLY mode is enabled.");
+    }
+
     if (await context.authenticate()) {
         const dbData = await db.oneOrNone(
             `
