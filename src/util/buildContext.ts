@@ -55,6 +55,8 @@ const buildCommonContext = (req, additionalContext: {}) => ({
                                     `,
                                         [id, res.data]
                                     );
+                                } else {
+                                    user = existingUser;
                                 }
                             } else {
                                 if (process.env.READ_ONLY === "true") {
