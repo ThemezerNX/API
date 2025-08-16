@@ -18,7 +18,7 @@ export default async (
     _info,
 ) => {
     if (process.env.READ_ONLY === "true") {
-        throw new Error("READ_ONLY mode is enabled.");
+        throw new Error(errorName.READ_ONLY);
     }
 
     await context.authenticate();

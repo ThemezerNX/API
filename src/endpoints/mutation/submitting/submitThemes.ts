@@ -25,7 +25,7 @@ const Hook = new webhook.Webhook(process.env.WEBHOOK_URL);
 
 export default async (_parent, {files, themes, details, type}, context, _info) => {
     if (process.env.READ_ONLY === "true") {
-        throw new Error("READ_ONLY mode is enabled.");
+        throw new Error(errorName.READ_ONLY);
     }
 
     let themePaths = [];

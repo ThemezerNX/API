@@ -1,5 +1,6 @@
 import axios from "axios";
 import {db} from "../db/db";
+import {errorName} from "./errorTypes"
 
 const discordApiBase = "https://discord.com/api";
 
@@ -16,7 +17,7 @@ function cleanString(input) {
 const buildCommonContext = (req, additionalContext: {}) => ({
     authenticate: () => {
         if (process.env.READ_ONLY === "true") {
-            throw new Error("READ_ONLY mode is enabled.");
+            throw new Error(errorName.READ_ONLY);
         }
 
         const token = req.headers.token;

@@ -3,7 +3,7 @@ import {db} from "../../db/db";
 
 export default async (_parent, {type, id, value}, context, _info) => {
     if (process.env.READ_ONLY === "true") {
-        throw new Error("READ_ONLY mode is enabled.");
+        throw new Error(errorName.READ_ONLY);
     }
 
     const typeLowercase = type.toLowerCase();

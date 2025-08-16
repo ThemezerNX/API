@@ -6,7 +6,7 @@ import rimraf from "rimraf";
 
 export default async (_parent, {id}, context, _info) => {
     if (process.env.READ_ONLY === "true") {
-        throw new Error("READ_ONLY mode is enabled.");
+        throw new Error(errorName.READ_ONLY);
     }
 
     return await new Promise(async (resolve, reject) => {

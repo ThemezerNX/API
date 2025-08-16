@@ -3,7 +3,7 @@ import {errorName} from "../../../util/errorTypes";
 
 export default async (_parent, {creator_id, backup_code}, context, _info) => {
     if (process.env.READ_ONLY === "true") {
-        throw new Error("READ_ONLY mode is enabled.");
+        throw new Error(errorName.READ_ONLY);
     }
 
     if (await context.authenticate()) {

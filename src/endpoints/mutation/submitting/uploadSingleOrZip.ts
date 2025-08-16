@@ -20,7 +20,7 @@ const isZipPromisified = promisify(ZIP_FILE.isZip);
 
 export default async (_parent, {file}, context, _info) => {
     if (process.env.READ_ONLY === "true") {
-        throw new Error("READ_ONLY mode is enabled.");
+        throw new Error(errorName.READ_ONLY);
     }
 
     if (await context.authenticate()) {
