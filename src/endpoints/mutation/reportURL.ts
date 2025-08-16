@@ -7,7 +7,7 @@ const Hook = new webhook.Webhook(process.env.REPORT_WEBHOOK_URL);
 
 export default async (_parent, {url, type, nsfw, reason}, context, _info) => {
     if (process.env.READ_ONLY === "true") {
-        throw new Error("READ_ONLY mode is enabled.");
+        throw new Error("Themezer is being migrated and currently read-only. ");
     }
 
     return await new Promise(async (resolve, reject) => {
