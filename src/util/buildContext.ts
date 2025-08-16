@@ -16,10 +16,6 @@ function cleanString(input) {
 
 const buildCommonContext = (req, additionalContext: {}) => ({
     authenticate: () => {
-        if (process.env.READ_ONLY === "true") {
-            throw new Error(errorName.READ_ONLY);
-        }
-
         const token = req.headers.token;
         if (token) {
             return new Promise((resolve, reject) => {
@@ -36,17 +32,44 @@ const buildCommonContext = (req, additionalContext: {}) => ({
                         res.data.username = cleanString(res.data.username);
 
                         try {
-                            req.user = await db.oneOrNone(
+                            // 1. Check if user exists
+                            const existingUser = await db.oneOrNone(
                                 `
+                                    SELECT *, coalesce(custom_username, discord_user ->> 'username') AS display_name
+                                    FROM creators
+                                    WHERE id = $1
+                                `,
+                                [id]
+                            );
+
+                            // 1.1 If user exists, update and return
+                            let user;
+                            if (existingUser) {
+                                user = await db.one(
+                                    `
+                                    UPDATE creators
+                                    SET discord_user = $2
+                                    WHERE id = $1
+                                    RETURNING *, coalesce(custom_username, discord_user ->> 'username') AS display_name
+                                    `,
+                                    [id, res.data]
+                                );
+                            } else {
+                                if (process.env.READ_ONLY === "true") {
+                                    reject(new Error(errorName.READ_ONLY));
+                                }
+
+                                user = await db.one(
+                                    `
                                     INSERT INTO creators (id, discord_user, joined, backup_code)
                                     VALUES ($1, $2, NOW(), md5(random()::varchar)::varchar)
-                                    ON CONFLICT (id)
-                                        DO UPDATE
-                                        SET discord_user = EXCLUDED.discord_user
                                     RETURNING *, coalesce(custom_username, discord_user ->> 'username') AS display_name
-                                `,
-                                [id, res.data],
-                            );
+                                    `,
+                                    [id, res.data]
+                                );
+                            }
+
+                            req.user = user;
 
                             // Then add the user object to the original req object
                             resolve(true);
